@@ -29,9 +29,7 @@ public static class DateUtils
         [ExcelArgument(Name = "Holidays", Description = "List of holiday dates.")]
         object[] holidays)
     {
-#if DEBUG
-        CommonUtils.InFunctionWizard();
-#endif
+        //CommonUtils.InFunctionWizard();
         var calendar = ParseHolidays(holidays, new WeekendsOnly());
         return (DateTime)calendar.adjust(date, BusinessDayConvention.Following);
     }
@@ -48,7 +46,7 @@ public static class DateUtils
                         "Deprecates AQS function: 'ModFolDay'",
         Category = "∂Excel: Dates")]
     public static object ModFolDay(
-        [ExcelArgument(Name = "Dates", Description = "The date to adjust.")]
+        [ExcelArgument(Name = "Date", Description = "The date to adjust.")]
         DateTime date,
         [ExcelArgument(Name = "Holidays", Description = "The list of holiday dates.")]
         object[] holidays)

@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using ExcelDna.Integration;
 using mni = MathNet.Numerics.Interpolation;
+using MathNet.Numerics;
 
 /// <summary>
 /// A collection of mathematical utility functions.
@@ -112,6 +113,26 @@ public static class MathUtils
                 break;
         }
 
+        int index = 0;
+        for (int i = 0; i < rowCount; i++)
+        {
+            if (x[i] <= xi && xi < x[i + 1])
+            {
+                index = i;
+                break;
+            }
+        }
+
+        Complex32 xiComplex = (Complex32)xi;
+        Complex32 x0Complex = (Complex32)x[index];
+        Complex32 x1Complex = (Complex32)x[index + 1];
+        Complex32 y0Complex = (Complex32)y[index];
+        Complex32 y1Complex = (Complex32)y[index + 1];
+
+        Complex32 yi = (Complex32.Log(y1Complex) - Complex32.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + Complex32.Log(y0Complex);
+        Complex32 outputY = Complex32.Exp(yi);
+
+
         if (x.Min() <= xi && xi <= x.Max())
             return interpolator.Interpolate(xi);
         else
@@ -162,6 +183,27 @@ public static class MathUtils
                 default:
                     break;
             }
+
+            int index = 0;
+            for (int i = 0; i < rowCount; i++)
+            {
+                if (x[i] <= xi && xi < x[i + 1])
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            Complex32 xiComplex = (Complex32)xi;
+            Complex32 x0Complex = (Complex32)x[index];
+            Complex32 x1Complex = (Complex32)x[index + 1];
+            Complex32 y0Complex = (Complex32)y[index];
+            Complex32 y1Complex = (Complex32)y[index + 1];
+
+            Complex32 yi = (Complex32.Log(y1Complex) - Complex32.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + Complex32.Log(y0Complex);
+            Complex32 outputY = Complex32.Exp(yi);
+
+            return (double)outputY.Real;
 
             if (x.Min() <= xi && xi <= x.Max())
                 return interpolator.Interpolate(xi);
