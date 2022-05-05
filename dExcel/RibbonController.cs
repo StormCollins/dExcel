@@ -59,9 +59,31 @@ public class RibbonController : ExcelRibbon
                 .SelectMany(x => x.GetMethods())
                 .Where(y => y.GetCustomAttributes(typeof(ExcelFunctionAttribute), false).Length > 0)
                 .Where(z =>
-                    !(z.GetCustomAttribute(typeof(ExcelFunctionAttribute)) is ExcelFunctionAttribute)
-                    || ((ExcelFunctionAttribute)z.GetCustomAttribute(typeof(ExcelFunctionAttribute)))
+                    z.GetCustomAttribute(typeof(ExcelFunctionAttribute)) is not ExcelFunctionAttribute
+                    || (z.GetCustomAttribute(typeof(ExcelFunctionAttribute)) as ExcelFunctionAttribute)
                     .Category?.ToUpper().Contains(categoryName.ToUpper()) == true);
+
+        var methodInfos = methods as MethodInfo[] ?? methods.ToArray();
+        return methodInfos.Select((t, i)
+            => (ExcelFunctionAttribute)methodInfos
+                .ElementAt(i)
+                .GetCustomAttribute(typeof(ExcelFunctionAttribute)))
+                .Select((excelFunctionAttribute, i)
+                    => (methodInfos.ElementAt(i).Name,
+                        excelFunctionAttribute.Description,
+                        excelFunctionAttribute.Category))
+                .ToList();
+    }
+
+    public List<(string name, string description, string category)> GetExposedMethods()
+    {
+        var methods =
+            Assembly
+                .GetExecutingAssembly()
+                .GetTypes()
+                .SelectMany(x => x.GetMethods())
+                .Where(y => y.GetCustomAttributes(typeof(ExcelFunctionAttribute), false).Length > 0)
+                .Where(z => z.GetCustomAttribute(typeof(ExcelFunctionAttribute)) is not ExcelFunctionAttribute);
 
         var methodInfos = methods as MethodInfo[] ?? methods.ToArray();
         return methodInfos.Select((t, i)
