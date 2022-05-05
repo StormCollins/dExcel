@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='utf-8'?>
+<DnaLibrary Name='dExcel' RuntimeVersion='v4.0' xmlns='http://schemas.excel-dna.net/addin/2020/07/dnalibrary'>
+  <ExternalLibrary Path='dExcel.dll' ExplicitExports='false' LoadFromBytes='true' Pack='true' IncludePdb='false'/>
+  <Reference Path='MaterialDesignColors.dll' Pack='true'/>
+  <Reference Path='MaterialDesignThemes.Wpf.dll' Pack='true'/>
+  <Reference Path='FuzzySharp.dll' Pack='true'/>
+  <CustomUI>
+	<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui' onLoad='LoadRibbon'>
+	  <ribbon>
+		<tabs>
+		  <tab id='tabdExcel' label='∂Excel' insertAfterMso='TabHome'>
+			<group id='grpdExcel' label='∂Excel'>
+			  <button
+				id='btndExcelDiagnostics'
+				label='Diagnostics'
+				getImage='GetImage'
+				onAction='GetDiagnostics'
+				size='large'
+				tag='dXL-logo.ico'/>
+			</group>
+			<group id='grpUtilities' label='Utilities'>
+			  <button id='btnOpenAudit' label='Open Audit' getImage='GetImage' tag='open-audit-small-blue.ico'/>
+			  <button id='btnWrapUpAudit' label='Wrap Up Audit' getImage='GetImage' tag='wrap-up-audit-small-blue.ico'/>
+			  <button id='btnFixEMSLinks' label='Fix EMS Links' getImage='GetImage' tag='fix-links-small-blue.ico'/>
+			  <button
+				id='btnManagePasswords'
+				label='Manage Passwords'
+				getImage='GetImage'
+				size='large'
+				tag='manage-passwords-large-blue.ico'/>
+			  <splitButton id='btnFormatPainter' size='large'>
+				<button id='btnFormatTable' getImage='GetImage' label='Format Painter' onAction='FormatTable' tag='format-painter-large-blue.ico'/>
+				<menu id='menuFormatMenu'>
+				  <button id='btnClearFormatting' label='Clear Formatting' onAction='ClearFormatting'/>
+				</menu>
+			  </splitButton>
+			</group>
+			<group id='grpFunctionLibrary' label='Function Library'>
+			  <dynamicMenu
+				id='Dates'
+				label='Dates'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='dates-large-green.ico'/>
+			  <dynamicMenu
+				id='Derivatives'
+				label='Derivatives'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='derivatives-large-green.ico'/>
+			  <dynamicMenu
+				id='Equities'
+				label='Equities'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='equities-large-green.ico'/>
+			  <dynamicMenu
+				id='Interest_Rates'
+				label='Interest Rates'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='interest-rates-large-green.ico'/>
+			  <dynamicMenu
+				id='Mathematics'
+				label='Mathematics'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='mathematics-large-green.ico'/>
+			  <dynamicMenu
+				id='Stats'
+				label='Stats'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='stats-large-green.ico'/>
+			  <separator id='separatorFunctionSearch'/>
+			  <button
+				  id='FunctionSearch'
+				  label='Function Search'
+				  getImage='GetImage'
+				  onAction='OpenFunctionSearch'
+				  size='large'
+				  tag='function-search-large-green.ico'/>
+		    </group>
+			<group id='grpExcelTemplates' label='Excel Templates'>
+			  <button id='btnCommodities_Templates' label='Commodities' getImage='GetImage' size='large' tag='commodities-large-blue.ico'/>
+			  <button id='btnCredit_Templates' label='Credit' getImage='GetImage' size='large' tag='credit-large-blue.ico'/>
+			  <button id='btnEquities_Templates' label='Equities' getImage='GetImage' size='large' tag='equities-large-blue.ico'/>
+			  <button id='btnFX_Templates' label='FX' getImage='GetImage' size='large' tag='fx-large-blue.ico'/>
+			  <button id='btnInterest_Rates_Templates' label='Interest Rates' getImage='GetImage' size='large' tag='interest-rates-large-blue.ico'/>
+			  <separator id='separatorTemplateSearch'/>
+			  <button
+				id='TemplateSearch'
+				label='Template Search'
+				getImage='GetImage'
+				onAction='OpenTemplateSearch'
+				size='large'
+				tag='template-search-large-blue.ico'/>
+			</group>
+			<group id='grpMarketData' label='Market Data'>
+			  <button
+				id='btnMarketData'
+				label='Database'
+				getImage='GetImage'
+				size='large'
+				tag='database-connected-large-green.ico'/>	  
+			</group>
+		  </tab>
+		</tabs>
+	  </ribbon>
+	</customUI>
+  </CustomUI>
+</DnaLibrary>
+
+<!-- onChange='EditBoxTextChanged' -->

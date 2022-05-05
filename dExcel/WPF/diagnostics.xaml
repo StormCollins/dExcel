@@ -1,0 +1,336 @@
+﻿<Window x:Class="dExcel.Diagnostics"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:dExcel"
+        mc:Ignorable="d"
+        Title="∂Excel Diagnostics" Height="700" Width="800"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}">
+  <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="DeepPurple" SecondaryColor="Lime"/>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <!--primary--> 
+      <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="#C4D600"/>
+      <SolidColorBrush x:Key="PrimaryHueLightForegroundBrush" Color="#FFFFFF"/>
+      <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="#86BC25"/>
+      <SolidColorBrush x:Key="PrimaryHueMidForegroundBrush" Color="#FFFFFF"/>
+      <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="#43B02A"/>
+      <SolidColorBrush x:Key="PrimaryHueDarkForegroundBrush" Color="#FFFFFF"/>
+      <!--accent--> 
+      <SolidColorBrush x:Key="SecondaryHueMidBrush" Color="#0D8390"/>
+      <SolidColorBrush x:Key="SecondaryHueMidForegroundBrush" Color="#FFFFFF"/>
+      <!--other-->
+      <SolidColorBrush x:Key="ValidationErrorBrush" Color="#FFCD00"/>
+
+      <Style x:Key="WinAll" TargetType="{x:Type Window}">
+        <Setter Property="FontFamily" Value="Calibri" />
+        <Setter Property="FontSize" Value="14" />
+      </Style>
+      
+      <Style BasedOn="{StaticResource MaterialDesignHeadline4TextBlock}"
+             TargetType="TextBlock"
+             x:Key="Header1">
+        <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}" />
+        <Setter Property="Margin" Value="5 0 0 0" />
+      </Style>
+
+      <Style BasedOn="{StaticResource MaterialDesignHeadline5TextBlock}"
+             TargetType="TextBlock"
+             x:Key="Header2">
+        <Setter Property="Foreground" Value="#FFFFFF" />
+        <Setter Property="Margin" Value="5 0 0 0" />
+      </Style>
+
+      <Style BasedOn="{StaticResource MaterialDesignTextBlock}"
+             TargetType="{x:Type TextBlock}">
+        <Setter Property="Margin" Value="9 0 0 0" />
+      </Style>
+
+      <Style BasedOn="{StaticResource MaterialDesignTextBlock}"
+             TargetType="{x:Type TextBlock}"
+             x:Key="OutputText">
+        <Setter Property="Margin" Value="5 0 0 0" />
+        <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}" />
+        <Setter Property="FontWeight" Value="Bold" />
+      </Style>
+
+      <Style BasedOn="{StaticResource MaterialDesignTextBlock}"
+             TargetType="{x:Type TextBlock}"
+             x:Key="WarningOutputText">
+        <Setter Property="Margin" Value="5 0 0 0" />
+        <Setter Property="Foreground" Value="{StaticResource ValidationErrorBrush}" />
+        <Setter Property="FontWeight" Value="Bold" />
+      </Style>
+
+      <Style TargetType="{x:Type Hyperlink}">
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}" />
+        <Setter Property="TextDecorations" Value="Underline" />
+      </Style>
+
+      <Style TargetType="{x:Type materialDesign:Card}">
+        <Setter Property="Margin" Value="5 0 5 5" />
+      </Style>
+
+      <Style TargetType="{x:Type Button}">
+        <Setter Property="Margin" Value="5" />
+      </Style>
+
+      <Style TargetType="{x:Type Separator}">
+        <Setter Property="Margin" Value="5 0 5 0" />
+                <Setter Property="Background" Value="#000000" />
+      </Style>
+
+      <Style BasedOn="{StaticResource MaterialDesignRaisedButton}"
+           TargetType="Button"
+           x:Key="StandardButton">
+        <Setter Property="Margin" Value="5 0 5 5" />
+      </Style>
+      
+    </ResourceDictionary>
+  </Window.Resources>
+  
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+
+    <TextBlock
+      Grid.Row="0"
+      Grid.Column="0"
+      Grid.ColumnSpan="3"
+      Style="{StaticResource Header1}"
+      Text="∂Excel Diagnostics"/>
+
+    <Image
+      Name="dExcelIcon"
+      HorizontalAlignment="Right"
+      VerticalAlignment="Top"
+      Grid.Row="0"
+      Grid.RowSpan="2"
+      Grid.Column="7"
+      Margin="5"
+      Width="40"
+      Source="/resources/icons/dXL-logo.ico"/>
+    
+    <materialDesign:Card
+      Grid.Row="1"
+      Grid.RowSpan="4"
+      Grid.Column="0"
+      Grid.ColumnSpan="4">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel
+          Grid.Row="0"
+          Grid.RowSpan="4"
+          Grid.Column="0"
+          Grid.ColumnSpan="3">
+          <TextBlock
+            Style="{StaticResource Header2}"
+            Text="∂Excel Version"/>
+          <Separator/>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Installed:"/>
+            <TextBlock
+              Style="{StaticResource OutputText}"
+              Text="3.1"/>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Latest:"/>
+            <TextBlock
+              Style="{StaticResource OutputText}"
+              Text="3.2"/>
+          </StackPanel>
+        </StackPanel>
+
+        <Button
+          Grid.Row="2"
+          Grid.Column="2"
+          Content="Update"
+          Style="{StaticResource StandardButton}"/>
+      </Grid>
+    </materialDesign:Card>
+
+    <materialDesign:Card
+      Grid.Row="5"
+      Grid.RowSpan="4"
+      Grid.Column="0"
+      Grid.ColumnSpan="4">
+      <StackPanel>
+        <TextBlock
+          Style="{StaticResource Header2}"
+          Text="Workbook Version"/>
+        <Separator/>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="Version History:"/>
+          <TextBlock
+              Style="{StaticResource OutputText}"
+              Text="1.0,1.2,2.1,3.2"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="Current Version:"/>
+          <TextBlock
+              Style="{StaticResource OutputText}"
+              Text="3.3"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="Select Version"/>
+          <ComboBox>
+
+          </ComboBox>
+        </StackPanel>
+      </StackPanel>
+    </materialDesign:Card>
+
+    <materialDesign:Card
+      Grid.Row="1"
+      Grid.RowSpan="4"
+      Grid.Column="4"
+      Grid.ColumnSpan="4">
+      <StackPanel>
+        <TextBlock
+          Style="{StaticResource Header2}"
+          Text="Connectivity"/>
+        <Separator/>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="VPN:"/>
+          <TextBlock
+              Style="{StaticResource OutputText}"
+              Text="Connected"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="Omicron:"/>
+          <TextBlock
+              Style="{StaticResource WarningOutputText}"
+              Text="Not Connected"/>
+        </StackPanel>
+      </StackPanel>
+    </materialDesign:Card>
+
+    <materialDesign:Card
+      Grid.Row="5"
+      Grid.RowSpan="4"
+      Grid.Column="4"
+      Grid.ColumnSpan="4">
+      <StackPanel>
+        <TextBlock
+          Style="{StaticResource Header2}"
+          Text="Useful Links"/>
+        <Separator/>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock>
+            <Hyperlink 
+              NavigateUri="https://gitlab.fsa-aks.deloitte.co.za/Valuations/QuantLibraries/dExcelTools/dExcel">
+              <Image
+                Name="gitlabRepoLink"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Grid.Row="0"
+                Grid.RowSpan="2"
+                Grid.Column="7"
+                Width="10"
+                Source="/resources/icons/follow-link-small-green.ico"/>
+                GitLab Repository
+            </Hyperlink>
+          </TextBlock>
+        </StackPanel>
+        <TextBlock>
+            <Hyperlink 
+              NavigateUri="https://gitlab.fsa-aks.deloitte.co.za/Valuations/QuantLibraries/dExcelTools/dExcel">
+              <Image
+                Name="installationPathLink"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Grid.Row="0"
+                Grid.RowSpan="2"
+                Grid.Column="7"
+                Width="10"
+                Source="/resources/icons/follow-link-small-green.ico"/>
+                Installation Path
+            </Hyperlink>
+        </TextBlock>
+      </StackPanel>
+    </materialDesign:Card>
+
+    <materialDesign:Card
+      Grid.Row="9"
+      Grid.RowSpan="4"
+      Grid.Column="0"
+      Grid.ColumnSpan="4">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel
+          Grid.Row="0"
+          Grid.RowSpan="4"
+          Grid.Column="0"
+          Grid.ColumnSpan="3">
+          <TextBlock
+          Style="{StaticResource Header2}"
+          Text="Testing"/>
+          <Separator/>
+        </StackPanel>
+        <Button
+          Content="Run Tests"
+          Style="{StaticResource StandardButton}"
+          Grid.Row="3"
+          Grid.Column="2"/>
+      </Grid>
+    </materialDesign:Card>
+    
+    <Button
+      Grid.Row="13"
+      Grid.Column="7"
+      Style="{StaticResource StandardButton}"
+      Content="Close"
+      Click="CloseDiagnostics"/>
+  </Grid>
+</Window>
