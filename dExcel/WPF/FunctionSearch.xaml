@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         BorderThickness="5"
         BorderBrush="{DynamicResource MaterialDesignPaper}"
-        Title="∂Excel Function Search" Height="350" Width="600"
+        Title="∂Excel Function Search" Height="550" Width="850"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}">
   <Window.Resources>
@@ -46,6 +46,13 @@
              TargetType="TextBlock"
              x:Key="Header2">
                 <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="Margin" Value="5 0 0 0" />
+            </Style>
+
+            <Style BasedOn="{StaticResource MaterialDesignSubtitle1TextBlock}"
+             TargetType="TextBlock"
+             x:Key="Header3">
+                <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}" />
                 <Setter Property="Margin" Value="5 0 0 0" />
             </Style>
 
@@ -90,8 +97,8 @@
             </Style>
 
             <Style BasedOn="{StaticResource MaterialDesignRaisedButton}"
-           TargetType="Button"
-           x:Key="StandardButton">
+               TargetType="Button"
+               x:Key="StandardButton">
                 <Setter Property="Margin" Value="5 0 5 5" />
             </Style>
 
@@ -106,13 +113,18 @@
       <RowDefinition Height="*"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="*"/>
-      
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
     </Grid.ColumnDefinitions>
 
     <TextBlock
@@ -128,7 +140,7 @@
       VerticalAlignment="Top"
       Grid.Row="0"
       Grid.RowSpan="2"
-      Grid.Column="3"
+      Grid.Column="5"
       Margin="5"
       Width="40"
       Source="/resources/icons/dXL-logo.ico"/>
@@ -136,7 +148,7 @@
     <materialDesign:Card
       Grid.Row="1"
       Grid.Column="0"
-      Grid.ColumnSpan="4">
+      Grid.ColumnSpan="6">
       <StackPanel
         Grid.Row="0"
         Grid.RowSpan="3"
@@ -156,35 +168,79 @@
 
     <materialDesign:Card
       Grid.Row="2"
-      Grid.RowSpan="3"
+      Grid.RowSpan="7"
       Grid.Column="0"
-      Grid.ColumnSpan="4">
+      Grid.ColumnSpan="6">
       <StackPanel
         Margin="10"
-        VerticalAlignment="Center">
-        <TextBox
-          Name="SearchResults"
-          Style="{StaticResource MaterialDesignOutlinedTextBox}"
-          AcceptsReturn="True"
-          Height="100"
-          IsReadOnly="True"
-          materialDesign:HintAssist.Hint="Search Results"
-          TextWrapping="Wrap"
-          VerticalAlignment="Stretch"
-          VerticalScrollBarVisibility="Auto"/>
-      </StackPanel>
+        VerticalAlignment="Top">
+        <TextBlock
+          Text="Search Results"
+          Style="{StaticResource Header3}"
+          VerticalAlignment="Top"/>
+          <DataGrid
+            Name="SearchResults"
+            CanUserAddRows="False"
+            CanUserSortColumns="False"
+            AutoGenerateColumns="False"
+            IsReadOnly="True"
+            HeadersVisibility="All"
+            SelectionChanged="SearchResults_SelectionChanged">
+          <DataGrid.CellStyle>
+            <Style TargetType="DataGridCell">
+              <Setter Property="BorderThickness" Value="0"/>
+              <Setter Property="Background" Value="{x:Null}" />
+              <!-- Update from comments.
+                 Remove the focus indication for the selected cell -->
+              <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            </Style>
+          </DataGrid.CellStyle>
+          <DataGrid.RowStyle>
+            <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+              <Style.Triggers>
+                <Trigger Property="IsSelected"
+                        Value="True">
+                  <Setter Property="BorderBrush"
+                        Value="{StaticResource PrimaryHueMidBrush}" />
+                  <Setter Property="BorderThickness"
+                        Value="1" />
+                </Trigger>
+              </Style.Triggers>
+            </Style>
+          </DataGrid.RowStyle>
+          <DataGrid.Columns>
+              <DataGridTextColumn
+                Binding="{Binding Name}"
+                Header="Function"
+                ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"
+                EditingElementStyle="{StaticResource MaterialDesignDataGridTextColumnEditingStyle}" />
+              <DataGridTextColumn
+                Binding="{Binding Description}"
+                Header="Description"
+                ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"
+                EditingElementStyle="{StaticResource MaterialDesignDataGridTextColumnEditingStyle}" />
+              <DataGridTextColumn
+                Binding="{Binding Category}"
+                Header="Category"
+                ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"
+                EditingElementStyle="{StaticResource MaterialDesignDataGridTextColumnEditingStyle}"/>
+            </DataGrid.Columns>
+          </DataGrid>
+        </StackPanel>
     </materialDesign:Card>
 
     <Button
-      Grid.Row="5"
-      Grid.Column="2"
-      Style="{StaticResource StandardButton}"
-      Content="Insert"/>
+      Name="Insert"
+      Content="Insert"
+      Grid.Row="9"
+      Grid.Column="4"
+      IsEnabled="False"
+      Style="{StaticResource StandardButton}" Click="Insert_Click"/>
     <Button
-      Grid.Row="5"
-      Grid.Column="3"
-      Style="{StaticResource StandardButton}"
       Content="Close"
+      Grid.Row="9"
+      Grid.Column="5"
+      Style="{StaticResource StandardButton}"
       Click="CloseDiagnostics"/>
   </Grid>
 </Window>

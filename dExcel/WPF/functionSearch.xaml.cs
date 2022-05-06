@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,18 +18,80 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ExcelDna.Integration;
+using Excel = Microsoft.Office.Interop.Excel;
 using FuzzySharp;
 using MaterialDesignColors;
 using MaterialDesignThemes.Wpf;
 
-
-
 /// <summary>
-/// Interaction logic for MainWindow.xaml
+/// Interaction logic for FunctionSearch.xaml
 /// </summary>
 public partial class FunctionSearch : Window
 {
-    private List<string> matches = new List<string>();
+    public string FunctionName { get; set; }
+
+    public class FunctionMatch : INotifyPropertyChanged
+    {
+        private string name;
+
+        private string category;
+
+        private string description;
+
+        public string Name
+        {
+            get => name; 
+            set
+            { 
+                name = value;
+                this.OnPropertyChanged("Name");
+            }
+        }
+
+        public string Category
+        {
+            get => category; 
+            set
+            {
+                category = value;
+                this.OnPropertyChanged("Category");
+            }
+        }
+
+        public string Description
+        {
+            get => description;
+            set
+            {
+                description = value;
+                this.OnPropertyChanged("Description");
+            }
+        }
+
+        public FunctionMatch((string name, string description, string category) functionMatch)
+        {
+            this.Name = functionMatch.name;
+            this.Category = functionMatch.category;
+            this.Description = functionMatch.description;
+        }
+
+
+        protected void OnPropertyChanged(string name)
+        {
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+    }
+
+    public ObservableCollection<FunctionMatch> FunctionMatches { get; set; }
+
+    private readonly List<(string name, string description, string category)> methods =
+        RibbonController.GetExposedMethods().ToList();
 
     public FunctionSearch()
     {
@@ -52,17 +116,35 @@ public partial class FunctionSearch : Window
 
     private void SearchTerm_TextChanged(object sender, TextChangedEventArgs e)
     {
-        List<string> choices = new() { "d.BlackScholes", "d.Black", "d.HullWhite", "d.ModFol", "d.Prev", "d.Fol", "d.InterpContiguousArea", "d.InterpTwoColumns" };
-        matches = Process.ExtractTop(SearchTerm.Text, choices).Where(x => x.Score >= 65).Select(x => x.Value).ToList();
-        SearchResults.Text = "";
+        Insert.IsEnabled = false;
+        var matches =
+             Process.ExtractTop(SearchTerm.Text, methods.Select(x => x.name)).Where(y => y.Score >= 65);
+                
         if (matches.Any())
         {
+            FunctionMatches = new();
             foreach (var match in matches)
             {
-                SearchResults.Text += $"{match}\n";
+                var method = methods.First(x => x.name == match.Value);
+                FunctionMatches.Add(new FunctionMatch(method));
             }
+            SearchResults.ItemsSource = FunctionMatches;
         }
     }
 
+    private void SearchResults_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        Insert.IsEnabled = true;
+    }
 
+    private void SearchResults_Unselected(object sender, RoutedEventArgs e)
+    {
+        Insert.IsEnabled = false;
+    }
+
+    private void Insert_Click(object sender, RoutedEventArgs e)
+    {
+        this.FunctionName = ((FunctionMatch)SearchResults.SelectedItem).Name;
+        this.Close();
+    }
 }

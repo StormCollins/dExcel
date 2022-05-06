@@ -7,6 +7,7 @@ using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 using Excel = Microsoft.Office.Interop.Excel;
 using FuzzySharp;
+using System.Windows.Threading;
 
 [ComVisible(true)]
 public class RibbonController : ExcelRibbon
@@ -39,8 +40,25 @@ public class RibbonController : ExcelRibbon
 
     public void OpenFunctionSearch(IRibbonControl control)
     {
-        var functionSearch = new FunctionSearch();
-        functionSearch.Show();
+        string? functionName = null;
+        var thread = new Thread(() =>
+        {
+            var functionSearch = new FunctionSearch();
+            functionSearch.Show();
+            functionSearch.Closed += (sender2, e2) => functionSearch.Dispatcher.InvokeShutdown();
+            Dispatcher.Run();
+            functionName = functionSearch.FunctionName;
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        if (functionName != null)
+        {
+            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            ((Excel.Range)xlApp.Selection).Formula = $"=d.{functionName}()";
+            ((Excel.Range)xlApp.Selection).FunctionWizard();
+        }
     }
 
     public void InsertFunction(IRibbonControl control)
@@ -50,32 +68,18 @@ public class RibbonController : ExcelRibbon
         ((Excel.Range)xlApp.Selection).FunctionWizard();
     }
 
-    public List<(string name, string description, string category)> GetCategoryMethods(string categoryName)
+    public static IEnumerable<(string name, string description, string category)> GetCategoryMethods(string categoryName)
     {
-        var methods =
-            Assembly
-                .GetExecutingAssembly()
-                .GetTypes()
-                .SelectMany(x => x.GetMethods())
-                .Where(y => y.GetCustomAttributes(typeof(ExcelFunctionAttribute), false).Length > 0)
-                .Where(z =>
-                    z.GetCustomAttribute(typeof(ExcelFunctionAttribute)) is not ExcelFunctionAttribute
-                    || (z.GetCustomAttribute(typeof(ExcelFunctionAttribute)) as ExcelFunctionAttribute)
-                    .Category?.ToUpper().Contains(categoryName.ToUpper()) == true);
-
-        var methodInfos = methods as MethodInfo[] ?? methods.ToArray();
-        return methodInfos.Select((t, i)
-            => (ExcelFunctionAttribute)methodInfos
-                .ElementAt(i)
-                .GetCustomAttribute(typeof(ExcelFunctionAttribute)))
-                .Select((excelFunctionAttribute, i)
-                    => (methodInfos.ElementAt(i).Name,
-                        excelFunctionAttribute.Description,
-                        excelFunctionAttribute.Category))
-                .ToList();
+        foreach (var method in GetExposedMethods())
+        {
+            if (method.category.ToUpper().Contains(categoryName.ToUpper()))
+            {
+                yield return method;
+            }
+        }
     }
 
-    public List<(string name, string description, string category)> GetExposedMethods()
+    public static IEnumerable<(string name, string description, string category)> GetExposedMethods()
     {
         var methods =
             Assembly
@@ -83,7 +87,7 @@ public class RibbonController : ExcelRibbon
                 .GetTypes()
                 .SelectMany(x => x.GetMethods())
                 .Where(y => y.GetCustomAttributes(typeof(ExcelFunctionAttribute), false).Length > 0)
-                .Where(z => z.GetCustomAttribute(typeof(ExcelFunctionAttribute)) is not ExcelFunctionAttribute);
+                .Where(z => z.GetCustomAttribute(typeof(ExcelFunctionAttribute)) is ExcelFunctionAttribute);
 
         var methodInfos = methods as MethodInfo[] ?? methods.ToArray();
         return methodInfos.Select((t, i)
@@ -91,10 +95,9 @@ public class RibbonController : ExcelRibbon
                 .ElementAt(i)
                 .GetCustomAttribute(typeof(ExcelFunctionAttribute)))
                 .Select((excelFunctionAttribute, i)
-                    => (methodInfos.ElementAt(i).Name,
-                        excelFunctionAttribute.Description,
-                        excelFunctionAttribute.Category))
-                .ToList();
+                    => (Name: methodInfos.ElementAt(i).Name,
+                        Description: excelFunctionAttribute.Description,
+                        Category: excelFunctionAttribute.Category));
     }
 
     public string GetFunctionContent(IRibbonControl control)
