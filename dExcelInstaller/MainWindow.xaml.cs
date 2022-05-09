@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,18 @@ namespace dExcelManager
         public MainWindow()
         {
             InitializeComponent();
+            this.Icon = dExcelIcon.Source = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + @"\resources\icons\dXL-logo-extra-small.ico"));
+            dExcelIcon.Source = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + @"\resources\icons\dXL-logo.ico"));
+        }
+
+        private void Install_Click(object sender, RoutedEventArgs e)
+        {
+            var versionsPath = @"C:\GitLab\dExcelTools\Versions";
+            if (!Directory.Exists(versionsPath))
+            {
+                Directory.CreateDirectory(versionsPath);
+            }
+
         }
     }
 }

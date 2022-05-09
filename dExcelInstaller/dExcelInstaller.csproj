@@ -1,0 +1,125 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="resources\icons\commodities-large-blue.ico" />
+    <None Remove="resources\icons\credit-large-blue.ico" />
+    <None Remove="resources\icons\database-connected-large-green.ico" />
+    <None Remove="resources\icons\dates-large-green.ico" />
+    <None Remove="resources\icons\derivatives-large-green.ico" />
+    <None Remove="resources\icons\dXL-logo-extra-small.ico" />
+    <None Remove="resources\icons\dXL-logo.ico" />
+    <None Remove="resources\icons\equities-large-blue.ico" />
+    <None Remove="resources\icons\equities-large-green.ico" />
+    <None Remove="resources\icons\fix-links-small-blue.ico" />
+    <None Remove="resources\icons\fix-links-small-green.ico" />
+    <None Remove="resources\icons\follow-link-small-green.ico" />
+    <None Remove="resources\icons\format-painter-large-blue.ico" />
+    <None Remove="resources\icons\format-painter-large-green.ico" />
+    <None Remove="resources\icons\function-search-large-green.ico" />
+    <None Remove="resources\icons\fx-large-blue.ico" />
+    <None Remove="resources\icons\interest-rates-large-blue.ico" />
+    <None Remove="resources\icons\interest-rates-large-green.ico" />
+    <None Remove="resources\icons\manage-passwords-large-blue.ico" />
+    <None Remove="resources\icons\mathematics-large-green.ico" />
+    <None Remove="resources\icons\open-audit-small-blue.ico" />
+    <None Remove="resources\icons\open-audit-small-green.ico" />
+    <None Remove="resources\icons\stats-large-green.ico" />
+    <None Remove="resources\icons\template-search-large-blue.ico" />
+    <None Remove="resources\icons\wrap-up-audit-small-blue.ico" />
+    <None Remove="resources\icons\wrap-up-audit-small-green.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="resources\icons\commodities-large-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\credit-large-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\database-connected-large-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\dates-large-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\derivatives-large-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\dXL-logo-extra-small.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\dXL-logo.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\equities-large-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\equities-large-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\fix-links-small-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\fix-links-small-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\follow-link-small-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\format-painter-large-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\format-painter-large-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\function-search-large-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\fx-large-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\interest-rates-large-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\interest-rates-large-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\manage-passwords-large-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\mathematics-large-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\open-audit-small-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\open-audit-small-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\stats-large-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\template-search-large-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\wrap-up-audit-small-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\wrap-up-audit-small-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MaterialDesignColors" Version="2.0.7-ci170" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.6.0-ci170" />
+  </ItemGroup>
+
+</Project>

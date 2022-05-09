@@ -26,7 +26,7 @@ public static class DataObjectController
         {
             dataObjects[handle] = dataObject;  
         }
-        return $"@@{handle}:{DateTime.Now:HH:mm:ss}";
+        return $"@@{handle}::{DateTime.Now:HH:mm:ss}";
     }
 
     public static string CleanHandle(string dirtyTag)

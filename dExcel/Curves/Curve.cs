@@ -2,9 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ExcelDna.Integration;
 using QLNet;
 
@@ -35,13 +32,13 @@ public static class Curve
         Name = "d.Curve_DF",
         Description = "",
         Category = "∂Excel: Interest Rates")]
-    public static object[] GetDiscountFactors(string handle, object[] dates)
+    public static object[,] GetDiscountFactors(string handle, object[] dates)
     {
-        var discountFactors = new object[dates.Length];
+        var discountFactors = new object[dates.Length, 1];
         var curve = ((InterpolatedDiscountCurve<LogLinear>)DataObjectController.GetDataObject(handle));
         for (int i = 0; i < dates.Length; i++)
         {
-            discountFactors[i] = curve.discount((Date)DateTime.FromOADate((double)dates[i]));
+            discountFactors[i, 0] = curve.discount((Date)DateTime.FromOADate((double)dates[i]));
         }
         
         return discountFactors;
