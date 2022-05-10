@@ -3,9 +3,7 @@
 using System;
 using System.IO;
 using System.Windows;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using MaterialDesignColors;
 using MaterialDesignThemes.Wpf;
 
 /// <summary>
@@ -46,6 +44,6 @@ public partial class Dashboard : Window
     private void CloseDashboard(object sender, RoutedEventArgs e)
     {
         this.Close();
-        instance = null;
+        //instance = null;
     }
 }

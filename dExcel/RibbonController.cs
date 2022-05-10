@@ -32,10 +32,19 @@ public class RibbonController : ExcelRibbon
             throw new ArgumentNullException($"Icon {control.Tag} not found in resources."));
     }
 
-    public void GetDashboard(IRibbonControl control)
+    public void OpenDashboard(IRibbonControl control)
     {
-        var dashboard = Dashboard.Instance;
-        dashboard.Show();
+        var thread = new Thread(() =>
+        {
+            var dashboard = Dashboard.Instance;
+            dashboard.Show();
+            dashboard.Closed += (sender2, e2) => dashboard.Dispatcher.InvokeShutdown();
+            Dispatcher.Run();
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
     }
 
     public void OpenFunctionSearch(IRibbonControl control)

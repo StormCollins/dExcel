@@ -15,14 +15,26 @@
 				id='btndExcelDashboard'
 				label='Dashboard'
 				getImage='GetImage'
-				onAction='GetDashboard'
+				onAction='OpenDashboard'
 				size='large'
 				tag='dXL-logo.ico'/>
 			</group>
 			<group id='grpUtilities' label='Utilities'>
-			  <button id='btnOpenAudit' label='Open Audit' getImage='GetImage' tag='open-audit-small-blue.ico'/>
-			  <button id='btnWrapUpAudit' label='Wrap Up Audit' getImage='GetImage' tag='wrap-up-audit-small-blue.ico'/>
-			  <button id='btnFixEMSLinks' label='Fix EMS Links' getImage='GetImage' tag='fix-links-small-blue.ico'/>
+			  <button
+				id='btnOpenAudit'
+				label='Open Audit'
+				getImage='GetImage'
+				tag='open-audit-small-blue.ico'/>
+			  <button
+				id='btnWrapUpAudit'
+				label='Wrap Up Audit'
+				getImage='GetImage'
+				tag='wrap-up-audit-small-blue.ico'/>
+			  <button
+				id='btnFixEMSLinks'
+				label='Fix EMS Links'
+				getImage='GetImage'
+				tag='fix-links-small-blue.ico'/>
 			  <button
 				id='btnManagePasswords'
 				label='Manage Passwords'
@@ -30,9 +42,17 @@
 				size='large'
 				tag='manage-passwords-large-blue.ico'/>
 			  <splitButton id='btnFormatPainter' size='large'>
-				<button id='btnFormatTable' getImage='GetImage' label='Format Painter' onAction='FormatTable' tag='format-painter-large-blue.ico'/>
+				<button
+			      id='btnFormatTable'
+				  getImage='GetImage'
+				  label='Format Painter'
+				  onAction='FormatTable'
+				  tag='format-painter-large-blue.ico'/>
 				<menu id='menuFormatMenu'>
-				  <button id='btnClearFormatting' label='Clear Formatting' onAction='ClearFormatting'/>
+				  <button
+					id='btnClearFormatting'
+					label='Clear Formatting'
+					onAction='ClearFormatting'/>
 				</menu>
 			  </splitButton>
 			</group>
@@ -81,19 +101,44 @@
 				tag='stats-large-green.ico'/>
 			  <separator id='separatorFunctionSearch'/>
 			  <button
-				  id='FunctionSearch'
-				  label='Function Search'
-				  getImage='GetImage'
-				  onAction='OpenFunctionSearch'
-				  size='large'
-				  tag='function-search-large-green.ico'/>
+				id='FunctionSearch'
+				label='Function Search'
+				getImage='GetImage'
+				onAction='OpenFunctionSearch'
+				size='large'
+				tag='function-search-large-green.ico'/>
 		    </group>
 			<group id='grpExcelTemplates' label='Excel Templates'>
-			  <button id='btnCommodities_Templates' label='Commodities' getImage='GetImage' size='large' tag='commodities-large-blue.ico'/>
-			  <button id='btnCredit_Templates' label='Credit' getImage='GetImage' size='large' tag='credit-large-blue.ico'/>
-			  <button id='btnEquities_Templates' label='Equities' getImage='GetImage' size='large' tag='equities-large-blue.ico'/>
-			  <button id='btnFX_Templates' label='FX' getImage='GetImage' size='large' tag='fx-large-blue.ico'/>
-			  <button id='btnInterest_Rates_Templates' label='Interest Rates' getImage='GetImage' size='large' tag='interest-rates-large-blue.ico'/>
+			  <button
+				id='btnCommodities_Templates'
+				label='Commodities'
+				getImage='GetImage'
+				size='large'
+				tag='commodities-large-blue.ico'/>
+			  <button 
+				id='btnCredit_Templates' 
+				label='Credit' 
+				getImage='GetImage' 
+				size='large' 
+				tag='credit-large-blue.ico'/>
+			  <button 
+				id='btnEquities_Templates'
+				label='Equities'
+				getImage='GetImage'
+				size='large'
+				tag='equities-large-blue.ico'/>
+			  <button
+				id='btnFX_Templates'
+				label='FX'
+				getImage='GetImage'
+				size='large'
+				tag='fx-large-blue.ico'/>
+			  <button
+				id='btnInterest_Rates_Templates'
+				label='Interest Rates'
+				getImage='GetImage'
+				size='large'
+				tag='interest-rates-large-blue.ico'/>
 			  <separator id='separatorTemplateSearch'/>
 			  <button
 				id='TemplateSearch'
@@ -117,5 +162,3 @@
 	</customUI>
   </CustomUI>
 </DnaLibrary>
-
-<!-- onChange='EditBoxTextChanged' -->
