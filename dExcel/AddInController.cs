@@ -17,6 +17,7 @@ public class AddInController : IExcelAddIn
     public void AutoOpen()
     {
         string? xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+        Assembly.LoadFrom(Path.Combine(xllPath, "dExcelWpf.dll"));
         Assembly.LoadFrom(Path.Combine(xllPath, "FuzzySharp.dll"));
         Assembly.LoadFrom(Path.Combine(xllPath, "MaterialDesignColors.dll"));
         Assembly.LoadFrom(Path.Combine(xllPath, "MaterialDesignThemes.Wpf.dll"));

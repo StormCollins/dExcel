@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dExcel", "dExcel\dExcel.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dExcelInstaller", "dExcelInstaller\dExcelInstaller.csproj", "{2A581449-52BC-4D42-BA81-C5B423AE933E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dExcelWpf", "dExcelWpf\dExcelWpf.csproj", "{B29F07D6-8D2B-46BA-A52D-A15BB20CDD13}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{2A581449-52BC-4D42-BA81-C5B423AE933E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A581449-52BC-4D42-BA81-C5B423AE933E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A581449-52BC-4D42-BA81-C5B423AE933E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B29F07D6-8D2B-46BA-A52D-A15BB20CDD13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B29F07D6-8D2B-46BA-A52D-A15BB20CDD13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B29F07D6-8D2B-46BA-A52D-A15BB20CDD13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B29F07D6-8D2B-46BA-A52D-A15BB20CDD13}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
