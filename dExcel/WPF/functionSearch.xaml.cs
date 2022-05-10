@@ -113,7 +113,7 @@ public partial class FunctionSearch : Window
         var hue = new Hue("Dummy", Colors.Black, Colors.White);
     }
 
-    private void CloseDiagnostics(object sender, RoutedEventArgs e) => this.Close();
+    private void CloseFunctionSearch(object sender, RoutedEventArgs e) => this.Close();
 
     private void SearchTerm_TextChanged(object sender, TextChangedEventArgs e)
     {

@@ -32,10 +32,10 @@ public class RibbonController : ExcelRibbon
             throw new ArgumentNullException($"Icon {control.Tag} not found in resources."));
     }
 
-    public void GetDiagnostics(IRibbonControl control)
+    public void GetDashboard(IRibbonControl control)
     {
-        var diagnostics = Diagnostics.Instance;
-        diagnostics.Show();
+        var dashboard = Dashboard.Instance;
+        dashboard.Show();
     }
 
     public void OpenFunctionSearch(IRibbonControl control)

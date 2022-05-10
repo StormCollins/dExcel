@@ -12,10 +12,10 @@
 		  <tab id='tabdExcel' label='∂Excel' insertAfterMso='TabHome'>
 			<group id='grpdExcel' label='∂Excel'>
 			  <button
-				id='btndExcelDiagnostics'
-				label='Diagnostics'
+				id='btndExcelDashboard'
+				label='Dashboard'
 				getImage='GetImage'
-				onAction='GetDiagnostics'
+				onAction='GetDashboard'
 				size='large'
 				tag='dXL-logo.ico'/>
 			</group>

@@ -241,6 +241,6 @@
       Grid.Row="9"
       Grid.Column="5"
       Style="{StaticResource StandardButton}"
-      Click="CloseDiagnostics"/>
+      Click="CloseFunctionSearch"/>
   </Grid>
 </Window>
