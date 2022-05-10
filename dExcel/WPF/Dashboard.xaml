@@ -8,7 +8,9 @@
         mc:Ignorable="d"
         BorderThickness="5"
         BorderBrush="{DynamicResource MaterialDesignPaper}"
-        Title="∂Excel Dashboard" Height="700" Width="800"
+        Title="∂Excel Dashboard"
+        Height="500"
+        Width="1200"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}">
   <Window.Resources>
@@ -110,12 +112,12 @@
       <RowDefinition Height="*"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="*"/>
@@ -139,7 +141,7 @@
       VerticalAlignment="Top"
       Grid.Row="0"
       Grid.RowSpan="2"
-      Grid.Column="7"
+      Grid.Column="11"
       Margin="5"
       Width="40"
       Source="/resources/icons/dXL-logo.ico"/>
@@ -295,9 +297,9 @@
     </materialDesign:Card>
 
     <materialDesign:Card
-      Grid.Row="9"
+      Grid.Row="1"
       Grid.RowSpan="4"
-      Grid.Column="0"
+      Grid.Column="8"
       Grid.ColumnSpan="4">
       <Grid>
         <Grid.ColumnDefinitions>
@@ -329,8 +331,8 @@
     </materialDesign:Card>
     
     <Button
-      Grid.Row="13"
-      Grid.Column="7"
+      Grid.Row="9"
+      Grid.Column="11"
       Style="{StaticResource StandardButton}"
       Content="Close"
       Click="CloseDashboard"/>
