@@ -1,10 +1,7 @@
 ﻿namespace dExcel;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using System.Reflection;
 using ExcelDna.Integration;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -19,6 +16,10 @@ public class AddInController : IExcelAddIn
 
     public void AutoOpen()
     {
-
+        string? xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+        Assembly.LoadFrom(Path.Combine(xllPath, "FuzzySharp.dll"));
+        Assembly.LoadFrom(Path.Combine(xllPath, "MaterialDesignColors.dll"));
+        Assembly.LoadFrom(Path.Combine(xllPath, "MaterialDesignThemes.Wpf.dll"));
+        Assembly.LoadFrom(Path.Combine(xllPath, "QLNet.dll"));
     }
 }

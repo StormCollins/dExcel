@@ -40,6 +40,7 @@ public partial class Diagnostics : Window
 
     private Diagnostics()
     {
+        //Directory.SetCurrentDirectory(@"C:\GitLab\dExcelTools\dExcel\dExcel\bin\Debug\net6.0-windows");
         InitializeComponent();
         InitializeMaterialDesign();
         ShadowAssist.SetShadowDepth(this, ShadowDepth.Depth0);

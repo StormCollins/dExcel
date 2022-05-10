@@ -7,6 +7,7 @@
 	<UseWindowsForms>true</UseWindowsForms>
 	<UseWPF>true</UseWPF>
 	<ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -169,8 +170,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="WPF\MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <None Update="WPF\Diagnostics.xaml">
+      <Generator>$(DefaultXamlRuntime)</Generator>
     </None>
   </ItemGroup>
 

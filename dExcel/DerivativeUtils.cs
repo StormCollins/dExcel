@@ -1,6 +1,7 @@
 ﻿namespace dExcel;
 
 using System;
+using System.IO;
 using ExcelDna.Integration;
 using mnd = MathNet.Numerics.Distributions;
 
@@ -175,7 +176,7 @@ public static class DerivativeUtils
     [ExcelFunction(
        Name = "d.Bachelier",
        Description = "Bachelier option pricer on Sport or Forwards/Futures." +
-                     "\nTo price swaptions you need to multiply by the relevant annuity factor.", 
+                     "\nTo price swaptions you need to multiply by the relevant annuity factor.",
        Category = "∂Excel: Derivatives")]
     public static object Bachelier(
         [ExcelArgument(Name = "Forward Rate", Description = "Forward rate.")]
@@ -198,7 +199,7 @@ public static class DerivativeUtils
 #endif 
 
         int sign = 0;
-        
+
         if (optionType.ToUpper() == "C" || optionType.ToUpper() == "CALL")
         {
             sign = 1;
@@ -214,7 +215,7 @@ public static class DerivativeUtils
 
         double d = (forwardRate - strike) / (vol * Math.Sqrt(optionMaturity));
 
-        var value = sign * (forwardRate - strike) * mnd.Normal.CDF(0, 1, sign * d)  + vol * Math.Sqrt(optionMaturity) * mnd.Normal.PDF(0, 1, d);
+        var value = sign * (forwardRate - strike) * mnd.Normal.CDF(0, 1, sign * d) + vol * Math.Sqrt(optionMaturity) * mnd.Normal.PDF(0, 1, d);
         return forwardOrSpot.ToUpper() == "F" ? value : Math.Exp(-rate * optionMaturity) * value;
-    }       
+    }
 }

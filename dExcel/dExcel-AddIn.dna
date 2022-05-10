@@ -1,9 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
-<DnaLibrary Name='dExcel' RuntimeVersion='v4.0' xmlns='http://schemas.excel-dna.net/addin/2020/07/dnalibrary'>
+<DnaLibrary Name='dExcel Add-In' RuntimeVersion='v4.0' xmlns='http://schemas.excel-dna.net/addin/2020/07/dnalibrary'>
   <ExternalLibrary Path='dExcel.dll' ExplicitExports='false' LoadFromBytes='true' Pack='true' IncludePdb='false'/>
+  <Reference Path='FuzzySharp.dll' Pack='true'/>
   <Reference Path='MaterialDesignColors.dll' Pack='true'/>
   <Reference Path='MaterialDesignThemes.Wpf.dll' Pack='true'/>
-  <Reference Path='FuzzySharp.dll' Pack='true'/>
+  <Reference Path='QLNet.dll' Pack='true'/>
   <CustomUI>
 	<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui' onLoad='LoadRibbon'>
 	  <ribbon>

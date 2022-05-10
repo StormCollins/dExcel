@@ -95,6 +95,7 @@ public partial class FunctionSearch : Window
 
     public FunctionSearch()
     {
+        Directory.SetCurrentDirectory(@"C:\GitLab\dExcelTools\dExcel\dExcel\bin\Debug\net6.0-windows");
         InitializeComponent();
         InitializeMaterialDesign();
         ShadowAssist.SetShadowDepth(this, ShadowDepth.Depth0);
