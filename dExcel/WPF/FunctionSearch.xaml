@@ -8,101 +8,13 @@
         mc:Ignorable="d"
         BorderThickness="5"
         BorderBrush="{DynamicResource MaterialDesignPaper}"
-        Title="∂Excel Function Search" Height="550" Width="850"
+        Title="∂Excel Function Search"
+        Height="550"
+        Width="850"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}">
   <Window.Resources>
-    <ResourceDictionary>
-      <ResourceDictionary.MergedDictionaries>
-        <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="DeepPurple" SecondaryColor="Lime"/>
-        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-      </ResourceDictionary.MergedDictionaries>
-            <!--primary-->
-            <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="#C4D600"/>
-            <SolidColorBrush x:Key="PrimaryHueLightForegroundBrush" Color="#FFFFFF"/>
-            <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="#86BC25"/>
-            <SolidColorBrush x:Key="PrimaryHueMidForegroundBrush" Color="#FFFFFF"/>
-            <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="#43B02A"/>
-            <SolidColorBrush x:Key="PrimaryHueDarkForegroundBrush" Color="#FFFFFF"/>
-            <!--accent-->
-            <SolidColorBrush x:Key="SecondaryHueMidBrush" Color="#0D8390"/>
-            <SolidColorBrush x:Key="SecondaryHueMidForegroundBrush" Color="#FFFFFF"/>
-            <!--other-->
-            <SolidColorBrush x:Key="ValidationErrorBrush" Color="#FFCD00"/>
-
-            <Style x:Key="WinAll" TargetType="{x:Type Window}">
-                <Setter Property="FontFamily" Value="Calibri" />
-                <Setter Property="FontSize" Value="14" />
-            </Style>
-
-            <Style BasedOn="{StaticResource MaterialDesignHeadline4TextBlock}"
-             TargetType="TextBlock"
-             x:Key="Header1">
-                <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}" />
-                <Setter Property="Margin" Value="5 0 0 0" />
-            </Style>
-
-            <Style BasedOn="{StaticResource MaterialDesignHeadline5TextBlock}"
-             TargetType="TextBlock"
-             x:Key="Header2">
-                <Setter Property="Foreground" Value="#FFFFFF" />
-                <Setter Property="Margin" Value="5 0 0 0" />
-            </Style>
-
-            <Style BasedOn="{StaticResource MaterialDesignSubtitle1TextBlock}"
-             TargetType="TextBlock"
-             x:Key="Header3">
-                <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}" />
-                <Setter Property="Margin" Value="5 0 0 0" />
-            </Style>
-
-            <Style BasedOn="{StaticResource MaterialDesignTextBlock}"
-             TargetType="{x:Type TextBlock}">
-                <Setter Property="Margin" Value="9 0 0 0" />
-            </Style>
-
-            <Style BasedOn="{StaticResource MaterialDesignTextBlock}"
-             TargetType="{x:Type TextBlock}"
-             x:Key="OutputText">
-                <Setter Property="Margin" Value="5 0 0 0" />
-                <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}" />
-                <Setter Property="FontWeight" Value="Bold" />
-            </Style>
-
-            <Style BasedOn="{StaticResource MaterialDesignTextBlock}"
-             TargetType="{x:Type TextBlock}"
-             x:Key="WarningOutputText">
-                <Setter Property="Margin" Value="5 0 0 0" />
-                <Setter Property="Foreground" Value="{StaticResource ValidationErrorBrush}" />
-                <Setter Property="FontWeight" Value="Bold" />
-            </Style>
-
-            <Style TargetType="{x:Type Hyperlink}">
-                <Setter Property="FontWeight" Value="Bold" />
-                <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}" />
-                <Setter Property="TextDecorations" Value="Underline" />
-            </Style>
-
-            <Style TargetType="{x:Type materialDesign:Card}">
-                <Setter Property="Margin" Value="5" />
-            </Style>
-
-            <Style TargetType="{x:Type Button}">
-                <Setter Property="Margin" Value="5" />
-            </Style>
-
-            <Style TargetType="{x:Type Separator}">
-                <Setter Property="Margin" Value="5 0 5 0" />
-                <Setter Property="Background" Value="#000000" />
-            </Style>
-
-            <Style BasedOn="{StaticResource MaterialDesignRaisedButton}"
-               TargetType="Button"
-               x:Key="StandardButton">
-                <Setter Property="Margin" Value="5 0 5 5" />
-            </Style>
-
-        </ResourceDictionary>
+    <ResourceDictionary Source="dExcelTheme.xaml"/>
   </Window.Resources>
   
   <Grid>
@@ -131,7 +43,7 @@
       Grid.Row="0"
       Grid.Column="0"
       Grid.ColumnSpan="4"
-      Style="{StaticResource Header1}"
+      Style="{StaticResource GreenHeader1}"
       Text="∂Excel Function Search"/>
 
     <Image
@@ -176,7 +88,7 @@
         VerticalAlignment="Top">
         <TextBlock
           Text="Search Results"
-          Style="{StaticResource Header3}"
+          Style="{StaticResource GreenHeader3}"
           VerticalAlignment="Top"/>
           <DataGrid
             Name="SearchResults"
