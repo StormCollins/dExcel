@@ -111,7 +111,7 @@
                 <Trigger Property="IsSelected"
                         Value="True">
                   <Setter Property="BorderBrush"
-                        Value="{StaticResource PrimaryHueMidBrush}" />
+                        Value="{StaticResource PrimaryHueLightBrush}" />
                   <Setter Property="BorderThickness"
                         Value="1" />
                 </Trigger>
@@ -145,12 +145,11 @@
       Grid.Row="9"
       Grid.Column="4"
       IsEnabled="False"
-      Style="{StaticResource StandardButton}" Click="Insert_Click"/>
+      Click="Insert_Click"/>
     <Button
       Content="Close"
       Grid.Row="9"
       Grid.Column="5"
-      Style="{StaticResource StandardButton}"
       Click="CloseFunctionSearch"/>
   </Grid>
 </Window>
