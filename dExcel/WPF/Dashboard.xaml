@@ -10,7 +10,7 @@
         BorderBrush="{DynamicResource MaterialDesignPaper}"
         Title="∂Excel Dashboard"
         Height="500"
-        Width="1200"
+        Width="1000"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}">
   <Window.Resources>
@@ -48,7 +48,7 @@
     <TextBlock
       Grid.Row="0"
       Grid.Column="0"
-      Grid.ColumnSpan="3"
+      Grid.ColumnSpan="4"
       Style="{StaticResource GreenHeader1}"
       Text="∂Excel Dashboard"/>
 

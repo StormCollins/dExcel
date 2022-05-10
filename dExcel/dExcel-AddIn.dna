@@ -36,6 +36,13 @@
 				getImage='GetImage'
 				tag='fix-links-small-blue.ico'/>
 			  <button
+				id='btnCalculateRange'
+				label='Calculate Range'
+				getImage='GetImage'
+				onAction='CalculateRange'
+				screentip='Select a range and click this button to recalculate it.'
+				tag='calculate-range-small-blue.ico'/>
+			  <button
 				id='btnManagePasswords'
 				label='Manage Passwords'
 				getImage='GetImage'

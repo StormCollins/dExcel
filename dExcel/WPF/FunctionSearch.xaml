@@ -102,8 +102,6 @@
             <Style TargetType="DataGridCell">
               <Setter Property="BorderThickness" Value="0"/>
               <Setter Property="Background" Value="{x:Null}" />
-              <!-- Update from comments.
-                 Remove the focus indication for the selected cell -->
               <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             </Style>
           </DataGrid.CellStyle>

@@ -139,6 +139,15 @@ public class RibbonController : ExcelRibbon
 
     public void FormatTable(IRibbonControl control) => CellFormatUtils.FormatTable();
 
+    /// <summary>
+    /// Calculates the selected Excel range.
+    /// </summary>
+    /// <param name="control">Ribbon control.</param>
+    public void CalculateRange(IRibbonControl control)
+    {
+        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        ((Excel.Range)xlApp.Selection).Calculate();
+    }
 
     // TODO: Move these to a separate class.
     private StringBuilder allTemplates = new("Hello,Hi,XiXi,Hoho,XiXe,Hiddy");
