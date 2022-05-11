@@ -18,6 +18,7 @@
     <None Remove="resources\icons\database-connected-large-green.ico" />
     <None Remove="resources\icons\dates-large-green.ico" />
     <None Remove="resources\icons\derivatives-large-green.ico" />
+    <None Remove="resources\icons\dExcel.ico" />
     <None Remove="resources\icons\dXL-logo-extra-small.ico" />
     <None Remove="resources\icons\dXL-logo.ico" />
     <None Remove="resources\icons\equities-large-blue.ico" />
@@ -82,6 +83,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="resources\icons\derivatives-large-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\dExcel.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="resources\icons\dXL-logo-extra-small.ico">

@@ -17,7 +17,7 @@
 				getImage='GetImage'
 				onAction='OpenDashboard'
 				size='large'
-				tag='dXL-logo.ico'/>
+				tag='dExcel.ico'/>
 			</group>
 			<group id='grpUtilities' label='Utilities'>
 			  <button

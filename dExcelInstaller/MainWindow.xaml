@@ -13,7 +13,7 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        Title="∂Excel Manager" Height="450" Width="800">
+        Title="∂Excel Installer" Height="450" Width="800">
     <Window.Resources>
       <Style TargetType="{x:Type materialDesign:Card}">
         <Setter Property="Margin" Value="5" />
@@ -50,7 +50,7 @@
         Grid.Column="0"
         Grid.ColumnSpan="3"
         Style="{StaticResource Header1}"
-        Text="∂Excel Manager"/>
+        Text="∂Excel Installer"/>
 
       <Image
         Name="dExcelIcon"
