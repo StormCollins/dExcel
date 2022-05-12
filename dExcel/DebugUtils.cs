@@ -17,4 +17,33 @@ public static class DebugUtils
         Description = "Gets the path of the dExcel xll.",
         Category = "∂Excel: Debug")]
     public static string GetXllPath() => ExcelDnaUtil.XllPath;
+
+    /// <summary>
+    /// Gets a list of all assemblies loaded into the current domain.
+    /// </summary>
+    /// <returns>A list of all assemblies loaded into the current domain.</returns>
+    [ExcelFunction(
+        Name = "d.Debug_GetAssemblies",
+        Description = "Gets a List of all assemblies loaded into the current domain.",
+        Category = "∂Excel: Debug")]
+    public static object[,] GetAssemblies()
+    {
+        var assemblyNames = new List<string>();
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (assembly.FullName != null)
+            {
+                assemblyNames.Add(assembly.FullName);
+            }
+        }
+
+        assemblyNames.Sort();
+
+        var output = new object[assemblyNames.Count, 1];
+        for (int i = 0; i < assemblyNames.Count; i++)
+        {
+            output[i, 0] = assemblyNames[i];
+        }
+        return output;
+    }
 }

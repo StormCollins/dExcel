@@ -14,7 +14,7 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}">
   <Window.Resources>
-    <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"></ResourceDictionary>
+    <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"/>
   </Window.Resources>
   
   <Grid>

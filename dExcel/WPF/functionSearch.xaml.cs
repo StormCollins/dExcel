@@ -9,6 +9,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using ExcelDna.Integration;
 using FuzzySharp;
 
 /// <summary>
@@ -81,9 +82,10 @@ public partial class FunctionSearch : Window
 
     public FunctionSearch()
     {
+        var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
         InitializeComponent();
-        this.Icon = dExcelIcon.Source = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + @"\resources\icons\dXL-logo-extra-small.ico")); 
-        dExcelIcon.Source = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + @"\resources\icons\dXL-logo.ico"));
+        this.Icon = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dXL-logo-extra-small.ico")); 
+        dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dXL-logo.ico"));
     }
 
     private void CloseFunctionSearch(object sender, RoutedEventArgs e) => this.Close();
