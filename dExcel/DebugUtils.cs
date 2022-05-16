@@ -2,6 +2,7 @@
 
 using System.Reflection;
 using ExcelDna.Integration;
+using Excel = Microsoft.Office.Interop.Excel;
 
 /// <summary>
 /// A collection of utility functions to debug the dExcel application at runtime from Excel.
@@ -45,5 +46,31 @@ public static class DebugUtils
             output[i, 0] = assemblyNames[i];
         }
         return output;
+    }
+
+    [ExcelFunction(
+        Name = "d.Debug_GetAddInPath",
+        Description = "Gets a List of all assemblies loaded into the current domain.",
+        Category = "∂Excel: Debug")]
+    public static string GetAddInPath()
+    {
+        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        foreach (Excel.AddIn addIn in xlApp.AddIns)
+        {
+            if (addIn.FullName.Contains("dExcel"))
+            {
+                return addIn.FullName;
+            }
+        }
+        return "";
+    }
+
+    [ExcelFunction(
+        Name = "d.Debug_GetAssemblyVersion",
+        Description = "Gets a List of all assemblies loaded into the current domain.",
+        Category = "∂Excel: Debug")]
+    public static string GetAssemblyVersion()
+    {
+        return Assembly.GetAssembly(typeof(DebugUtils)).FullName;
     }
 }

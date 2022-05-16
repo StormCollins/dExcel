@@ -5,6 +5,7 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>resources\icons\dExcel.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,8 +14,10 @@
     <None Remove="resources\icons\database-connected-large-green.ico" />
     <None Remove="resources\icons\dates-large-green.ico" />
     <None Remove="resources\icons\derivatives-large-green.ico" />
+    <None Remove="resources\icons\dExcel.ico" />
     <None Remove="resources\icons\dXL-logo-extra-small.ico" />
     <None Remove="resources\icons\dXL-logo.ico" />
+    <None Remove="resources\icons\dXL-logo.png" />
     <None Remove="resources\icons\equities-large-blue.ico" />
     <None Remove="resources\icons\equities-large-green.ico" />
     <None Remove="resources\icons\fix-links-small-blue.ico" />
@@ -50,6 +53,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="resources\icons\dExcel.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="resources\icons\commodities-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -65,10 +72,16 @@
     <EmbeddedResource Include="resources\icons\derivatives-large-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\dExcel.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="resources\icons\dXL-logo-extra-small.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="resources\icons\dXL-logo.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\dXL-logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="resources\icons\equities-large-blue.ico">

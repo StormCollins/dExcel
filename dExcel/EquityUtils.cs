@@ -60,7 +60,7 @@ public static class EquityUtils
         var endDate = valDate;
         var startDate = valDate - (maturityDate - valDate);
 
-        // Determine the relevant time period over which volatility should be calculated
+        // Determine the relevant time period over which volatility should be calculated.
         var sortedDatesAndPricesForVolCalculation = sortedDatesAndPrices.Where(x => startDate <= x.date && x.date <= endDate).ToList();
         var returns = new List<double>();
         for (int i = 0; i < sortedDatesAndPricesForVolCalculation.Count - 1; i++)
@@ -92,7 +92,7 @@ public static class EquityUtils
         {
             return new double[1, 2] { { equallyWeightedVolatility, ewmaVolatility } };
         }
-
+        
         return Math.Max(equallyWeightedVolatility, ewmaVolatility);
     }
 }

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -14,14 +15,22 @@ using Excel = Microsoft.Office.Interop.Excel;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private const string VersionsPath = @"C:\GitLab\dExcelTools\Versions\";
+    private const string CurrentVersionPath = @"C:\GitLab\dExcelTools\Versions\Current\";
+    private readonly string version = "1.1";
+
+    // What does it mean to register an addin?
+    // Difference between COM addin?
+    // What is C API for Excel?
+    // stackoverflow.com/questions/363377/how-do-i-run-a-simple-bit-of-code-in-a-new-thread
     public Logger logger;
 
     public MainWindow()
     {
         InitializeComponent();
-        this.Icon = dExcelIcon.Source = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + @"\resources\icons\dXL-logo-extra-small.ico"));
-        dExcelIcon.Source = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + @"\resources\icons\dXL-logo.ico"));
+        dExcelIcon.Source = new BitmapImage(new Uri(CurrentVersionPath + @"\resources\icons\dExcel.ico"));
         logger = new Logger(LogWindow);
+
     }
 
     /// <summary>
@@ -31,100 +40,239 @@ public partial class MainWindow : Window
     /// <param name="e">The routed events.</param>
     private void Install_Click(object sender, RoutedEventArgs e)
     {
-        this.logger.NewProcess("Installation of ∂Excel started.");
+        new Thread(InstallAddIn).Start();
+    }
+
+
+    public void InstallAddIn()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            this.logger.NewProcess("Installation of ∂Excel started.");
+            this.logger.NewSubProcess($"Ensuring Excel is closed.");
+        });
 
         // Ensure Excel is closed.
-        this.logger.OkayText = $"Checking that all instances of Excel are closed.";
         try
         {
-            Process[] workers = Process.GetProcessesByName("Excel");
-            this.logger.OkayText = $"{workers.Length} Excel instances found.";
-            foreach (Process worker in workers)
+            Process[] excelInstances = Process.GetProcessesByName("Excel");
+            Dispatcher.Invoke(() =>
             {
-                worker.Kill();
-                worker.WaitForExit();
-                worker.Dispose();
+                this.logger.OkayText = $"{excelInstances.Length} Excel instances found.";
+            });
+            foreach (Process excelInstance in excelInstances)
+            {
+                excelInstance.Kill();
+                excelInstance.WaitForExit();
+                excelInstance.Dispose();
             }
-            this.logger.OkayText = $"All Excel instances terminated.";
+            Dispatcher.Invoke(() =>
+            {
+                this.logger.OkayText = $"All Excel instances terminated.";
+            });
         }
         catch (Exception exception)
         {
-            this.logger.ErrorText = $"Excel process could not be terminated.";
-            this.logger.ErrorText = $"{exception.Message}";
+            Dispatcher.Invoke(() =>
+            {
+                this.logger.ErrorText = $"Excel process could not be terminated.";
+                this.logger.ErrorText = $"{exception.Message}";
+            });
         }
-        this.logger.DashedHorizontalLine();
 
-        // Remove the initial version of dExcel - this would only apply to first adopters 
-        // and this step can be deprecated later.
-        this.logger.OkayText = $"Checking for obsolete instances of ∂Excel.";
+        // Remove the initial (obsolete) version of dExcel.
+        // This would only apply to first adopters so this step can be deprecated later.
+        Dispatcher.Invoke(() =>
+        {
+            this.logger.NewSubProcess($"Removing obsolete instances of ∂Excel.");
+        });
         try
         {
-            var currentAddIns = Directory.GetFiles(Environment.ExpandEnvironmentVariables(@"%appdata%\Microsoft\AddIns"));
-            var obsoleteDExcelAddIn = currentAddIns.Length == 0 ? null : currentAddIns.First(x => x.Contains("dExcel", StringComparison.InvariantCultureIgnoreCase));
+            var currentAddIns =
+                Directory.GetFiles(Environment.ExpandEnvironmentVariables(@"%appdata%\Microsoft\AddIns"));
+            var obsoleteDExcelAddIn =
+                currentAddIns.Length == 0 ?
+                null : currentAddIns.First(x => x.Contains("dExcel", StringComparison.InvariantCultureIgnoreCase));
             if (obsoleteDExcelAddIn != null)
             {
-                this.logger.OkayText = $"Found obsolete AddIn {Path.GetFileName(obsoleteDExcelAddIn)} "
+                Dispatcher.Invoke(() =>
+                {
+                    this.logger.OkayText = $"Found obsolete AddIn {Path.GetFileName(obsoleteDExcelAddIn)} "
                     + $"in {Path.GetDirectoryName(obsoleteDExcelAddIn)}.";
+                });
                 File.Delete(obsoleteDExcelAddIn);
-                this.logger.OkayText = $"Deleted obsolete AddIn {Path.GetFileName(obsoleteDExcelAddIn)}.";
+                Dispatcher.Invoke(() =>
+                {
+                    this.logger.OkayText = $"Removed obsolete AddIn {Path.GetFileName(obsoleteDExcelAddIn)}.";
+                });
             }
         }
         catch (Exception exception)
         {
-            this.logger.ErrorText = $"Error deleting obsolete instances of ∂Excel from " +
-                $"{Environment.ExpandEnvironmentVariables("%appdata%/Microsoft/AddIns")}"; 
-            this.logger.ErrorText = exception.Message; 
+            Dispatcher.Invoke(() =>
+            {
+                this.logger.ErrorText = $"Error removing obsolete instances of ∂Excel from " +
+                $"{Environment.ExpandEnvironmentVariables("%appdata%/Microsoft/AddIns")}";
+                this.logger.ErrorText = exception.Message;
+            });
         }
-        this.logger.DashedHorizontalLine();
+        Dispatcher.Invoke(() =>
+        {
+            this.logger.DashedHorizontalLine();
+        });
 
         // Check if installation path exists.
-        var versionsPath = @"C:\GitLab\dExcelTools\Versions";
-        if (!Directory.Exists(versionsPath))
+        Dispatcher.Invoke(() =>
         {
-            this.logger.OkayText = $"Path {versionsPath} does not exist.";
+        });
+
+        if (!Directory.Exists(VersionsPath))
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this.logger.OkayText = $"Path {VersionsPath} does not exist.";
+            });
+            
             try
             {
-                Directory.CreateDirectory(versionsPath);
-                this.logger.OkayText = $"Path {versionsPath} created.";
+                Directory.CreateDirectory(VersionsPath);
+                Dispatcher.Invoke(() =>
+                {
+                    this.logger.OkayText = $"Path {VersionsPath} created.";
+                });
             }
             catch (Exception exception)
             {
-                this.logger.ErrorText = $"Path {versionsPath} could not be created.";
+                this.logger.ErrorText = $"Path {VersionsPath} could not be created.";
                 this.logger.ErrorText = $"{exception.Message}";
             }
         }
         else
         {
-            logger.OkayText = $"Path {versionsPath} already exists.";
+            Dispatcher.Invoke(() =>
+            {
+                this.logger.OkayText = $"Path {VersionsPath} already exists.";
+            });
         }
-        this.logger.DashedHorizontalLine();
+        Dispatcher.Invoke(() =>
+        {
+            this.logger.DashedHorizontalLine();
+        });
 
         // Download addin from GitLab and copy to installation path.
 
-        // Open Excel and install the addin.
-        // stackoverflow.com/questions/363377/how-do-i-run-a-simple-bit-of-code-in-a-new-thread
-        logger.OkayText = $"Opening Excel to install ∂Excel add in.";
-        try
-        { 
-            Thread t = new Thread(InstalldExcelAddIn);
-            t.Start();
-            
-        }
-        catch (Exception)
+
+        // Remove previous version from C:\GitLab\dExcelTools\Versions\Current.
+        Dispatcher.Invoke(() =>
         {
-            throw;
+            this.logger.NewSubProcess($"Updating ∂Excel.");
+            this.logger.OkayText = $"Deleting previous ∂Excel version from {CurrentVersionPath}.";
+        });
+        DirectoryInfo currentVersionDirectory = new(CurrentVersionPath);
+        try
+        {
+            foreach (FileInfo file in currentVersionDirectory.GetFiles())
+            {
+                file.Delete();
+            }
+            foreach (DirectoryInfo dir in currentVersionDirectory.GetDirectories())
+            {
+                dir.Delete(true);
+            }
         }
+        catch (Exception exception)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this.logger.ErrorText = $"Failed to delete files and folders from {CurrentVersionPath}.";
+                this.logger.ErrorText = exception.Message;
+            }); 
+        }
+
+        // Copy required version from 'C:\GitLab\dExcelTools\Versions\<version number>' to
+        // 'C:\GitLab\dExcelTools\Versions\Current'.
+        Dispatcher.Invoke(() =>
+        {
+            logger.OkayText = $"Copying new version of ∂Excel to {CurrentVersionPath}.";
+        });
+        try
+        {
+            CopyFilesRecursively(VersionsPath + version, CurrentVersionPath);
+        }
+        catch (Exception exception)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this.logger.ErrorText = $"Failed to copy new version of ∂Excel to {CurrentVersionPath}.";
+                this.logger.ErrorText = $"{exception.Message}";
+            });
+        }
+
+
+        // Create Excel application and ∂Excel install addin.
+        Excel.Application excel = new();
+        bool dExcelInstalled = false;
+        foreach (Excel.AddIn addIn in excel.AddIns)
+        {
+            if (addIn.Name.Contains("dExcel"))
+            {
+                addIn.Installed = true;
+                dExcelInstalled = true;
+                break;
+            }
+        }
+
+        if (!dExcelInstalled)
+        {
+            Excel.AddIn dExcelAddIn =
+                excel.AddIns.Add(@"C:\GitLab\dExcelTools\Versions\Current\dExcel-AddIn64.xll");
+            dExcelAddIn.Installed = true;
+        }
+        excel.Quit();
+
+        Dispatcher.Invoke(() =>
+        {
+            Install.IsEnabled = false;
+            Cancel.Content = "Close";
+        });
     }
 
-    static void InstalldExcelAddIn()
+    /// <summary>
+    /// Copies all files, including subdirectories, from one path to path.
+    /// </summary>
+    /// <param name="sourcePath">Source path.</param>
+    /// <param name="targetPath">Target path.</param>
+    private static void CopyFilesRecursively(string sourcePath, string targetPath)
     {
-        Excel.Application excel = new Excel.Application();
-        Excel.Workbook wb = excel.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\resources\workbooks\Testing.xlsm");
-        Excel.AddIn dExcelAddIn = excel.AddIns.Add(@"C:\GitLab\dExcelTools\Versions\0.0\dExcel-AddIn64.xll");
-        dExcelAddIn.Installed = true;
-        //excel.RegisterXLL(@"C:\GitLab\dExcelTools\Versions\0.0\dExcel - AddIn64.xll");
-        excel.Visible = true;
+        foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+        {
+            Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+        }
+
+        foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+        {
+            File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+        }
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => this.Close();
+
+    /// <summary>
+    /// Uninstalls ∂Excel from Excel.
+    /// </summary>
+    /// <param name="sender">Sender.</param>
+    /// <param name="e">Routed event args.</param>
+    private void Uninstall_Click(object sender, RoutedEventArgs e)
+    {
+        Excel.Application excel = new();
+        foreach (Excel.AddIn addIn in excel.AddIns)
+        {
+            if (addIn.Name.Contains("dExcel"))
+            {
+                addIn.Installed = false;
+                break;
+            }
+        }
+        excel.Quit();
+    }
 }

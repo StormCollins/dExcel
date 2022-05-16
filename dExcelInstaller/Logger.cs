@@ -128,8 +128,8 @@ public class Logger
     {
         return new Run($"[{DateTime.Now:HH:mm:ss}]  ")
         {
-            FontWeight = FontWeights.Bold,
-            FontFamily = new FontFamily("Calibri")
+            FontFamily = new FontFamily("Calibri"),
+            FontWeight = FontWeights.ExtraBold,
         };
     }
 
@@ -142,12 +142,12 @@ public class Logger
         };
     }
 
-    public static Run CreateBoldMessage(string message)
+    public static Run CreateBoldMessage(string message, int fontSize = 16)
     {
         return new Run($"{message}")
         {
             FontFamily = new FontFamily("Calibri"),
-            FontSize = 16,
+            FontSize = fontSize,
             FontWeight = FontWeights.ExtraBold,
         };
     }
@@ -180,6 +180,18 @@ public class Logger
     public void NewProcess(string message)
     {
         var timeStamp = CreateTimeStamp();
+        var messageRun = CreateBoldMessage(message, 18);
+        var paragraph = new Paragraph();
+        paragraph.Inlines.Clear();
+        paragraph.Inlines.Add(timeStamp);
+        paragraph.Inlines.Add(messageRun);
+        LogWindow.Document.Blocks.Add(paragraph);
+        LogWindow.ScrollToEnd();
+    }
+
+    public void NewSubProcess(string message)
+    {
+        var timeStamp = CreateTimeStamp();
         var messageRun = CreateBoldMessage(message);
         var paragraph = new Paragraph();
         paragraph.Inlines.Clear();
@@ -206,13 +218,13 @@ public class Logger
     {
         if (color == null)
         {
-            color = (Brush)Application.Current.Resources["SecondaryHueMidBrush"];
+            color = (Brush)Application.Current.Resources["PrimaryHueDarkBrush"];
         }
         var dashedLine = string.Concat(Enumerable.Repeat("-  ", 56));
         var horizontalLine = new Run(dashedLine)
         {
-            FontWeight = FontWeights.Bold,
-            Foreground = color
+            Foreground = color,
+            FontWeight = FontWeights.Regular,
         };
 
         var paragraph = new Paragraph();
@@ -222,26 +234,26 @@ public class Logger
 
     public void ExtractionComplete(string message)
     {
-        DashedHorizontalLine((Brush)Application.Current.Resources["SecondaryAccentBrush"]);
+        DashedHorizontalLine((Brush)Application.Current.Resources["PrimaryHueDarkBrush"]);
 
         var completeRun = new Run($"\n>>>>>>>>  Complete : ")
         {
             FontWeight = FontWeights.Bold,
-            Foreground = (Brush)Application.Current.Resources["SecondaryAccentBrush"],
+            Foreground = (Brush)Application.Current.Resources["PrimaryHueDarkBrush"],
             FontFamily = new FontFamily("Courier")
         };
 
 
         var messageRun = new Run($" {message} ")
         {
-            Foreground = (Brush)Application.Current.Resources["SecondaryAccentBrush"],
+            Foreground = (Brush)Application.Current.Resources["PrimaryHueDarkBrush"],
             FontFamily = new FontFamily("Courier")
         };
 
         var chevrons = new Run("  <<<<<<<<")
         {
             FontWeight = FontWeights.Bold,
-            Foreground = (Brush)Application.Current.Resources["SecondaryAccentBrush"],
+            Foreground = (Brush)Application.Current.Resources["PrimaryHueDarkBrush"],
             FontFamily = new FontFamily("Courier")
         };
 
@@ -253,6 +265,4 @@ public class Logger
         LogWindow.Document.Blocks.Add(paragraph);
         LogWindow.ScrollToEnd();
     }
-
-    
-    }
+}
