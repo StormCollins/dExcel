@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,7 +39,9 @@ public partial class MainWindow : Window
         InstallerVersion.Text = $"{installerVersion?.Major}.{installerVersion?.Minor}";
         var currentDExcelVersion = AssemblyName.GetAssemblyName(CurrentVersionPath + @"\dExcel.dll").Version;
         CurrentDExcelVersion.Text = $"{currentDExcelVersion?.Major}.{currentDExcelVersion?.Minor}";
-        
+
+        AdminRights.Text = IsAdministrator().ToString();
+
         if (NetworkUtils.GetConnectionStatus())
         {
             _connectionStatus = true;
@@ -57,6 +60,14 @@ public partial class MainWindow : Window
         this.logger = new Logger(LogWindow);
     }
 
+    public static bool IsAdministrator()
+    {
+        using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+        {
+            WindowsPrincipal principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
+    }
 
     public void ConnectionStatusChangedCallback(object sender, EventArgs e)
     {
