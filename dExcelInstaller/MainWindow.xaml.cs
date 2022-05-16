@@ -34,6 +34,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        this.logger = new Logger(LogWindow);
+
         dExcelIcon.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/dExcel.png", UriKind.Absolute));
         var installerVersion = Assembly.GetEntryAssembly()?.GetName().Version;
         InstallerVersion.Text = $"{installerVersion?.Major}.{installerVersion?.Minor}";
@@ -41,6 +43,10 @@ public partial class MainWindow : Window
         CurrentDExcelVersion.Text = $"{currentDExcelVersion?.Major}.{currentDExcelVersion?.Minor}";
 
         AdminRights.Text = IsAdministrator().ToString();
+        if (!IsAdministrator())
+        {
+            this.logger.WarningText = "The user is not an admin on this machine. It may limit installation functionality.";
+        }
 
         if (NetworkUtils.GetConnectionStatus())
         {
@@ -51,13 +57,16 @@ public partial class MainWindow : Window
         {
             _connectionStatus = false;
             ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-amber.ico", UriKind.Absolute));
+            this.logger.WarningText = "User not connected to VPN. VPN is required to check for latest versions of ∂Excel on GitLab.";
         }
         NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback;
 
         // TODO: Get new versions from GitLab before this step.
         AvailableDExcelVersions.ItemsSource = GetAvailableVersions();
         AvailableDExcelVersions.SelectedIndex = 0;
-        this.logger = new Logger(LogWindow);
+        
+
+
     }
 
     public static bool IsAdministrator()
@@ -77,12 +86,18 @@ public partial class MainWindow : Window
             if (NetworkUtils.GetConnectionStatus())
             {
                 Dispatcher.Invoke(() =>
-                    ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico", UriKind.Absolute)));
+                {
+                    ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico", UriKind.Absolute));
+                    this.logger.OkayText = "Connection to VPN established. Checking for latest versions of ∂Excel on GitLab.";
+                });
             }
             else
             {
                 Dispatcher.Invoke(() =>
-                    ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-amber.ico", UriKind.Absolute)));
+                {
+                    ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-amber.ico", UriKind.Absolute));
+                    this.logger.WarningText = "User not connected to VPN. VPN is required to check for latest versions of ∂Excel on GitLab.";
+                });
             }
         }
     }
