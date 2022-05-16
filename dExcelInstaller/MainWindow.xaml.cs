@@ -2,8 +2,12 @@
 
 using System;
 using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,7 +21,8 @@ public partial class MainWindow : Window
 {
     private const string VersionsPath = @"C:\GitLab\dExcelTools\Versions\";
     private const string CurrentVersionPath = @"C:\GitLab\dExcelTools\Versions\Current\";
-    private readonly string version = "1.1";
+    private const string dExcelVersion = "1.1";
+    private static bool _connectionStatus;
 
     // What does it mean to register an addin?
     // Difference between COM addin?
@@ -28,9 +33,60 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        dExcelIcon.Source = new BitmapImage(new Uri(CurrentVersionPath + @"\resources\icons\dExcel.ico"));
-        logger = new Logger(LogWindow);
+        dExcelIcon.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/dExcel.png", UriKind.Absolute));
+        var installerVersion = Assembly.GetEntryAssembly()?.GetName().Version;
+        InstallerVersion.Text = $"{installerVersion?.Major}.{installerVersion?.Minor}";
+        var currentDExcelVersion = AssemblyName.GetAssemblyName(CurrentVersionPath + @"\dExcel.dll").Version;
+        CurrentDExcelVersion.Text = $"{currentDExcelVersion?.Major}.{currentDExcelVersion?.Minor}";
+        
+        if (NetworkUtils.GetConnectionStatus())
+        {
+            _connectionStatus = true;
+            ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico", UriKind.Absolute));
+        }
+        else
+        {
+            _connectionStatus = false;
+            ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-amber.ico", UriKind.Absolute));
+        }
+        NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback;
 
+        // TODO: Get new versions from GitLab before this step.
+        AvailableDExcelVersions.ItemsSource = GetAvailableVersions();
+        AvailableDExcelVersions.SelectedIndex = 0;
+        this.logger = new Logger(LogWindow);
+    }
+
+
+    public void ConnectionStatusChangedCallback(object sender, EventArgs e)
+    {
+        if (NetworkUtils.GetConnectionStatus() != _connectionStatus)
+        {
+            _connectionStatus = !_connectionStatus;
+            if (NetworkUtils.GetConnectionStatus())
+            {
+                Dispatcher.Invoke(() =>
+                    ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico", UriKind.Absolute)));
+            }
+            else
+            {
+                Dispatcher.Invoke(() =>
+                    ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-amber.ico", UriKind.Absolute)));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets all versions of dExcel already copied to the user's local machine.
+    /// </summary>
+    /// <returns>Available local versions of dExcel</returns>
+    private static IEnumerable<string> GetAvailableVersions()
+    {
+        return Directory
+            .GetDirectories(VersionsPath)
+            .Where(x => Regex.IsMatch(x, @"\d+(.\d+)"))
+            .Select(x => Path.GetFileName(x))
+            .Reverse();
     }
 
     /// <summary>
@@ -197,7 +253,7 @@ public partial class MainWindow : Window
         });
         try
         {
-            CopyFilesRecursively(VersionsPath + version, CurrentVersionPath);
+            CopyFilesRecursively(VersionsPath + dExcelVersion, CurrentVersionPath);
         }
         catch (Exception exception)
         {
