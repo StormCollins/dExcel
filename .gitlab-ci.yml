@@ -1,4 +1,5 @@
-image: mcr.microsoft.com/dotnet/sdk:latest
+#image: mcr.microsoft.com/dotnet/sdk:latest
+image: mcr.microsoft.com/windows/servercore:ltsc2022
 
 stages:
     - build
