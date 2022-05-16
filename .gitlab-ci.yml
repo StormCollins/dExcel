@@ -1,5 +1,6 @@
 #image: mcr.microsoft.com/dotnet/sdk:latest
-image: mcr.microsoft.com/windows/servercore:ltsc2022
+#image: mcr.microsoft.com/windows/servercore:ltsc2022
+image: maloneweb/docker-wine-dotnet:latest
 
 stages:
     - build
@@ -8,10 +9,14 @@ build:
     stage: build
     script:
         - "dotnet restore"
-        - "dotnet build --configuration Release"
+        - "dotnet build dExcel/dExcel.csproj --configuration Release"
         - "mkdir publish"
         - "cp dExcel/bin/Release/net6.0-windows/*.* publish"
     artifacts:
         paths:
         - publish/*.*
         expire_in: 1 day
+
+
+ # 1. Setup gitlab runner on Mabi.
+ # 2. Try to figure out how to run Wine inside a Linux container.
