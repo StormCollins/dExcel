@@ -14,9 +14,12 @@
   <ItemGroup>
     <None Remove="resources\icons\calculate-range-small-blue.ico" />
     <None Remove="resources\icons\commodities-large-blue.ico" />
+    <None Remove="resources\icons\connection-status-amber.ico" />
+    <None Remove="resources\icons\connection-status-green.ico" />
     <None Remove="resources\icons\credit-large-blue.ico" />
     <None Remove="resources\icons\cross_amber.png" />
     <None Remove="resources\icons\database-connected-large-green.ico" />
+    <None Remove="resources\icons\database-not-connected-large-amber.ico" />
     <None Remove="resources\icons\dates-large-green.ico" />
     <None Remove="resources\icons\derivatives-large-green.ico" />
     <None Remove="resources\icons\dExcel.ico" />
@@ -75,10 +78,19 @@
     <EmbeddedResource Include="resources\icons\commodities-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\connection-status-amber.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\connection-status-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="resources\icons\credit-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="resources\icons\database-connected-large-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\database-not-connected-large-amber.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="resources\icons\dates-large-green.ico">

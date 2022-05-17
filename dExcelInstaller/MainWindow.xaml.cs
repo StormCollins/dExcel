@@ -64,9 +64,6 @@ public partial class MainWindow : Window
         // TODO: Get new versions from GitLab before this step.
         AvailableDExcelVersions.ItemsSource = GetAvailableVersions();
         AvailableDExcelVersions.SelectedIndex = 0;
-        
-
-
     }
 
     public static bool IsAdministrator()

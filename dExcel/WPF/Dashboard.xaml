@@ -9,7 +9,7 @@
         BorderThickness="5"
         BorderBrush="{DynamicResource MaterialDesignPaper}"
         Title="∂Excel Dashboard"
-        Height="500"
+        Height="540"
         Width="1000"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}">
@@ -92,6 +92,7 @@
           <StackPanel Orientation="Horizontal">
             <TextBlock Text="Installed:"/>
             <TextBlock
+              Name="InstalledDExcelVersion"
               Style="{StaticResource OutputText}"
               Text="3.1"/>
           </StackPanel>
@@ -152,17 +153,59 @@
           Style="{StaticResource GreenHeader2}"
           Text="Connectivity"/>
         <Separator/>
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="VPN:"/>
-          <TextBlock
-              Style="{StaticResource OutputText}"
-              Text="Connected"/>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Omicron:"/>
-          <TextBlock
-              Style="{StaticResource WarningOutputText}"
-              Text="Not Connected"/>
+        <StackPanel
+          Orientation="Vertical"
+          HorizontalAlignment="Center">
+          <Border
+            Background="{StaticResource MaterialDesignDarkBackground}"
+            BorderBrush="{StaticResource PrimaryHueLightBrush}" 
+            BorderThickness="1"
+            CornerRadius="5"
+            DockPanel.Dock="Top"
+            Margin="5">
+            <StackPanel
+              HorizontalAlignment="Center"
+              Orientation="Horizontal">
+              <TextBlock
+                VerticalAlignment="Center"
+                Text="VPN Connection Status"/>
+              <Image
+                Name="ConnectionStatus"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Grid.Row="0"
+                Grid.RowSpan="2"
+                Grid.Column="7"
+                Margin="5"
+                Width="50"
+                Source="../resources/icons/connection-status-green.ico"/>
+            </StackPanel>
+          </Border>
+          <Border
+            Background="{StaticResource MaterialDesignDarkBackground}"
+            BorderBrush="{StaticResource PrimaryHueLightBrush}" 
+            BorderThickness="1"
+            CornerRadius="5"
+            DockPanel.Dock="Top"
+            Margin="5">
+            <StackPanel
+              HorizontalAlignment="Center"
+              Orientation="Horizontal">
+            <TextBlock
+              VerticalAlignment="Center"
+              Text="Omicron Connection Status"/>
+            <Image
+              Name="OmicronStatus"
+              HorizontalAlignment="Right"
+              VerticalAlignment="Top"
+              Grid.Row="0"
+              Grid.RowSpan="2"
+              Grid.Column="7"
+              Margin="5"
+              Width="50"
+              Source="../resources/icons/database-connected-large-green.ico"/>
+            </StackPanel>
+          </Border>
         </StackPanel>
       </StackPanel>
     </materialDesign:Card>

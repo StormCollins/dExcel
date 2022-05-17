@@ -85,7 +85,7 @@ public partial class FunctionSearch : Window
         var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
         InitializeComponent();
         this.Icon = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dXL-logo-extra-small.ico")); 
-        dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dXL-logo.ico"));
+        dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dExcel.ico"));
     }
 
     private void CloseFunctionSearch(object sender, RoutedEventArgs e) => this.Close();
