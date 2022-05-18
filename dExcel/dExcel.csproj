@@ -22,7 +22,9 @@
     <None Remove="resources\icons\database-not-connected-large-amber.ico" />
     <None Remove="resources\icons\dates-large-green.ico" />
     <None Remove="resources\icons\derivatives-large-green.ico" />
+    <None Remove="resources\icons\dExcel-ribbon.ico" />
     <None Remove="resources\icons\dExcel.ico" />
+    <None Remove="resources\icons\dExcel48.png" />
     <None Remove="resources\icons\dXL-logo-extra-small.ico" />
     <None Remove="resources\icons\dXL-logo.ico" />
     <None Remove="resources\icons\dXL-logo.png" />
@@ -99,9 +101,15 @@
     <EmbeddedResource Include="resources\icons\derivatives-large-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\dExcel.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <EmbeddedResource Include="resources\icons\dExcel-ribbon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <Resource Include="resources\icons\dExcel.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="resources\icons\dExcel48.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <EmbeddedResource Include="resources\icons\dXL-logo-extra-small.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>

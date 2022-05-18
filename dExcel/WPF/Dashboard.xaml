@@ -11,12 +11,14 @@
         Title="∂Excel Dashboard"
         Height="540"
         Width="1000"
+        Icon="pack://application:,,,/dExcel;component/resources/icons/dExcel.ico"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}">
   <Window.Resources>
     <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"/>
   </Window.Resources>
-  
+  <!--Icon="pack://application:,,,/dExcel;component//resources/icons/dExcel.ico"-->
+  <!--pack://application:,,,/resources/icons/dExcel.ico"-->
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="*"/>
@@ -60,8 +62,8 @@
       Grid.RowSpan="2"
       Grid.Column="11"
       Margin="5"
-      Width="40"
-      Source="/resources/icons/dXL-logo.ico"/>
+      Width="48"
+      Source="pack://application:,,,/dExcel;component/resources/icons/dExcel48.png"/>
     
     <materialDesign:Card
       Grid.Row="1"

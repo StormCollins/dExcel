@@ -2,63 +2,62 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:dExcelInstaller"
-        mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource Calibri}"
+        Height="550"
+        Icon="resources/icons/dExcel.ico"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
-        Icon="resources/icons/dExcel.ico"
-        Background="{DynamicResource MaterialDesignPaper}"
-        FontFamily="{DynamicResource MaterialDesignFont}"
         Title="∂Excel Installer"
-        Height="550"
         Width="800">
   <Grid>
-    
-      <Grid.RowDefinitions>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-      </Grid.RowDefinitions>
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="*"/>
-      </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
 
-      <TextBlock
-        Grid.Row="0"
-        Grid.Column="0"
-        Grid.ColumnSpan="3"
-        Style="{StaticResource GreenHeader1}"
-        Text="∂Excel Installer"/>
+    <TextBlock
+      Grid.Row="0"
+      Grid.Column="0"
+      Grid.ColumnSpan="3"
+      Style="{StaticResource GreenHeader1}"
+      Text="∂Excel Installer"/>
 
-      <Image
-        Name="dExcelIcon"
-        HorizontalAlignment="Right"
-        VerticalAlignment="Top"
-        Grid.Row="0"
-        Grid.RowSpan="2"
-        Grid.Column="7"
-        Margin="5"
-        Width="40"
-        Source="pack://application:,,,/resources/icons/dExcel.ico"/>
+    <Image
+      Name="dExcelIcon"
+      HorizontalAlignment="Right"
+      VerticalAlignment="Top"
+      Grid.Row="0"
+      Grid.RowSpan="2"
+      Grid.Column="7"
+      Margin="5"
+      Width="40"
+      Source="pack://application:,,,/resources/icons/dExcel.ico"/>
 
     <materialDesign:Card
       Grid.Row="1"
@@ -71,8 +70,8 @@
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="Installer Version:"/>
           <TextBlock
-              Name="InstallerVersion" 
-              Style="{StaticResource OutputText}"/>
+            Name="InstallerVersion" 
+            Style="{StaticResource OutputText}"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="Current ∂Excel Version: "/>
@@ -90,9 +89,14 @@
       Grid.RowSpan="4"
       Grid.Column="2"
       Grid.ColumnSpan="2">
-      <StackPanel>
-        <TextBlock Text="Diagnostics" Style="{StaticResource GreenHeader2}"/>
-        <Separator Name="DiagnosticsSeparator"/>
+      <DockPanel>
+        <TextBlock
+          DockPanel.Dock="Top"
+          Style="{StaticResource GreenHeader2}"
+          Text="Diagnostics" />
+        <Separator
+          DockPanel.Dock="Top"
+          Name="DiagnosticsSeparator"/>
         <Border
           Background="{StaticResource MaterialDesignDarkBackground}"
           BorderBrush="{StaticResource PrimaryHueLightBrush}" 
@@ -100,9 +104,8 @@
           CornerRadius="5"
           DockPanel.Dock="Top"
           Margin="5">
-          <StackPanel
-            HorizontalAlignment="Center"
-            Orientation="Horizontal">
+          <DockPanel
+            HorizontalAlignment="Center">
             <TextBlock
               VerticalAlignment="Center"
               Text="VPN Connection Status"/>
@@ -116,7 +119,7 @@
               Margin="5"
               Width="50"
               Source="resources/icons/connection-status-green.ico"/>
-          </StackPanel>
+          </DockPanel>
         </Border>
         <Border
           Background="{StaticResource MaterialDesignDarkBackground}"
@@ -125,14 +128,14 @@
           CornerRadius="5"
           DockPanel.Dock="Top"
           Margin="5">
-          <StackPanel
+          <DockPanel
             HorizontalAlignment="Center"
-            Orientation="Horizontal">
+            VerticalAlignment="Center">
             <TextBlock Text="User Has Admin Rights:"/>
             <TextBlock Name="AdminRights" Style="{StaticResource OutputText}"/>
-          </StackPanel>
+          </DockPanel>
         </Border>
-      </StackPanel>
+      </DockPanel>
     </materialDesign:Card>
     
     <materialDesign:Card
@@ -174,30 +177,28 @@
           CornerRadius="5"
           DockPanel.Dock="Top"
           Margin="5">
-        <RichTextBox
-          Name="LogWindow"
-          VerticalAlignment="Stretch"
-          HorizontalContentAlignment="Stretch"
-          HorizontalAlignment="Stretch"
-          Background="Transparent"
-          IsReadOnly="True"
-          Margin="5"
-          BorderThickness="0"
-          Foreground="{StaticResource PrimaryHueLightBrush}"
-          FontSize="14"
-          VerticalContentAlignment="Top"
-          VerticalScrollBarVisibility="Auto">
-          <RichTextBox.Resources>
-            <Style TargetType="{x:Type Paragraph}">
-              <Setter Property="Margin" Value="0"/>
-            </Style>
-          </RichTextBox.Resources>
-        </RichTextBox>
-
-    </Border>
+          <RichTextBox
+            Name="LogWindow"
+            Background="Transparent"
+            BorderThickness="0"
+            FontSize="14"
+            Foreground="{StaticResource PrimaryHueLightBrush}"
+            HorizontalContentAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            IsReadOnly="True"
+            Margin="5"
+            VerticalAlignment="Stretch"
+            VerticalContentAlignment="Top"
+            VerticalScrollBarVisibility="Auto">
+            <RichTextBox.Resources>
+              <Style TargetType="{x:Type Paragraph}">
+                <Setter Property="Margin" Value="0"/>
+              </Style>
+            </RichTextBox.Resources>
+          </RichTextBox>
+        </Border>
       </DockPanel>
     </materialDesign:Card>
-
 
     <Button
       Name="Install"

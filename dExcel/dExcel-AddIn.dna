@@ -17,7 +17,7 @@
 				getImage='GetImage'
 				onAction='OpenDashboard'
 				size='large'
-				tag='dExcel.ico'/>
+				tag='dExcel-ribbon.ico'/>
 			</group>
 			<group id='grpUtilities' label='Utilities'>
 			  <button

@@ -8,7 +8,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
-using MaterialDesignThemes.Wpf;
 
 /// <summary>
 /// Interaction logic for Dashboard.xaml
@@ -33,11 +32,11 @@ public partial class Dashboard : Window
 
     private Dashboard()
     {
-        var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
         InitializeComponent();
-        ShadowAssist.SetShadowDepth(this, ShadowDepth.Depth0);
-        this.Icon = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dXL-logo-extra-small.ico")); 
-        dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dExcel.ico"));
+        var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+        //ShadowAssist.SetShadowDepth(this, ShadowDepth.Depth0);
+        //this.Icon = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dXL-logo-extra-small.ico")); 
+        //dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dExcel.ico"));
         gitlabRepoLink.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\follow-link-small-green.ico"));
         installationPathLink.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\follow-link-small-green.ico"));
         Closing += Dashboard_Closing;
