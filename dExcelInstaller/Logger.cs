@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using Brushes = System.Windows.Media.Brushes;
+using dExcelWpf;
 
 public class Logger
 {
@@ -22,15 +23,15 @@ public class Logger
             loggedText += "\n" + value;
             var timeStamp = new Run($"[{DateTime.Now:hh:mm:ss}]  ")
             {
+                FontFamily = new FontFamily("Calibri"),
                 FontWeight = FontWeights.Bold,
-                Foreground = Brushes.Orange,
-                FontFamily = new FontFamily("Courier")
+                Foreground = Application.Current.Resources["WarningBrush"] as Brush,
             };
 
             var message = new Run($"{value}")
             {
-                Foreground = Brushes.Orange,
-                FontFamily = new FontFamily("Courier")
+                FontFamily = new FontFamily("Calibri"),
+                Foreground = Application.Current.Resources["WarningBrush"] as Brush,
             };
 
             var paragraph = new Paragraph();
@@ -51,16 +52,15 @@ public class Logger
             loggedText += "\n" + value;
             var timeStamp = new Run($"{DateTime.Now:hh:mm:ss}:  ")
             {
+                FontFamily = new FontFamily("Calibri"),
+                Foreground = Application.Current.Resources["ErrorBrush"] as Brush,
                 FontWeight = FontWeights.Bold,
-                Foreground = Brushes.Red,
-                FontFamily = new FontFamily("Courier")
             };
 
             var message = new Run($"{value}")
             {
-                FontWeight = FontWeights.DemiBold,
-                Foreground = Brushes.Red,
-                FontFamily = new FontFamily("Courier")
+                FontFamily = new FontFamily("Calibri"),
+                Foreground = Application.Current.Resources["ErrorBrush"] as Brush,
             };
 
             var paragraph = new Paragraph();

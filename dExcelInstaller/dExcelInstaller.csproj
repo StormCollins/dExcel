@@ -19,6 +19,7 @@
     <None Remove="resources\icons\derivatives-large-green.ico" />
     <None Remove="resources\icons\dExcel.ico" />
     <None Remove="resources\icons\dExcel.png" />
+    <None Remove="resources\icons\dExcel48.png" />
     <None Remove="resources\icons\equities-large-blue.ico" />
     <None Remove="resources\icons\equities-large-green.ico" />
     <None Remove="resources\icons\fix-links-small-blue.ico" />
@@ -65,6 +66,9 @@
     </Resource>
     <Resource Include="resources\icons\connection-status-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="resources\icons\dExcel48.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <EmbeddedResource Include="resources\icons\database-connected-large-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

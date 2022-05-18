@@ -17,6 +17,16 @@
         TextOptions.TextRenderingMode="Auto"
         Title="∂Excel Installer"
         Width="800">
+  
+  <Window.Resources>
+    <Style
+      TargetType="ToolTip"
+      BasedOn="{StaticResource MaterialDesignToolTip}">
+      <Setter Property="FontSize" Value="35" />
+      <Setter Property="Background" Value="Black" />
+    </Style>
+  </Window.Resources>
+  
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="*"/>
@@ -50,14 +60,14 @@
 
     <Image
       Name="dExcelIcon"
-      HorizontalAlignment="Right"
-      VerticalAlignment="Top"
       Grid.Row="0"
       Grid.RowSpan="2"
       Grid.Column="7"
+      HorizontalAlignment="Right"
       Margin="5"
-      Width="40"
-      Source="pack://application:,,,/resources/icons/dExcel.ico"/>
+      Source="pack://application:,,,/resources/icons/dExcel48.png"
+      VerticalAlignment="Top"
+      Width="40"/>
 
     <materialDesign:Card
       Grid.Row="1"
@@ -105,7 +115,8 @@
           DockPanel.Dock="Top"
           Margin="5">
           <DockPanel
-            HorizontalAlignment="Center">
+            HorizontalAlignment="Center"
+            Name="DockPanelConnectionStatus">
             <TextBlock
               VerticalAlignment="Center"
               Text="VPN Connection Status"/>
@@ -150,12 +161,21 @@
         <Separator Name="UtilitiesSeparator"/>
         <Button
           Name="Uninstall"
-          Grid.Row="11"
-          Grid.Column="3"
           Click="Uninstall_Click"
           Content="Uninstall ∂Excel"
+          Grid.Row="11"
+          Grid.Column="3"
           Margin="5"
-          Style="{StaticResource MaterialDesignRaisedSecondaryButton}"/>
+          Style="{StaticResource MaterialDesignRaisedSecondaryButton}">
+          <Button.ToolTip>
+            <ToolTip Background="Black">
+              <TextBlock>
+                Uninstalls ∂Excel from Excel. <LineBreak/>
+                However, it does not remove any files from your computer.
+              </TextBlock>
+            </ToolTip>
+          </Button.ToolTip>
+        </Button>
       </StackPanel>
     </materialDesign:Card>
     

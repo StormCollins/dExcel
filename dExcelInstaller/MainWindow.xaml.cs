@@ -36,7 +36,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         this.logger = new Logger(LogWindow);
 
-        dExcelIcon.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/dExcel.png", UriKind.Absolute));
+        //dExcelIcon.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/dExcel.png", UriKind.Absolute));
         var installerVersion = Assembly.GetEntryAssembly()?.GetName().Version;
         InstallerVersion.Text = $"{installerVersion?.Major}.{installerVersion?.Minor}";
         var currentDExcelVersion = AssemblyName.GetAssemblyName(CurrentVersionPath + @"\dExcel.dll").Version;
@@ -52,12 +52,14 @@ public partial class MainWindow : Window
         {
             _connectionStatus = true;
             ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico", UriKind.Absolute));
+            DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
         }
         else
         {
             _connectionStatus = false;
             ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-amber.ico", UriKind.Absolute));
             this.logger.WarningText = "User not connected to VPN. VPN is required to check for latest versions of ∂Excel on GitLab.";
+            DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
         }
         NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback;
 
@@ -86,6 +88,7 @@ public partial class MainWindow : Window
                 {
                     ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico", UriKind.Absolute));
                     this.logger.OkayText = "Connection to VPN established. Checking for latest versions of ∂Excel on GitLab.";
+                    DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
                 });
             }
             else
@@ -94,6 +97,7 @@ public partial class MainWindow : Window
                 {
                     ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-amber.ico", UriKind.Absolute));
                     this.logger.WarningText = "User not connected to VPN. VPN is required to check for latest versions of ∂Excel on GitLab.";
+                    DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
                 });
             }
         }
@@ -159,8 +163,8 @@ public partial class MainWindow : Window
             });
         }
 
-        // Remove the initial (obsolete) version of dExcel.
-        // This would only apply to first adopters so this step can be deprecated later.
+        // Remove initial (obsolete) version of dExcel.
+        // Only applies to first adopters => this step can be deprecated later.
         Dispatcher.Invoke(() =>
         {
             this.logger.NewSubProcess($"Removing obsolete instances of ∂Excel.");
