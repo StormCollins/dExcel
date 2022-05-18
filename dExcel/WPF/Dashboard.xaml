@@ -163,9 +163,7 @@
             CornerRadius="5"
             DockPanel.Dock="Top"
             Margin="5">
-            <StackPanel
-              HorizontalAlignment="Center"
-              Orientation="Horizontal">
+            <DockPanel>
               <TextBlock
                 VerticalAlignment="Center"
                 Text="VPN Connection Status"/>
@@ -179,7 +177,7 @@
                 Margin="5"
                 Width="50"
                 Source="../resources/icons/connection-status-green.ico"/>
-            </StackPanel>
+            </DockPanel>
           </Border>
           <Border
             Background="{StaticResource MaterialDesignDarkBackground}"
@@ -188,9 +186,7 @@
             CornerRadius="5"
             DockPanel.Dock="Top"
             Margin="5">
-            <StackPanel
-              HorizontalAlignment="Center"
-              Orientation="Horizontal">
+            <DockPanel>
             <TextBlock
               VerticalAlignment="Center"
               Text="Omicron Connection Status"/>
@@ -204,7 +200,7 @@
               Margin="5"
               Width="50"
               Source="../resources/icons/database-connected-large-green.ico"/>
-            </StackPanel>
+            </DockPanel>
           </Border>
         </StackPanel>
       </StackPanel>
@@ -223,7 +219,8 @@
         <StackPanel Orientation="Horizontal">
           <TextBlock>
             <Hyperlink 
-              NavigateUri="https://gitlab.fsa-aks.deloitte.co.za/Valuations/QuantLibraries/dExcelTools/dExcel">
+              NavigateUri="https://gitlab.fsa-aks.deloitte.co.za/Valuations/QuantLibraries/dExcelTools/dExcel"
+              RequestNavigate="Hyperlink_RequestNavigate">
               <Image
                 Name="gitlabRepoLink"
                 HorizontalAlignment="Left"
@@ -233,13 +230,14 @@
                 Grid.Column="7"
                 Width="10"
                 Source="/resources/icons/follow-link-small-green.ico"/>
-                GitLab Repository
+                ∂Excel GitLab Repository
             </Hyperlink>
           </TextBlock>
         </StackPanel>
         <TextBlock>
             <Hyperlink 
-              NavigateUri="https://gitlab.fsa-aks.deloitte.co.za/Valuations/QuantLibraries/dExcelTools/dExcel">
+              NavigateUri="C:\GitLab\dExcelTools\Versions"
+              RequestNavigate="Hyperlink_RequestNavigate">
               <Image
                 Name="installationPathLink"
                 HorizontalAlignment="Left"

@@ -1,6 +1,8 @@
 ﻿namespace dExcel;
 
 using System;
+using System.Diagnostics;
+using System.Windows.Navigation;
 using System.Net.NetworkInformation;
 using System.IO;
 using System.Windows;
@@ -114,5 +116,11 @@ public partial class Dashboard : Window
                 });
             }
         }
+    }
+
+    private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+        e.Handled = true;
     }
 }
