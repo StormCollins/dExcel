@@ -11,7 +11,7 @@ public static class DerivativeUtils
        Name = "d.Black",
        Description = "Black option pricer." +
                      "\nShould be used to price options on: futures, forwards, and zero coupon bonds." +
-                     "\n To price swaptions multiply by the relevant annuity factor." +
+                     "\nTo price swaptions multiply by the relevant annuity factor." +
                      "\nDeprecates AQS function: 'Black'",
        Category = "∂Excel: Derivatives")]
     // TODO: Replace OptionType with an Enum.
