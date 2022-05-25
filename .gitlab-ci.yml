@@ -1,7 +1,3 @@
-#image: mcr.microsoft.com/dotnet/sdk:latest
-#image: mcr.microsoft.com/windows/servercore:ltsc2022
-#image: maloneweb/docker-wine-dotnet:latest
-    
 stages:
     - build
 
@@ -18,6 +14,3 @@ build:
         expire_in: 1 day
     tags:
         - windows
-
- # 1. Setup gitlab runner on Mabi.
- # 2. Try to figure out how to run Wine inside a Linux container.
