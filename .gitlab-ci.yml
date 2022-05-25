@@ -9,7 +9,7 @@ build:
     stage: build
     script:
         - "dotnet restore"
-        - "dotnet build dExcel/dExcel.csproj --configuration Release"
+        - "msbuild.exe dExcel/dExcel.csproj --configuration Release"
         - "mkdir publish"
         - "cp dExcel/bin/Release/net6.0-windows/*.* publish"
     artifacts:
