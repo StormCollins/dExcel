@@ -107,9 +107,9 @@
     <Resource Include="resources\icons\dExcel.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="resources\icons\dExcel48.png">
+    <EmbeddedResource Include="resources\icons\dExcel48.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    </EmbeddedResource>
     <EmbeddedResource Include="resources\icons\dXL-logo-extra-small.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>

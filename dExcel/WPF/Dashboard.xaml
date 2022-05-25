@@ -17,8 +17,6 @@
   <Window.Resources>
     <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"/>
   </Window.Resources>
-  <!--Icon="pack://application:,,,/dExcel;component//resources/icons/dExcel.ico"-->
-  <!--pack://application:,,,/resources/icons/dExcel.ico"-->
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="*"/>
@@ -84,7 +82,7 @@
         
         <StackPanel
           Grid.Row="0"
-          Grid.RowSpan="4"
+          Grid.RowSpan="3"
           Grid.Column="0"
           Grid.ColumnSpan="3">
           <TextBlock
@@ -96,13 +94,14 @@
             <TextBlock
               Name="InstalledDExcelVersion"
               Style="{StaticResource OutputText}"
-              Text="3.1"/>
+              Text="0.0"/>
           </StackPanel>
           <StackPanel Orientation="Horizontal">
             <TextBlock Text="Latest:"/>
             <TextBlock
+              Name="LatestDExcelVersion"
               Style="{StaticResource OutputText}"
-              Text="3.2"/>
+              Text="0.0"/>
           </StackPanel>
         </StackPanel>
 

@@ -2,267 +2,146 @@
 
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using Brushes = System.Windows.Media.Brushes;
-using dExcelWpf;
+using System.Windows.Threading;
 
 public class Logger
 {
-    private string loggedText = "";
-    public readonly RichTextBox LogWindow;
+    private readonly RichTextBox _logWindow;
+    private static readonly Brush ErrorBrush = (Brush)Application.Current.Resources["ErrorBrush"];
+    private static readonly Brush WarningBrush = (Brush)Application.Current.Resources["WarningBrush"];
+    private static readonly Brush PrimaryHueMidBrush = (Brush)Application.Current.Resources["PrimaryHueMidBrush"];
+    private static readonly Brush PrimaryHueLightBrush = (Brush)Application.Current.Resources["PrimaryHueLightBrush"];
 
-    public string WarningText
-    {
-        get => loggedText;
-        set
-        {
-            var loggerText = new FlowDocument();
-            loggedText += "\n" + value;
-            var timeStamp = new Run($"[{DateTime.Now:hh:mm:ss}]  ")
-            {
-                FontFamily = new FontFamily("Calibri"),
-                FontWeight = FontWeights.Bold,
-                Foreground = Application.Current.Resources["WarningBrush"] as Brush,
-            };
-
-            var message = new Run($"{value}")
-            {
-                FontFamily = new FontFamily("Calibri"),
-                Foreground = Application.Current.Resources["WarningBrush"] as Brush,
-            };
-
-            var paragraph = new Paragraph();
-            paragraph.Inlines.Add(timeStamp);
-            paragraph.Inlines.Add(message);
-            loggerText.Blocks.Add(paragraph);
-            LogWindow.Document.Blocks.Add(paragraph);
-            LogWindow.ScrollToEnd();
-        }
-    }
-
+    /// <summary>
+    /// Sets the current 'error' text, indicating an error to the user, in the log window.
+    /// </summary>
     public string ErrorText
     {
-        get => loggedText;
-        set
-        {
-            var loggerText = new FlowDocument();
-            loggedText += "\n" + value;
-            var timeStamp = new Run($"{DateTime.Now:hh:mm:ss}:  ")
-            {
-                FontFamily = new FontFamily("Calibri"),
-                Foreground = Application.Current.Resources["ErrorBrush"] as Brush,
-                FontWeight = FontWeights.Bold,
-            };
-
-            var message = new Run($"{value}")
-            {
-                FontFamily = new FontFamily("Calibri"),
-                Foreground = Application.Current.Resources["ErrorBrush"] as Brush,
-            };
-
-            var paragraph = new Paragraph();
-            paragraph.Inlines.Add(timeStamp);
-            paragraph.Inlines.Add(message);
-            loggerText.Blocks.Add(paragraph);
-            LogWindow.Document.Blocks.Add(paragraph);
-            LogWindow.ScrollToEnd();
-        }
-    }
-
-    public string DontPanicErrorText
-    {
-        get => loggedText;
-        set
-        {
-            var loggerText = new FlowDocument();
-            loggedText += "\n" + value;
-            var timeStamp = new Run($"{DateTime.Now:hh:mm:ss}:  ")
-            {
-                FontWeight = FontWeights.Bold,
-                Foreground = Brushes.Red,
-                FontFamily = new FontFamily("Courier")
-            };
-
-            var dontPanic = new Run($"DON'T PANIC: ")
-            {
-                FontWeight = FontWeights.Bold,
-                Foreground = Brushes.Red,
-                FontFamily = new FontFamily("Courier")
-            };
-
-            var dontPanicExplanation =
-                new Run("This error is being 'gracefully' dealt with.")
-                {
-                    Foreground = Brushes.Red,
-                    FontWeight = FontWeights.DemiBold,
-                    FontFamily = new FontFamily("Courier")
-                };
-
-            var message = new Run($"{value}")
-            {
-                Foreground = Brushes.Red,
-                FontFamily = new FontFamily("Courier")
-            };
-
-            var paragraph = new Paragraph();
-            paragraph.Inlines.Add(timeStamp);
-            paragraph.Inlines.Add(dontPanic);
-            paragraph.Inlines.Add(dontPanicExplanation);
-            loggerText.Blocks.Add(paragraph);
-            LogWindow.Document.Blocks.Add(paragraph);
-            LogWindow.ScrollToEnd();
-
-            paragraph = new Paragraph();
-            paragraph.Inlines.Add(timeStamp);
-            paragraph.Inlines.Add(message);
-            loggerText.Blocks.Add(paragraph);
-            LogWindow.Document.Blocks.Add(paragraph);
-            LogWindow.ScrollToEnd();
-        }
-    }
-
-    public static Run CreateTimeStamp()
-    {
-        return new Run($"[{DateTime.Now:HH:mm:ss}]  ")
-        {
-            FontFamily = new FontFamily("Calibri"),
-            FontWeight = FontWeights.ExtraBold,
-        };
-    }
-
-    public static Run CreateMessage(string message)
-    {
-        return new Run($"{message}")
-        {
-            FontFamily = new FontFamily("Calibri"),
-            FontWeight = FontWeights.Regular,
-        };
-    }
-
-    public static Run CreateBoldMessage(string message, int fontSize = 16)
-    {
-        return new Run($"{message}")
-        {
-            FontFamily = new FontFamily("Calibri"),
-            FontSize = fontSize,
-            FontWeight = FontWeights.ExtraBold,
-        };
-    }
-
-    public string OkayText
-    {
-        get => loggedText;
-        set
-        {
-            loggedText += "\n" + value;
-            var timeStamp = CreateTimeStamp();
-            var message = CreateMessage(value);
-            var paragraph = new Paragraph();
-            paragraph.Inlines.Add(timeStamp);
-            paragraph.Inlines.Add(message);
-            LogWindow.Document.Blocks.Add(paragraph);
-            LogWindow.ScrollToEnd();
-        }
+        set => CreateTimeStampedMessage(value, ErrorBrush);
     }
 
     /// <summary>
-    /// Constructor creating instance of <see cref="Logger"/>.
+    /// Sets the current 'Okay' text, indicating no errors nor warnings to the user, in the log window.
+    /// </summary>
+    public string OkayText
+    {
+        set => CreateTimeStampedMessage(value);
+    }
+
+    /// <summary>
+    /// Sets the current 'Warning' text, indicating warnings to the user, in the log window.
+    /// </summary>
+    public string WarningText
+    {
+        set => CreateTimeStampedMessage(value, WarningBrush);
+    }
+
+    /// <summary>
+    /// Creates an instance of <see cref="Logger"/>.
     /// </summary>
     /// <param name="logWindow">XAML log window.</param>
     public Logger(RichTextBox logWindow)
     {
-        LogWindow = logWindow;
+        _logWindow = logWindow;
+    }
+
+    /// <summary>
+    /// Creates a formatted time stamp.
+    /// </summary>
+    /// <param name="fontColor">The font color.</param>
+    /// <returns>A formatted time stamp.</returns>
+    private static Run CreateTimeStamp(Brush? fontColor = null) =>
+        CreateMessage($"[{DateTime.Now:HH:mm:ss}]  ", fontColor, true);
+
+    /// <summary>
+    /// Creates a formatted message without a time stamp.
+    /// </summary>
+    /// <param name="message">The message.</param>
+    /// <param name="fontColor">The font color.</param>
+    /// <param name="isBold">Set to true to make the font bold.</param>
+    /// <returns>A formatted message.</returns>
+    private static Run CreateMessage(string message, Brush? fontColor = null, bool isBold = false)
+    {
+        return new Run($"{message}")
+        {
+            FontFamily = new FontFamily("Calibri"),
+            FontWeight = isBold ? FontWeights.ExtraBold : FontWeights.Regular,
+            Foreground = fontColor ?? PrimaryHueMidBrush,
+        };
+    }
+
+    private void CreateTimeStampedMessage(string message, Brush? fontColor = null)
+    {
+        var loggerText = new FlowDocument();
+        var timeStamp = CreateTimeStamp(fontColor ?? PrimaryHueMidBrush);
+        var messageWithoutTimeStamp = CreateMessage(message, fontColor ?? PrimaryHueMidBrush);
+        var paragraph = new Paragraph();
+        paragraph.Inlines.Add(timeStamp);
+        paragraph.Inlines.Add(messageWithoutTimeStamp);
+        loggerText.Blocks.Add(paragraph);
+        _logWindow.Document.Blocks.Add(paragraph);
+        _logWindow.ScrollToEnd();
     }
 
     public void NewProcess(string message)
     {
-        var timeStamp = CreateTimeStamp();
-        var messageRun = CreateBoldMessage(message, 18);
+        var timeStamp = CreateTimeStamp(PrimaryHueLightBrush);
+        var messageRun = CreateMessage(message, PrimaryHueLightBrush, true);
         var paragraph = new Paragraph();
         paragraph.Inlines.Clear();
+        paragraph.Inlines.Add("\n");
         paragraph.Inlines.Add(timeStamp);
         paragraph.Inlines.Add(messageRun);
-        LogWindow.Document.Blocks.Add(paragraph);
-        LogWindow.ScrollToEnd();
+        _logWindow.Document.Blocks.Add(paragraph);
+        _logWindow.ScrollToEnd();
     }
 
     public void NewSubProcess(string message)
     {
-        var timeStamp = CreateTimeStamp();
-        var messageRun = CreateBoldMessage(message);
+        var timeStamp = CreateTimeStamp(PrimaryHueLightBrush);
+        var messageRun = CreateMessage(message, PrimaryHueLightBrush, true);
         var paragraph = new Paragraph();
         paragraph.Inlines.Clear();
+        paragraph.Inlines.Add(DashedHorizontalLine());
         paragraph.Inlines.Add(timeStamp);
         paragraph.Inlines.Add(messageRun);
-        LogWindow.Document.Blocks.Add(paragraph);
-        LogWindow.ScrollToEnd();
+        _logWindow.Document.Blocks.Add(paragraph);
+        _logWindow.ScrollToEnd();
     }
 
-    public void HorizontalLine(Brush color, char lineCharacter = '-', int lineLength = 97)
+    private Run DashedHorizontalLine(Brush? fontColor = null)
     {
-        var horizontalLine = new Run(new string(lineCharacter, lineLength))
-        {
-            FontWeight = FontWeights.Bold,
-            Foreground = color
-        };
-
-        var paragraph = new Paragraph();
-        paragraph.Inlines.Add(horizontalLine);
-        LogWindow.Document.Blocks.Add(paragraph);
+        var repeats = _logWindow.Width;
+        return CreateMessage(string.Concat(Enumerable.Repeat("-  ", (int) repeats / 11)) + '\n', fontColor);
     }
 
-    public void DashedHorizontalLine(Brush? color = null)
+    public void InstallationFailed() => EndProcessMessage("Installation Failed", ErrorBrush);
+
+    public void InstallationSucceeded() => EndProcessMessage("Installation Succeeded", PrimaryHueLightBrush);
+
+    public void UninstallationFailed() => EndProcessMessage("Uninstallation Failed", ErrorBrush);
+    
+    public void UninstallationSucceeded() => EndProcessMessage("Uninstallation Succeeded", PrimaryHueLightBrush);
+
+    private void EndProcessMessage(string message, Brush fontColor)
     {
-        if (color == null)
-        {
-            color = (Brush)Application.Current.Resources["PrimaryHueDarkBrush"];
-        }
-        var dashedLine = string.Concat(Enumerable.Repeat("-  ", 56));
-        var horizontalLine = new Run(dashedLine)
-        {
-            Foreground = color,
-            FontWeight = FontWeights.Regular,
-        };
-
-        var paragraph = new Paragraph();
-        paragraph.Inlines.Add(horizontalLine);
-        LogWindow.Document.Blocks.Add(paragraph);
-    }
-
-    public void ExtractionComplete(string message)
-    {
-        DashedHorizontalLine((Brush)Application.Current.Resources["PrimaryHueDarkBrush"]);
-
-        var completeRun = new Run($"\n>>>>>>>>  Complete : ")
-        {
-            FontWeight = FontWeights.Bold,
-            Foreground = (Brush)Application.Current.Resources["PrimaryHueDarkBrush"],
-            FontFamily = new FontFamily("Courier")
-        };
-
-
-        var messageRun = new Run($" {message} ")
-        {
-            Foreground = (Brush)Application.Current.Resources["PrimaryHueDarkBrush"],
-            FontFamily = new FontFamily("Courier")
-        };
-
-        var chevrons = new Run("  <<<<<<<<")
-        {
-            FontWeight = FontWeights.Bold,
-            Foreground = (Brush)Application.Current.Resources["PrimaryHueDarkBrush"],
-            FontFamily = new FontFamily("Courier")
-        };
-
+        var formattedMessage =
+            CreateMessage(
+                message: $">>>>>> {message} <<<<<<<   \n",
+                isBold: true,
+                fontColor: fontColor);
         var paragraph = new Paragraph();
         paragraph.Inlines.Clear();
-        paragraph.Inlines.Add(completeRun);
-        paragraph.Inlines.Add(messageRun);
-        paragraph.Inlines.Add(chevrons);
-        LogWindow.Document.Blocks.Add(paragraph);
-        LogWindow.ScrollToEnd();
+        paragraph.TextAlignment = TextAlignment.Center;
+        paragraph.Inlines.Add(DashedHorizontalLine(fontColor));
+        paragraph.Inlines.Add(formattedMessage);
+        paragraph.Inlines.Add(DashedHorizontalLine(fontColor));
+        _logWindow.Document.Blocks.Add(paragraph);
+        _logWindow.ScrollToEnd();
     }
 }

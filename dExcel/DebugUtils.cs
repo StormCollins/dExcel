@@ -71,6 +71,7 @@ public static class DebugUtils
         Category = "∂Excel: Debug")]
     public static string GetAssemblyVersion()
     {
-        return Assembly.GetAssembly(typeof(DebugUtils)).FullName;
+        var dExcelAssembly = Assembly.GetAssembly(typeof(DebugUtils))?.GetName().Version;
+        return dExcelAssembly == null ? "Failed to get version." : $"{dExcelAssembly.Major}.{dExcelAssembly.Minor}";
     }
 }

@@ -14,7 +14,7 @@ using ExcelDna.Integration;
 /// </summary>
 public partial class Dashboard : Window
 {
-    private static Dashboard? instance = null;
+    private static Dashboard? _instance;
     private static bool _connectionStatus;
     private static bool _omicronStatus;
 
@@ -22,11 +22,11 @@ public partial class Dashboard : Window
     {
         get
         {
-            if (instance == null)
+            if (_instance == null)
             {
-                instance = new Dashboard();
+                _instance = new Dashboard();
             }
-            return instance;
+            return _instance;
         }
     }
 
@@ -34,11 +34,9 @@ public partial class Dashboard : Window
     {
         InitializeComponent();
         var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-        //ShadowAssist.SetShadowDepth(this, ShadowDepth.Depth0);
-        //this.Icon = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dXL-logo-extra-small.ico")); 
-        //dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dExcel.ico"));
         gitlabRepoLink.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\follow-link-small-green.ico"));
         installationPathLink.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\follow-link-small-green.ico"));
+        this.InstalledDExcelVersion.Text = DebugUtils.GetAssemblyVersion();
         Closing += Dashboard_Closing;
         if (NetworkUtils.GetConnectionStatus())
         {
@@ -67,7 +65,7 @@ public partial class Dashboard : Window
 
     private void Dashboard_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        instance = null;
+        _instance = null;
     }
 
     private void CloseDashboard(object sender, RoutedEventArgs e)

@@ -17,14 +17,9 @@
         TextOptions.TextRenderingMode="Auto"
         Title="∂Excel Installer"
         Width="800">
-  
+
   <Window.Resources>
-    <Style
-      TargetType="ToolTip"
-      BasedOn="{StaticResource MaterialDesignToolTip}">
-      <Setter Property="FontSize" Value="35" />
-      <Setter Property="Background" Value="Black" />
-    </Style>
+
   </Window.Resources>
   
   <Grid>
@@ -78,18 +73,56 @@
         <TextBlock Text="Version Information" Style="{StaticResource GreenHeader2}"/>
         <Separator Name="VersionInformationSeparator"/>
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Installer Version:"/>
+          <materialDesign:PackIcon
+            Foreground="{StaticResource SecondaryHueMidBrush}"
+            Kind="HelpCircleOutline"
+            Margin="4"
+            ToolTip="The version of this, currently opened, installer."
+            ToolTipService.InitialShowDelay="100"
+            ToolTipService.BetweenShowDelay="100"
+            VerticalAlignment="Center"/>
+          <TextBlock
+            Margin="-2 0 0 0"
+            Text="Installer Version:"/>
           <TextBlock
             Name="InstallerVersion" 
             Style="{StaticResource OutputText}"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Current ∂Excel Version: "/>
-          <TextBlock Name="CurrentDExcelVersion" Style="{StaticResource OutputText}"/>
+          <materialDesign:PackIcon
+            Foreground="{StaticResource SecondaryHueMidBrush}"
+            Kind="HelpCircleOutline"
+            Margin="4"
+            ToolTip="The version of ∂Excel currently installed in Excel."
+            ToolTipService.InitialShowDelay="100"
+            ToolTipService.BetweenShowDelay="100"
+            VerticalAlignment="Center"/>
+          <TextBlock
+            Margin="-2 0 0 0"
+            Text="Current ∂Excel Version: "/>
+          <TextBlock
+            Name="CurrentDExcelVersion"
+            Style="{StaticResource OutputText}"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Available ∂Excel Versions: "/>
-          <ComboBox Name="AvailableDExcelVersions" Style="{StaticResource MaterialDesignDataGridComboBox}"/>
+          <materialDesign:PackIcon
+            Foreground="{StaticResource SecondaryHueMidBrush}"
+            Kind="HelpCircleOutline"
+            Margin="4"
+            ToolTip="The version of ∂Excel you'd like to switch to."
+            ToolTipService.InitialShowDelay="100"
+            ToolTipService.BetweenShowDelay="100"
+            VerticalAlignment="Center"/>
+          <TextBlock
+            Margin="-2 0 0 0"
+            Text="Update to ∂Excel Version:"/>
+          <ComboBox 
+            materialDesign:ColorZoneAssist.Mode="SecondaryMid"
+            materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
+            Name="AvailableDExcelVersions"
+            Padding="0"
+            SelectionChanged="AvailableDExcelVersions_OnSelectionChanged"
+            Style="{StaticResource MaterialDesignComboBox}"/>
         </StackPanel>
       </StackPanel>
     </materialDesign:Card>
@@ -166,12 +199,33 @@
           Grid.Row="11"
           Grid.Column="3"
           Margin="5"
-          Style="{StaticResource MaterialDesignRaisedSecondaryButton}">
+          Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
+          ToolTipService.InitialShowDelay="100"
+          ToolTipService.BetweenShowDelay="100">
           <Button.ToolTip>
             <ToolTip Background="Black">
               <TextBlock>
                 Uninstalls ∂Excel from Excel. <LineBreak/>
                 However, it does not remove any files from your computer.
+              </TextBlock>
+            </ToolTip>
+          </Button.ToolTip>
+        </Button>
+        
+        <Button
+          Name="CloseAndLaunchExcel"
+          Click="CloseAndLaunchExcel_OnClick"
+          Content="Close and Launch Excel"
+          Grid.Row="11"
+          Grid.Column="3"
+          Margin="5"
+          Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
+          ToolTipService.InitialShowDelay="100"
+          ToolTipService.BetweenShowDelay="100">
+          <Button.ToolTip>
+            <ToolTip Background="Black">
+              <TextBlock>
+                Closes this dialog and opens Excel.
               </TextBlock>
             </ToolTip>
           </Button.ToolTip>
@@ -183,7 +237,7 @@
       Grid.Row="5"
       Grid.RowSpan="6"
       Grid.Column="0"
-      Grid.ColumnSpan="8">
+      Grid.ColumnSpan="6">
       <DockPanel
         Margin="5">
         <TextBlock
@@ -207,6 +261,7 @@
             HorizontalAlignment="Stretch"
             IsReadOnly="True"
             Margin="5"
+            Width="750"
             VerticalAlignment="Stretch"
             VerticalContentAlignment="Top"
             VerticalScrollBarVisibility="Auto">
@@ -215,6 +270,7 @@
                 <Setter Property="Margin" Value="0"/>
               </Style>
             </RichTextBox.Resources>
+            <FlowDocument Name="LoggerFlowDocument" PageWidth="{Binding ElementName=LogWindow, Path=ActualWidth}"/>
           </RichTextBox>
         </Border>
       </DockPanel>

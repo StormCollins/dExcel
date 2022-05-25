@@ -10,8 +10,8 @@ using System.Reflection;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -22,82 +22,117 @@ public partial class MainWindow : Window
 {
     private const string VersionsPath = @"C:\GitLab\dExcelTools\Versions\";
     private const string CurrentVersionPath = @"C:\GitLab\dExcelTools\Versions\Current\";
-    private const string dExcelVersion = "1.1";
-    private static bool _connectionStatus;
+    private const string Dll = "dExcel.dll";
+    private static bool _vpnConnectionStatus;
 
-    // What does it mean to register an addin?
-    // Difference between COM addin?
-    // What is C API for Excel?
-    // stackoverflow.com/questions/363377/how-do-i-run-a-simple-bit-of-code-in-a-new-thread
-    public Logger logger;
+    /// <summary>
+    /// The logging window housed in the installer.
+    /// </summary>
+    private readonly Logger _logger;
 
+    /// <summary>
+    /// The main window for the installer.
+    /// </summary>
     public MainWindow()
     {
         InitializeComponent();
-        this.logger = new Logger(LogWindow);
-
-        //dExcelIcon.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/dExcel.png", UriKind.Absolute));
+        this._logger = new Logger(LogWindow);
         var installerVersion = Assembly.GetEntryAssembly()?.GetName().Version;
         InstallerVersion.Text = $"{installerVersion?.Major}.{installerVersion?.Minor}";
-        var currentDExcelVersion = AssemblyName.GetAssemblyName(CurrentVersionPath + @"\dExcel.dll").Version;
-        CurrentDExcelVersion.Text = $"{currentDExcelVersion?.Major}.{currentDExcelVersion?.Minor}";
-
+        
+        CurrentDExcelVersion.Text = GetCurrentDExcelVersion();
+        if (string.Compare(
+                strA: GetCurrentDExcelVersion(), 
+                strB: "Not Installed", 
+                comparisonType: StringComparison.InvariantCultureIgnoreCase) == 0)
+        {
+            this.Uninstall.IsEnabled = false;
+        }
+        
+        
         AdminRights.Text = IsAdministrator().ToString();
         if (!IsAdministrator())
         {
-            this.logger.WarningText = "The user is not an admin on this machine. It may limit installation functionality.";
+            this._logger.WarningText =
+                "The user is not an admin on this machine. It may limit installation functionality.";
         }
 
         if (NetworkUtils.GetConnectionStatus())
         {
-            _connectionStatus = true;
-            ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico", UriKind.Absolute));
-            DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
+            _vpnConnectionStatus = true;
+            this.ConnectionStatus.Source =
+                new BitmapImage(
+                    new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico",
+                    UriKind.Absolute));
+            this.DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
         }
         else
         {
-            _connectionStatus = false;
-            ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-amber.ico", UriKind.Absolute));
-            this.logger.WarningText = "User not connected to VPN. VPN is required to check for latest versions of ∂Excel on GitLab.";
-            DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
+            _vpnConnectionStatus = false;
+            this.ConnectionStatus.Source =
+                new BitmapImage(
+                    new Uri(
+                        uriString: @"pack://application:,,,/resources/icons/connection-status-amber.ico",
+                        uriKind: UriKind.Absolute));
+            this._logger.WarningText =
+                "User not connected to VPN. VPN is required to check for latest versions of ∂Excel on GitLab.";
+            this.DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
         }
+
         NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback;
 
         // TODO: Get new versions from GitLab before this step.
-        AvailableDExcelVersions.ItemsSource = GetAvailableVersions();
+        AvailableDExcelVersions.ItemsSource = GetLocalAvailableDExcelVersions();
         AvailableDExcelVersions.SelectedIndex = 0;
     }
 
-    public static bool IsAdministrator()
+    /// <summary>
+    /// Checks if the current user is an administrator on the current machine.
+    /// </summary>
+    /// <returns>Returns true if the user is an administrator otherwise false.</returns>
+    private static bool IsAdministrator()
     {
-        using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
-        {
-            WindowsPrincipal principal = new WindowsPrincipal(identity);
-            return principal.IsInRole(WindowsBuiltInRole.Administrator);
-        }
+        using var identity = WindowsIdentity.GetCurrent();
+        var principal = new WindowsPrincipal(identity);
+        return principal.IsInRole(WindowsBuiltInRole.Administrator);
     }
 
-    public void ConnectionStatusChangedCallback(object sender, EventArgs e)
+    /// <summary>
+    /// Callback triggered by the either the VPN connection status or Omicron connection status changing.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The EventArgs.</param>
+    private void ConnectionStatusChangedCallback(object sender, EventArgs e)
     {
-        if (NetworkUtils.GetConnectionStatus() != _connectionStatus)
+        if (NetworkUtils.GetConnectionStatus() != _vpnConnectionStatus)
         {
-            _connectionStatus = !_connectionStatus;
+            _vpnConnectionStatus = !_vpnConnectionStatus;
             if (NetworkUtils.GetConnectionStatus())
             {
                 Dispatcher.Invoke(() =>
                 {
-                    ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico", UriKind.Absolute));
-                    this.logger.OkayText = "Connection to VPN established. Checking for latest versions of ∂Excel on GitLab.";
-                    DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
+                    this.ConnectionStatus.Source =
+                        new BitmapImage(
+                            new Uri(
+                                uriString: @"pack://application:,,,/resources/icons/connection-status-green.ico",
+                                uriKind: UriKind.Absolute));
+                    this._logger.OkayText =
+                        "Connection to VPN established. Checking for latest versions of ∂Excel on GitLab.";
+                    this.DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
                 });
             }
             else
             {
                 Dispatcher.Invoke(() =>
                 {
-                    ConnectionStatus.Source = new BitmapImage(new Uri(@"pack://application:,,,/resources/icons/connection-status-amber.ico", UriKind.Absolute));
-                    this.logger.WarningText = "User not connected to VPN. VPN is required to check for latest versions of ∂Excel on GitLab.";
-                    DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
+                    this.ConnectionStatus.Source =
+                        new BitmapImage(
+                            new Uri(
+                                uriString: @"pack://application:,,,/resources/icons/connection-status-amber.ico",
+                                uriKind: UriKind.Absolute));
+                    this._logger.WarningText =
+                        "User not connected to VPN. VPN is required to check for latest versions of ∂Excel on GitLab.";
+                    this.DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
                 });
             }
         }
@@ -107,12 +142,12 @@ public partial class MainWindow : Window
     /// Gets all versions of dExcel already copied to the user's local machine.
     /// </summary>
     /// <returns>Available local versions of dExcel</returns>
-    private static IEnumerable<string> GetAvailableVersions()
+    private static IEnumerable<string?> GetLocalAvailableDExcelVersions()
     {
         return Directory
             .GetDirectories(VersionsPath)
             .Where(x => Regex.IsMatch(x, @"\d+(.\d+)"))
-            .Select(x => Path.GetFileName(x))
+            .Select(Path.GetFileName)
             .Reverse();
     }
 
@@ -126,48 +161,42 @@ public partial class MainWindow : Window
         new Thread(InstallAddIn).Start();
     }
 
+    /// <summary>
+    /// Gets the version of dExcel currently installed in Excel.
+    /// </summary>
+    /// <returns>The dExcel version if available as "Major version number.Minor version number" if installed otherwise
+    /// "Not Installed".</returns>
+    private static string GetCurrentDExcelVersion()
+    {
+        if (File.Exists(CurrentVersionPath + @"\" + Dll))
+        {
+            var currentDExcelVersion = AssemblyName.GetAssemblyName(CurrentVersionPath + @"\" + Dll).Version;
+            return $"{currentDExcelVersion?.Major}.{currentDExcelVersion?.Minor}";
+        }
 
-    public void InstallAddIn()
+        return "Not Installed";
+    }
+
+
+    /// <summary>
+    /// Installs the specified version of the dExcel AddIn to Excel.
+    /// </summary>
+    private void InstallAddIn()
     {
         Dispatcher.Invoke(() =>
         {
-            this.logger.NewProcess("Installation of ∂Excel started.");
-            this.logger.NewSubProcess($"Ensuring Excel is closed.");
+            this._logger.NewProcess("Installation of ∂Excel started.");
+            this._logger.NewSubProcess($"Ensuring Excel is closed.");
         });
 
         // Ensure Excel is closed.
-        try
-        {
-            Process[] excelInstances = Process.GetProcessesByName("Excel");
-            Dispatcher.Invoke(() =>
-            {
-                this.logger.OkayText = $"{excelInstances.Length} Excel instances found.";
-            });
-            foreach (Process excelInstance in excelInstances)
-            {
-                excelInstance.Kill();
-                excelInstance.WaitForExit();
-                excelInstance.Dispose();
-            }
-            Dispatcher.Invoke(() =>
-            {
-                this.logger.OkayText = $"All Excel instances terminated.";
-            });
-        }
-        catch (Exception exception)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                this.logger.ErrorText = $"Excel process could not be terminated.";
-                this.logger.ErrorText = $"{exception.Message}";
-            });
-        }
+        CloseAllExcelInstances();
 
         // Remove initial (obsolete) version of dExcel.
         // Only applies to first adopters => this step can be deprecated later.
         Dispatcher.Invoke(() =>
         {
-            this.logger.NewSubProcess($"Removing obsolete instances of ∂Excel.");
+            this._logger.NewSubProcess($"Removing obsolete instances of ∂Excel.");
         });
         try
         {
@@ -180,13 +209,21 @@ public partial class MainWindow : Window
             {
                 Dispatcher.Invoke(() =>
                 {
-                    this.logger.OkayText = $"Found obsolete AddIn {Path.GetFileName(obsoleteDExcelAddIn)} "
-                    + $"in {Path.GetDirectoryName(obsoleteDExcelAddIn)}.";
+                    this._logger.OkayText =
+                        $"Found obsolete AddIn {Path.GetFileName(obsoleteDExcelAddIn)} in " +
+                        $"{Path.GetDirectoryName(obsoleteDExcelAddIn)}.";
                 });
                 File.Delete(obsoleteDExcelAddIn);
                 Dispatcher.Invoke(() =>
                 {
-                    this.logger.OkayText = $"Removed obsolete AddIn {Path.GetFileName(obsoleteDExcelAddIn)}.";
+                    this._logger.OkayText = $"Removed obsolete AddIn {Path.GetFileName(obsoleteDExcelAddIn)}.";
+                });
+            }
+            else
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    this._logger.OkayText = $"No obsolete instances of ∂Excel found.";
                 });
             }
         }
@@ -194,26 +231,26 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this.logger.ErrorText = $"Error removing obsolete instances of ∂Excel from " +
-                $"{Environment.ExpandEnvironmentVariables("%appdata%/Microsoft/AddIns")}";
-                this.logger.ErrorText = exception.Message;
+                this._logger.ErrorText =
+                    $"Error removing obsolete instances of ∂Excel from " +
+                    $"{Environment.ExpandEnvironmentVariables("%appdata%/Microsoft/AddIns")}.";
+                this._logger.ErrorText = exception.Message;
+                this._logger.InstallationFailed();
             });
+            return;
         }
-        Dispatcher.Invoke(() =>
-        {
-            this.logger.DashedHorizontalLine();
-        });
 
         // Check if installation path exists.
         Dispatcher.Invoke(() =>
         {
+            this._logger.NewSubProcess($"Checking if {VersionsPath} exists.");
         });
 
         if (!Directory.Exists(VersionsPath))
         {
             Dispatcher.Invoke(() =>
             {
-                this.logger.OkayText = $"Path {VersionsPath} does not exist.";
+                this._logger.OkayText = $"Path {VersionsPath} does not exist.";
             });
             
             try
@@ -221,35 +258,34 @@ public partial class MainWindow : Window
                 Directory.CreateDirectory(VersionsPath);
                 Dispatcher.Invoke(() =>
                 {
-                    this.logger.OkayText = $"Path {VersionsPath} created.";
+                    this._logger.OkayText = $"Path {VersionsPath} created.";
                 });
             }
             catch (Exception exception)
             {
-                this.logger.ErrorText = $"Path {VersionsPath} could not be created.";
-                this.logger.ErrorText = $"{exception.Message}";
+                Dispatcher.Invoke(() =>
+                {
+                    this._logger.ErrorText = $"Path {VersionsPath} could not be created.";
+                    this._logger.ErrorText = $"{exception.Message}";
+                    this._logger.InstallationFailed();
+                });
             }
+            return;
         }
-        else
-        {
-            Dispatcher.Invoke(() =>
-            {
-                this.logger.OkayText = $"Path {VersionsPath} already exists.";
-            });
-        }
+
         Dispatcher.Invoke(() =>
         {
-            this.logger.DashedHorizontalLine();
+            this._logger.OkayText = $"Path {VersionsPath} already exists.";
         });
 
         // Download addin from GitLab and copy to installation path.
 
 
-        // Remove previous version from C:\GitLab\dExcelTools\Versions\Current.
+        // Remove previously installed version from C:\GitLab\dExcelTools\Versions\Current.
         Dispatcher.Invoke(() =>
         {
-            this.logger.NewSubProcess($"Updating ∂Excel.");
-            this.logger.OkayText = $"Deleting previous ∂Excel version from {CurrentVersionPath}.";
+            this._logger.NewSubProcess($"Updating ∂Excel.");
+            this._logger.OkayText = $"Deleting previous ∂Excel version from {CurrentVersionPath}.";
         });
         DirectoryInfo currentVersionDirectory = new(CurrentVersionPath);
         try
@@ -267,56 +303,88 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this.logger.ErrorText = $"Failed to delete files and folders from {CurrentVersionPath}.";
-                this.logger.ErrorText = exception.Message;
-            }); 
+                this._logger.ErrorText = $"Failed to delete files and folders from {CurrentVersionPath}.";
+                this._logger.ErrorText = exception.Message;
+                this._logger.InstallationFailed();
+            });
+            return;
         }
 
-        // Copy required version from 'C:\GitLab\dExcelTools\Versions\<version number>' to
-        // 'C:\GitLab\dExcelTools\Versions\Current'.
+        // Copy required version from 'C:\GitLab\dExcelTools\Versions\<version number>'
+        // to 'C:\GitLab\dExcelTools\Versions\Current'.
         Dispatcher.Invoke(() =>
         {
-            logger.OkayText = $"Copying new version of ∂Excel to {CurrentVersionPath}.";
+            this._logger.OkayText = $"Copying version {AvailableDExcelVersions.SelectedItem} of ∂Excel to {CurrentVersionPath}.";
         });
         try
         {
-            CopyFilesRecursively(VersionsPath + dExcelVersion, CurrentVersionPath);
+            Dispatcher.Invoke(() =>
+            {
+                CopyFilesRecursively(VersionsPath + AvailableDExcelVersions.SelectedItem, CurrentVersionPath);
+            });
         }
         catch (Exception exception)
         {
             Dispatcher.Invoke(() =>
             {
-                this.logger.ErrorText = $"Failed to copy new version of ∂Excel to {CurrentVersionPath}.";
-                this.logger.ErrorText = $"{exception.Message}";
+                this._logger.ErrorText = $"Failed to copy version {AvailableDExcelVersions.SelectedItem} of ∂Excel to {CurrentVersionPath}.";
+                this._logger.ErrorText = $"{exception.Message}";
+                this._logger.InstallationFailed();
             });
+            return;
         }
-
 
         // Create Excel application and ∂Excel install addin.
-        Excel.Application excel = new();
-        bool dExcelInstalled = false;
-        foreach (Excel.AddIn addIn in excel.AddIns)
+        Dispatcher.Invoke(() =>
         {
-            if (addIn.Name.Contains("dExcel"))
-            {
-                addIn.Installed = true;
-                dExcelInstalled = true;
-                break;
-            }
-        }
+            this._logger.OkayText = $"Installing ∂Excel in Excel.";
+        });
 
-        if (!dExcelInstalled)
+        try
         {
-            Excel.AddIn dExcelAddIn =
-                excel.AddIns.Add(@"C:\GitLab\dExcelTools\Versions\Current\dExcel-AddIn64.xll");
-            dExcelAddIn.Installed = true;
+            Excel.Application excel = new();
+            var dExcelInstalled = false;
+            foreach (Excel.AddIn addIn in excel.AddIns)
+            {
+                if (addIn.Name.Contains("dExcel"))
+                {
+                    addIn.Installed = true;
+                    dExcelInstalled = true;
+                    break;
+                }
+            }
+
+            if (!dExcelInstalled)
+            {
+                Excel.AddIn dExcelAddIn =
+                    excel.AddIns.Add(@"C:\GitLab\dExcelTools\Versions\Current\dExcel-AddIn64.xll");
+                dExcelAddIn.Installed = true;
+            }
+            excel.Quit();
         }
-        excel.Quit();
+        catch (Exception exception)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this._logger.ErrorText = $"Failed to install ∂Excel in Excel.";
+                this._logger.ErrorText = $"{exception.Message}";
+                this._logger.InstallationFailed();
+            });
+            CloseAllExcelInstances();
+            Dispatcher.Invoke(() =>
+            {
+                this._logger.InstallationFailed();
+            });
+            return;
+        }
 
         Dispatcher.Invoke(() =>
         {
-            Install.IsEnabled = false;
-            Cancel.Content = "Close";
+            this._logger.InstallationSucceeded();
+            this.Install.IsEnabled = false;
+            this.Uninstall.IsEnabled = true;
+            this.CurrentDExcelVersion.Text = GetCurrentDExcelVersion();
+            this.Cancel.Content = "Close";
         });
     }
 
@@ -338,6 +406,22 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Deletes all files, including subdirectories, from the given directory. It does not delete the directory itself.
+    /// </summary>
+    /// <param name="directoryPath">The directory path.</param>
+    private static void DeleteFilesRecursively(string directoryPath)
+    {
+        var directory = new DirectoryInfo(directoryPath);
+        directory.EnumerateFiles().ToList().ForEach(f => f.Delete());
+        directory.EnumerateDirectories().ToList().ForEach(d => d.Delete(true)); 
+    }
+    
+    /// <summary>
+    /// Closes the installer dialog.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The RoutedEventArgs.</param>
     private void Cancel_Click(object sender, RoutedEventArgs e) => this.Close();
 
     /// <summary>
@@ -345,17 +429,137 @@ public partial class MainWindow : Window
     /// </summary>
     /// <param name="sender">Sender.</param>
     /// <param name="e">Routed event args.</param>
-    private void Uninstall_Click(object sender, RoutedEventArgs e)
+    private void Uninstall_Click(object sender, RoutedEventArgs e) => new Thread(UninstallAddIn).Start();
+
+    /// <summary>
+    /// Uninstallation process triggered by clicking the uninstall button.
+    /// </summary>
+    private void UninstallAddIn()
     {
-        Excel.Application excel = new();
-        foreach (Excel.AddIn addIn in excel.AddIns)
+        Dispatcher.Invoke(() =>
         {
-            if (addIn.Name.Contains("dExcel"))
+            this._logger.NewProcess("Uninstalling ∂Excel from Excel.");
+            this._logger.NewSubProcess("Closing all instances of Excel.");
+        });
+        CloseAllExcelInstances();
+        
+        try
+        {
+            Dispatcher.Invoke(() =>
             {
-                addIn.Installed = false;
-                break;
+                this._logger.NewSubProcess("Opening instance of Excel.");
+            });
+            Excel.Application excel = new();
+            foreach (Excel.AddIn addIn in excel.AddIns)
+            {
+                if (addIn.Name.Contains("dExcel"))
+                {
+                    addIn.Installed = false;
+                    Dispatcher.Invoke(() =>
+                    {
+                        this._logger.OkayText = "∂Excel uninstalled from Excel.";
+                    });
+                    break;
+                }
             }
+            excel.Quit();
         }
-        excel.Quit();
+        catch (Exception exception)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this._logger.ErrorText = exception.Message;
+                this._logger.UninstallationFailed();
+            });
+            return;
+        }
+
+        try
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this._logger.OkayText = $"Deleting contents of {CurrentVersionPath}.";
+                DeleteFilesRecursively(CurrentVersionPath);
+            });
+        }
+        catch (Exception exception)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this._logger.ErrorText = $"Failed to delete ∂Excel files from {CurrentVersionPath}.";
+                this._logger.ErrorText = exception.Message;
+                this._logger.UninstallationFailed();
+            });
+        }
+
+        Dispatcher.Invoke(() =>
+        {
+            this._logger.UninstallationSucceeded();
+            this.CurrentDExcelVersion.Text = GetCurrentDExcelVersion();
+            this.Uninstall.IsEnabled = false;
+            this.Install.IsEnabled = true;
+        });
+    }
+    
+    /// <summary>
+    /// Closes all instances of Excel.
+    /// </summary>
+    private void CloseAllExcelInstances()
+    {
+        try
+        {
+            var excelInstances = Process.GetProcessesByName("Excel");
+            Dispatcher.Invoke(() =>
+            {
+                this._logger.OkayText = $"{excelInstances.Length} Excel instances found.";
+            });
+            foreach (Process excelInstance in excelInstances)
+            {
+                excelInstance.Kill();
+                excelInstance.WaitForExit();
+                excelInstance.Dispose();
+            }
+            Dispatcher.Invoke(() =>
+            {
+                this._logger.OkayText = $"All Excel instances terminated.";
+            });
+        }
+        catch (Exception exception)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this._logger.ErrorText = $"Excel process could not be terminated.";
+                this._logger.ErrorText = $"{exception.Message}";
+            });
+        }
+    }
+
+    /// <summary>
+    /// Event triggered by changing the selected dExcel version to install.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The RoutedEventArgs.</param>
+    private void AvailableDExcelVersions_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        Install.IsEnabled = AvailableDExcelVersions.SelectedItem.ToString() != CurrentDExcelVersion.Text;
+    }
+
+    /// <summary>
+    /// Launches an instance of Excel and closes the installation dialog.
+    /// </summary>
+    /// <param name="sender">The Sender.</param>
+    /// <param name="e">The RoutedEventArgs.</param>
+    private void CloseAndLaunchExcel_OnClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Process.Start(@"C:\Program Files\Microsoft Office\root\Office16\excel.exe");
+            this.Close();
+        }
+        catch (Exception exception)
+        {
+            this._logger.ErrorText = "Failed to launch Excel.";
+            this._logger.ErrorText = exception.Message;
+        }
     }
 }
