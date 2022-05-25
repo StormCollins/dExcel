@@ -7,9 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -36,6 +38,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        
+       
         this._logger = new Logger(LogWindow);
         var installerVersion = Assembly.GetEntryAssembly()?.GetName().Version;
         InstallerVersion.Text = $"{installerVersion?.Major}.{installerVersion?.Minor}";

@@ -1,11 +1,11 @@
+#- "& 'C:\\Nuget\\nuget.exe' restore dExcel.sln -OutputDirectory C:\\GitLab-Runner"
 stages:
     - build
 
 build:
     stage: build
     script:
-        - "dotnet restore"
-        - "msbuild.exe dExcel/dExcel.csproj --configuration Release"
+        - "& 'C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\msbuild.exe' -t:restore,build dExcel.sln /property:Configuration=Release"
         - "mkdir publish"
         - "cp dExcel/bin/Release/net6.0-windows/*.* publish"
     artifacts:
