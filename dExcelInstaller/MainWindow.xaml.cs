@@ -334,7 +334,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        // Create Excel application and ∂Excel install addin.
+        // Create Excel application and install ∂Excel add-in.
         Dispatcher.Invoke(() =>
         {
             this._logger.OkayText = $"Installing ∂Excel in Excel.";
