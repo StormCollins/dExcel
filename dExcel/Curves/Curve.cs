@@ -28,6 +28,12 @@ public static class Curve
         return DataObjectController.Add(handle, interpolatedDiscountCurve);
     }
 
+    public static InterpolatedDiscountCurve<LogLinear> GetDiscountCurve(string handle)
+    {
+        return (InterpolatedDiscountCurve<LogLinear>)DataObjectController.GetDataObject(handle);
+    }
+    
+    
     [ExcelFunction(
         Name = "d.Curve_DF",
         Description = "",
@@ -35,7 +41,7 @@ public static class Curve
     public static object[,] GetDiscountFactors(string handle, object[] dates)
     {
         var discountFactors = new object[dates.Length, 1];
-        var curve = ((InterpolatedDiscountCurve<LogLinear>)DataObjectController.GetDataObject(handle));
+        var curve = (InterpolatedDiscountCurve<LogLinear>)DataObjectController.GetDataObject(handle);
         for (int i = 0; i < dates.Length; i++)
         {
             discountFactors[i, 0] = curve.discount((Date)DateTime.FromOADate((double)dates[i]));
@@ -64,4 +70,3 @@ public static class Curve
         return curve.zeroRate((Date)startDate, new Actual365Fixed(), Compounding.Continuous).rate();
     }
 }
-
