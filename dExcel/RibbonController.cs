@@ -159,44 +159,36 @@ public class RibbonController : ExcelRibbon
         return templateCount;
     }
 
-    public string GetTemplateSearchItemLabel(IRibbonControl control, int index)
+       
+    public void WrapUpAudit(IRibbonControl control)
     {
-        string[] separators = new string[1];
-        separators[0] = ",";
-        String[] newstring = templates.ToString().Split(separators, StringSplitOptions.None);
-        String? str = newstring[index];
-        return str ?? "";
+        // Remove review notes
+        // Get rid of headings.
+        // Hide formuale
+        // Hide cell names
+        // Lock sheets and protect with password
     }
-    
-    public void EditBoxTextChanged(IRibbonControl control, string text)
+
+    /// <summary>
+    /// Opens an (EMS) audit file that was previously "wrapped up" using the <see cref="WrapUpAudit(IRibbonControl)"/> function.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void OpenAuditFile(IRibbonControl control)
     {
-        if (text == "")
-        {
-            templates = allTemplates;
-            templateCount = 6;
-        }
-        else
-        {
-            var matches = Process.ExtractTop(text, allTemplates.ToString().Split(','));
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
 
-            templates = new("");
-            templateCount = 0;
-
-            foreach (var match in matches)
+        foreach (Excel.Worksheet worksheet in xlApp.ActiveWorkbook.Worksheets)
+        {
+            if (worksheet.ProtectContents == true)
             {
-                templates.Append($",{match.Value}");
-                templateCount++;
+                worksheet.Unprotect("asterix");
             }
-            templates = new(templates.ToString().TrimStart(','));
-            
+            xlApp.ActiveWindow.DisplayHeadings = true;
         }
-        RibbonUi.InvalidateControl("TemplateSearch");
-    }
 
-    public void Add(IRibbonControl control)
-    {
-        templateCount++;
-        templates.Append("||Item" + templateCount.ToString());
-        RibbonUi.InvalidateControl("TemplateSearch");
+        foreach (Excel.Name name in xlApp.ActiveWorkbook.Names)
+        {
+            name.Visible = true;
+        }
     }
 }
