@@ -24,11 +24,13 @@
 				id='btnOpenAudit'
 				label='Open Audit'
 				getImage='GetImage'
+				onAction='OpenAuditFile'
 				tag='open-audit-small-blue.ico'/>
 			  <button
 				id='btnWrapUpAudit'
 				label='Wrap Up Audit'
 				getImage='GetImage'
+				onAction='WrapUpAudit'
 				tag='wrap-up-audit-small-blue.ico'/>
 			  <button
 				id='btnFixEMSLinks'

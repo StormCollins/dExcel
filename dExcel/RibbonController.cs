@@ -159,44 +159,109 @@ public class RibbonController : ExcelRibbon
         return templateCount;
     }
 
-    public string GetTemplateSearchItemLabel(IRibbonControl control, int index)
+    /// <summary>
+    /// Opens an (EMS) audit file that was previously "wrapped up" using the <see cref="WrapUpAudit(IRibbonControl)"/> function.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void OpenAuditFile(IRibbonControl control)
     {
-        string[] separators = new string[1];
-        separators[0] = ",";
-        String[] newstring = templates.ToString().Split(separators, StringSplitOptions.None);
-        String? str = newstring[index];
-        return str ?? "";
-    }
-    
-    public void EditBoxTextChanged(IRibbonControl control, string text)
-    {
-        if (text == "")
-        {
-            templates = allTemplates;
-            templateCount = 6;
-        }
-        else
-        {
-            var matches = Process.ExtractTop(text, allTemplates.ToString().Split(','));
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
 
-            templates = new("");
-            templateCount = 0;
-
-            foreach (var match in matches)
+        foreach (Excel.Worksheet worksheet in xlApp.ActiveWorkbook.Worksheets)
+        {
+            if (worksheet.ProtectContents)
             {
-                templates.Append($",{match.Value}");
-                templateCount++;
+                worksheet.Unprotect("asterix");
             }
-            templates = new(templates.ToString().TrimStart(','));
-            
+
+            xlApp.ActiveWindow.DisplayHeadings = true;
         }
-        RibbonUi.InvalidateControl("TemplateSearch");
+
+        foreach (Excel.Name name in xlApp.ActiveWorkbook.Names)
+        {
+            name.Visible = true;
+        }
     }
 
-    public void Add(IRibbonControl control)
+    /// <summary>
+    /// This wraps up an audit Excel file by:
+    ///     <list type="number">
+    ///         <item> Deleting all review notes.</item>
+    ///         <item> Hiding the row and column headings.</item>
+    ///         <item> Hiding formulae.</item>
+    ///         <item> Hiding range names. </item>
+    ///         <item> Locking and password protecting cells.</item>
+    ///         <item> Removing Matlab ExcelLink references.</item>
+    ///         <item> Password protecting VBA code.</item>
+    ///     </list>
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void WrapUpAudit(IRibbonControl control)
     {
-        templateCount++;
-        templates.Append("||Item" + templateCount.ToString());
-        RibbonUi.InvalidateControl("TemplateSearch");
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+
+        // Delete review notes.
+        // It is unclear where the workbook WPExcel.xls is located but EMS users seem to have access to it.
+        xlApp.Application.Run("WPEXCEL.XLS!DPWPReviewNotesDeleteAll");
+
+        foreach (Excel.Worksheet worksheet in xlApp.ActiveWorkbook.Worksheets)
+        {
+            worksheet.Activate();
+            int lastRowOfUsedRange = worksheet.UsedRange.Rows.Count;
+            int lastColumnOfUsedRange = worksheet.UsedRange.Columns.Count;
+            xlApp.ActiveWindow.DisplayHeadings = false;
+            
+            if (!worksheet.ProtectContents)
+            {
+                worksheet.UsedRange.Cells.FormulaHidden = true;
+                worksheet.UsedRange.Cells.Locked = true;
+                worksheet.Protect("asterix");
+            }
+        }
+
+        // Remove Matlab references.
+        // TODO: This can be deprecated when we no longer use Matlab and ExcelLink.
+        Excel.Workbook wb = xlApp.ActiveWorkbook;
+        foreach (VBIDE.Reference reference in wb.VBProject.References)
+        {
+            if (reference.Name.Contains("ExcelLink", StringComparison.CurrentCultureIgnoreCase) ||
+                reference.Name.Contains("SpreadsheetLink", StringComparison.CurrentCultureIgnoreCase))
+            {
+                wb.VBProject.References.Remove(reference);
+            }
+        }
+
+        foreach (VBIDE.VBComponent component in wb.VBProject.VBComponents)
+        {
+            VBIDE.CodeModule codeModule = component.CodeModule;
+            
+            for (int i = 1; i < codeModule.CountOfLines; i++)
+            {
+                string line = codeModule.Lines[i, 1];
+                if (line.Contains("#Const oExcelLink = 1"))
+                {
+                    codeModule.ReplaceLine(i, line.Replace("#Const oExcelLink = 1", "#Const oExcelLink = 0"));
+                }
+            }
+        }
+
+        // Password protect the VBA code.
+        // TODO: See if this can be simplified.
+        xlApp.Application.ScreenUpdating = false;
+
+        string breakIt = "%{F11}%TE+{TAB}{RIGHT}%V{+}{TAB}";
+        foreach (VBIDE.Window window in wb.VBProject.VBE.Windows)
+        {
+            if (window.Caption.Contains('('))
+            {
+                window.Close();
+            }
+        }
+        wb.Activate();
+
+        xlApp.Application.OnKey("%{F11}");
+        SendKeys.SendWait(breakIt + "asterix" + "{TAB}" + "asterix" + "~%{F11}");
+        xlApp.Application.ScreenUpdating = true;
+        wb.Activate();
     }
 }
