@@ -120,4 +120,13 @@ public partial class Dashboard : Window
         Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
         e.Handled = true;
     }
+
+    private void OpenInstaller_Click(object sender, RoutedEventArgs e)
+    {
+#if DEBUG
+        Process.Start(@"C:\GitLab\dExcelTools\dExcel\dExcelInstaller\bin\Debug\net6.0-windows\dExcelInstaller.exe");
+#else
+        Process.Start(@"C:\GitLab\dExcelTools\Installer\dExcelInstaller.exe");
+#endif
+    }
 }

@@ -106,9 +106,12 @@
         </StackPanel>
 
         <Button
+          Name="OpenInstaller"
           Grid.Row="2"
-          Grid.Column="2"
-          Content="Update"/>
+          Grid.Column="1"
+          Grid.ColumnSpan="2"
+          Content="Open Installer" 
+          Click="OpenInstaller_Click"/>
       </Grid>
     </materialDesign:Card>
 

@@ -7,11 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -215,12 +213,12 @@ public partial class MainWindow : Window
                 {
                     this._logger.OkayText =
                         $"Found obsolete AddIn {Path.GetFileName(obsoleteDExcelAddIn)} in " +
-                        $"{Path.GetDirectoryName(obsoleteDExcelAddIn)}.";
+                        $"[[{Path.GetDirectoryName(obsoleteDExcelAddIn)}]].";
                 });
                 File.Delete(obsoleteDExcelAddIn);
                 Dispatcher.Invoke(() =>
                 {
-                    this._logger.OkayText = $"Removed obsolete AddIn {Path.GetFileName(obsoleteDExcelAddIn)}.";
+                    this._logger.OkayText = $"Removed obsolete AddIn [[{Path.GetFileName(obsoleteDExcelAddIn)}]].";
                 });
             }
             else
@@ -247,14 +245,14 @@ public partial class MainWindow : Window
         // Check if installation path exists.
         Dispatcher.Invoke(() =>
         {
-            this._logger.NewSubProcess($"Checking if {VersionsPath} exists.");
+            this._logger.NewSubProcess($"Checking if ∂Excel installation path exists.");
         });
 
         if (!Directory.Exists(VersionsPath))
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.OkayText = $"Path {VersionsPath} does not exist.";
+                this._logger.OkayText = $"Path [[{VersionsPath}]] does not exist.";
             });
             
             try
@@ -262,14 +260,14 @@ public partial class MainWindow : Window
                 Directory.CreateDirectory(VersionsPath);
                 Dispatcher.Invoke(() =>
                 {
-                    this._logger.OkayText = $"Path {VersionsPath} created.";
+                    this._logger.OkayText = $"Path [[{VersionsPath}]] created.";
                 });
             }
             catch (Exception exception)
             {
                 Dispatcher.Invoke(() =>
                 {
-                    this._logger.ErrorText = $"Path {VersionsPath} could not be created.";
+                    this._logger.ErrorText = $"Path [[{VersionsPath}]] could not be created.";
                     this._logger.ErrorText = $"{exception.Message}";
                     this._logger.InstallationFailed();
                 });
@@ -279,7 +277,7 @@ public partial class MainWindow : Window
 
         Dispatcher.Invoke(() =>
         {
-            this._logger.OkayText = $"Path {VersionsPath} already exists.";
+            this._logger.OkayText = $"Path [[{VersionsPath}]] already exists.";
         });
 
         // Download addin from GitLab and copy to installation path.
@@ -289,8 +287,9 @@ public partial class MainWindow : Window
         Dispatcher.Invoke(() =>
         {
             this._logger.NewSubProcess($"Updating ∂Excel.");
-            this._logger.OkayText = $"Deleting previous ∂Excel version from {CurrentVersionPath}.";
+            this._logger.OkayText = $"Deleting previous ∂Excel version from [[{CurrentVersionPath}]].";
         });
+
         DirectoryInfo currentVersionDirectory = new(CurrentVersionPath);
         try
         {
@@ -307,7 +306,7 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.ErrorText = $"Failed to delete files and folders from {CurrentVersionPath}.";
+                this._logger.ErrorText = $"Failed to delete files and folders from [[{CurrentVersionPath}]].";
                 this._logger.ErrorText = exception.Message;
                 this._logger.InstallationFailed();
             });
@@ -318,7 +317,7 @@ public partial class MainWindow : Window
         // to 'C:\GitLab\dExcelTools\Versions\Current'.
         Dispatcher.Invoke(() =>
         {
-            this._logger.OkayText = $"Copying version {AvailableDExcelVersions.SelectedItem} of ∂Excel to {CurrentVersionPath}.";
+            this._logger.OkayText = $"Copying version {AvailableDExcelVersions.SelectedItem} of ∂Excel to [[{CurrentVersionPath}]].";
         });
         try
         {
@@ -331,7 +330,7 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.ErrorText = $"Failed to copy version {AvailableDExcelVersions.SelectedItem} of ∂Excel to {CurrentVersionPath}.";
+                this._logger.ErrorText = $"Failed to copy version {AvailableDExcelVersions.SelectedItem} of ∂Excel to [[{CurrentVersionPath}]].";
                 this._logger.ErrorText = $"{exception.Message}";
                 this._logger.InstallationFailed();
             });
@@ -347,18 +346,18 @@ public partial class MainWindow : Window
         try
         {
             Excel.Application excel = new();
-            var dExcelInstalled = false;
+            var dExcelAdded = false;
             foreach (Excel.AddIn addIn in excel.AddIns)
             {
-                if (addIn.Name.Contains("dExcel"))
+                if (addIn.Name.Contains("dExcel", StringComparison.InvariantCultureIgnoreCase))
                 {
                     addIn.Installed = true;
-                    dExcelInstalled = true;
+                    dExcelAdded = true;
                     break;
                 }
             }
 
-            if (!dExcelInstalled)
+            if (!dExcelAdded)
             {
                 Excel.AddIn dExcelAddIn =
                     excel.AddIns.Add(@"C:\GitLab\dExcelTools\Versions\Current\dExcel-AddIn64.xll");
@@ -451,12 +450,12 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.NewSubProcess("Opening instance of Excel.");
+                this._logger.NewSubProcess("Opening (background) instance of Excel.");
             });
             Excel.Application excel = new();
             foreach (Excel.AddIn addIn in excel.AddIns)
             {
-                if (addIn.Name.Contains("dExcel"))
+                if (addIn.Name.Contains("dExcel", StringComparison.InvariantCultureIgnoreCase))
                 {
                     addIn.Installed = false;
                     Dispatcher.Invoke(() =>
@@ -482,7 +481,7 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.OkayText = $"Deleting contents of {CurrentVersionPath}.";
+                this._logger.OkayText = $"Deleting contents of [[{CurrentVersionPath}]].";
                 DeleteFilesRecursively(CurrentVersionPath);
             });
         }
@@ -490,7 +489,7 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.ErrorText = $"Failed to delete ∂Excel files from {CurrentVersionPath}.";
+                this._logger.ErrorText = $"Failed to delete ∂Excel files from [[{CurrentVersionPath}]].";
                 this._logger.ErrorText = exception.Message;
                 this._logger.UninstallationFailed();
             });
@@ -515,7 +514,7 @@ public partial class MainWindow : Window
             var excelInstances = Process.GetProcessesByName("Excel");
             Dispatcher.Invoke(() =>
             {
-                this._logger.OkayText = $"{excelInstances.Length} Excel instances found.";
+                this._logger.OkayText = $"Excel instances found: {excelInstances.Length}";
             });
             foreach (Process excelInstance in excelInstances)
             {
@@ -532,7 +531,7 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.ErrorText = $"Excel process could not be terminated.";
+                this._logger.ErrorText = $"Excel instance could not be terminated.";
                 this._logger.ErrorText = $"{exception.Message}";
             });
         }
@@ -559,6 +558,26 @@ public partial class MainWindow : Window
         {
             Process.Start(@"C:\Program Files\Microsoft Office\root\Office16\excel.exe");
             this.Close();
+        }
+        catch (Exception exception)
+        {
+            this._logger.ErrorText = "Failed to launch Excel.";
+            this._logger.ErrorText = exception.Message;
+        }
+    }
+
+    /// <summary>
+    /// Launches an instance of Excel.
+    /// </summary>
+    /// <param name="sender">The Sender.</param>
+    /// <param name="e">The RoutedEventArgs.</param>
+    private void LaunchExcel_OnClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Process.Start(@"C:\Program Files\Microsoft Office\root\Office16\excel.exe");
+            this._logger.OkayText = "Opening Excel.";
+            this._logger.OkayText = @"[[C:\Program Files\Microsoft Office\root\Office16\excel.exe]]";
         }
         catch (Exception exception)
         {

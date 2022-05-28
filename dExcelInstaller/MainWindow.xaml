@@ -211,7 +211,26 @@
             </ToolTip>
           </Button.ToolTip>
         </Button>
-        
+
+        <Button
+          Name="LaunchExcel"
+          Click="LaunchExcel_OnClick"
+          Content="Launch Excel"
+          Grid.Row="11"
+          Grid.Column="3"
+          Margin="5"
+          Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
+          ToolTipService.InitialShowDelay="100"
+          ToolTipService.BetweenShowDelay="100">
+          <Button.ToolTip>
+            <ToolTip Background="Black">
+              <TextBlock>
+                Opens Excel.
+              </TextBlock>
+            </ToolTip>
+          </Button.ToolTip>
+        </Button>
+
         <Button
           Name="CloseAndLaunchExcel"
           Click="CloseAndLaunchExcel_OnClick"
