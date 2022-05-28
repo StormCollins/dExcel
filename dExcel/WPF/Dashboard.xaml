@@ -251,6 +251,22 @@
                 Installation Path
             </Hyperlink>
         </TextBlock>
+        <TextBlock>
+            <Hyperlink 
+              NavigateUri="https://jupyterhub.fsa-aks.deloitte.co.za"
+              RequestNavigate="Hyperlink_RequestNavigate">
+              <Image
+                Name="JupyterHubLink"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Grid.Row="0"
+                Grid.RowSpan="2"
+                Grid.Column="7"
+                Width="10"
+                Source="/resources/icons/follow-link-small-green.ico"/>
+                JupyterHub
+            </Hyperlink>
+        </TextBlock>
       </StackPanel>
     </materialDesign:Card>
 
