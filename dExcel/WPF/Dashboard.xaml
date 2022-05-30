@@ -226,12 +226,9 @@
               NavigateUri="https://gitlab.fsa-aks.deloitte.co.za/Valuations/QuantLibraries/dExcelTools/dExcel"
               RequestNavigate="Hyperlink_RequestNavigate">
               <Image
-                Name="gitlabRepoLink"
+                Name="GitlabRepoLink"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Grid.Row="0"
-                Grid.RowSpan="2"
-                Grid.Column="7"
                 Width="10"
                 Source="/resources/icons/follow-link-small-green.ico"/>
                 ∂Excel GitLab Repository
@@ -243,12 +240,9 @@
               NavigateUri="C:\GitLab\dExcelTools\Versions"
               RequestNavigate="Hyperlink_RequestNavigate">
               <Image
-                Name="installationPathLink"
+                Name="InstallationPathLink"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Grid.Row="0"
-                Grid.RowSpan="2"
-                Grid.Column="7"
                 Width="10"
                 Source="/resources/icons/follow-link-small-green.ico"/>
                 Installation Path
@@ -262,9 +256,6 @@
                 Name="JupyterHubLink"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Grid.Row="0"
-                Grid.RowSpan="2"
-                Grid.Column="7"
                 Width="10"
                 Source="/resources/icons/follow-link-small-green.ico"/>
                 JupyterHub
