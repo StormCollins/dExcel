@@ -1,10 +1,15 @@
 ﻿namespace dExcelInstaller;
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 
 public class Logger
@@ -54,33 +59,120 @@ public class Logger
     /// <param name="fontColor">The font color.</param>
     /// <returns>A formatted time stamp.</returns>
     private static Run CreateTimeStamp(Brush? fontColor = null) =>
-        CreateMessage($"[{DateTime.Now:HH:mm:ss}]  ", fontColor, true);
+        CreateMessage($"[{DateTime.Now:HH:mm:ss}]  ", fontColor, true)[0];
 
     /// <summary>
-    /// Creates a formatted message without a time stamp.
+    /// Creates a formatted message without a time stamp. 
+    /// Place a path between 
     /// </summary>
     /// <param name="message">The message.</param>
     /// <param name="fontColor">The font color.</param>
     /// <param name="isBold">Set to true to make the font bold.</param>
     /// <returns>A formatted message.</returns>
-    private static Run CreateMessage(string message, Brush? fontColor = null, bool isBold = false)
+    private static List<Run> CreateMessage(string message, Brush? fontColor = null, bool isBold = false)
     {
-        return new Run($"{message}")
+        var paths = Regex.Matches(message, @"(?<=\[\[).+?(?=\]\])").Select(x => x.Value);
+
+        if (paths.Count() != 0)
         {
-            FontFamily = new FontFamily("Calibri"),
-            FontWeight = isBold ? FontWeights.ExtraBold : FontWeights.Regular,
-            Foreground = fontColor ?? PrimaryHueMidBrush,
-        };
+            var subMessages = Regex.Split(message, @"(\[\[)|(\]\])").ToList();
+            subMessages.RemoveAll(x => x == "[[" || x == "]]");
+
+            List<Run> output = new();
+            foreach (var subMessage in subMessages)
+            {
+                if (paths.Contains(subMessage))
+                {
+                    var run = new Run($"{subMessage}")
+                    {
+                        FontFamily = new FontFamily("Courier New"),
+                        FontWeight = isBold ? FontWeights.ExtraBold : FontWeights.Regular,
+                        Foreground = fontColor ?? PrimaryHueMidBrush,
+                        TextDecorations = TextDecorations.Underline,
+                    };
+
+                    run.MouseEnter += LoggerPath_MouseEnter;
+                    run.MouseLeave += LoggerPath_MouseLeave;
+                    run.MouseLeftButtonDown += LoggerPath_MouseLeftButtonDown;
+                    output.Add(run);
+                }
+                else
+                {
+                    output.Add(
+                        new Run($"{subMessage}")
+                        {
+                            FontFamily = new FontFamily("Calibri"),
+                            FontWeight = isBold ? FontWeights.ExtraBold : FontWeights.Regular,
+                            Foreground = fontColor ?? PrimaryHueMidBrush,
+                        });
+                }
+            }
+
+            return output; 
+        }
+        else
+        {
+            return new()
+            {
+                new Run($"{message}")
+                {
+                    FontFamily = new FontFamily("Calibri"),
+                    FontWeight = isBold ? FontWeights.ExtraBold : FontWeights.Regular,
+                    Foreground = fontColor ?? PrimaryHueMidBrush,
+                } 
+            };
+        }
     }
 
+    private static void LoggerPath_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var path = ((Run)sender).Text;
+        if (Path.HasExtension(path))
+        {
+            Process.Start(new ProcessStartInfo(Path.GetDirectoryName(path)) { UseShellExecute = true });
+        }
+        else
+        {
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+        }
+    }
+
+    private static void LoggerPath_MouseLeave(object sender, MouseEventArgs e)
+    {
+        ((Run)sender).FontWeight = FontWeights.Regular;
+        if (((Run)sender).Foreground == PrimaryHueLightBrush)
+        {
+            ((Run)sender).Foreground = PrimaryHueMidBrush;
+        }
+    }
+
+    private static void LoggerPath_MouseEnter(object sender, MouseEventArgs e)
+    {
+        ((Run)sender).FontWeight = FontWeights.Bold;
+        ((Run)sender).Cursor = Cursors.Hand;
+
+        if (((Run)sender).Foreground == PrimaryHueMidBrush)
+        {
+            ((Run)sender).Foreground = PrimaryHueLightBrush;
+        }
+    }
+
+    /// <summary>
+    /// Creates a formatted, time-stamped message.
+    /// </summary>
+    /// <param name="message">The message.</param>
+    /// <param name="fontColor">The font color.</param>
     private void CreateTimeStampedMessage(string message, Brush? fontColor = null)
     {
         var loggerText = new FlowDocument();
         var timeStamp = CreateTimeStamp(fontColor ?? PrimaryHueMidBrush);
-        var messageWithoutTimeStamp = CreateMessage(message, fontColor ?? PrimaryHueMidBrush);
+        var messagesWithoutTimeStamp = CreateMessage(message, fontColor ?? PrimaryHueMidBrush);
         var paragraph = new Paragraph();
         paragraph.Inlines.Add(timeStamp);
-        paragraph.Inlines.Add(messageWithoutTimeStamp);
+        foreach (var subMessage in messagesWithoutTimeStamp)
+        {
+            paragraph.Inlines.Add(subMessage);
+        }
         loggerText.Blocks.Add(paragraph);
         _logWindow.Document.Blocks.Add(paragraph);
         _logWindow.ScrollToEnd();
@@ -89,12 +181,15 @@ public class Logger
     public void NewProcess(string message)
     {
         var timeStamp = CreateTimeStamp(PrimaryHueLightBrush);
-        var messageRun = CreateMessage(message, PrimaryHueLightBrush, true);
+        var messageRuns = CreateMessage(message, PrimaryHueLightBrush, true);
         var paragraph = new Paragraph();
         paragraph.Inlines.Clear();
         paragraph.Inlines.Add("\n");
         paragraph.Inlines.Add(timeStamp);
-        paragraph.Inlines.Add(messageRun);
+        foreach (var messageRun in messageRuns)
+        {
+            paragraph.Inlines.Add(messageRun);
+        }
         _logWindow.Document.Blocks.Add(paragraph);
         _logWindow.ScrollToEnd();
     }
@@ -102,12 +197,15 @@ public class Logger
     public void NewSubProcess(string message)
     {
         var timeStamp = CreateTimeStamp(PrimaryHueLightBrush);
-        var messageRun = CreateMessage(message, PrimaryHueLightBrush, true);
+        var messageRuns = CreateMessage(message, PrimaryHueLightBrush, true);
         var paragraph = new Paragraph();
         paragraph.Inlines.Clear();
         paragraph.Inlines.Add(DashedHorizontalLine());
         paragraph.Inlines.Add(timeStamp);
-        paragraph.Inlines.Add(messageRun);
+        foreach (var messageRun in messageRuns)
+        {
+            paragraph.Inlines.Add(messageRun);
+        }
         _logWindow.Document.Blocks.Add(paragraph);
         _logWindow.ScrollToEnd();
     }
@@ -115,7 +213,7 @@ public class Logger
     private Run DashedHorizontalLine(Brush? fontColor = null)
     {
         var repeats = _logWindow.Width;
-        return CreateMessage(string.Concat(Enumerable.Repeat("-  ", (int) repeats / 11)) + '\n', fontColor);
+        return CreateMessage(string.Concat(Enumerable.Repeat("-  ", (int) repeats / 11)) + '\n', fontColor)[0];
     }
 
     public void InstallationFailed() => EndProcessMessage("Installation Failed", ErrorBrush);
@@ -137,7 +235,7 @@ public class Logger
         paragraph.Inlines.Clear();
         paragraph.TextAlignment = TextAlignment.Center;
         paragraph.Inlines.Add(DashedHorizontalLine(fontColor));
-        paragraph.Inlines.Add(formattedMessage);
+        paragraph.Inlines.Add(formattedMessage[0]);
         paragraph.Inlines.Add(DashedHorizontalLine(fontColor));
         _logWindow.Document.Blocks.Add(paragraph);
         _logWindow.ScrollToEnd();

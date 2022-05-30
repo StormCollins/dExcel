@@ -106,9 +106,12 @@
         </StackPanel>
 
         <Button
+          Name="OpenInstaller"
           Grid.Row="2"
-          Grid.Column="2"
-          Content="Update"/>
+          Grid.Column="1"
+          Grid.ColumnSpan="2"
+          Content="Open Installer" 
+          Click="OpenInstaller_Click"/>
       </Grid>
     </materialDesign:Card>
 
@@ -223,12 +226,9 @@
               NavigateUri="https://gitlab.fsa-aks.deloitte.co.za/Valuations/QuantLibraries/dExcelTools/dExcel"
               RequestNavigate="Hyperlink_RequestNavigate">
               <Image
-                Name="gitlabRepoLink"
+                Name="GitlabRepoLink"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Grid.Row="0"
-                Grid.RowSpan="2"
-                Grid.Column="7"
                 Width="10"
                 Source="/resources/icons/follow-link-small-green.ico"/>
                 ∂Excel GitLab Repository
@@ -240,15 +240,25 @@
               NavigateUri="C:\GitLab\dExcelTools\Versions"
               RequestNavigate="Hyperlink_RequestNavigate">
               <Image
-                Name="installationPathLink"
+                Name="InstallationPathLink"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Grid.Row="0"
-                Grid.RowSpan="2"
-                Grid.Column="7"
                 Width="10"
                 Source="/resources/icons/follow-link-small-green.ico"/>
                 Installation Path
+            </Hyperlink>
+        </TextBlock>
+        <TextBlock>
+            <Hyperlink 
+              NavigateUri="https://jupyterhub.fsa-aks.deloitte.co.za"
+              RequestNavigate="Hyperlink_RequestNavigate">
+              <Image
+                Name="JupyterHubLink"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Width="10"
+                Source="/resources/icons/follow-link-small-green.ico"/>
+                JupyterHub
             </Hyperlink>
         </TextBlock>
       </StackPanel>

@@ -34,8 +34,9 @@ public partial class Dashboard : Window
     {
         InitializeComponent();
         var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-        gitlabRepoLink.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\follow-link-small-green.ico"));
-        installationPathLink.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\follow-link-small-green.ico"));
+        GitlabRepoLink.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\follow-link-small-green.ico"));
+        InstallationPathLink.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\follow-link-small-green.ico"));
+        JupyterHubLink.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\follow-link-small-green.ico"));
         this.InstalledDExcelVersion.Text = DebugUtils.GetAssemblyVersion();
         Closing += Dashboard_Closing;
         if (NetworkUtils.GetConnectionStatus())
@@ -119,5 +120,14 @@ public partial class Dashboard : Window
     {
         Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
         e.Handled = true;
+    }
+
+    private void OpenInstaller_Click(object sender, RoutedEventArgs e)
+    {
+#if DEBUG
+        Process.Start(@"C:\GitLab\dExcelTools\dExcel\dExcelInstaller\bin\Debug\net6.0-windows\dExcelInstaller.exe");
+#else
+        Process.Start(@"C:\GitLab\dExcelTools\Installer\dExcelInstaller.exe");
+#endif
     }
 }
