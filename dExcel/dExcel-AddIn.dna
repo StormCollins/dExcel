@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <DnaLibrary Name='dExcel Add-In' RuntimeVersion='v4.0' xmlns='http://schemas.excel-dna.net/addin/2020/07/dnalibrary'>
-  <ExternalLibrary Path='dExcel.dll' ExplicitExports='false' LoadFromBytes='true' Pack='true' IncludePdb='false'/>
+  <ExternalLibrary Path='dExcel.dll' ExplicitExports='false' ExplicitRegistration='true' LoadFromBytes='true' Pack='true' IncludePdb='false'/>
   <Reference Path='FuzzySharp.dll' Pack='true'/>
   <Reference Path='MaterialDesignColors.dll' Pack='true'/>
   <Reference Path='MaterialDesignThemes.Wpf.dll' Pack='true'/>

@@ -23,9 +23,15 @@ public static class Curve
         }
 
         //QLNet.PiecewiseYieldCurve<Discount, LogLinear> curve = new ()
-        InterpolatedDiscountCurve<LogLinear> interpolatedDiscountCurve
+        InterpolatedDiscountCurve<LogLinear> termStructure
             = new(dates, discountFactors, new Actual365Fixed(), new LogLinear());
-        return DataObjectController.Add(handle, interpolatedDiscountCurve);
+        
+        Dictionary<string, object> curveDetails = new()
+        {
+            ["Curve"] = termStructure,
+        };
+        
+        return DataObjectController.Add(handle, curveDetails);
     }
 
     public static InterpolatedDiscountCurve<LogLinear> GetDiscountCurve(string handle)
@@ -41,7 +47,9 @@ public static class Curve
     public static object[,] GetDiscountFactors(string handle, object[] dates)
     {
         var discountFactors = new object[dates.Length, 1];
-        var curve = (InterpolatedDiscountCurve<LogLinear>)DataObjectController.GetDataObject(handle);
+
+        var curve =
+            (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve"];
         for (int i = 0; i < dates.Length; i++)
         {
             discountFactors[i, 0] = curve.discount((Date)DateTime.FromOADate((double)dates[i]));

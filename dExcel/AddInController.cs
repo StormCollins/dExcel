@@ -3,6 +3,7 @@
 using System.IO;
 using System.Reflection;
 using ExcelDna.Integration;
+using ExcelDna.Registration;
 using Excel = Microsoft.Office.Interop.Excel;
 
 public class AddInController : IExcelAddIn
@@ -22,5 +23,9 @@ public class AddInController : IExcelAddIn
         Assembly.LoadFrom(Path.Combine(xllPath, "MaterialDesignColors.dll"));
         Assembly.LoadFrom(Path.Combine(xllPath, "MaterialDesignThemes.Wpf.dll"));
         Assembly.LoadFrom(Path.Combine(xllPath, "QLNet.dll"));
+        ExcelRegistration
+            .GetExcelFunctions()
+            .ProcessParamsRegistrations()
+            .RegisterFunctions();
     }
 }
