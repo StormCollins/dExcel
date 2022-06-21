@@ -12,6 +12,10 @@ public class ExcelTableTests
         {"Parameter", "Value"},
         {"Curve Name", "SingleCurve"},
         {"Interpolation", "LogLinear"},
+        {"Instruments", "Deposits"},
+        {"", "FRAs"},
+        {"", "Interest Rate Swaps"},
+        {"Base Date", "2022-06-01"},
     };
 
     private readonly object[,] _discountFactorsTable =
@@ -98,5 +102,13 @@ public class ExcelTableTests
         Assert.AreEqual(
             expected: "LogLinear",
             actual: ExcelTable.LookupTableValue<string>(_parameterTable, "Value", "Interpolation")); 
+    }
+
+    [Test]
+    public void LookupTableValuesTest()
+    {
+        Assert.AreEqual(
+            expected: new List<string> {"Deposits", "FRAs", "Interest Rate Swaps"},
+            actual: ExcelTable.LookupTableValues<string>(_parameterTable, "Value", "Instruments"));
     }
 }

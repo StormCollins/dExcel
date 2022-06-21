@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using ExcelDna.Integration;
 
 /// <summary>
 /// A class for manipulating dExcel type tables in Excel.
@@ -107,5 +108,64 @@ public static class ExcelTable
             return (T)Convert.ChangeType(DateTime.FromOADate(int.Parse(table[rowIndex, columnIndex].ToString())), typeof(T));
         }
         return (T)Convert.ChangeType(table[rowIndex, columnIndex], typeof(T));
+    }
+    
+    /// <summary>
+    /// Looks up several values in an Excel table using a column and row header where multiple values fall under the
+    /// same row header. Assumes row headers are in column 0 and column headers are in row 2.
+    /// </summary>
+    /// <remarks>If the table is as follows:
+    /// Table Type
+    /// Parameter     | Value 
+    /// Instruments   | Deposits
+    ///               | FRAs
+    ///               | Interest Rate Swaps
+    /// Interpolation | LogLinear
+    /// ...
+    /// Using this function to lookup the "Instruments" it will return: 'Deposits', 'FRAs', and 'Interest Rate Swaps'.
+    /// </remarks>
+    /// <param name="table">The Excel input range.</param>
+    /// <param name="columnHeader">The column header.</param>
+    /// <param name="rowHeader">The row header.</param>
+    /// <returns>The looked up value.</returns>
+    public static List<T> LookupTableValues<T>(object[,] table, string columnHeader, string rowHeader)
+    {
+        var columnIndex = GetColumnHeaders(table).IndexOf(columnHeader);
+        var rowIndexStart = GetRowHeaders(table).IndexOf(rowHeader) + 2;
+        var rowIndexEnd = 1;
+        
+        for (int i = rowIndexStart + 1; i < table.GetLength(0); i++)
+        {
+            if (table[i, 0].ToString() == "" || table[i, 0] == ExcelMissing.Value)
+            {
+                rowIndexEnd++;
+            }
+            else
+            {
+                break;
+            }
+        }
+        
+        List<T> values = new();
+
+        if (typeof(T) == typeof(DateTime))
+        {
+            values = 
+                Enumerable
+                    .Range(rowIndexStart, rowIndexEnd)
+                    .Select(i => DateTime.FromOADate(int.Parse(table[i, columnIndex].ToString())))
+                    .Cast<T>()
+                    .ToList();
+        }
+        else
+        {
+            values = 
+                Enumerable
+                    .Range(rowIndexStart, rowIndexEnd)
+                    .Select(i => (T)Convert.ChangeType(table[i, columnIndex], typeof(T)))
+                    .ToList();
+        }
+
+        return values;
     }
 }
