@@ -14,11 +14,11 @@ public class SingleCurveBootstrapperTests
         DateTime baseDate = new DateTime(2022, 06, 01);
         object[,] instruments = 
         {
-            {"Deposits", "", ""},
-            {"Tenors", "RateIndex", "Rates"},
-            {"1m", "JIBAR", 0.1},
-            {"3m", "JIBAR", 0.1},
-            {"6m", "JIBAR", 0.1},
+            {"Deposits", "", "", ""},
+            {"Tenors", "RateIndex", "Rates", "Include"},
+            {"1m", "JIBAR", 0.1, "TRUE"},
+            {"3m", "JIBAR", 0.1, "TRUE"},
+            {"6m", "JIBAR", 0.1, "TRUE"},
         };
         
         var dayCounter = new Actual365Fixed();
@@ -51,19 +51,19 @@ public class SingleCurveBootstrapperTests
         DateTime baseDate = new DateTime(2022, 06, 01);
         object[,] depositInstruments = 
         {
-            {"Deposits", "", ""},
-            {"Tenors", "RateIndex", "Rates"},
-            {"1m", "JIBAR", 0.1},
-            {"3m", "JIBAR", 0.1},
-            {"6m", "JIBAR", 0.1},
+            {"Deposits", "", "", ""},
+            {"Tenors", "RateIndex", "Rates", "Include"},
+            {"1m", "JIBAR", 0.1, "TRUE"},
+            {"3m", "JIBAR", 0.1, "TRUE"},
+            {"6m", "JIBAR", 0.1, "TRUE"},
         };
        
         object[,] fraInstruments = 
         {
-            {"FRAs", "", ""},
-            {"Tenors", "RateIndex", "Rates"},
-            {"6m", "JIBAR", 0.1},
-            {"9m", "JIBAR", 0.1},
+            {"FRAs", "", "", ""},
+            {"Tenors", "RateIndex", "Rates", "Include"},
+            {"6m", "JIBAR", 0.1, "TRUE"},
+            {"9m", "JIBAR", 0.1, "TRUE"},
         };
 
         object[] instruments = {depositInstruments, fraInstruments};

@@ -1,6 +1,7 @@
 ﻿namespace dExcel.Curves;
 
 using ExcelDna.Integration;
+using ExcelUtils;
 using QLNet;
 
 public static class SingleCurveBootstrapper
@@ -14,38 +15,15 @@ public static class SingleCurveBootstrapper
         List<RateHelper> rateHelpers = new();
         IborIndex rateIndex = null;
         
-        for (int k = 0; k < instrumentGroups.Length; k++)
+        foreach (var instrumentGroup in instrumentGroups)
         {
-            var instruments = (object[,])instrumentGroups[k];
+            var instruments = (object[,])instrumentGroup;
             
-            List<string> columnTitles
-                = Enumerable
-                    .Range(0, instruments.GetLength(1))
-                    .Select(j => instruments[1, j])
-                    .Cast<string>()
-                    .ToList();
-
             // TODO: Make this case insensitive.
-            List<string> tenors 
-                = Enumerable
-                    .Range(2, instruments.GetLength(0) - 2)
-                    .Select(i => instruments[i, columnTitles.IndexOf("Tenors")])
-                    .Cast<string>()
-                    .ToList();
-        
-            List<string> rateIndices 
-                = Enumerable
-                    .Range(2, instruments.GetLength(0) - 2)
-                    .Select(i => instruments[i, columnTitles.IndexOf("RateIndex")])
-                    .Cast<string>()
-                    .ToList();
-            
-            List<double> rates
-                = Enumerable
-                    .Range(2, instruments.GetLength(0) - 2)
-                    .Select(i => instruments[i, columnTitles.IndexOf("Rates")])
-                    .Cast<double>()
-                    .ToList();
+            List<string> tenors = ExcelTable.GetColumn<string>(instruments, "Tenors");
+            List<string> rateIndices = ExcelTable.GetColumn<string>(instruments, "RateIndex");
+            List<double> rates = ExcelTable.GetColumn<double>(instruments, "Rates");
+            List<bool> include = ExcelTable.GetColumn<bool>(instruments, "Include");
             
             var index = rateIndices[0];
             rateIndex =
@@ -56,48 +34,56 @@ public static class SingleCurveBootstrapper
                     "USD-LIBOR" => new USDLibor(new Period("3m")),
                 };
 
-
-            string? instrumentType = instruments[0, 0].ToString();
+            string? instrumentType = ExcelTable.GetTableType(instruments);
             
             if (string.Compare(instrumentType, "Deposits", StringComparison.InvariantCultureIgnoreCase) == 0)
             {
                 for (int i = 0; i < tenors.Count; i++)
                 {
-                    rateHelpers.Add(
-                        new DepositRateHelper(
-                            rate: rates[i],
-                            tenor: new Period(tenors[i]),
-                            fixingDays: rateIndex.fixingDays(),
-                            calendar: rateIndex.fixingCalendar(), 
-                            convention: rateIndex.businessDayConvention(),
-                            endOfMonth: rateIndex.endOfMonth(),
-                            dayCounter: rateIndex.dayCounter()));
+                    if (include[i])
+                    {
+                        rateHelpers.Add(
+                            new DepositRateHelper(
+                                rate: rates[i],
+                                tenor: new Period(tenors[i]),
+                                fixingDays: rateIndex.fixingDays(),
+                                calendar: rateIndex.fixingCalendar(),
+                                convention: rateIndex.businessDayConvention(),
+                                endOfMonth: rateIndex.endOfMonth(),
+                                dayCounter: rateIndex.dayCounter()));
+                    }
                 }
             }
             else if (string.Compare(instrumentType, "FRAs", StringComparison.InvariantCultureIgnoreCase) == 0)
             {
                 for (int i = 0; i < tenors.Count; i++)
                 {
-                    rateHelpers.Add(
-                        new FraRateHelper(
-                            rate: new Handle<Quote>(new SimpleQuote(rates[i])),
-                            periodToStart: new Period(tenors[i]),
-                            iborIndex: rateIndex));
+                    if (include[i])
+                    {
+                        rateHelpers.Add(
+                            new FraRateHelper(
+                                rate: new Handle<Quote>(new SimpleQuote(rates[i])),
+                                periodToStart: new Period(tenors[i]),
+                                iborIndex: rateIndex));
+                    }
                 }
             }
             else if (string.Compare(instrumentType, "Interest Rate Swaps", StringComparison.InvariantCultureIgnoreCase) == 0)
             {
                 for (int i = 0; i < tenors.Count; i++)
                 {
-                    rateHelpers.Add(
-                        new SwapRateHelper(
-                            rate: new Handle<Quote>(new SimpleQuote(rates[i])),
-                            tenor: new Period(tenors[i]),
-                            calendar: rateIndex.fixingCalendar(),
-                            fixedFrequency: Frequency.Quarterly,
-                            fixedConvention: rateIndex.businessDayConvention(),
-                            fixedDayCount: rateIndex.dayCounter(),
-                            iborIndex: rateIndex));
+                    if (include[i])
+                    {
+                        rateHelpers.Add(
+                            new SwapRateHelper(
+                                rate: new Handle<Quote>(new SimpleQuote(rates[i])),
+                                tenor: new Period(tenors[i]),
+                                calendar: rateIndex.fixingCalendar(),
+                                fixedFrequency: Frequency.Quarterly,
+                                fixedConvention: rateIndex.businessDayConvention(),
+                                fixedDayCount: rateIndex.dayCounter(),
+                                iborIndex: rateIndex));
+                    }
                 }
             }
         }
