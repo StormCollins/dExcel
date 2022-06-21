@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Documents;
 
 /// <summary>
 /// A class for manipulating dExcel type tables in Excel.
@@ -40,5 +41,56 @@ public static class ExcelTable
                     .Cast<string>()
                     .ToList();
         return columnTitles;
+    }
+
+    /// <summary>
+    /// Gets a column from an Excel table given the column header.
+    /// </summary>
+    /// <param name="table">The input range.</param>
+    /// <param name="columnHeader">The column header.</param>
+    /// <typeparam name="T">The type to cast the column to e.g. "string" or "double".</typeparam>
+    /// <returns>The table column.</returns>
+    public static List<T> GetColumn<T>(object[,] table, string columnHeader)
+    {
+        var index = GetColumnHeaders(table).IndexOf(columnHeader);
+        List<T> column;
+        if (typeof(T) == typeof(double))
+        {
+            column =
+                Enumerable
+                    .Range(2, table.GetLength(0) - 2)
+                    .Select(i => double.Parse(table[i, index].ToString()))
+                    .Cast<T>()
+                    .ToList();
+        }
+        else if (typeof(T) == typeof(int))
+        {
+            column =
+                Enumerable
+                    .Range(2, table.GetLength(0) - 2)
+                    .Select(i => int.Parse(table[i, index].ToString()))
+                    .Cast<T>()
+                    .ToList();
+        }
+        else if (typeof(T) == typeof(DateTime))
+        {
+            column =
+                Enumerable
+                    .Range(2, table.GetLength(0) - 2)
+                    .Select(i => DateTime.FromOADate(int.Parse(table[i, index].ToString())))
+                    .Cast<T>()
+                    .ToList();
+        }
+        else
+        {
+            column =
+                Enumerable
+                    .Range(2, table.GetLength(0) - 2)
+                    .Select(i => table[i, index])
+                    .Cast<T>()
+                    .ToList();
+        }
+        
+        return column;
     }
 }
