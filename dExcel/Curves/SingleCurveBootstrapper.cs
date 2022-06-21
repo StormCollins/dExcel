@@ -44,13 +44,13 @@ public static class SingleCurveBootstrapper
                     {
                         rateHelpers.Add(
                             new DepositRateHelper(
-                                rate: rates[i],
-                                tenor: new Period(tenors[i]),
-                                fixingDays: rateIndex.fixingDays(),
-                                calendar: rateIndex.fixingCalendar(),
-                                convention: rateIndex.businessDayConvention(),
-                                endOfMonth: rateIndex.endOfMonth(),
-                                dayCounter: rateIndex.dayCounter()));
+                                    rate: rates[i],
+                                    tenor: new Period(tenors[i]),
+                                    fixingDays: rateIndex.fixingDays(),
+                                    calendar: rateIndex.fixingCalendar(),
+                                    convention: rateIndex.businessDayConvention(),
+                                    endOfMonth: rateIndex.endOfMonth(),
+                                    dayCounter: rateIndex.dayCounter()));
                     }
                 }
             }
@@ -76,13 +76,13 @@ public static class SingleCurveBootstrapper
                     {
                         rateHelpers.Add(
                             new SwapRateHelper(
-                                rate: new Handle<Quote>(new SimpleQuote(rates[i])),
-                                tenor: new Period(tenors[i]),
-                                calendar: rateIndex.fixingCalendar(),
-                                fixedFrequency: Frequency.Quarterly,
-                                fixedConvention: rateIndex.businessDayConvention(),
-                                fixedDayCount: rateIndex.dayCounter(),
-                                iborIndex: rateIndex));
+                                    rate: new Handle<Quote>(new SimpleQuote(rates[i])),
+                                    tenor: new Period(tenors[i]),
+                                    calendar: rateIndex.fixingCalendar(),
+                                    fixedFrequency: Frequency.Quarterly,
+                                    fixedConvention: rateIndex.businessDayConvention(),
+                                    fixedDayCount: rateIndex.dayCounter(),
+                                    iborIndex: rateIndex));
                     }
                 }
             }
