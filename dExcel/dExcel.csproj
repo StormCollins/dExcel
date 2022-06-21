@@ -173,6 +173,7 @@
   <ItemGroup>
     <PackageReference Include="ExcelDna.AddIn" Version="1.6.0-preview3" />
     <PackageReference Include="ExcelDna.Integration" Version="1.6.0-preview3" />
+    <PackageReference Include="ExcelDna.Registration" Version="1.6.0-preview3" />
     <PackageReference Include="fuzzysharp" Version="2.0.2" />
     <PackageReference Include="MaterialDesignThemes" Version="4.5.0" />
     <PackageReference Include="mathnet.numerics" Version="5.0.0" />
