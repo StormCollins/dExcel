@@ -45,23 +45,7 @@ public class ExcelTableTests
     }
 
     [Test]
-    public void GetStringColumnTest()
-    {
-        Assert.AreEqual(
-            expected: new List<string> {"Curve Name", "Interpolation"},
-            actual: ExcelTable.GetColumn<string>(_parameterTable, "Parameter"));
-    }
-
-    [Test]
-    public void GetDoubleColumnTest()
-    {
-        Assert.AreEqual(
-            expected: new List<double> { 1.000, 0.999, 0.998 },
-            actual: ExcelTable.GetColumn<double>(_discountFactorsTable, "Discount Factors"));
-    }
-    
-    [Test]
-    public void GetDateColumnTest()
+    public void GetColumnDateTest()
     {
         Assert.AreEqual(
             expected: new List<DateTime> { new(2022, 06, 01), new(2022, 07, 01), new(2022, 08, 01) },
@@ -69,10 +53,50 @@ public class ExcelTableTests
     }
     
     [Test]
-    public void GetIntColumnTest()
+    public void GetColumnDoubleTest()
+    {
+        Assert.AreEqual(
+            expected: new List<double> { 1.000, 0.999, 0.998 },
+            actual: ExcelTable.GetColumn<double>(_discountFactorsTable, "Discount Factors"));
+    }
+    
+    [Test]
+    public void GetColumnIntTest()
     {
         Assert.AreEqual(
             expected: new List<double> { 1, 2, 3 },
             actual: ExcelTable.GetColumn<int>(_integerTable, "Int1"));
+    }
+
+    [Test]
+    public void GetColumnStringTest()
+    {
+        Assert.AreEqual(
+            expected: new List<string> {"Curve Name", "Interpolation"},
+            actual: ExcelTable.GetColumn<string>(_parameterTable, "Parameter"));
+    }
+
+    [Test]
+    public void GetRowHeadersTest()
+    {
+        Assert.AreEqual(
+            expected: new List<string> {"Curve Name", "Interpolation"}, 
+            actual: ExcelTable.GetRowHeaders(_parameterTable));
+    }
+
+    [Test]
+    public void LookupTableValueIntTest()
+    {
+        Assert.AreEqual(
+            expected: 3,
+            actual: ExcelTable.LookupTableValue<int>(_integerTable, "Int2", "2")); 
+    }
+    
+    [Test]
+    public void LookupTableValueStringTest()
+    {
+        Assert.AreEqual(
+            expected: "LogLinear",
+            actual: ExcelTable.LookupTableValue<string>(_parameterTable, "Value", "Interpolation")); 
     }
 }

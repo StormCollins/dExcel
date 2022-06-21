@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Documents;
 
 /// <summary>
 /// A class for manipulating dExcel type tables in Excel.
@@ -34,13 +33,13 @@ public static class ExcelTable
     /// <returns>The list of column headers.</returns>
     public static List<string> GetColumnHeaders(object[,] table)
     {
-        List<string> columnTitles
-                = Enumerable
-                    .Range(0, table.GetLength(1))
-                    .Select(j => table[1, j])
-                    .Cast<string>()
-                    .ToList();
-        return columnTitles;
+        var columnHeaders
+            = Enumerable
+                .Range(0, table.GetLength(1))
+                .Select(j => table[1, j])
+                .Cast<string>()
+                .ToList();
+        return columnHeaders;
     }
 
     /// <summary>
@@ -54,25 +53,7 @@ public static class ExcelTable
     {
         var index = GetColumnHeaders(table).IndexOf(columnHeader);
         List<T> column;
-        if (typeof(T) == typeof(double))
-        {
-            column =
-                Enumerable
-                    .Range(2, table.GetLength(0) - 2)
-                    .Select(i => double.Parse(table[i, index].ToString()))
-                    .Cast<T>()
-                    .ToList();
-        }
-        else if (typeof(T) == typeof(int))
-        {
-            column =
-                Enumerable
-                    .Range(2, table.GetLength(0) - 2)
-                    .Select(i => int.Parse(table[i, index].ToString()))
-                    .Cast<T>()
-                    .ToList();
-        }
-        else if (typeof(T) == typeof(DateTime))
+        if (typeof(T) == typeof(DateTime))
         {
             column =
                 Enumerable
@@ -86,11 +67,45 @@ public static class ExcelTable
             column =
                 Enumerable
                     .Range(2, table.GetLength(0) - 2)
-                    .Select(i => table[i, index])
-                    .Cast<T>()
+                    .Select(i => (T)Convert.ChangeType(table[i, index], typeof(T)))
                     .ToList();
         }
-        
         return column;
+    }
+    
+    /// <summary>
+    /// Get the list of row headers of a table.
+    /// </summary>
+    /// <remarks>Assumes the row headers are in column 0 and start from row 2.</remarks>
+    /// <param name="table">The input range.</param>
+    /// <returns>The list of row headers.</returns>
+    public static List<string> GetRowHeaders(object[,] table)
+    {
+        var rowHeaders
+            = Enumerable
+                .Range(2, table.GetLength(0) - 2)
+                .Select(i => table[i, 0])
+                .Cast<string>()
+                .ToList(); 
+        return rowHeaders;
+    }
+
+    /// <summary>
+    /// Looks up a value in an Excel table using a column and row header. Assumes row headers are in column 0 and column
+    /// headers are in row 2.
+    /// </summary>
+    /// <param name="table">The Excel input range.</param>
+    /// <param name="columnHeader">The column header.</param>
+    /// <param name="rowHeader">The row header.</param>
+    /// <returns>The looked up value.</returns>
+    public static T LookupTableValue<T>(object[,] table, string columnHeader, string rowHeader)
+    {
+        var columnIndex = GetColumnHeaders(table).IndexOf(columnHeader);
+        var rowIndex = GetRowHeaders(table).IndexOf(rowHeader) + 2;
+        if (typeof(T) == typeof(DateTime))
+        {
+            return (T)Convert.ChangeType(DateTime.FromOADate(int.Parse(table[rowIndex, columnIndex].ToString())), typeof(T));
+        }
+        return (T)Convert.ChangeType(table[rowIndex, columnIndex], typeof(T));
     }
 }
