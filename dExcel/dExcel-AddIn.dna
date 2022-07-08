@@ -63,6 +63,10 @@
 					id='btnClearFormatting'
 					label='Clear Formatting'
 					onAction='ClearFormatting'/>
+				  <button
+					id='btnLoadDeloitteTheme'
+					label='Load Deloitte Theme'
+					onAction='LoadDeloitteTheme'/>
 				</menu>
 			  </splitButton>
 			</group>

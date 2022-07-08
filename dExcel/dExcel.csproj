@@ -200,6 +200,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="resources\workbooks\Deloitte_Brand_Theme.thmx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="resources\workbooks\Testing.xlsm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="WPF\Dashboard.xaml">
       <Generator>$(DefaultXamlRuntime)</Generator>
     </None>

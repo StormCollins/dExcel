@@ -1,5 +1,6 @@
 ﻿namespace dExcel;
 
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -136,6 +137,18 @@ public class RibbonController : ExcelRibbon
     }
 
     public void ClearFormatting(IRibbonControl control) => CellFormatUtils.ClearFormatting();
+
+    /// <summary>
+    /// Loads and switches Excel to the standard Deloitte Excel theme i.e. it loads the relevant .thmx file.
+    /// </summary>
+    /// <param name="control"></param>
+    public void LoadDeloitteTheme(IRibbonControl control)
+    {
+#if DEBUG
+        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        xlApp.ActiveWorkbook.ApplyTheme(Path.Combine(Path.GetDirectoryName(DebugUtils.GetXllPath()), @"resources\workbooks\Deloitte_Brand_Theme.thmx"));
+#endif
+    }
 
     public void FormatTable(IRibbonControl control) => CellFormatUtils.FormatTable();
 
