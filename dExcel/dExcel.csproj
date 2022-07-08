@@ -212,6 +212,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="WPF\TableFormatter.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
     <Page Update="WPF\FunctionSearch.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>

@@ -1,0 +1,122 @@
+﻿<Window x:Class="dExcel.TableFormatter"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:dExcel"
+        mc:Ignorable="d"
+        BorderThickness="5"
+        BorderBrush="{DynamicResource MaterialDesignPaper}"
+        Title="∂Excel Table Formatter"
+        Height="540"
+        Width="500"
+        Icon="pack://application:,,,/dExcel;component/resources/icons/dExcel.ico"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}">
+  <Window.Resources>
+    <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"/>
+  </Window.Resources>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+
+    <TextBlock
+      Grid.Row="0"
+      Grid.Column="0"
+      Grid.ColumnSpan="5"
+      Style="{StaticResource GreenHeader1}"
+      Text="∂Excel Table Formatter"/>
+
+    <Image
+      Name="dExcelIcon"
+      HorizontalAlignment="Right"
+      VerticalAlignment="Top"
+      Grid.Row="0"
+      Grid.RowSpan="2"
+      Grid.Column="11"
+      Margin="5"
+      Width="48"
+      Source="pack://application:,,,/dExcel;component/resources/icons/dExcel48.png"/>
+    
+    <materialDesign:Card
+      Grid.Row="1"
+      Grid.RowSpan="6"
+      Grid.Column="0"
+      Grid.ColumnSpan="6">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel
+          Grid.Column="0"
+          Grid.ColumnSpan="3"
+          Grid.Row="0"
+          Grid.RowSpan="6"
+          Margin="5">
+        
+          <TextBlock
+            FontSize="18"
+            Text="Select the features your table has:"/>
+
+          <RadioButton
+            Name="VerticallyAlignedTable"
+            Content="Vertically Aligned"
+            GroupName="TableAlignment"
+            IsChecked="True" />
+
+          <RadioButton
+            Name="HorizontallyAlignedTable"
+            Content="Horizontally Aligned"
+            GroupName="TableAlignment" 
+            IsChecked="False"/>
+
+          <CheckBox
+            Name="chkBxSecondaryHeader"
+            Content="Secondary Header"/>
+          
+        </StackPanel>
+        
+        <Button
+          Name="FormatTable"
+          Grid.Row="5"
+          Grid.Column="2"
+          Content="Format Table" 
+          Click="FormatTable_Click"/>
+      </Grid>
+    </materialDesign:Card>
+
+    <Button
+      Grid.Row="9"
+      Grid.Column="11"
+      Content="Close"
+      Click="CloseTableFormatter"/>
+  </Grid>
+</Window>

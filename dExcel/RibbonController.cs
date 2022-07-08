@@ -146,11 +146,37 @@ public class RibbonController : ExcelRibbon
     {
 #if DEBUG
         var xlApp = (Excel.Application)ExcelDnaUtil.Application;
-        xlApp.ActiveWorkbook.ApplyTheme(Path.Combine(Path.GetDirectoryName(DebugUtils.GetXllPath()), @"resources\workbooks\Deloitte_Brand_Theme.thmx"));
+        xlApp.ActiveWorkbook.ApplyTheme(
+            Path.Combine(
+                Path.GetDirectoryName(DebugUtils.GetXllPath()),
+                @"resources\workbooks\Deloitte_Brand_Theme.thmx"));
 #endif
     }
 
-    public void FormatTable(IRibbonControl control) => CellFormatUtils.FormatTable();
+    public void FormatTable(IRibbonControl control)
+    {
+        FormattingSettings? formatSettings = null;
+        var thread = new Thread(() =>
+        {
+            var tableFormatter = TableFormatter.Instance;
+            tableFormatter.Show();
+            tableFormatter.Closed += (sender2, e2) => tableFormatter.Dispatcher.InvokeShutdown();
+            Dispatcher.Run();
+            formatSettings = tableFormatter.FormatSettings;
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        if (formatSettings != null)
+        {
+            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            ((Excel.Range)xlApp.Selection).Formula = $"=d.{formatSettings}()";
+            ((Excel.Range)xlApp.Selection).FunctionWizard();
+        }
+        //CellFormatUtils.FormatTable();
+    }
+    
 
     /// <summary>
     /// Calculates the selected Excel range.
