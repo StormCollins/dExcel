@@ -103,12 +103,29 @@ public class ExcelTableTests
             expected: "LogLinear",
             actual: ExcelTable.LookupTableValue<string>(_parameterTable, "Value", "Interpolation")); 
     }
+    
+    [Test]
+    public void LookupNonExistentTableValueStringTest()
+    {
+        Assert.AreEqual(
+            expected: null,
+            actual: ExcelTable.LookupTableValue<string>(_parameterTable, "NotThere", "Interpolation")); 
+    }
 
     [Test]
-    public void LookupTableValuesTest()
+    public void LookupMultiplyMappedTableValuesTest()
     {
+        // TODO: Explain this test.
         Assert.AreEqual(
             expected: new List<string> {"Deposits", "FRAs", "Interest Rate Swaps"},
             actual: ExcelTable.LookupTableValues<string>(_parameterTable, "Value", "Instruments"));
+    }
+    
+    [Test]
+    public void LookupNonExistentTableValuesTest()
+    {
+        Assert.AreEqual(
+            expected: null,
+            actual: ExcelTable.LookupTableValues<string>(_parameterTable, "Value", "NotThere"));
     }
 }

@@ -31,13 +31,14 @@ public static class ExcelTable
     /// </summary>
     /// <remarks>Assumes the column headers are in row 1 (of a zero based row index).</remarks>
     /// <param name="table">The input range.</param>
+    /// <param name="columnHeaderRow">The index of the row containing the column headers.</param>
     /// <returns>The list of column headers.</returns>
-    public static List<string> GetColumnHeaders(object[,] table)
+    public static List<string> GetColumnHeaders(object[,] table, int columnHeaderRow = 0)
     {
         var columnHeaders
             = Enumerable
                 .Range(0, table.GetLength(1))
-                .Select(j => table[1, j])
+                .Select(j => table[columnHeaderRow, j])
                 .Cast<string>()
                 .ToList();
         return columnHeaders;
@@ -50,9 +51,14 @@ public static class ExcelTable
     /// <param name="columnHeader">The column header.</param>
     /// <typeparam name="T">The type to cast the column to e.g. "string" or "double".</typeparam>
     /// <returns>The table column.</returns>
-    public static List<T> GetColumn<T>(object[,] table, string columnHeader)
+    public static List<T>? GetColumn<T>(object[,] table, string columnHeader)
     {
         var index = GetColumnHeaders(table).IndexOf(columnHeader);
+        if (index == -1)
+        {
+            return null;
+        }
+
         List<T> column;
         if (typeof(T) == typeof(DateTime))
         {
@@ -99,10 +105,15 @@ public static class ExcelTable
     /// <param name="columnHeader">The column header.</param>
     /// <param name="rowHeader">The row header.</param>
     /// <returns>The looked up value.</returns>
-    public static T LookupTableValue<T>(object[,] table, string columnHeader, string rowHeader)
+    public static T? LookupTableValue<T>(object[,] table, string columnHeader, string rowHeader)
     {
         var columnIndex = GetColumnHeaders(table).IndexOf(columnHeader);
         var rowIndex = GetRowHeaders(table).IndexOf(rowHeader) + 2;
+        if (columnIndex == -1 || rowIndex == 1)
+        {
+            return default;
+        }
+        
         if (typeof(T) == typeof(DateTime))
         {
             return (T)Convert.ChangeType(DateTime.FromOADate(int.Parse(table[rowIndex, columnIndex].ToString())), typeof(T));
@@ -127,11 +138,16 @@ public static class ExcelTable
     /// <param name="table">The Excel input range.</param>
     /// <param name="columnHeader">The column header.</param>
     /// <param name="rowHeader">The row header.</param>
-    /// <returns>The looked up value.</returns>
-    public static List<T> LookupTableValues<T>(object[,] table, string columnHeader, string rowHeader)
+    /// <returns>The looked up value. If it can't find the column/row header, returns null.</returns>
+    public static List<T>? LookupTableValues<T>(object[,] table, string columnHeader, string rowHeader)
     {
         var columnIndex = GetColumnHeaders(table).IndexOf(columnHeader);
         var rowIndexStart = GetRowHeaders(table).IndexOf(rowHeader) + 2;
+        if (columnIndex == -1 || rowIndexStart == 1)
+        {
+            return null;
+        }
+        
         var rowIndexEnd = 1;
         
         for (int i = rowIndexStart + 1; i < table.GetLength(0); i++)
@@ -146,7 +162,7 @@ public static class ExcelTable
             }
         }
         
-        List<T> values = new();
+        List<T>? values;
 
         if (typeof(T) == typeof(DateTime))
         {

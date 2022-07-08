@@ -7,7 +7,7 @@ using QLNet;
 public static class CurveBootstrapper
 {
     [ExcelFunction(
-            Name = "d.Curve_SingleCurveBootstrap",
+            Name = "d.Curve_CurveBootstrap",
             Description = "Bootstraps a single curve i.e. this is not a multi-curve bootstrapper.",
             Category = "∂Excel: Interest Rates")]
         public static string Bootstrap(string handle, DateTime baseDate, params object[] instrumentGroups)
@@ -44,13 +44,13 @@ public static class CurveBootstrapper
                         {
                             rateHelpers.Add(
                                 new DepositRateHelper(
-                                    rate: rates[i],
-                                    tenor: new Period(tenors[i]),
-                                    fixingDays: rateIndex.fixingDays(),
-                                    calendar: rateIndex.fixingCalendar(),
-                                    convention: rateIndex.businessDayConvention(),
-                                    endOfMonth: rateIndex.endOfMonth(),
-                                    dayCounter: rateIndex.dayCounter()));
+                                        rate: rates[i],
+                                        tenor: new Period(tenors[i]),
+                                        fixingDays: rateIndex.fixingDays(),
+                                        calendar: rateIndex.fixingCalendar(),
+                                        convention: rateIndex.businessDayConvention(),
+                                        endOfMonth: rateIndex.endOfMonth(),
+                                        dayCounter: rateIndex.dayCounter()));
                         }
                     }
                 }
@@ -74,6 +74,15 @@ public static class CurveBootstrapper
                     {
                         if (include[i])
                         {
+                                var x = new SwapRateHelper(
+                                    rate: new Handle<Quote>(new SimpleQuote(rates[i])),
+                                    tenor: new Period(tenors[i]),
+                                    calendar: rateIndex.fixingCalendar(),
+                                    fixedFrequency: Frequency.Quarterly,
+                                    fixedConvention: rateIndex.businessDayConvention(),
+                                    fixedDayCount: rateIndex.dayCounter(),
+                                    iborIndex: rateIndex);
+                                
                             rateHelpers.Add(
                                 new SwapRateHelper(
                                     rate: new Handle<Quote>(new SimpleQuote(rates[i])),

@@ -10,6 +10,13 @@ public class HullWhiteTests
     [TestCase]
     public void Calibration()
     { 
+        object[,] curveParameters =
+        {
+            { "Parameter", "Value" },
+            { "DayCountConvention", "Actual365" },
+            { "Interpolation", "LogLinear" },
+        }; 
+        
         var dates = new object[,]
         {
             { new DateTime(2022,  05, 25).ToOADate() },
@@ -84,7 +91,7 @@ public class HullWhiteTests
             { 0.499731 },
         };
 
-        string curveHandle = dExcel.Curves.Curve.Create("DiscountCurve", dates, discountFactors);
+        string curveHandle = dExcel.Curves.Curve.Create("DiscountCurve", curveParameters, dates, discountFactors);
         
         var swaptionMaturities = new object[,] 
         { 

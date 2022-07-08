@@ -99,20 +99,24 @@ public static class CellFormatUtils
         var secondaryTitle = GetSecondaryTitleRow(entireRange, primaryTitle.row);
         SetSecondaryTitleRowFormatting(secondaryTitle?.range);
         var firstRowOrColumnOfBodyRange = secondaryTitle == null ? 2 : secondaryTitle?.row + 1;
-        var bodyRange =
+
+        // The 1-based index of the first column containing content (i.e. content as opposed to titles) 
+        int firstContentColumn = tableOrientation == TableOrientation.Vertical ? entireRange.Column : -1;
+
+        var contentRange =
             tableOrientation == TableOrientation.Horizontal
                 ? (Excel.Range)entireRange.Rows[$"{firstRowOrColumnOfBodyRange}:{entireRange.Rows.Count}"]
                 : (Excel.Range)entireRange
-                    .Columns[$"{firstRowOrColumnOfBodyRange}:{GetExcelColumnName(entireRange.Columns.Count)}"];
+                    .Columns[$"{GetColumnLetter(firstContentColumn)}:{GetColumnLetter(entireRange.Columns.Count)}"];
 
-        SetBodyFormatting(bodyRange, secondaryTitle?.range ?? primaryTitle.range, tableOrientation);
+        SetBodyFormatting(contentRange, secondaryTitle?.range ?? primaryTitle.range, tableOrientation);
         entireRange.Columns.AutoFit();
 
         // format chart
         // if cell at the bottom has sum
     }
 
-    private static string GetExcelColumnName(int columnNumber)
+    private static string GetColumnLetter(int columnNumber)
     {
         var columnName = "";
         while (columnNumber > 0)

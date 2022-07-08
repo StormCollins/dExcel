@@ -12,6 +12,7 @@ public static class SingleCurveBootstrapper
         Category = "∂Excel: Interest Rates")]
     public static string Bootstrap(string handle, DateTime baseDate, params object[] instrumentGroups)
     {
+        Settings.setEvaluationDate(baseDate);
         List<RateHelper> rateHelpers = new();
         IborIndex rateIndex = null;
         
@@ -21,15 +22,21 @@ public static class SingleCurveBootstrapper
             
             // TODO: Make this case insensitive.
             List<string> tenors = ExcelTable.GetColumn<string>(instruments, "Tenors");
+            List<DateTime> startDates = ExcelTable.GetColumn<DateTime>(instruments, "StartDates");
+            List<DateTime> endDates = ExcelTable.GetColumn<DateTime>(instruments, "EndDates");
             List<string> rateIndices = ExcelTable.GetColumn<string>(instruments, "RateIndex");
             List<double> rates = ExcelTable.GetColumn<double>(instruments, "Rates");
             List<bool> include = ExcelTable.GetColumn<bool>(instruments, "Include");
-            
+
+            var instrumentCount = include.Count;
+
+
             var index = rateIndices[0];
             rateIndex =
                 index switch
                 {
                     "EURIBOR" => new Euribor(new Period("3m")),
+                    "FEDFUND" => new FedFunds(),
                     "JIBAR" => new Jibar(new Period("3m")),
                     "USD-LIBOR" => new USDLibor(new Period("3m")),
                 };
@@ -38,7 +45,7 @@ public static class SingleCurveBootstrapper
             
             if (string.Compare(instrumentType, "Deposits", StringComparison.InvariantCultureIgnoreCase) == 0)
             {
-                for (int i = 0; i < tenors.Count; i++)
+                for (int i = 0; i < instrumentCount; i++)
                 {
                     if (include[i])
                     {
@@ -56,7 +63,7 @@ public static class SingleCurveBootstrapper
             }
             else if (string.Compare(instrumentType, "FRAs", StringComparison.InvariantCultureIgnoreCase) == 0)
             {
-                for (int i = 0; i < tenors.Count; i++)
+                for (int i = 0; i < instrumentCount; i++)
                 {
                     if (include[i])
                     {
@@ -70,7 +77,7 @@ public static class SingleCurveBootstrapper
             }
             else if (string.Compare(instrumentType, "Interest Rate Swaps", StringComparison.InvariantCultureIgnoreCase) == 0)
             {
-                for (int i = 0; i < tenors.Count; i++)
+                for (int i = 0; i < instrumentCount; i++)
                 {
                     if (include[i])
                     {
@@ -83,6 +90,21 @@ public static class SingleCurveBootstrapper
                                     fixedConvention: rateIndex.businessDayConvention(),
                                     fixedDayCount: rateIndex.dayCounter(),
                                     iborIndex: rateIndex));
+                    }
+                }
+            }
+            else if (string.Compare(instrumentType, "OISs", StringComparison.InvariantCultureIgnoreCase) == 0)
+            {
+                for (int i = 0; i < instrumentCount; i++)
+                {
+                    if (include[i])
+                    {
+                        rateHelpers.Add(
+                            new DatedOISRateHelper(
+                                startDate: baseDate, 
+                                endDate: endDates[i],
+                                new Handle<Quote>(new SimpleQuote(rates[i])),
+                                (OvernightIndex)rateIndex));
                     }
                 }
             }
