@@ -35,17 +35,28 @@ public class RibbonController : ExcelRibbon
 
     public void OpenDashboard(IRibbonControl control)
     {
+        string? dashBoardAction = null;
         var thread = new Thread(() =>
         {
             var dashboard = Dashboard.Instance;
             dashboard.Show();
             dashboard.Closed += (sender2, e2) => dashboard.Dispatcher.InvokeShutdown();
             Dispatcher.Run();
+            dashBoardAction = dashboard.DashBoardAction;
         });
 
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
         thread.Join();
+        if (string.Compare(dashBoardAction, "OpenTestingWorkbook", true) == 0)
+        {
+            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+#if DEBUG
+            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\resources\workbooks\dexcel-testing.xlsm");
+#else
+            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\Versions\Current\dexcel-testing.xlsm");
+#endif
+        }
     }
 
     public void OpenFunctionSearch(IRibbonControl control)
@@ -136,7 +147,11 @@ public class RibbonController : ExcelRibbon
         return path;
     }
 
-    public void ClearFormatting(IRibbonControl control) => CellFormatUtils.ClearFormatting();
+    /// <summary>
+    /// Removes the formatting from a table (or rather contiguous region) in Excel.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void ClearTableFormatting(IRibbonControl control) => RangeFormatUtils.ClearRangeFormatting();
 
     /// <summary>
     /// Loads and switches Excel to the standard Deloitte Excel theme i.e. it loads the relevant .thmx file.
@@ -150,6 +165,10 @@ public class RibbonController : ExcelRibbon
             Path.Combine(
                 Path.GetDirectoryName(DebugUtils.GetXllPath()),
                 @"resources\workbooks\Deloitte_Brand_Theme.thmx"));
+#else
+        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        xlApp.ActiveWorkbook.ApplyTheme(
+                @"C:\GitLab\dExcelTools\Versions\CurrentDeloitte_Brand_Theme.thmx"));
 #endif
     }
 
@@ -168,13 +187,16 @@ public class RibbonController : ExcelRibbon
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
         thread.Join();
-        if (formatSettings != null)
+        if (formatSettings != null && formatSettings.Value.IsVertical)
         {
             var xlApp = (Excel.Application)ExcelDnaUtil.Application;
-            ((Excel.Range)xlApp.Selection).Formula = $"=d.{formatSettings}()";
-            ((Excel.Range)xlApp.Selection).FunctionWizard();
+            RangeFormatUtils.SetVerticallyAlignedTableFormatting(formatSettings.Value.HasTwoHeaders);
         }
-        //CellFormatUtils.FormatTable();
+        else if (formatSettings != null && !formatSettings.Value.IsVertical)
+        {
+            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            RangeFormatUtils.SetHorizontallyAlignedTableFormatting(formatSettings.Value.HasTwoHeaders);
+        }
     }
     
 
@@ -186,6 +208,23 @@ public class RibbonController : ExcelRibbon
     {
         var xlApp = (Excel.Application)ExcelDnaUtil.Application;
         ((Excel.Range)xlApp.Selection).Calculate();
+    }
+
+    public void ApplyLogicFormatting(IRibbonControl control)
+    {
+        RangeFormatUtils.SetRangeConditionalLogicFormatting();
+    }
+
+    public void ApplyPrimaryHeaderFormatting(IRibbonControl control)
+    {
+        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        RangeFormatUtils.SetPrimaryTitleRangeFormatting(xlApp.Selection);
+    }
+
+    public void ApplySecondaryHeaderFormatting(IRibbonControl control)
+    {
+        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        RangeFormatUtils.SetSecondaryTitleRangeFormatting(xlApp.Selection);
     }
 
     // TODO: Move these to a separate class.

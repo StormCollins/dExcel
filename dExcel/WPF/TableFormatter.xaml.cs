@@ -1,15 +1,14 @@
 ﻿namespace dExcel;
 
-using System;
-using System.Diagnostics;
-using System.Windows.Navigation;
-using System.Net.NetworkInformation;
-using System.IO;
 using System.Windows;
-using System.Windows.Media.Imaging;
-using ExcelDna.Integration;
 
-public readonly record struct FormattingSettings(bool IsVertical, bool HasSecondaryHeader);
+/// <summary>
+/// The formatting settings to apply to a table.
+/// </summary>
+/// <param name="IsVertical">True if the table is vertical (i.e. has column headers) else false if horizontal 
+/// (i.e. has row headers).</param>
+/// <param name="HasTwoHeaders">True if the table has two header rows.</param>
+public readonly record struct FormattingSettings(bool IsVertical, bool HasTwoHeaders);
 
 /// <summary>
 /// Interaction logic for TableFormatter.xaml which allows users to quickly select and apply the format for a selected
@@ -22,7 +21,7 @@ public partial class TableFormatter : Window
     public FormattingSettings? FormatSettings { get; set; }
 
     /// <summary>
-    /// Creates an instance of TableFormatter using the Singleton pattern.
+    /// Creates an instance of <see cref="TableFormatter"/> using the Singleton pattern.
     /// </summary>
     public static TableFormatter Instance
     {
@@ -37,7 +36,7 @@ public partial class TableFormatter : Window
     }
 
     /// <summary>
-    /// Creates an instance of TableFormatter.
+    /// Creates an instance of <see cref="TableFormatter"/>.
     /// </summary>
     private TableFormatter()
     {
@@ -56,7 +55,7 @@ public partial class TableFormatter : Window
     }
 
     /// <summary>
-    /// Event called when TableFormatter close button is clicked.
+    /// Event called when TableFormatter 'Close' button or red 'X' is clicked.
     /// </summary>
     /// <param name="sender">The sender.</param>
     /// <param name="e">Event args.</param>
@@ -71,5 +70,26 @@ public partial class TableFormatter : Window
         this.FormatSettings
             = new FormattingSettings((bool)VerticallyAlignedTable.IsChecked, (bool)chkBxSecondaryHeader.IsChecked);
         this.Close();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void HorizontallyAlignedTable_Checked(object sender, RoutedEventArgs e)
+    {
+        if (chkBxSecondaryHeader != null)
+        {
+            chkBxSecondaryHeader.Content = "Two Header Columns";
+        }
+    }
+
+    private void VerticallyAlignedTable_Checked(object sender, RoutedEventArgs e)
+    {
+        if (chkBxSecondaryHeader != null)
+        {
+            chkBxSecondaryHeader.Content = "Two Header Rows";
+        }
     }
 }

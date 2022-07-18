@@ -90,18 +90,62 @@
             Name="VerticallyAlignedTable"
             Content="Vertically Aligned"
             GroupName="TableAlignment"
+            Checked="VerticallyAlignedTable_Checked"
             IsChecked="True" />
 
           <RadioButton
             Name="HorizontallyAlignedTable"
             Content="Horizontally Aligned"
             GroupName="TableAlignment" 
-            IsChecked="False"/>
+            IsChecked="False"
+            Checked="HorizontallyAlignedTable_Checked"/>
 
           <CheckBox
             Name="chkBxSecondaryHeader"
-            Content="Secondary Header"/>
-          
+            Content="Two Header Rows"/>
+
+          <TextBlock
+            Text="Number of Column Headers"
+            Style="{StaticResource GreenHeader3}"/>
+          <StackPanel
+            Orientation="Horizontal">
+            <RadioButton
+              Content="Zero"
+              GroupName="ColumnHeaderCount"
+              Margin="10 0 10 10"/>
+
+            <RadioButton
+              Content="One"
+              GroupName="ColumnHeaderCount"
+              IsChecked="True"
+              Margin="10 0 10 10"/>
+
+            <RadioButton
+              Content="Two"
+              GroupName="ColumnHeaderCount"
+              Margin="10 0 10 10"/>
+          </StackPanel>
+
+          <TextBlock
+            Text="Number of Row Headers"
+            Style="{StaticResource GreenHeader3}"/>
+          <DockPanel>
+            <RadioButton
+              Content="Zero"
+              GroupName="RowHeaderCount"
+              IsChecked="True"
+              Margin="10 0 10 10"/>
+
+            <RadioButton
+              Content="One"
+              GroupName="RowHeaderCount"
+              Margin="10 0 10 10"/>
+
+            <RadioButton
+              Content="Two"
+              GroupName="RowHeaderCount"
+              Margin="10 0 10 10"/>
+          </DockPanel>
         </StackPanel>
         
         <Button

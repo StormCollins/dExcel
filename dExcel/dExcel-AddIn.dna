@@ -60,13 +60,30 @@
 				  tag='format-painter-large-blue.ico'/>
 				<menu id='menuFormatMenu'>
 				  <button
-					id='btnClearFormatting'
-					label='Clear Formatting'
-					onAction='ClearFormatting'/>
+					id='btnClearTableFormatting'
+					label='Clear Table Formatting'
+					onAction='ClearTableFormatting'
+					screentip='Clears the formatting from a ∂Excel formatted table.'/>
 				  <button
 					id='btnLoadDeloitteTheme'
 					label='Load Deloitte Theme'
-					onAction='LoadDeloitteTheme'/>
+					onAction='LoadDeloitteTheme'
+					screentip='Loads and applies the Deloitte Excel theme.'/>
+				  <button
+					id='btnApplyLogicFormatting'
+					label='Apply Logic Formatting'
+					onAction='ApplyLogicFormatting'
+					screentip='Applies the ∂Excel conditional formatting for OK, ERROR, and Warning.'/>
+				  <button
+					id='btnApplyPrimaryHeaderFormatting'
+					label='Apply Primary Header Formatting'
+					onAction='ApplyPrimaryHeaderFormatting'
+					screentip='Applies the ∂Excel primary header formatting i.e. white font on black background.'/>
+				  <button
+					id='btnApplySecondaryHeaderFormatting'
+					label='Apply Secondary Header Formatting'
+					onAction='ApplySecondaryHeaderFormatting'
+					screentip='Applies the ∂Excel secondary header formatting i.e. white font on green background.'/>
 				</menu>
 			  </splitButton>
 			</group>

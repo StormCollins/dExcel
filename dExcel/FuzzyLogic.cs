@@ -1,13 +1,10 @@
 ﻿namespace dExcel;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ExcelDna.Integration;
 
-public static class FuzzyLogic
+public static class FuzzyLogicUtils
 {
     public enum FuzzyOutputs
     {
@@ -15,9 +12,9 @@ public static class FuzzyLogic
     }
 
     [ExcelFunction(
-        Name = "d.Equal",
-        Description = "",
-        Category = "∂Excel: Mathematics")]
+        Name = "d.Logic_Equal",
+        Description = "Returns 'Okay' if two values are equal, otherwise it returns 'Error'.",
+        Category = "∂Excel: Logic")]
     public static string Equal(object a, object b)
     {
         if (double.TryParse(a.ToString(), out var x) && double.TryParse(b.ToString(), out var y))
@@ -29,64 +26,171 @@ public static class FuzzyLogic
     }
 
     [ExcelFunction(
-        Name = "d.GreaterThan",
-        Description = "",
+        Name = "d.Logic_GreaterThan",
+        Description = "Returns 'Okay' if one value is greater than the other, otherwise it returns 'Error'.",
         Category = "∂Excel: Mathematics")]
     public static string GreaterThan(double a, double b) =>
         (double)a > (double)b ? FuzzyOutputs.OK.ToString() : FuzzyOutputs.ERROR.ToString();
 
     [ExcelFunction(
-        Name = "d.LessThan",
-        Description = "",
-        Category = "∂Excel: Mathematics")]
+        Name = "d.Logic_LessThan",
+        Description = "Returns 'Okay' if one value is less than the other, otherwise it returns 'Error'.",
+        Category = "∂Excel: Logic")]
     public static string LessThan(double a, double b) =>
         (double)a > (double)b ? FuzzyOutputs.OK.ToString() : FuzzyOutputs.ERROR.ToString();
 
     [ExcelFunction(
-        Name = "d.Or",
+        Name = "d.Logic_Or",
         Description = "",
-        Category = "∂Excel: Mathematics")]
-    public static string Or(params object[] x)
+        Category = "∂Excel: Logic")]
+    public static string Or(params object[] xRange)
     {
-        if (x.Contains(FuzzyOutputs.OK.ToString()))
+        var resultArray = new string[xRange.Length];
+
+        for (int i = 0; i < xRange.Length; i++)
         {
-            return FuzzyOutputs.OK.ToString();
+            if (xRange[i].GetType() == typeof(object[]))
+            {
+                resultArray[i] = Or1d((object[])xRange[i]);
+            }
+            else if (xRange[i].GetType() == typeof(object[,]))
+            {
+                resultArray[i] = Or2d((object[,])xRange[i]);
+            }
+            else
+            {
+                resultArray[i] = xRange[i].ToString();
+            }
         }
-        else if (x.Contains(FuzzyOutputs.WARNING.ToString()))
+
+        return Or1d(resultArray);
+
+        string Or1d(object[] x)
         {
-            return FuzzyOutputs.WARNING.ToString();
+            var result = FuzzyOutputs.OK.ToString();
+            for (int i = 0; i < x.GetLength(0); i++)
+            {
+                if (string.Compare(x[i].ToString(), FuzzyOutputs.OK.ToString(), true) == 0)
+                {
+                    return FuzzyOutputs.OK.ToString();
+                }
+                else if (string.Compare(x[i].ToString(), FuzzyOutputs.WARNING.ToString(), true) == 0)
+                {
+                    result = FuzzyOutputs.WARNING.ToString();
+                }
+                else
+                {
+                    result = (result == FuzzyOutputs.WARNING.ToString()) ? FuzzyOutputs.WARNING.ToString() : FuzzyOutputs.ERROR.ToString();
+                }
+            }
+
+            return result;
         }
-        else
+
+        string Or2d(object[,] x)
         {
-            return FuzzyOutputs.ERROR.ToString();
+            var result = FuzzyOutputs.OK.ToString();
+            for (int i = 0; i < x.GetLength(0); i++)
+            {
+                for (int j = 0; j < x.GetLength(1); j++)
+                {
+                    if (string.Compare(x[i, j].ToString(), FuzzyOutputs.OK.ToString(), true) == 0)
+                    {
+                        return FuzzyOutputs.OK.ToString();
+                    }
+                    else if (string.Compare(x[i, j].ToString(), FuzzyOutputs.WARNING.ToString(), true) == 0)
+                    {
+                        result = FuzzyOutputs.WARNING.ToString();
+                    }
+                    else
+                    {
+                        result = (result == FuzzyOutputs.WARNING.ToString()) ? FuzzyOutputs.WARNING.ToString() : FuzzyOutputs.ERROR.ToString();
+                    }
+                }
+            }
+
+            return result;
         }
     }
 
     [ExcelFunction(
-    Name = "d.And",
-    Description = "",
-    Category = "∂Excel: Mathematics")]
-    public static string And(params object[] x)
+        Name = "d.Logic_And",
+        Description = "",
+        Category = "∂Excel: Logic")]
+    public static string And(params object[] xRange)
     {
-        if (x.Contains(FuzzyOutputs.ERROR.ToString()))
+        var resultArray = new string[xRange.Length];
+
+        for (int i = 0; i < xRange.Length; i++)
         {
-            return FuzzyOutputs.ERROR.ToString();
+            if (xRange[i].GetType() == typeof(object[]))
+            {
+                resultArray[i] = And1d((object[])xRange[i]);
+            }
+            else if (xRange[i].GetType() == typeof(object[,]))
+            {
+                resultArray[i] = And2d((object[,])xRange[i]);
+            }
+            else
+            {
+                resultArray[i] = xRange[i].ToString();
+            }
         }
-        else if (x.Contains(FuzzyOutputs.WARNING.ToString()))
+
+        return And1d(resultArray);
+    
+        string And1d(object[] x)
         {
-            return FuzzyOutputs.WARNING.ToString();
+            var result = FuzzyOutputs.OK.ToString();
+            for (int i = 0; i < x.GetLength(0); i++)
+            {
+                if (string.Compare(x[i].ToString(), FuzzyOutputs.ERROR.ToString(), true) == 0)
+                {
+                    return FuzzyOutputs.ERROR.ToString();
+                }
+                else if (string.Compare(x[i].ToString(), FuzzyOutputs.WARNING.ToString(), true) == 0)
+                {
+                    result = FuzzyOutputs.WARNING.ToString();
+                }
+                else
+                {
+                    result = (result == FuzzyOutputs.WARNING.ToString()) ? FuzzyOutputs.WARNING.ToString() : FuzzyOutputs.OK.ToString();
+                }
+            }
+
+            return result;
         }
-        else
+
+        string And2d(object[,] x)
         {
-            return FuzzyOutputs.OK.ToString();
+            var result = FuzzyOutputs.OK.ToString();
+            for (int i = 0; i < x.GetLength(0); i++)
+            {
+                for (int j = 0; j < x.GetLength(1); j++)
+                {
+                    if (string.Compare(x[i, j].ToString(), FuzzyOutputs.ERROR.ToString(), true) == 0)
+                    {
+                        return FuzzyOutputs.ERROR.ToString();
+                    }
+                    else if (string.Compare(x[i, j].ToString(), FuzzyOutputs.WARNING.ToString(), true) == 0)
+                    {
+                        result = FuzzyOutputs.WARNING.ToString();
+                    }
+                    else
+                    {
+                        result = (result == FuzzyOutputs.WARNING.ToString()) ? FuzzyOutputs.WARNING.ToString() : FuzzyOutputs.OK.ToString();
+                    }
+                }
+            }
+
+            return result;
         }
     }
 
-
     [ExcelFunction(
-    Name = "d.Not",
+    Name = "d.Logic_Not",
     Description = "",
-    Category = "∂Excel: Mathematics")]
+    Category = "∂Excel: Logic")]
     public static object Not(object[] x)
     {
         var output = new object[x.Length];
@@ -99,5 +203,37 @@ public static class FuzzyLogic
                         FuzzyOutputs.OK.ToString() : FuzzyOutputs.WARNING.ToString();
         }
         return output;
+    }
+
+    [ExcelFunction(
+        Name = "d.Logic_IsTrue",
+        Description = "Returns 'Okay' if parameter is true, otherwise returns 'Error'.",
+        Category = "∂Excel: Logic")]
+    public static object IsTrue(object x)
+    {
+        if ((bool)x)
+        {
+            return FuzzyOutputs.OK.ToString();
+        }
+        else
+        {
+            return FuzzyOutputs.ERROR.ToString();
+        }
+    }
+
+    [ExcelFunction(
+        Name = "d.Logic_IsFalse",
+        Description = "Returns 'Okay' if parameter is false, otherwise returns 'Error'.",
+        Category = "∂Excel: Logic")]
+    public static object IsFalse(object x)
+    {
+        if (!(bool)x)
+        {
+            return FuzzyOutputs.OK.ToString();
+        }
+        else
+        {
+            return FuzzyOutputs.ERROR.ToString();
+        }
     }
 }
