@@ -187,15 +187,17 @@ public class RibbonController : ExcelRibbon
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
         thread.Join();
-        if (formatSettings != null && formatSettings.Value.IsVertical)
+        if (formatSettings != null && formatSettings.Value.columnHeaderCount > 0)
         {
             var xlApp = (Excel.Application)ExcelDnaUtil.Application;
-            RangeFormatUtils.SetVerticallyAlignedTableFormatting(formatSettings.Value.HasTwoHeaders);
+            bool hasTwoHeaders = formatSettings.Value.columnHeaderCount == 2;
+            RangeFormatUtils.SetVerticallyAlignedTableFormatting(hasTwoHeaders);
         }
-        else if (formatSettings != null && !formatSettings.Value.IsVertical)
+        else if (formatSettings != null && formatSettings.Value.rowHeaderCount > 0)
         {
             var xlApp = (Excel.Application)ExcelDnaUtil.Application;
-            RangeFormatUtils.SetHorizontallyAlignedTableFormatting(formatSettings.Value.HasTwoHeaders);
+            bool hasTwoHeaders = formatSettings.Value.rowHeaderCount == 2;
+            RangeFormatUtils.SetHorizontallyAlignedTableFormatting(hasTwoHeaders);
         }
     }
     

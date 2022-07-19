@@ -81,28 +81,6 @@
           Grid.Row="0"
           Grid.RowSpan="6"
           Margin="5">
-        
-          <TextBlock
-            FontSize="18"
-            Text="Select the features your table has:"/>
-
-          <RadioButton
-            Name="VerticallyAlignedTable"
-            Content="Vertically Aligned"
-            GroupName="TableAlignment"
-            Checked="VerticallyAlignedTable_Checked"
-            IsChecked="True" />
-
-          <RadioButton
-            Name="HorizontallyAlignedTable"
-            Content="Horizontally Aligned"
-            GroupName="TableAlignment" 
-            IsChecked="False"
-            Checked="HorizontallyAlignedTable_Checked"/>
-
-          <CheckBox
-            Name="chkBxSecondaryHeader"
-            Content="Two Header Rows"/>
 
           <TextBlock
             Text="Number of Column Headers"
@@ -110,19 +88,27 @@
           <StackPanel
             Orientation="Horizontal">
             <RadioButton
+              Name="HasZeroColumnHeaders"
+              Checked="Headers_Checked"
               Content="Zero"
               GroupName="ColumnHeaderCount"
+              IsChecked="False"
               Margin="10 0 10 10"/>
 
             <RadioButton
+              Name="HasOneColumnHeader"
+              Checked="Headers_Checked"
               Content="One"
               GroupName="ColumnHeaderCount"
               IsChecked="True"
               Margin="10 0 10 10"/>
 
             <RadioButton
+              Name="HasTwoColumnHeaders"
+              Checked="Headers_Checked"
               Content="Two"
               GroupName="ColumnHeaderCount"
+              IsChecked="False"
               Margin="10 0 10 10"/>
           </StackPanel>
 
@@ -131,23 +117,43 @@
             Style="{StaticResource GreenHeader3}"/>
           <DockPanel>
             <RadioButton
+              Name="HasZeroRowHeaders"
+              Checked="Headers_Checked"
               Content="Zero"
               GroupName="RowHeaderCount"
               IsChecked="True"
               Margin="10 0 10 10"/>
 
             <RadioButton
+              Name="HasOneRowHeader"
+              Checked="Headers_Checked"
               Content="One"
               GroupName="RowHeaderCount"
+              IsChecked="False"
               Margin="10 0 10 10"/>
 
             <RadioButton
+              Name="HasTwoRowHeaders"
+              Checked="Headers_Checked"
               Content="Two"
               GroupName="RowHeaderCount"
+              IsChecked="False"
               Margin="10 0 10 10"/>
           </DockPanel>
         </StackPanel>
-        
+
+        <Image
+          Name="Example"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Top"
+          Grid.Row="2"
+          Grid.RowSpan="3"
+          Grid.Column="0"
+          Grid.ColumnSpan="3"
+          Margin="20"
+          Width="300"
+          Source="pack://application:,,,/dExcel;component/resources/icons/table-formatting-column-1.png"/>
+
         <Button
           Name="FormatTable"
           Grid.Row="5"
