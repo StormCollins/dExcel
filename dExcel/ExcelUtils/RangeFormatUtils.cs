@@ -554,6 +554,18 @@ public static class RangeFormatUtils
         selectedRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
         selectedRange.VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
 
+        Excel.FormatCondition errorFormatCondition = (Excel.FormatCondition)selectedRange.FormatConditions.Add(Excel.XlFormatConditionType.xlCellValue, Excel.XlFormatConditionOperator.xlEqual, "=\"ERROR\"");
+        errorFormatCondition.Font.Bold = true;
+        errorFormatCondition.Font.Color = -16383844;
+        errorFormatCondition.Font.TintAndShade = 0;
+        errorFormatCondition.Interior.PatternColorIndex = Excel.XlColorIndex.xlColorIndexAutomatic;
+        errorFormatCondition.Interior.Color = 13551615;
+        errorFormatCondition.Interior.TintAndShade = 0;
+        errorFormatCondition.Borders.LineStyle = Excel.XlLineStyle.xlDash;
+        errorFormatCondition.Borders.Color = -16383844;
+        errorFormatCondition.Borders.TintAndShade = 0;
+        errorFormatCondition.Borders.Weight = Excel.XlBorderWeight.xlThin;
+
         Excel.FormatCondition okFormatCondition = (Excel.FormatCondition)selectedRange.FormatConditions.Add(Excel.XlFormatConditionType.xlCellValue, Excel.XlFormatConditionOperator.xlEqual, "=\"OK\"");
         okFormatCondition.Font.Bold = true;
         okFormatCondition.Font.Color = -16752384;
@@ -566,17 +578,17 @@ public static class RangeFormatUtils
         okFormatCondition.Borders.TintAndShade = 0;
         okFormatCondition.Borders.Weight = Excel.XlBorderWeight.xlThin;
 
-        Excel.FormatCondition errorFormatCondition = (Excel.FormatCondition)selectedRange.FormatConditions.Add(Excel.XlFormatConditionType.xlCellValue, Excel.XlFormatConditionOperator.xlEqual, "=\"ERROR\"");
-        errorFormatCondition.Font.Bold = true;
-        errorFormatCondition.Font.Color = -16383844;
-        errorFormatCondition.Font.TintAndShade = 0;
-        errorFormatCondition.Interior.PatternColorIndex = Excel.XlColorIndex.xlColorIndexAutomatic;
-        errorFormatCondition.Interior.Color = 13551615;
-        errorFormatCondition.Interior.TintAndShade = 0;
-        errorFormatCondition.Borders.LineStyle = Excel.XlLineStyle.xlDash;
-        errorFormatCondition.Borders.Color = -16383844;
-        errorFormatCondition.Borders.TintAndShade = 0;
-        errorFormatCondition.Borders.Weight = Excel.XlBorderWeight.xlThin;
+        Excel.FormatCondition warningFormatCondition = (Excel.FormatCondition)selectedRange.FormatConditions.Add(Excel.XlFormatConditionType.xlCellValue, Excel.XlFormatConditionOperator.xlEqual, "=\"WARNING\"");
+        warningFormatCondition.Font.Bold = true;
+        warningFormatCondition.Font.Color = -16754788;
+        warningFormatCondition.Font.TintAndShade = 0;
+        warningFormatCondition.Interior.PatternColorIndex = Excel.XlColorIndex.xlColorIndexAutomatic;
+        warningFormatCondition.Interior.Color = 10284031;
+        warningFormatCondition.Interior.TintAndShade = 0;
+        warningFormatCondition.Borders.LineStyle = Excel.XlLineStyle.xlDash;
+        warningFormatCondition.Borders.Color = -16754788;
+        warningFormatCondition.Borders.TintAndShade = 0;
+        warningFormatCondition.Borders.Weight = Excel.XlBorderWeight.xlThin;
     }
 
 }

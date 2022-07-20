@@ -13,7 +13,8 @@
         Width="500"
         Icon="pack://application:,,,/dExcel;component/resources/icons/dExcel.ico"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        Background="{DynamicResource MaterialDesignPaper}">
+        Background="{DynamicResource MaterialDesignPaper}"
+        Loaded="OnLoad">
   <Window.Resources>
     <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"/>
   </Window.Resources>
@@ -92,7 +93,6 @@
               Checked="Headers_Checked"
               Content="Zero"
               GroupName="ColumnHeaderCount"
-              IsChecked="False"
               Margin="10 0 10 10"/>
 
             <RadioButton
@@ -100,7 +100,6 @@
               Checked="Headers_Checked"
               Content="One"
               GroupName="ColumnHeaderCount"
-              IsChecked="True"
               Margin="10 0 10 10"/>
 
             <RadioButton
@@ -108,7 +107,6 @@
               Checked="Headers_Checked"
               Content="Two"
               GroupName="ColumnHeaderCount"
-              IsChecked="False"
               Margin="10 0 10 10"/>
           </StackPanel>
 
@@ -121,7 +119,6 @@
               Checked="Headers_Checked"
               Content="Zero"
               GroupName="RowHeaderCount"
-              IsChecked="True"
               Margin="10 0 10 10"/>
 
             <RadioButton
@@ -129,7 +126,6 @@
               Checked="Headers_Checked"
               Content="One"
               GroupName="RowHeaderCount"
-              IsChecked="False"
               Margin="10 0 10 10"/>
 
             <RadioButton
@@ -137,24 +133,30 @@
               Checked="Headers_Checked"
               Content="Two"
               GroupName="RowHeaderCount"
-              IsChecked="False"
               Margin="10 0 10 10"/>
           </DockPanel>
         </StackPanel>
 
-        <Image
-          Name="Example"
-          HorizontalAlignment="Center"
-          VerticalAlignment="Top"
+        <materialDesign:Card
           Grid.Row="2"
           Grid.RowSpan="3"
           Grid.Column="0"
           Grid.ColumnSpan="3"
-          Margin="20"
+          Background="{DynamicResource MaterialDesignPaper}"
+          Height="150"
+          Width="315"
+          Padding="5"
+          materialDesign:ShadowAssist.ShadowDepth="Depth3"
+          UniformCornerRadius="6">
+        <Image
+          Name="Example"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
           Width="300"
+          materialDesign:ShadowAssist.ShadowDepth="Depth5"
           Source="pack://application:,,,/dExcel;component/resources/icons/table-formatting-column-1.png"/>
-
-        <Button
+          </materialDesign:Card>
+          <Button
           Name="FormatTable"
           Grid.Row="5"
           Grid.Column="2"

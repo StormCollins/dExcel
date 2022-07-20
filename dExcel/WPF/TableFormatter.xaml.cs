@@ -47,12 +47,22 @@ public partial class TableFormatter : Window
         Closing += TableFormatter_Closing;
     }
 
-    /// <summary>
-    /// Event called when TableFormatter WPF form closes.
-    /// </summary>
-    /// <param name="sender">The sender.</param>
-    /// <param name="e">Event args.</param>
-    private void TableFormatter_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+    void OnLoad(object sender, RoutedEventArgs e)
+    {
+        HasZeroColumnHeaders.IsChecked = false;
+        HasOneColumnHeader.IsChecked = true;
+        HasTwoColumnHeaders.IsChecked = false;
+        HasZeroRowHeaders.IsChecked = true;
+        HasOneRowHeader.IsChecked = false;
+        HasTwoRowHeaders.IsChecked = false;
+    }
+
+        /// <summary>
+        /// Event called when TableFormatter WPF form closes.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">Event args.</param>
+        private void TableFormatter_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         _instance = null;
     }
@@ -79,49 +89,63 @@ public partial class TableFormatter : Window
 
     private void Headers_Checked(object sender, RoutedEventArgs e)
     {
-        if (HasZeroColumnHeaders != null && HasOneColumnHeader != null && HasTwoColumnHeaders != null &&
-            HasZeroRowHeaders != null && HasOneRowHeader != null && HasTwoRowHeaders != null)
+        if ((bool)HasZeroColumnHeaders.IsChecked && (bool)HasOneRowHeader.IsChecked)
         {
-            if ((bool)HasZeroColumnHeaders.IsChecked && (bool)HasOneRowHeader.IsChecked)
-            {
-                var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                Example.Source = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-row-1.png"));
-            }
-            else if ((bool)HasZeroColumnHeaders.IsChecked && (bool)HasTwoRowHeaders.IsChecked)
-            {
-                var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                Example.Source = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-row-2.png"));
-            }
-            else if ((bool)HasOneColumnHeader.IsChecked && (bool)HasZeroRowHeaders.IsChecked)
-            {
-                var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                Example.Source = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-1.png"));
-            }
-            else if ((bool)HasOneColumnHeader.IsChecked && (bool)HasOneRowHeader.IsChecked)
-            {
-                var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                Example.Source = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-1-row-1.png"));
-            }
-            else if ((bool)HasOneColumnHeader.IsChecked && (bool)HasTwoRowHeaders.IsChecked)
-            {
-                var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                Example.Source = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-1-row2.png"));
-            }
-            else if ((bool)HasTwoColumnHeaders.IsChecked && (bool)HasZeroRowHeaders.IsChecked)
-            {
-                var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                Example.Source = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-2.png"));
-            }
-            else if ((bool)HasTwoColumnHeaders.IsChecked && (bool)HasOneRowHeader.IsChecked)
-            {
-                var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                Example.Source = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-2-row-1.png"));
-            }
-            else if ((bool)HasTwoColumnHeaders.IsChecked && (bool)HasTwoRowHeaders.IsChecked)
-            {
-                var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                Example.Source = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-2-row-2.png"));
-            }
+            var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+            Example.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-row-1.png"));
+        }
+        else if ((bool)HasZeroColumnHeaders.IsChecked && (bool)HasTwoRowHeaders.IsChecked)
+        {
+            var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+            Example.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-row-2.png"));
+        }
+        else if ((bool)HasOneColumnHeader.IsChecked && (bool)HasZeroRowHeaders.IsChecked)
+        {
+            var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+            Example.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-1.png"));
+        }
+        else if ((bool)HasOneColumnHeader.IsChecked && (bool)HasOneRowHeader.IsChecked)
+        {
+            var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+            Example.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-1-row-1.png"));
+        }
+        else if ((bool)HasOneColumnHeader.IsChecked && (bool)HasTwoRowHeaders.IsChecked)
+        {
+            var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+            Example.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-1-row2.png"));
+        }
+        else if ((bool)HasTwoColumnHeaders.IsChecked && (bool)HasZeroRowHeaders.IsChecked)
+        {
+            var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+            Example.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-2.png"));
+        }
+        else if ((bool)HasTwoColumnHeaders.IsChecked && (bool)HasOneRowHeader.IsChecked)
+        {
+            var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+            Example.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-2-row-1.png"));
+        }
+        else if ((bool)HasTwoColumnHeaders.IsChecked && (bool)HasTwoRowHeaders.IsChecked)
+        {
+            var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+            Example.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\table-formatting-column-2-row-2.png"));
+        }
+
+        if ((bool)HasZeroColumnHeaders.IsChecked)
+        {
+            HasZeroRowHeaders.IsEnabled = false;
+        }
+        else
+        {
+            HasZeroRowHeaders.IsEnabled = true;
+        }
+
+        if ((bool)HasZeroRowHeaders.IsChecked)
+        {
+            HasZeroColumnHeaders.IsEnabled = false;
+        }
+        else
+        {
+            HasZeroColumnHeaders.IsEnabled = true;
         }
     }
 }
