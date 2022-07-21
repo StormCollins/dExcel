@@ -53,7 +53,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: new List<DateTime> { new(2022, 06, 01), new(2022, 07, 01), new(2022, 08, 01) },
-            actual: ExcelTable.GetColumn<DateTime>(_discountFactorsTable, "Dates"));
+            actual: ExcelTable.GetColumn<DateTime>(_discountFactorsTable, "Dates", 1));
     }
     
     [Test]
@@ -61,7 +61,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: new List<double> { 1.000, 0.999, 0.998 },
-            actual: ExcelTable.GetColumn<double>(_discountFactorsTable, "Discount Factors"));
+            actual: ExcelTable.GetColumn<double>(_discountFactorsTable, "Discount Factors", 1));
     }
     
     [Test]
@@ -69,22 +69,22 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: new List<double> { 1, 2, 3 },
-            actual: ExcelTable.GetColumn<int>(_integerTable, "Int1"));
+            actual: ExcelTable.GetColumn<int>(_integerTable, "Int1", 1));
     }
 
     [Test]
     public void GetColumnStringTest()
     {
         Assert.AreEqual(
-            expected: new List<string> {"Curve Name", "Interpolation"},
-            actual: ExcelTable.GetColumn<string>(_parameterTable, "Parameter"));
+            expected: new List<string> {"Curve Name", "Interpolation", "Instruments", "", "", "Base Date"},
+            actual: ExcelTable.GetColumn<string>(_parameterTable, "Parameter", 1));
     }
 
     [Test]
     public void GetRowHeadersTest()
     {
         Assert.AreEqual(
-            expected: new List<string> {"Curve Name", "Interpolation"}, 
+            expected: new List<string> {"Curve Name", "Interpolation", "Instruments", "", "", "Base Date"}, 
             actual: ExcelTable.GetRowHeaders(_parameterTable));
     }
 
