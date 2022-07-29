@@ -16,12 +16,12 @@ using ExcelDna.Integration;
 public static class ExcelTable
 {
     /// <summary>
-    /// Gets the table type.
+    /// Gets the table label.
     /// </summary>
-    /// <remarks>It is assumed the table type is at position [0,0] in the 2D array.</remarks>
+    /// <remarks>It is assumed the table label is at position [0,0] in the 2D array.</remarks>
     /// <param name="table">The input range.</param>
-    /// <returns>The table type.</returns>
-    public static string? GetTableType(object[,] table)
+    /// <returns>The table label.</returns>
+    public static string? GetTableLabel(object[,] table)
     {
         return table[0, 0].ToString();
     }
@@ -63,24 +63,11 @@ public static class ExcelTable
             return null;
         }
 
-        List<T> column;
-        if (typeof(T) == typeof(DateTime))
-        {
-            column =
-                Enumerable
-                    .Range(2, table.GetLength(0) - 2)
-                    .Select(i => DateTime.FromOADate(int.Parse(table[i, index].ToString())))
-                    .Cast<T>()
-                    .ToList();
-        }
-        else
-        {
-            column =
-                Enumerable
-                    .Range(2, table.GetLength(0) - 2)
-                    .Select(i => (T)Convert.ChangeType(table[i, index], typeof(T)))
-                    .ToList();
-        }
+        var column =
+            Enumerable
+                .Range(rowIndexOfColumnHeaders + 1, table.GetLength(0) - (rowIndexOfColumnHeaders + 1))
+                .Select(i => (T)Convert.ChangeType(table[i, index], typeof(T)))
+                .ToList();
         return column;
     }
 
@@ -92,15 +79,12 @@ public static class ExcelTable
     /// <param name="table">The input range.</param>
     /// <param name="rowIndexOfFirstRowHeader">The row index of the first row header.</param>
     /// <returns>The list of row headers.</returns>
-    public static List<string> GetRowHeaders(object[,] table, int rowIndexOfFirstRowHeader = 2)
+    public static List<string?> GetRowHeaders(object[,] table, int rowIndexOfFirstRowHeader = 2)
     {
-        var rowHeaders
-            = Enumerable
-                .Range(rowIndexOfFirstRowHeader, table.GetLength(0) - 2)
-                .Select(i => table[i, 0])
-                .Cast<string>()
+        return Enumerable
+                .Range(rowIndexOfFirstRowHeader, table.GetLength(0) - rowIndexOfFirstRowHeader)
+                .Select(i => table[i, 0].ToString())
                 .ToList(); 
-        return rowHeaders;
     }
 
     /// <summary>
@@ -114,7 +98,7 @@ public static class ExcelTable
     /// <param name="rowHeader">The row header.</param>
     /// <param name="rowIndexOfColumnHeaders">The index of the row containing the column headers.</param>
     /// <returns>The looked up value.</returns>
-    public static T? LookupTableValue<T>(
+    public static T? LookUpTableValue<T>(
         object[,] table,
         string columnHeader,
         string rowHeader,
@@ -127,12 +111,6 @@ public static class ExcelTable
             return default;
         }
         
-        if (typeof(T) == typeof(DateTime))
-        {
-            return (T)Convert.ChangeType(
-                value: DateTime.FromOADate(int.Parse(table[rowIndex, columnIndex].ToString() ?? string.Empty)),
-                conversionType: typeof(T));
-        }
         return (T)Convert.ChangeType(table[rowIndex, columnIndex], typeof(T));
     }
     
@@ -158,18 +136,24 @@ public static class ExcelTable
     /// <param name="rowHeader">The row header.</param>
     /// <param name="rowIndexOfColumnHeaders">The index of the row containing the column headers.</param>
     /// <returns>The looked up value. If it can't find the column/row header, returns null.</returns>
-    public static List<T>? LookupTableValues<T>(
+    public static List<T>? LookUpTableValues<T>(
         object[,] table,
         string columnHeader,
         string rowHeader,
         int rowIndexOfColumnHeaders = 1)
     {
         var columnIndex = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader);
-        var rowIndexStart = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader) + 2;
-        if (columnIndex == -1 || rowIndexStart == 1)
+        if (columnIndex == -1)
         {
             return null;
         }
+        
+        var rowIndexStart = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader);
+        if (rowIndexStart == -1)
+        {
+            return null;
+        }
+        rowIndexStart += rowIndexOfColumnHeaders + 1;
         
         var rowIndexEnd = 1;
         
@@ -184,27 +168,10 @@ public static class ExcelTable
                 break;
             }
         }
-        
-        List<T>? values;
 
-        if (typeof(T) == typeof(DateTime))
-        {
-            values = 
-                Enumerable
-                    .Range(rowIndexStart, rowIndexEnd)
-                    .Select(i => DateTime.FromOADate(int.Parse(table[i, columnIndex].ToString() ?? string.Empty)))
-                    .Cast<T>()
-                    .ToList();
-        }
-        else
-        {
-            values = 
-                Enumerable
-                    .Range(rowIndexStart, rowIndexEnd)
-                    .Select(i => (T)Convert.ChangeType(table[i, columnIndex], typeof(T)))
-                    .ToList();
-        }
-
-        return values;
+        return Enumerable
+                .Range(rowIndexStart, rowIndexEnd)
+                .Select(i => (T)Convert.ChangeType(table[i, columnIndex], typeof(T)))
+                .ToList();
     }
 }

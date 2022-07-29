@@ -34,7 +34,7 @@ public static class CurveBootstrapper
                         "USD-LIBOR" => new USDLibor(new Period("3m")),
                     };
     
-                string? instrumentType = ExcelTable.GetTableType(instruments);
+                string? instrumentType = ExcelTable.GetTableLabel(instruments);
                 
                 if (string.Compare(instrumentType, "Deposits", StringComparison.InvariantCultureIgnoreCase) == 0)
                 {
