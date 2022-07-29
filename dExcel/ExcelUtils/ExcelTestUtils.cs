@@ -18,13 +18,90 @@ public static class ExcelTestUtils
     }
 
     /// <summary>
+    /// Values that are (semantically) equivalent to ERROR in Excel.
+    /// </summary>
+    private static readonly List<string> excelErrorValues = new()
+    {
+        ExcelError.ExcelErrorDiv0.ToString(),
+        ExcelError.ExcelErrorName.ToString(),
+        ExcelError.ExcelErrorNull.ToString(),
+        ExcelError.ExcelErrorNum.ToString(),
+        ExcelError.ExcelErrorNA.ToString(),
+        ExcelError.ExcelErrorRef.ToString(),
+        ExcelError.ExcelErrorValue.ToString(),
+    };
+
+    /// <summary>
+    /// Checks that input from Excel isn't invalid e.g. #NA, #VALUE etc.
+    /// </summary>
+    /// <param name="x">The input.</param>
+    /// <returns>True if the input is valid, false otherwise.</returns>
+    private static bool AreInputsValid(object x)
+    {
+        foreach (var excelErrorValue in excelErrorValues)
+        {
+            if (String.Equals(x.ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Checks that inputs in the form of an array from Excel aren't invalid e.g. #NA, #VALUE etc.
+    /// </summary>
+    /// <param name="x">The input array.</param>
+    /// <returns>True if the inputs are valid, false otherwise.</returns>
+    private static bool AreInputsValid(object[] x)
+    {
+        for (int i = 0; i < x.Length; i++)
+        {
+            foreach (var excelErrorValue in excelErrorValues)
+            {
+                if (String.Equals(x[i].ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Checks that inputs in the form of an array from Excel aren't invalid e.g. #NA, #VALUE etc.
+    /// </summary>
+    /// <param name="x">The input array.</param>
+    /// <returns>True if the inputs are valid, false otherwise.</returns>
+    private static bool AreInputsValid(object[,] x)
+    {
+        for (int i = 0; i < x.GetLength(0); i++)
+        {
+            for (int j = 0; j < x.GetLength(1); j++)
+            {
+                foreach (var excelErrorValue in excelErrorValues)
+                {
+                    if (String.Equals(x[i, j].ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Checks if two numeric or string values in Excel are the same.
     /// </summary>
     /// <param name="a">Input a</param>
     /// <param name="b">Input b</param>
     /// <returns>'OK' if the values are equal otherwise 'ERROR'.</returns>
     [ExcelFunction(
-        Name = "d.Test_Equal",
+        Name = "d.TestUtils_Equal",
         Description = "Returns 'OK' if two values are equal, otherwise it returns 'ERROR'.",
         Category = "∂Excel: Test")]
     public static string Equal(
@@ -37,6 +114,11 @@ public static class ExcelTestUtils
             Description = "Input b")]
         object b)
     {
+        if (!AreInputsValid(a) || !AreInputsValid(b))
+        {
+            return TestOutputs.ERROR.ToString();
+        }
+
         if (double.TryParse(a.ToString(), out var x) && double.TryParse(b.ToString(), out var y))
         {
             return Math.Abs(y - x) < 0.00000000001 ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
@@ -53,7 +135,7 @@ public static class ExcelTestUtils
     /// <param name="x">x</param>
     /// <returns>Returns 'OK' if input is true, otherwise returns 'ERROR'.</returns>
     [ExcelFunction(
-        Name = "d.Test_IsTrue",
+        Name = "d.TestUtils_IsTrue",
         Description = "Returns 'OK' if input is true, otherwise returns 'ERROR'.",
         Category = "∂Excel: Test")]
     public static object IsTrue(
@@ -61,7 +143,14 @@ public static class ExcelTestUtils
             Name = "x",
             Description = "Boolean input.")]
         object x)
-        => (bool)x ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+    {
+        if (!AreInputsValid(x))
+        {
+            return TestOutputs.ERROR.ToString();
+        }
+
+        return (bool)x ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+    }
 
     /// <summary>
     /// Returns 'OK' if input is false, otherwise returns 'ERROR'.
@@ -69,7 +158,7 @@ public static class ExcelTestUtils
     /// <param name="x">x</param>
     /// <returns>Returns 'OK' if input is false, otherwise returns 'ERROR'.</returns>
     [ExcelFunction(
-        Name = "d.Test_IsFalse",
+        Name = "d.TestUtils_IsFalse",
         Description = "Returns 'Okay' if parameter is false, otherwise returns 'Error'.",
         Category = "∂Excel: Test")]
     public static object IsFalse(
@@ -77,7 +166,14 @@ public static class ExcelTestUtils
             Name = "x",
             Description = "Boolean input.")]
         object x)
-        => !(bool)x ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+    {
+        if (!AreInputsValid(x))
+        {
+            return TestOutputs.ERROR.ToString();
+        }
+
+        return !(bool)x ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+    }
 
     /// <summary>
     /// Checks if input 'a' is strictly greater than input 'b'.
@@ -86,7 +182,7 @@ public static class ExcelTestUtils
     /// <param name="b">Input b</param>
     /// <returns>Returns 'OK' if one value is greater than the other, otherwise it returns 'Error'.</returns>
     [ExcelFunction(
-        Name = "d.Test_GreaterThan",
+        Name = "d.TestUtils_GreaterThan",
         Description = "Returns 'OK' if input 'a' is strictly greater than input 'b', otherwise 'ERROR'.",
         Category = "∂Excel: Test")]
     public static string GreaterThan(
@@ -97,8 +193,15 @@ public static class ExcelTestUtils
         [ExcelArgument(
             Name = "b",
             Description = "Input b")]
-        double b) =>
-        a > b ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+        double b)
+    {
+        if (!AreInputsValid(a) || !AreInputsValid(b))
+        {
+            return TestOutputs.ERROR.ToString();
+        }
+
+        return a > b? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+    }
 
     /// <summary>
     /// Checks if input 'a' is strictly less than input 'b'.
@@ -107,7 +210,7 @@ public static class ExcelTestUtils
     /// <param name="b">Input b</param>
     /// <returns>Returns 'OK' if input 'a' is strictly less than input 'b', otherwise it returns 'Error'.</returns>
     [ExcelFunction(
-        Name = "d.Test_LessThan",
+        Name = "d.TestUtils_LessThan",
         Description = "Returns 'OK' if input 'a' is strictly less than input 'b', otherwise it returns 'ERROR'.",
         Category = "∂Excel: Test")]
     public static string LessThan(
@@ -118,8 +221,15 @@ public static class ExcelTestUtils
         [ExcelArgument(
             Name = "b",
             Description = "Input b")]
-        double b) =>
-        a < b ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+        double b)
+    {
+        if (!AreInputsValid(a) || !AreInputsValid(b))
+        {
+            return TestOutputs.ERROR.ToString();
+        }
+
+        return a < b ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+    }
 
     /// <summary>
     /// Acts like a fuzzy logic 'And' with the following rules.
@@ -131,7 +241,7 @@ public static class ExcelTestUtils
     /// <returns>'ERROR' if the input range contains any 'ERROR's, otherwise 'WARNING' if there are no 'ERROR's,
     /// otherwise 'OK'.</returns>
     [ExcelFunction(
-        Name = "d.Test_And",
+        Name = "d.TestUtils_And",
         Description = "Acts like a fuzzy logic 'And' with the following rules." +
         "\n  'ERROR' and X = 'ERROR'" +
         "\n  'WARNING' and 'OK' = 'WARNING'" +
@@ -165,10 +275,15 @@ public static class ExcelTestUtils
 
         string And1d(object[] x)
         {
+            if (!AreInputsValid(x))
+            {
+                return TestOutputs.ERROR.ToString();
+            }
+
             var result = TestOutputs.OK.ToString();
             for (int i = 0; i < x.GetLength(0); i++)
             {
-                if (Compare(x[i].ToString(), TestOutputs.ERROR.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(x[i].ToString(), TestOutputs.ERROR.ToString(), StringComparison.OrdinalIgnoreCase))
                 {
                     return TestOutputs.ERROR.ToString();
                 }
@@ -190,6 +305,11 @@ public static class ExcelTestUtils
 
         string And2d(object[,] x)
         {
+            if (!AreInputsValid(x))
+            {
+                return TestOutputs.ERROR.ToString();
+            }
+
             var result = TestOutputs.OK.ToString();
             for (int i = 0; i < x.GetLength(0); i++)
             {
@@ -223,7 +343,7 @@ public static class ExcelTestUtils
     /// <param name="x"></param>
     /// <returns>Returns 'OK' if input is 'ERROR', 'ERROR' if 'OK' and 'WARNING' otherwise.</returns>
     [ExcelFunction(
-        Name = "d.Test_Not",
+        Name = "d.TestUtils_Not",
         Description = "Returns 'OK' if input is 'ERROR', 'ERROR' if 'OK' and 'WARNING' otherwise.",
         Category = "∂Excel: Test")]
     public static object Not(
@@ -232,6 +352,11 @@ public static class ExcelTestUtils
             Description = "Input range.")]
         object[,] x)
     {
+        if (!AreInputsValid(x))
+        {
+            return TestOutputs.ERROR.ToString();
+        }
+
         var output = new object[x.GetLength(0), x.GetLength(1)];
 
         for (int i = 0; i < x.GetLength(0); i++)
@@ -269,7 +394,7 @@ public static class ExcelTestUtils
     /// <returns>'OK' if input range contains any 'OK's, otherwise 'WARNING' if there are no 'OK's but at least one
     /// 'WARNING', otherwise 'ERROR'.</returns>
     [ExcelFunction(
-        Name = "d.Test_Or",
+        Name = "d.TestUtils_Or",
         Description = "Acts like a fuzzy logic 'Or' with the following rules." +
         "\n  'OK' or X = 'OK'" +
         "\n  'WARNING' or 'ERROR' = 'WARNING'" +
@@ -303,6 +428,11 @@ public static class ExcelTestUtils
 
         string Or1d(object[] x)
         {
+            if (!AreInputsValid(xRange))
+            {
+                return TestOutputs.ERROR.ToString();
+            }
+
             var result = TestOutputs.OK.ToString();
             for (int i = 0; i < x.GetLength(0); i++)
             {
@@ -331,6 +461,11 @@ public static class ExcelTestUtils
 
         string Or2d(object[,] x)
         {
+            if (!AreInputsValid(xRange))
+            {
+                return TestOutputs.ERROR.ToString();
+            }
+
             var result = TestOutputs.OK.ToString();
             for (int i = 0; i < x.GetLength(0); i++)
             {
