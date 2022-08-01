@@ -12,6 +12,7 @@ public class ExcelTestUtilsTests
     [TestCase(1.5, 2.5, ExpectedResult = "ERROR")]
     [TestCase("TEST", "TEST", ExpectedResult = "OK")]
     [TestCase("APPLES", "ORANGES", ExpectedResult = "ERROR")]
+    [TestCase("ExcelErrorNA", "ORANGES", ExpectedResult = "ERROR")]
     public string TestEqual(object a, object b)
     {
         return ExcelTestUtils.Equal(a, b);
@@ -20,6 +21,7 @@ public class ExcelTestUtilsTests
     [Test]
     [TestCase(true, ExpectedResult = "OK")]
     [TestCase(false, ExpectedResult = "ERROR")]
+    [TestCase("ExcelErrorNA", ExpectedResult = "ERROR")]
     public object TestIsTrue(object x)
     {
         return ExcelTestUtils.IsTrue(x);
@@ -28,6 +30,7 @@ public class ExcelTestUtilsTests
     [Test]
     [TestCase(false, ExpectedResult = "OK")]
     [TestCase(true, ExpectedResult = "ERROR")]
+    [TestCase("ExcelErrorNA", ExpectedResult = "ERROR")]
     public object TestIsFalse(object x)
     {
         return ExcelTestUtils.IsFalse(x);
@@ -37,7 +40,8 @@ public class ExcelTestUtilsTests
     [TestCase(1.5, 0.5, ExpectedResult = "OK")]
     [TestCase(1.5, 1.5, ExpectedResult = "ERROR")]
     [TestCase(1.5, 2.5, ExpectedResult = "ERROR")]
-    public string TestGreaterThan(double a, double b)
+    [TestCase("ExcelErrorNA", 2.5, ExpectedResult = "ERROR")]
+    public string TestGreaterThan(object a, object b)
     {
         return ExcelTestUtils.GreaterThan(a, b);
     }
@@ -46,12 +50,16 @@ public class ExcelTestUtilsTests
     [TestCase(1.5, 0.5, ExpectedResult = "ERROR")]
     [TestCase(1.5, 1.5, ExpectedResult = "ERROR")]
     [TestCase(1.5, 2.5, ExpectedResult = "OK")]
-    public string TestLessThan(double a, double b)
-    { return ExcelTestUtils.LessThan(a, b); }
+    [TestCase("ExcelErrorNA", 2.5, ExpectedResult = "ERROR")]
+    public string TestLessThan(object a, object b)
+    {
+        return ExcelTestUtils.LessThan(a, b);
+    }
 
     public static IEnumerable<TestCaseData> AndTestCaseData()
     {
         yield return new TestCaseData("OK").Returns("OK");
+        yield return new TestCaseData(ExcelError.ExcelErrorNA.ToString()).Returns("ERROR");
         yield return new TestCaseData((object)new object[] { "OK", "OK" }).Returns("OK");
         yield return new TestCaseData(new object[,] { { "OK" }, { "OK" } }).Returns("OK");
         yield return new TestCaseData(new object[,] { { "OK", "OK" } }).Returns("OK");
@@ -70,9 +78,9 @@ public class ExcelTestUtilsTests
         yield return new TestCaseData((object)new object[] { "ERROR" , "ERROR" }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "ERROR" }, { "ERROR" } }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "ERROR", "ERROR" } }).Returns("ERROR");
+        yield return new TestCaseData((object)new object[]{ "OK", ExcelError.ExcelErrorNA.ToString() }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "OK", ExcelError.ExcelErrorNA.ToString() } }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "OK" }, { ExcelError.ExcelErrorNA.ToString() } }).Returns("ERROR");
-        yield return new TestCaseData((object)new object[]{ "OK", ExcelError.ExcelErrorNA.ToString() }).Returns("ERROR");
     }
 
     [Test]
@@ -85,6 +93,7 @@ public class ExcelTestUtilsTests
     public static IEnumerable<TestCaseData> OrTestCaseData()
     {
         yield return new TestCaseData("OK").Returns("OK");
+        yield return new TestCaseData(ExcelError.ExcelErrorNA.ToString()).Returns("ERROR");
         yield return new TestCaseData((object)new object[] { "OK", "OK" }).Returns("OK");
         yield return new TestCaseData(new object[,] { { "OK" }, { "OK" } }).Returns("OK");
         yield return new TestCaseData(new object[,] { { "OK", "OK" } }).Returns("OK");
@@ -103,9 +112,9 @@ public class ExcelTestUtilsTests
         yield return new TestCaseData((object)new object[] { "ERROR" , "ERROR" }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "ERROR" }, { "ERROR" } }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "ERROR", "ERROR" } }).Returns("ERROR");
+        yield return new TestCaseData((object)new object[]{ "OK", ExcelError.ExcelErrorNA.ToString() }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "OK", ExcelError.ExcelErrorNA.ToString() } }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "OK" }, { ExcelError.ExcelErrorNA.ToString() } }).Returns("ERROR");
-        yield return new TestCaseData((object)new object[]{ "OK", ExcelError.ExcelErrorNA.ToString() }).Returns("ERROR");
     }
     
     [Test]

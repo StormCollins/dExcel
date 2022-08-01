@@ -189,18 +189,18 @@ public static class ExcelTestUtils
         [ExcelArgument(
             Name = "a",
             Description = "Input a")]
-        double a,
+        object a,
         [ExcelArgument(
             Name = "b",
             Description = "Input b")]
-        double b)
+        object b)
     {
         if (!AreInputsValid(a) || !AreInputsValid(b))
         {
             return TestOutputs.ERROR.ToString();
         }
 
-        return a > b? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+        return (double)a > (double)b? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
     }
 
     /// <summary>
@@ -217,18 +217,18 @@ public static class ExcelTestUtils
         [ExcelArgument(
             Name = "a",
             Description = "Input a")]
-        double a,
+        object a,
         [ExcelArgument(
             Name = "b",
             Description = "Input b")]
-        double b)
+        object b)
     {
         if (!AreInputsValid(a) || !AreInputsValid(b))
         {
             return TestOutputs.ERROR.ToString();
         }
 
-        return a < b ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+        return (double)a < (double)b ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
     }
 
     /// <summary>

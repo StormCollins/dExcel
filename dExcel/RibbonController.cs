@@ -15,7 +15,6 @@ public class RibbonController : ExcelRibbon
 {
     // TODO: Switch off page breaks easily.
     // TODO: Link to Wiki for functions.
-    // TODO: Link to GitLab.
     // TODO: Remove blanks.
 
     public static IRibbonUI RibbonUi;
