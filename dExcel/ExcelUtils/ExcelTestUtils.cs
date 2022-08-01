@@ -235,7 +235,7 @@ public static class ExcelTestUtils
     /// Acts like a fuzzy logic 'And' with the following rules.
     ///   'ERROR' and X = 'ERROR'
     ///   'WARNING' and 'OK' = 'WARNING'
-    /// i.e. 'ERROR' > 'WARNING' > 'WARNING' it can be seen as checking that there are only 'OK's.
+    /// i.e. 'ERROR' > 'WARNING' > 'OK' it can be seen as checking that there are only 'OK's.
     /// </summary>
     /// <param name="xRange">The input range.</param>
     /// <returns>'ERROR' if the input range contains any 'ERROR's, otherwise 'WARNING' if there are no 'ERROR's,

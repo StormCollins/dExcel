@@ -13,8 +13,6 @@ using System.Windows.Threading;
 [ComVisible(true)]
 public class RibbonController : ExcelRibbon
 {
-    // TODO: Switch off page breaks easily.
-    // TODO: Link to Wiki for functions.
     // TODO: Remove blanks.
 
     public static IRibbonUI RibbonUi;
