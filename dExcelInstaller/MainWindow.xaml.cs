@@ -345,7 +345,8 @@ public partial class MainWindow : Window
 
         try
         {
-            Excel.Application excel = new();
+            Excel.Application excel = new Microsoft.Office.Interop.Excel.Application();
+            excel.Visible = true;
             var dExcelAdded = false;
             foreach (Excel.AddIn addIn in excel.AddIns)
             {

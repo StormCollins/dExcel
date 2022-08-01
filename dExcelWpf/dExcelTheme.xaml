@@ -53,7 +53,7 @@
   </Style>
 
   <!-- TextBlocks -->
-<Style
+  <Style
     BasedOn="{StaticResource MaterialDesignTextBlock}"
     TargetType="{x:Type TextBlock}">
     <Setter Property="FontFamily" Value="Calibri" />
@@ -89,6 +89,15 @@
 
   <!-- Other Controls -->
   <Style
+    TargetType="{x:Type CheckBox}"
+    BasedOn="{StaticResource MaterialDesignCheckBox}">
+    <Setter Property="FontFamily" Value="Calibri" />
+    <Setter Property="FontSize" Value="16" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  
+  <Style
     TargetType="{x:Type DataGridColumnHeader}"
     BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
     <Setter Property="FontWeight" Value="Bold" />
@@ -105,6 +114,15 @@
 
   <Style TargetType="{x:Type materialDesign:Card}">
     <Setter Property="Margin" Value="5" />
+  </Style>
+
+  <Style
+    TargetType="{x:Type RadioButton}"
+    BasedOn="{StaticResource MaterialDesignRadioButton}">
+    <Setter Property="FontFamily" Value="Calibri" />
+    <Setter Property="FontSize" Value="16" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="White" />
   </Style>
 
   <Style TargetType="{x:Type Separator}">

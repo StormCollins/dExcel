@@ -1,5 +1,6 @@
 ﻿namespace dExcel;
 
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -12,9 +13,6 @@ using System.Windows.Threading;
 [ComVisible(true)]
 public class RibbonController : ExcelRibbon
 {
-    // TODO: Switch off page breaks easily.
-    // TODO: Link to Wiki for functions.
-    // TODO: Link to GitLab.
     // TODO: Remove blanks.
 
     public static IRibbonUI RibbonUi;
@@ -34,17 +32,28 @@ public class RibbonController : ExcelRibbon
 
     public void OpenDashboard(IRibbonControl control)
     {
+        string? dashBoardAction = null;
         var thread = new Thread(() =>
         {
             var dashboard = Dashboard.Instance;
             dashboard.Show();
             dashboard.Closed += (sender2, e2) => dashboard.Dispatcher.InvokeShutdown();
             Dispatcher.Run();
+            dashBoardAction = dashboard.DashBoardAction;
         });
 
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
         thread.Join();
+        if (string.Compare(dashBoardAction, "OpenTestingWorkbook", true) == 0)
+        {
+            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+#if DEBUG
+            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\resources\workbooks\dexcel-testing.xlsm");
+#else
+            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\Versions\Current\dexcel-testing.xlsm");
+#endif
+        }
     }
 
     public void OpenFunctionSearch(IRibbonControl control)
@@ -135,9 +144,60 @@ public class RibbonController : ExcelRibbon
         return path;
     }
 
-    public void ClearFormatting(IRibbonControl control) => CellFormatUtils.ClearFormatting();
+    /// <summary>
+    /// Removes the formatting from a table (or rather contiguous region) in Excel.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void ClearTableFormatting(IRibbonControl control) => RangeFormatUtils.ClearRangeFormatting();
 
-    public void FormatTable(IRibbonControl control) => CellFormatUtils.FormatTable();
+    /// <summary>
+    /// Loads and switches Excel to the standard Deloitte Excel theme i.e. it loads the relevant .thmx file.
+    /// </summary>
+    /// <param name="control"></param>
+    public void LoadDeloitteTheme(IRibbonControl control)
+    {
+#if DEBUG
+        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        xlApp.ActiveWorkbook.ApplyTheme(
+            Path.Combine(
+                Path.GetDirectoryName(DebugUtils.GetXllPath()),
+                @"resources\workbooks\Deloitte_Brand_Theme.thmx"));
+#else
+        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        xlApp.ActiveWorkbook.ApplyTheme(
+                @"C:\GitLab\dExcelTools\Versions\CurrentDeloitte_Brand_Theme.thmx"));
+#endif
+    }
+
+    public void FormatTable(IRibbonControl control)
+    {
+        FormattingSettings? formatSettings = null;
+        var thread = new Thread(() =>
+        {
+            var tableFormatter = TableFormatter.Instance;
+            tableFormatter.Show();
+            tableFormatter.Closed += (sender2, e2) => tableFormatter.Dispatcher.InvokeShutdown();
+            Dispatcher.Run();
+            formatSettings = tableFormatter.FormatSettings;
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        if (formatSettings != null && formatSettings.Value.columnHeaderCount > 0)
+        {
+            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            bool hasTwoHeaders = formatSettings.Value.columnHeaderCount == 2;
+            RangeFormatUtils.SetVerticallyAlignedTableFormatting(hasTwoHeaders);
+        }
+        else if (formatSettings != null && formatSettings.Value.rowHeaderCount > 0)
+        {
+            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            bool hasTwoHeaders = formatSettings.Value.rowHeaderCount == 2;
+            RangeFormatUtils.SetHorizontallyAlignedTableFormatting(hasTwoHeaders);
+        }
+    }
+    
 
     /// <summary>
     /// Calculates the selected Excel range.
@@ -147,6 +207,23 @@ public class RibbonController : ExcelRibbon
     {
         var xlApp = (Excel.Application)ExcelDnaUtil.Application;
         ((Excel.Range)xlApp.Selection).Calculate();
+    }
+
+    public void ApplyLogicFormatting(IRibbonControl control)
+    {
+        RangeFormatUtils.SetRangeConditionalLogicFormatting();
+    }
+
+    public void ApplyPrimaryHeaderFormatting(IRibbonControl control)
+    {
+        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        RangeFormatUtils.SetPrimaryTitleRangeFormatting(xlApp.Selection);
+    }
+
+    public void ApplySecondaryHeaderFormatting(IRibbonControl control)
+    {
+        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        RangeFormatUtils.SetSecondaryTitleRangeFormatting(xlApp.Selection);
     }
 
     // TODO: Move these to a separate class.

@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <DnaLibrary Name='dExcel Add-In' RuntimeVersion='v4.0' xmlns='http://schemas.excel-dna.net/addin/2020/07/dnalibrary'>
-  <ExternalLibrary Path='dExcel.dll' ExplicitExports='false' LoadFromBytes='true' Pack='true' IncludePdb='false'/>
+  <ExternalLibrary Path='dExcel.dll' ExplicitExports='false' ExplicitRegistration='true' LoadFromBytes='true' Pack='true' IncludePdb='false'/>
+  <Reference Path="ExcelDna.Registration.dll" Pack="true" />
   <Reference Path='FuzzySharp.dll' Pack='true'/>
   <Reference Path='MaterialDesignColors.dll' Pack='true'/>
   <Reference Path='MaterialDesignThemes.Wpf.dll' Pack='true'/>
@@ -69,9 +70,30 @@
 				  tag='format-painter-large-blue.ico'/>
 				<menu id='menuFormatMenu'>
 				  <button
-					id='btnClearFormatting'
-					label='Clear Formatting'
-					onAction='ClearFormatting'/>
+					id='btnClearTableFormatting'
+					label='Clear Table Formatting'
+					onAction='ClearTableFormatting'
+					screentip='Clears the formatting from a ∂Excel formatted table.'/>
+				  <button
+					id='btnLoadDeloitteTheme'
+					label='Load Deloitte Theme'
+					onAction='LoadDeloitteTheme'
+					screentip='Loads and applies the Deloitte Excel theme.'/>
+				  <button
+					id='btnApplyLogicFormatting'
+					label='Apply Logic Formatting'
+					onAction='ApplyLogicFormatting'
+					screentip='Applies the ∂Excel conditional formatting for OK, ERROR, and Warning.'/>
+				  <button
+					id='btnApplyPrimaryHeaderFormatting'
+					label='Apply Primary Header Formatting'
+					onAction='ApplyPrimaryHeaderFormatting'
+					screentip='Applies the ∂Excel primary header formatting i.e. white font on black background.'/>
+				  <button
+					id='btnApplySecondaryHeaderFormatting'
+					label='Apply Secondary Header Formatting'
+					onAction='ApplySecondaryHeaderFormatting'
+					screentip='Applies the ∂Excel secondary header formatting i.e. white font on green background.'/>
 				</menu>
 			  </splitButton>
 			</group>

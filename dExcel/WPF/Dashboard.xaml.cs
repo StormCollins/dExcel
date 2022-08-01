@@ -8,15 +8,23 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
+using Excel = Microsoft.Office.Interop.Excel;
 
 /// <summary>
 /// Interaction logic for Dashboard.xaml
 /// </summary>
 public partial class Dashboard : Window
 {
+    /// <summary>
+    /// A (possibly null) action that needs to be performed by Excel after the dashboard is closed.
+    /// This is handled by the <see cref="RibbonController"/>.
+    /// </summary>
+    public string? DashBoardAction { get; set; } = null;
+
     private static Dashboard? _instance;
     private static bool _connectionStatus;
     private static bool _omicronStatus;
+    
 
     public static Dashboard Instance
     {
@@ -38,7 +46,9 @@ public partial class Dashboard : Window
         InstallationPathLink.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\follow-link-small-green.ico"));
         JupyterHubLink.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\follow-link-small-green.ico"));
         this.InstalledDExcelVersion.Text = DebugUtils.GetAssemblyVersion();
+        
         Closing += Dashboard_Closing;
+
         if (NetworkUtils.GetConnectionStatus())
         {
             _connectionStatus = true;
@@ -129,5 +139,17 @@ public partial class Dashboard : Window
 #else
         Process.Start(@"C:\GitLab\dExcelTools\Installer\dExcelInstaller.exe");
 #endif
+    }
+
+    /// <summary>
+    /// Opens the testing workbook: 'dexcel-testing.xlsm'.
+    /// The logic is handled by <see cref="RibbonController.OpenDashboard"/> this just specifies the action.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The routed event args.</param>
+    private void OpenTestingWorkbook_Click(object sender, RoutedEventArgs e)
+    {
+        this.DashBoardAction = "OpenTestingWorkbook";
+        this.Close();
     }
 }

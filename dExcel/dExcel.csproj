@@ -45,6 +45,22 @@
     <None Remove="resources\icons\open-audit-small-blue.ico" />
     <None Remove="resources\icons\open-audit-small-green.ico" />
     <None Remove="resources\icons\stats-large-green.ico" />
+    <None Remove="resources\icons\table-formatting-column-1-row-1.png" />
+    <None Remove="resources\icons\table-formatting-column-1-row2.png" />
+    <None Remove="resources\icons\table-formatting-column-1.png" />
+    <None Remove="resources\icons\table-formatting-column-2-row-1.png" />
+    <None Remove="resources\icons\table-formatting-column-2-row-2.png" />
+    <None Remove="resources\icons\table-formatting-column-2.png" />
+    <None Remove="resources\icons\table-formatting-column-primary-and-secondary-header-row-primary-and-secondary-header.png" />
+    <None Remove="resources\icons\table-formatting-column-primary-and-secondary-header-row-primary-header.png" />
+    <None Remove="resources\icons\table-formatting-column-primary-and-secondary-header.png" />
+    <None Remove="resources\icons\table-formatting-column-primary-header-row-primary-and-secondary-header.png" />
+    <None Remove="resources\icons\table-formatting-column-primary-header-row-primary-header.png" />
+    <None Remove="resources\icons\table-formatting-column-primary-header.png" />
+    <None Remove="resources\icons\table-formatting-row-1.png" />
+    <None Remove="resources\icons\table-formatting-row-2.png" />
+    <None Remove="resources\icons\table-formatting-row-primary-and-secondary-header.png" />
+    <None Remove="resources\icons\table-formatting-row-primary-header.png" />
     <None Remove="resources\icons\template-search-large-blue.ico" />
     <None Remove="resources\icons\wrap-up-audit-small-blue.ico" />
     <None Remove="resources\icons\wrap-up-audit-small-green.ico" />
@@ -113,6 +129,30 @@
     </EmbeddedResource>
     <EmbeddedResource Include="resources\icons\dExcel-ribbon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\table-formatting-column-1-row-1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\table-formatting-column-1-row2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\table-formatting-column-1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\table-formatting-column-2-row-1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\table-formatting-column-2-row-2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\table-formatting-column-2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\table-formatting-row-1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\icons\table-formatting-row-2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <Resource Include="resources\icons\dExcel.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -200,12 +240,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="resources\workbooks\Deloitte_Brand_Theme.thmx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="resources\workbooks\Testing.xlsm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="WPF\Dashboard.xaml">
       <Generator>$(DefaultXamlRuntime)</Generator>
     </None>
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="WPF\TableFormatter.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
     <Page Update="WPF\FunctionSearch.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
