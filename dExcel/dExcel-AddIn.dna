@@ -8,13 +8,13 @@
   <Reference Path='MSCORLIB.dll' Pack='true'/>
   <Reference Path='QLNet.dll' Pack='true'/>
   <Reference Path='System.ComponentModel.Primitives.dll' Pack='true'/>
-  <Reference Path='System.Drawing.Common.dll' Pack='true'/>
-  <Reference Path='System.Drawing.Primitives.dll' Pack='true'/>
-  <Reference Path='System.Security.Cryptography.Algorithms.dll' Pack='true'/>
-  <Reference Path='System.Security.Cryptography.Primitives.dll' Pack='true'/>
-  <Reference Path='System.Security.Principal.Windows.dll' Pack='true'/>
-  <Reference Path='System.Threading.Tasks.Parallel.dll' Pack='true'/>
-  <Reference Path='System.Windows.Forms.Primitives.dll' Pack='true'/>
+<!--  <Reference Path='System.Drawing.Common.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Drawing.Primitives.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Security.Cryptography.Algorithms.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Security.Cryptography.Primitives.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Security.Principal.Windows.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Threading.Tasks.Parallel.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Windows.Forms.Primitives.dll' Pack='true'/>-->
 	
 	<CustomUI>
 	<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui' onLoad='LoadRibbon'>
