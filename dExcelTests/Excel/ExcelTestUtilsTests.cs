@@ -2,6 +2,7 @@
 
 using NUnit.Framework;
 using dExcel.ExcelUtils;
+using ExcelDna.Integration;
 
 [TestFixture]
 public class ExcelTestUtilsTests
@@ -69,6 +70,9 @@ public class ExcelTestUtilsTests
         yield return new TestCaseData((object)new object[] { "ERROR" , "ERROR" }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "ERROR" }, { "ERROR" } }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "ERROR", "ERROR" } }).Returns("ERROR");
+        yield return new TestCaseData(new object[,] { { "OK", ExcelError.ExcelErrorNA.ToString() } }).Returns("ERROR");
+        yield return new TestCaseData(new object[,] { { "OK" }, { ExcelError.ExcelErrorNA.ToString() } }).Returns("ERROR");
+        yield return new TestCaseData((object)new object[]{ "OK", ExcelError.ExcelErrorNA.ToString() }).Returns("ERROR");
     }
 
     [Test]
@@ -99,6 +103,9 @@ public class ExcelTestUtilsTests
         yield return new TestCaseData((object)new object[] { "ERROR" , "ERROR" }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "ERROR" }, { "ERROR" } }).Returns("ERROR");
         yield return new TestCaseData(new object[,] { { "ERROR", "ERROR" } }).Returns("ERROR");
+        yield return new TestCaseData(new object[,] { { "OK", ExcelError.ExcelErrorNA.ToString() } }).Returns("ERROR");
+        yield return new TestCaseData(new object[,] { { "OK" }, { ExcelError.ExcelErrorNA.ToString() } }).Returns("ERROR");
+        yield return new TestCaseData((object)new object[]{ "OK", ExcelError.ExcelErrorNA.ToString() }).Returns("ERROR");
     }
     
     [Test]
@@ -112,6 +119,7 @@ public class ExcelTestUtilsTests
     {
         yield return new TestCaseData(new object[,] { { "OK" }, { "ERROR" }, { "WARNING" } }).Returns(new object[,] { { "ERROR" }, { "OK" }, { "WARNING" } });
         yield return new TestCaseData(new object[,] { { "OK" , "ERROR", "WARNING" } }).Returns(new object[,] { { "ERROR", "OK", "WARNING" } } );
+        yield return new TestCaseData(new object[,] { { "OK" , "ERROR", ExcelError.ExcelErrorNA.ToString() } }).Returns(new object[,] { { "ERROR", "ERROR", "ERROR" } });
     }
 
     [Test]

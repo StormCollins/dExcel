@@ -352,12 +352,20 @@ public static class ExcelTestUtils
             Description = "Input range.")]
         object[,] x)
     {
+        var output = new object[x.GetLength(0), x.GetLength(1)];
+        
         if (!AreInputsValid(x))
         {
-            return TestOutputs.ERROR.ToString();
-        }
+            for (int i = 0; i < output.GetLength(0); i++)
+            {
+                for (int j = 0; j < output.GetLength(1); j++)
+                {
+                    output[i, j] = TestOutputs.ERROR.ToString();
+                } 
+            }
 
-        var output = new object[x.GetLength(0), x.GetLength(1)];
+            return output;
+        }
 
         for (int i = 0; i < x.GetLength(0); i++)
         {
@@ -428,7 +436,7 @@ public static class ExcelTestUtils
 
         string Or1d(object[] x)
         {
-            if (!AreInputsValid(xRange))
+            if (!AreInputsValid(x))
             {
                 return TestOutputs.ERROR.ToString();
             }
@@ -461,7 +469,7 @@ public static class ExcelTestUtils
 
         string Or2d(object[,] x)
         {
-            if (!AreInputsValid(xRange))
+            if (!AreInputsValid(x))
             {
                 return TestOutputs.ERROR.ToString();
             }
