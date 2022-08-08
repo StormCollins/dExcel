@@ -71,12 +71,13 @@ public class Logger
     /// <returns>A formatted message.</returns>
     private static List<Run> CreateMessage(string message, Brush? fontColor = null, bool isBold = false)
     {
-        var paths = Regex.Matches(message, @"(?<=\[\[).+?(?=\]\])").Select(x => x.Value);
-
-        if (paths.Count() != 0)
+        var paths = Regex.Matches(message, @"(?<=\[\[).+?(?=\]\])").Select(x => x.Value).ToList();
+        var boldStrings = Regex.Matches(message, @"(?<=\[\[).+?(?=\]\])").Select(x => x.Value).ToList();  
+        
+        if (paths.Any() || boldStrings.Any())
         {
             var subMessages = Regex.Split(message, @"(\[\[)|(\]\])").ToList();
-            subMessages.RemoveAll(x => x == "[[" || x == "]]");
+            subMessages.RemoveAll(x => x is "[[" or "]]");
 
             List<Run> output = new();
             foreach (var subMessage in subMessages)
@@ -107,21 +108,19 @@ public class Logger
                         });
                 }
             }
-
+        
             return output; 
         }
-        else
+        
+        return new List<Run>
         {
-            return new()
+            new($"{message}")
             {
-                new Run($"{message}")
-                {
-                    FontFamily = new FontFamily("Calibri"),
-                    FontWeight = isBold ? FontWeights.ExtraBold : FontWeights.Regular,
-                    Foreground = fontColor ?? PrimaryHueMidBrush,
-                } 
-            };
-        }
+                FontFamily = new FontFamily("Calibri"),
+                FontWeight = isBold ? FontWeights.ExtraBold : FontWeights.Regular,
+                Foreground = fontColor ?? PrimaryHueMidBrush,
+            } 
+        };
     }
 
     private static void LoggerPath_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
