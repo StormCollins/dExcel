@@ -124,6 +124,28 @@
             SelectionChanged="AvailableDExcelVersions_OnSelectionChanged"
             Style="{StaticResource MaterialDesignComboBox}"/>
         </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <materialDesign:PackIcon
+            Foreground="{StaticResource SecondaryHueMidBrush}"
+            Kind="HelpCircleOutline"
+            Margin="4"
+            ToolTip="The source location of the add-in.\nCurrently only the Shared Drive can be used."
+            ToolTipService.InitialShowDelay="100"
+            ToolTipService.BetweenShowDelay="100"
+            VerticalAlignment="Center"/>
+          <TextBlock
+            Margin="-2 0 0 0"
+            Text="∂Excel Source:"/>
+          <ComboBox 
+            materialDesign:ColorZoneAssist.Mode="SecondaryMid"
+            materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
+            Name="DExcelSource"
+            Padding="0"
+            Style="{StaticResource MaterialDesignComboBox}">
+            <ComboBoxItem Content="Shared Drive" IsSelected="True" />  
+            <ComboBoxItem Content="GitLab" IsEnabled="False" />  
+          </ComboBox>
+        </StackPanel>
       </StackPanel>
     </materialDesign:Card>
 

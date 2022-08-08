@@ -13,6 +13,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using ExcelDna.Integration;
 using Excel = Microsoft.Office.Interop.Excel;
 
 /// <summary>
@@ -20,6 +21,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private const string SharedDriveVersionsPath = @"\\ZAJNB010\Capital Markets 2\AQS Quants\dExcel\Versions";
     private const string VersionsPath = @"C:\GitLab\dExcelTools\Versions\";
     private const string CurrentVersionPath = @"C:\GitLab\dExcelTools\Versions\Current\";
     private const string Dll = "dExcel.dll";
@@ -30,6 +32,7 @@ public partial class MainWindow : Window
     /// </summary>
     private readonly Logger _logger;
 
+    
     /// <summary>
     /// The main window for the installer.
     /// </summary>
@@ -153,6 +156,26 @@ public partial class MainWindow : Window
             .Reverse();
     }
 
+    private IEnumerable<string?>? GetSourceAvailableDExcelVersions()
+    {
+        if 
+        if (string.Compare(DExcelSource.SelectedItem.ToString(), "Shared Drive", StringComparison.OrdinalIgnoreCase) == 0)
+        {
+            return Directory
+                .GetDirectories(SharedDriveVersionsPath)
+                .Where(x => Regex.IsMatch(x, @"\d+(.\d+)"))
+                .Select(Path.GetFileName)
+                .Reverse();
+        }
+
+        return null;
+    }
+    
+    public static void UpdateDExcelVersionsFromSource()
+    {
+             
+    }
+    
     /// <summary>
     /// Installation process triggered by clicking the install button.
     /// </summary>
@@ -345,8 +368,10 @@ public partial class MainWindow : Window
 
         try
         {
-            Excel.Application excel = new Microsoft.Office.Interop.Excel.Application();
+            var excel = new Excel.Application();
+
             excel.Visible = true;
+            excel.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\resources\workbooks\dexcel-testing.xlsm");
             var dExcelAdded = false;
             foreach (Excel.AddIn addIn in excel.AddIns)
             {
@@ -357,9 +382,11 @@ public partial class MainWindow : Window
                     break;
                 }
             }
-
+            // TODO: Check if file exists
             if (!dExcelAdded)
             {
+                Excel.Application xlApp = (Excel.Application) ExcelDnaUtil.Application;
+                // excel.RegisterXLL(@"C:\GitLab\dExcelTools\Versions\Current\dExcel-AddIn64.xll");
                 Excel.AddIn dExcelAddIn =
                     excel.AddIns.Add(@"C:\GitLab\dExcelTools\Versions\Current\dExcel-AddIn64.xll");
                 dExcelAddIn.Installed = true;

@@ -104,7 +104,9 @@
               Style="{StaticResource OutputText}"
               Text="0.0"/>
           </StackPanel>
+          
         </StackPanel>
+        
 
         <Button
           Name="OpenInstaller"
