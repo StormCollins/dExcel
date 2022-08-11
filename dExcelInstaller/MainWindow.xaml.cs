@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
@@ -15,6 +16,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
 using MaterialDesignThemes.Wpf;
+using SharpCompress.Archives.Zip;
 using Excel = Microsoft.Office.Interop.Excel;
 
 /// <summary>
@@ -82,7 +84,7 @@ public partial class MainWindow : Window
                     UriKind.Absolute));
             this.DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
             this._logger.OkayText =
-                $"Checking for latest versions of ∂Excel on the selected remote source: {DExcelRemoteSource.Text}.";
+                $"Checking for latest versions of ∂Excel on the selected remote source: **{DExcelRemoteSource.Text}**";
             this._logger.WarningText = $"Installation path set to: [[{SharedDriveVersionsPath}]]";
             this.AvailableDExcelVersions.ItemsSource = GetAllAvailableRemoteDExcelVersions();
         }
@@ -97,7 +99,7 @@ public partial class MainWindow : Window
             this._logger.WarningText = "User not connected to the VPN.";
             this._logger.WarningText =
                 "The VPN is required to check for the latest versions of the ∂Excel add-in on the selected remote " +
-                $"source: {this.DExcelRemoteSource.Text}";
+                $"source: **{this.DExcelRemoteSource.Text}**";
             this._logger.WarningText = $"Installation path set to: [[{LocalVersionsPath}]]";
             AvailableDExcelVersions.ItemsSource = GetAllAvailableLocalDExcelVersions();
             this.DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
@@ -105,8 +107,7 @@ public partial class MainWindow : Window
 
         NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback!;
 
-        var localVersions = GetAllAvailableLocalDExcelVersions();
-        
+        // var localVersions = GetAllAvailableLocalDExcelVersions();
         // var remoteVersions = GetAllAvailableRemoteDExcelVersions();
         // var missingRemoteVersions = (remoteVersions ?? Array.Empty<string?>()).Where(x => !localVersions.Contains(x));
         // if (missingRemoteVersions.Count() > 0)
@@ -148,9 +149,10 @@ public partial class MainWindow : Window
                                 uriString: @"pack://application:,,,/resources/icons/connection-status-green.ico",
                                 uriKind: UriKind.Absolute));
                     this.DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
+                    this._logger.OkayText = "Connection to the VPN established.";
                     this._logger.OkayText =
-                        $"Connection to the VPN established. " +
-                        $"Checking for latest versions of ∂Excel on the selected remote source: {DExcelRemoteSource.Text}.";
+                        "Checking for latest versions of ∂Excel on the selected remote source: " +
+                        $"**{this.DExcelRemoteSource.Text}**";
                     this._logger.WarningText = $"Installation path set to: [[{SharedDriveVersionsPath}]]";
                     this.AvailableDExcelVersions.ItemsSource = GetAllAvailableRemoteDExcelVersions();
                 });
@@ -168,7 +170,7 @@ public partial class MainWindow : Window
                     this._logger.WarningText = "User not connected to VPN.";
                     this._logger.WarningText = 
                         "The VPN is required to check for latest versions of the ∂Excel add-in on the selected " +
-                        $"remote source: {DExcelRemoteSource.Text}.";
+                        $"remote source: **{this.DExcelRemoteSource.Text}**";
                     this._logger.WarningText =
                         "Only locally available versions of the ∂Excel add-in can be installed.";
                     this._logger.WarningText = $"Installation path set to: [[{LocalVersionsPath}]]";
@@ -341,6 +343,7 @@ public partial class MainWindow : Window
         });
 
         // Download add-in from GitLab and copy to installation path.
+        DownloadRequiredDExcelAddInFromRemoteSource();
 
 
         // Remove previously installed version from C:\GitLab\dExcelTools\Versions\Current.
@@ -650,5 +653,27 @@ public partial class MainWindow : Window
             this._logger.ErrorText = "Failed to launch Excel.";
             this._logger.ErrorText = exception.Message;
         }
+    }
+
+    private void DownloadRequiredDExcelAddInFromRemoteSource()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            if (string.Compare(
+                    strA: DExcelRemoteSource.Text, 
+                    strB: "Shared Drive", 
+                    comparisonType: StringComparison.InvariantCultureIgnoreCase) == 0)
+            {
+                if (!GetAllAvailableLocalDExcelVersions().Contains(AvailableDExcelVersions.Text))
+                {
+                    var sourcePath = Path.Combine(SharedDriveVersionsPath, $"{AvailableDExcelVersions.Text}.zip");
+                    var targetPath = Path.Combine(LocalVersionsPath, $"{AvailableDExcelVersions.Text}.zip");
+                    var zipOutputPath = Path.Combine(LocalVersionsPath, $"{AvailableDExcelVersions.Text}");
+                    File.Copy(sourcePath, targetPath);
+                    ZipFile.ExtractToDirectory(targetPath, LocalVersionsPath);
+                    File.Delete(targetPath);
+                }
+            }
+        });
     }
 }
