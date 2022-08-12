@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
@@ -15,6 +14,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
+using SharpCompress.Archives.Zip;
+using SharpCompress.Archives.Zip;
+using SharpCompress.Archives.Zip;
 using Excel = Microsoft.Office.Interop.Excel;
 
 /// <summary>
@@ -145,7 +147,6 @@ public partial class MainWindow : Window
                                 uriString: @"pack://application:,,,/resources/icons/connection-status-green.ico",
                                 uriKind: UriKind.Absolute));
                     this.DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
-                    this._logger.OkayText = "Connection to the VPN established.";
                     this._logger.OkayText =
                         "Checking for latest versions of ∂Excel on the selected remote source: " +
                         $"**{this.DExcelRemoteSource.Text}**";
@@ -166,7 +167,7 @@ public partial class MainWindow : Window
                     this._logger.WarningText = "User not connected to VPN.";
                     this._logger.WarningText = 
                         "The VPN is required to check for latest versions of the ∂Excel add-in on the selected " +
-                        $"remote source: **{this.DExcelRemoteSource.Text}**";
+                        $"remote source: {DExcelRemoteSource.Text}.";
                     this._logger.WarningText =
                         "Only locally available versions of the ∂Excel add-in can be installed.";
                     this._logger.WarningText = $"Installation path set to: [[{LocalReleasesPath}]]";
