@@ -15,8 +15,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
-using MaterialDesignThemes.Wpf;
-using SharpCompress.Archives.Zip;
 using Excel = Microsoft.Office.Interop.Excel;
 
 /// <summary>
@@ -27,17 +25,17 @@ public partial class MainWindow : Window
     /// <summary>
     /// The location of all the add-in versions on the shared drive.
     /// </summary>
-    private const string SharedDriveVersionsPath = @"\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\Versions";
+    private const string SharedDriveReleasesPath = @"\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\Releases";
     
     /// <summary>
     /// The location of the all the add-in versions on the local machine.
     /// </summary>
-    private const string LocalVersionsPath = @"C:\GitLab\dExcelTools\Versions\";
+    private const string LocalReleasesPath = @"C:\GitLab\dExcelTools\Releases\";
     
     /// <summary>
     /// The location of the currently installed version of the add-in on the machine.
     /// </summary>
-    private const string LocalCurrentVersionPath = @"C:\GitLab\dExcelTools\Versions\Current\";
+    private const string LocalCurrentReleasePath = @"C:\GitLab\dExcelTools\Releases\Current\";
     
     private const string Dll = "dExcel.dll";
     private static bool _vpnConnectionStatus;
@@ -85,8 +83,8 @@ public partial class MainWindow : Window
             this.DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
             this._logger.OkayText =
                 $"Checking for latest versions of ∂Excel on the selected remote source: **{DExcelRemoteSource.Text}**";
-            this._logger.WarningText = $"Installation path set to: [[{SharedDriveVersionsPath}]]";
-            this.AvailableDExcelVersions.ItemsSource = GetAllAvailableRemoteDExcelVersions();
+            this._logger.WarningText = $"Installation path set to: [[{SharedDriveReleasesPath}]]";
+            this.AvailableDExcelReleases.ItemsSource = GetAllAvailableRemoteDExcelReleases();
         }
         else
         {
@@ -100,22 +98,13 @@ public partial class MainWindow : Window
             this._logger.WarningText =
                 "The VPN is required to check for the latest versions of the ∂Excel add-in on the selected remote " +
                 $"source: **{this.DExcelRemoteSource.Text}**";
-            this._logger.WarningText = $"Installation path set to: [[{LocalVersionsPath}]]";
-            AvailableDExcelVersions.ItemsSource = GetAllAvailableLocalDExcelVersions();
+            this._logger.WarningText = $"Installation path set to: [[{LocalReleasesPath}]]";
+            AvailableDExcelReleases.ItemsSource = GetAllAvailableLocalDExcelReleases();
             this.DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
         }
 
         NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback!;
-
-        // var localVersions = GetAllAvailableLocalDExcelVersions();
-        // var remoteVersions = GetAllAvailableRemoteDExcelVersions();
-        // var missingRemoteVersions = (remoteVersions ?? Array.Empty<string?>()).Where(x => !localVersions.Contains(x));
-        // if (missingRemoteVersions.Count() > 0)
-        // {
-        //     InstallerDialogHost.IsOpen = true;
-        // }
-        
-        AvailableDExcelVersions.SelectedIndex = 0;
+        AvailableDExcelReleases.SelectedIndex = 0;
     }
 
     /// <summary>
@@ -153,8 +142,8 @@ public partial class MainWindow : Window
                     this._logger.OkayText =
                         "Checking for latest versions of ∂Excel on the selected remote source: " +
                         $"**{this.DExcelRemoteSource.Text}**";
-                    this._logger.WarningText = $"Installation path set to: [[{SharedDriveVersionsPath}]]";
-                    this.AvailableDExcelVersions.ItemsSource = GetAllAvailableRemoteDExcelVersions();
+                    this._logger.WarningText = $"Installation path set to: [[{SharedDriveReleasesPath}]]";
+                    this.AvailableDExcelReleases.ItemsSource = GetAllAvailableRemoteDExcelReleases();
                 });
             }
             else
@@ -173,14 +162,14 @@ public partial class MainWindow : Window
                         $"remote source: **{this.DExcelRemoteSource.Text}**";
                     this._logger.WarningText =
                         "Only locally available versions of the ∂Excel add-in can be installed.";
-                    this._logger.WarningText = $"Installation path set to: [[{LocalVersionsPath}]]";
-                    this.AvailableDExcelVersions.ItemsSource = GetAllAvailableLocalDExcelVersions();
+                    this._logger.WarningText = $"Installation path set to: [[{LocalReleasesPath}]]";
+                    this.AvailableDExcelReleases.ItemsSource = GetAllAvailableLocalDExcelReleases();
                 });
             }
 
             Dispatcher.Invoke(() =>
             {
-                AvailableDExcelVersions.SelectedIndex = 0;
+                AvailableDExcelReleases.SelectedIndex = 0;
             });
         }
     }
@@ -189,10 +178,10 @@ public partial class MainWindow : Window
     /// Gets all versions of the ∂Excel add-in already copied to the user's local machine.
     /// </summary>
     /// <returns>All versions of the ∂Excel add-in available locally.</returns>
-    private static IEnumerable<string?> GetAllAvailableLocalDExcelVersions()
+    private static IEnumerable<string?> GetAllAvailableLocalDExcelReleases()
     {
         return Directory
-            .GetDirectories(LocalVersionsPath)
+            .GetDirectories(LocalReleasesPath)
             .Where(x => Regex.IsMatch(x, @"\d+(.\d+)"))
             .Select(Path.GetFileName)
             .Reverse();
@@ -202,12 +191,12 @@ public partial class MainWindow : Window
     /// Gets all versions of the ∂Excel add-in at the specified remote source location e.g. the shared drive or GitLab.
     /// </summary>
     /// <returns>All versions of the ∂Excel add-in available remotely.</returns>
-    private IEnumerable<string?>? GetAllAvailableRemoteDExcelVersions()
+    private IEnumerable<string?>? GetAllAvailableRemoteDExcelReleases()
     {
         if (string.Compare(DExcelRemoteSource.Text, "Shared Drive", StringComparison.OrdinalIgnoreCase) == 0)
         {
             return Directory
-                .GetFiles(SharedDriveVersionsPath)
+                .GetFiles(SharedDriveReleasesPath)
                 .Where(x => Regex.IsMatch(x, @"\d+(.\d+)(?=\.zip)"))
                 .Select(Path.GetFileNameWithoutExtension)
                 .Reverse();
@@ -233,9 +222,9 @@ public partial class MainWindow : Window
     /// "Not Installed".</returns>
     private static string GetCurrentDExcelVersion()
     {
-        if (File.Exists(LocalCurrentVersionPath + @"\" + Dll))
+        if (File.Exists(LocalCurrentReleasePath + @"\" + Dll))
         {
-            var currentDExcelVersion = AssemblyName.GetAssemblyName(LocalCurrentVersionPath + @"\" + Dll).Version;
+            var currentDExcelVersion = AssemblyName.GetAssemblyName(LocalCurrentReleasePath + @"\" + Dll).Version;
             return $"{currentDExcelVersion?.Major}.{currentDExcelVersion?.Minor}";
         }
 
@@ -310,26 +299,26 @@ public partial class MainWindow : Window
             this._logger.NewSubProcess("Checking if ∂Excel installation path exists.");
         });
 
-        if (!Directory.Exists(LocalVersionsPath))
+        if (!Directory.Exists(LocalReleasesPath))
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.OkayText = $"Path [[{LocalVersionsPath}]] does not exist.";
+                this._logger.OkayText = $"Path [[{LocalReleasesPath}]] does not exist.";
             });
             
             try
             {
-                Directory.CreateDirectory(LocalVersionsPath);
+                Directory.CreateDirectory(LocalReleasesPath);
                 Dispatcher.Invoke(() =>
                 {
-                    this._logger.OkayText = $"Path [[{LocalVersionsPath}]] created.";
+                    this._logger.OkayText = $"Path [[{LocalReleasesPath}]] created.";
                 });
             }
             catch (Exception exception)
             {
                 Dispatcher.Invoke(() =>
                 {
-                    this._logger.ErrorText = $"Path [[{LocalVersionsPath}]] could not be created.";
+                    this._logger.ErrorText = $"Path [[{LocalReleasesPath}]] could not be created.";
                     this._logger.ErrorText = $"{exception.Message}";
                     this._logger.InstallationFailed();
                 });
@@ -339,7 +328,7 @@ public partial class MainWindow : Window
 
         Dispatcher.Invoke(() =>
         {
-            this._logger.OkayText = $"Path [[{LocalVersionsPath}]] already exists.";
+            this._logger.OkayText = $"Path [[{LocalReleasesPath}]] already exists.";
         });
 
         // Download add-in from GitLab and copy to installation path.
@@ -350,10 +339,10 @@ public partial class MainWindow : Window
         Dispatcher.Invoke(() =>
         {
             this._logger.NewSubProcess($"Updating ∂Excel.");
-            this._logger.OkayText = $"Deleting previous ∂Excel version from [[{LocalCurrentVersionPath}]].";
+            this._logger.OkayText = $"Deleting previous ∂Excel version from [[{LocalCurrentReleasePath}]].";
         });
 
-        DirectoryInfo currentVersionDirectory = new(LocalCurrentVersionPath);
+        DirectoryInfo currentVersionDirectory = new(LocalCurrentReleasePath);
         try
         {
             foreach (FileInfo file in currentVersionDirectory.GetFiles())
@@ -369,7 +358,7 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.ErrorText = $"Failed to delete files and folders from [[{LocalCurrentVersionPath}]].";
+                this._logger.ErrorText = $"Failed to delete files and folders from [[{LocalCurrentReleasePath}]].";
                 this._logger.ErrorText = exception.Message;
                 this._logger.InstallationFailed();
             });
@@ -380,20 +369,20 @@ public partial class MainWindow : Window
         // to 'C:\GitLab\dExcelTools\Versions\Current'.
         Dispatcher.Invoke(() =>
         {
-            this._logger.OkayText = $"Copying version {AvailableDExcelVersions.SelectedItem} of ∂Excel to [[{LocalCurrentVersionPath}]].";
+            this._logger.OkayText = $"Copying version {AvailableDExcelReleases.SelectedItem} of ∂Excel to [[{LocalCurrentReleasePath}]].";
         });
         try
         {
             Dispatcher.Invoke(() =>
             {
-                CopyFilesRecursively(LocalVersionsPath + AvailableDExcelVersions.SelectedItem, LocalCurrentVersionPath);
+                CopyFilesRecursively(LocalReleasesPath + AvailableDExcelReleases.SelectedItem, LocalCurrentReleasePath);
             });
         }
         catch (Exception exception)
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.ErrorText = $"Failed to copy version {AvailableDExcelVersions.SelectedItem} of ∂Excel to [[{LocalCurrentVersionPath}]].";
+                this._logger.ErrorText = $"Failed to copy version {AvailableDExcelReleases.SelectedItem} of ∂Excel to [[{LocalCurrentReleasePath}]].";
                 this._logger.ErrorText = $"{exception.Message}";
                 this._logger.InstallationFailed();
             });
@@ -426,9 +415,9 @@ public partial class MainWindow : Window
             if (!dExcelAdded)
             {
                 Excel.Application xlApp = (Excel.Application) ExcelDnaUtil.Application;
-                // excel.RegisterXLL(@"C:\GitLab\dExcelTools\Versions\Current\dExcel-AddIn64.xll");
+                excel.RegisterXLL(@"C:\GitLab\dExcelTools\Releases\Current\dExcel-AddIn64.xll");
                 Excel.AddIn dExcelAddIn =
-                    excel.AddIns.Add(@"C:\GitLab\dExcelTools\Versions\Current\dExcel-AddIn64.xll");
+                    excel.AddIns.Add(@"C:\GitLab\dExcelTools\Releases\Current\dExcel-AddIn64.xll");
                 dExcelAddIn.Installed = true;
             }
             excel.Quit();
@@ -550,15 +539,15 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.OkayText = $"Deleting contents of [[{LocalCurrentVersionPath}]].";
-                DeleteFilesRecursively(LocalCurrentVersionPath);
+                this._logger.OkayText = $"Deleting contents of [[{LocalCurrentReleasePath}]].";
+                DeleteFilesRecursively(LocalCurrentReleasePath);
             });
         }
         catch (Exception exception)
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.ErrorText = $"Failed to delete ∂Excel files from [[{LocalCurrentVersionPath}]].";
+                this._logger.ErrorText = $"Failed to delete ∂Excel files from [[{LocalCurrentReleasePath}]].";
                 this._logger.ErrorText = exception.Message;
                 this._logger.UninstallationFailed();
             });
@@ -613,7 +602,7 @@ public partial class MainWindow : Window
     /// <param name="e">The RoutedEventArgs.</param>
     private void AvailableDExcelVersions_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        Install.IsEnabled = AvailableDExcelVersions.Text != CurrentDExcelVersion.Text;
+        Install.IsEnabled = AvailableDExcelReleases.Text != CurrentDExcelVersion.Text;
     }
 
     /// <summary>
@@ -664,13 +653,13 @@ public partial class MainWindow : Window
                     strB: "Shared Drive", 
                     comparisonType: StringComparison.InvariantCultureIgnoreCase) == 0)
             {
-                if (!GetAllAvailableLocalDExcelVersions().Contains(AvailableDExcelVersions.Text))
+                if (!GetAllAvailableLocalDExcelReleases().Contains(AvailableDExcelReleases.Text))
                 {
-                    var sourcePath = Path.Combine(SharedDriveVersionsPath, $"{AvailableDExcelVersions.Text}.zip");
-                    var targetPath = Path.Combine(LocalVersionsPath, $"{AvailableDExcelVersions.Text}.zip");
-                    var zipOutputPath = Path.Combine(LocalVersionsPath, $"{AvailableDExcelVersions.Text}");
+                    var sourcePath = Path.Combine(SharedDriveReleasesPath, $"{AvailableDExcelReleases.Text}.zip");
+                    var targetPath = Path.Combine(LocalReleasesPath, $"{AvailableDExcelReleases.Text}.zip");
+                    var zipOutputPath = Path.Combine(LocalReleasesPath, $"{AvailableDExcelReleases.Text}");
                     File.Copy(sourcePath, targetPath);
-                    ZipFile.ExtractToDirectory(targetPath, LocalVersionsPath);
+                    ZipFile.ExtractToDirectory(targetPath, LocalReleasesPath);
                     File.Delete(targetPath);
                 }
             }

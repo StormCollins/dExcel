@@ -125,7 +125,7 @@
             <ComboBox 
               materialDesign:ColorZoneAssist.Mode="SecondaryMid"
               materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
-              Name="AvailableDExcelVersions"
+              Name="AvailableDExcelReleases"
               Padding="0"
               SelectionChanged="AvailableDExcelVersions_OnSelectionChanged"
               Style="{StaticResource MaterialDesignComboBox}"/>
