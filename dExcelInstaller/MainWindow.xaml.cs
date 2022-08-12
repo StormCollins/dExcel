@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
@@ -14,9 +15,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
-using SharpCompress.Archives.Zip;
-using SharpCompress.Archives.Zip;
-using SharpCompress.Archives.Zip;
 using Excel = Microsoft.Office.Interop.Excel;
 
 /// <summary>
@@ -305,11 +303,11 @@ public partial class MainWindow : Window
             this._logger.NewSubProcess("Checking if ∂Excel installation path exists.");
         });
 
-        if (!Directory.Exists(LocalReleasesPath))
+        if (!Directory.Exists(LocalCurrentReleasePath))
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.OkayText = $"Path [[{LocalReleasesPath}]] does not exist.";
+                this._logger.OkayText = $"Path [[{LocalCurrentReleasePath}]] does not exist.";
             });
             
             try
@@ -317,14 +315,14 @@ public partial class MainWindow : Window
                 Directory.CreateDirectory(LocalReleasesPath);
                 Dispatcher.Invoke(() =>
                 {
-                    this._logger.OkayText = $"Path [[{LocalReleasesPath}]] created.";
+                    this._logger.OkayText = $"Path [[{LocalCurrentReleasePath}]] created.";
                 });
             }
             catch (Exception exception)
             {
                 Dispatcher.Invoke(() =>
                 {
-                    this._logger.ErrorText = $"Path [[{LocalReleasesPath}]] could not be created.";
+                    this._logger.ErrorText = $"Path [[{LocalCurrentReleasePath}]] could not be created.";
                     this._logger.ErrorText = $"{exception.Message}";
                     this._logger.InstallationFailed();
                 });
@@ -334,7 +332,7 @@ public partial class MainWindow : Window
 
         Dispatcher.Invoke(() =>
         {
-            this._logger.OkayText = $"Path [[{LocalReleasesPath}]] already exists.";
+            this._logger.OkayText = $"Path [[{LocalCurrentReleasePath}]] already exists.";
         });
 
         DownloadRequiredDExcelAddInFromRemoteSource();
@@ -432,6 +430,7 @@ public partial class MainWindow : Window
             {
                 this._logger.ErrorText = $"Failed to install ∂Excel in Excel.";
                 this._logger.ErrorText = $"{exception.Message}";
+                this._logger.ErrorText = $"If this is the first time you are installing dExcel try manually installing in Excel it from [[{LocalCurrentReleasePath}]].";
                 this._logger.InstallationFailed();
             });
             CloseAllExcelInstances();
