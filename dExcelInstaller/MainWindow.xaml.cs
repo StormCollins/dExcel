@@ -26,7 +26,9 @@ public partial class MainWindow : Window
     /// The location of all the add-in versions on the shared drive.
     /// </summary>
     private const string SharedDriveReleasesPath = @"\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\Releases";
-    
+
+    private const string SharedDriveInstallationWorkbookPath = @"\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\Installer\dExcelInstaller.xlsm";
+
     /// <summary>
     /// The location of the all the add-in versions on the local machine.
     /// </summary>
@@ -312,7 +314,7 @@ public partial class MainWindow : Window
             
             try
             {
-                Directory.CreateDirectory(LocalReleasesPath);
+                Directory.CreateDirectory(LocalCurrentReleasePath);
                 Dispatcher.Invoke(() =>
                 {
                     this._logger.OkayText = $"Path [[{LocalCurrentReleasePath}]] created.";
@@ -327,7 +329,6 @@ public partial class MainWindow : Window
                     this._logger.InstallationFailed();
                 });
             }
-            return;
         }
 
         Dispatcher.Invoke(() =>
@@ -366,7 +367,6 @@ public partial class MainWindow : Window
             });
             return;
         }
-
         // Copy required version from 'C:\GitLab\dExcelTools\Releases\<version number>'
         // to 'C:\GitLab\dExcelTools\Releases\Current'.
         Dispatcher.Invoke(() =>
@@ -430,14 +430,17 @@ public partial class MainWindow : Window
             {
                 this._logger.ErrorText = $"Failed to install ∂Excel in Excel.";
                 this._logger.ErrorText = $"{exception.Message}";
+
+                CloseAllExcelInstances();
+                this._logger.OkayText = $"Trying to install ∂Excel using VBA.";
+                this._logger.OkayText = $"Opening Excel workbook {SharedDriveInstallationWorkbookPath}.";
                 this._logger.ErrorText = $"If this is the first time you are installing dExcel try manually installing in Excel it from [[{LocalCurrentReleasePath}]].";
                 this._logger.InstallationFailed();
             });
-            CloseAllExcelInstances();
-            Dispatcher.Invoke(() =>
-            {
-                this._logger.InstallationFailed();
-            });
+            var excel = new Excel.Application();
+            excel.Visible = true;
+            excel.Workbooks.Open(SharedDriveInstallationWorkbookPath);
+            excel.Quit();
             return;
         }
 
