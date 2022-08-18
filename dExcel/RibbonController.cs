@@ -165,7 +165,7 @@ public class RibbonController : ExcelRibbon
 #else
         var xlApp = (Excel.Application)ExcelDnaUtil.Application;
         xlApp.ActiveWorkbook.ApplyTheme(
-                @"C:\GitLab\dExcelTools\Versions\CurrentDeloitte_Brand_Theme.thmx"));
+                @"C:\GitLab\dExcelTools\Versions\CurrentDeloitte_Brand_Theme.thmx");
 #endif
     }
 

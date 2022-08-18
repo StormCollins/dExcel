@@ -135,9 +135,21 @@ public partial class Dashboard : Window
     private void OpenInstaller_Click(object sender, RoutedEventArgs e)
     {
 #if DEBUG
-        Process.Start(@"C:\GitLab\dExcelTools\dExcel\dExcelInstaller\bin\Debug\net6.0-windows\dExcelInstaller.exe");
+        var startupPath = Environment.ExpandEnvironmentVariables(@"%appdata%\Microsoft\Windows\Start Menu\Programs\Deloitte\dExcelInstaller.appref-ms");
+        ProcessStartInfo startInfo = new()
+        {
+            UseShellExecute = true,
+            FileName = "\"" + startupPath + "\""
+        };
+
+        Process process = new()
+        {
+            StartInfo = startInfo
+        };
+
+        process.Start();
 #else
-        Process.Start(@"C:\GitLab\dExcelTools\Installer\dExcelInstaller.exe");
+        Process.Start(@"C:\GitLab\dExcelTools\dExcel\dExcelInstaller\bin\Debug\net6.0-windows\dExcelInstaller.exe");
 #endif
     }
 

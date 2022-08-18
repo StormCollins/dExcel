@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource Calibri}"
-        Height="550"
+        Height="600"
         Icon="resources/icons/dExcel.ico"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
@@ -16,7 +16,7 @@
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
         Title="∂Excel Installer"
-        Width="800">
+        Width="900">
 
   <materialDesign:DialogHost
     Name="InstallerDialogHost">
@@ -318,7 +318,7 @@
               HorizontalAlignment="Stretch"
               IsReadOnly="True"
               Margin="5"
-              Width="750"
+              Width="850"
               VerticalAlignment="Stretch"
               VerticalContentAlignment="Top"
               VerticalScrollBarVisibility="Auto">

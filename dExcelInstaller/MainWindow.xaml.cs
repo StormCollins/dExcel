@@ -27,6 +27,9 @@ public partial class MainWindow : Window
     /// </summary>
     private const string SharedDriveReleasesPath = @"\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\Releases";
 
+    /// <summary>
+    /// The location of the workbook which invokes a VBA based installer on start up.
+    /// </summary>
     private const string SharedDriveInstallationWorkbookPath = @"\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\Installer\dExcelInstaller.xlsm";
 
     /// <summary>
@@ -38,8 +41,15 @@ public partial class MainWindow : Window
     /// The location of the currently installed version of the add-in on the machine.
     /// </summary>
     private const string LocalCurrentReleasePath = @"C:\GitLab\dExcelTools\Releases\Current\";
-   
+    
+    /// <summary>
+    /// The dExcel dll name.
+    /// </summary>
     private const string Dll = "dExcel.dll";
+    
+    /// <summary>
+    /// Indicates if the user is connected to the VPN.
+    /// </summary>
     private static bool _vpnConnectionStatus;
 
     /// <summary>
@@ -57,7 +67,7 @@ public partial class MainWindow : Window
         var installerVersion = Assembly.GetEntryAssembly()?.GetName().Version;
         InstallerVersion.Text = $"{installerVersion?.Major}.{installerVersion?.Minor}";
 
-        var currentDExcelVersion = GetCurrentDExcelVersion();
+        var currentDExcelVersion = GetInstalledDExcelVersion();
         CurrentDExcelVersion.Text = currentDExcelVersion;
         
         if (string.Compare(
@@ -226,7 +236,7 @@ public partial class MainWindow : Window
     /// </summary>
     /// <returns>The dExcel version if available as "Major version number.Minor version number" if installed otherwise
     /// "Not Installed".</returns>
-    private static string GetCurrentDExcelVersion()
+    private static string GetInstalledDExcelVersion()
     {
         if (File.Exists(LocalCurrentReleasePath + @"\" + Dll))
         {
@@ -248,7 +258,6 @@ public partial class MainWindow : Window
             this._logger.NewSubProcess("Ensuring Excel is closed.");
         });
 
-        // Ensure Excel is closed.
         CloseAllExcelInstances();
 
         // Remove initial (obsolete) version of dExcel.
@@ -291,9 +300,9 @@ public partial class MainWindow : Window
             Dispatcher.Invoke(() =>
             {
                 this._logger.ErrorText =
-                    $"Error removing obsolete instances of the ∂Excel add-in from " +
+                    "Error removing obsolete instances of the ∂Excel add-in from " +
                     $"{Environment.ExpandEnvironmentVariables("%appdata%/Microsoft/AddIns")}.";
-                this._logger.ErrorText = exception.Message;
+                this._logger.ErrorText = $"Exception message: {exception.Message}";
                 this._logger.InstallationFailed();
             });
             return;
@@ -362,7 +371,7 @@ public partial class MainWindow : Window
             Dispatcher.Invoke(() =>
             {
                 this._logger.ErrorText = $"Failed to delete files and folders from [[{LocalCurrentReleasePath}]].";
-                this._logger.ErrorText = exception.Message;
+                this._logger.ErrorText = $"Exception message: {exception.Message}";
                 this._logger.InstallationFailed();
             });
             return;
@@ -371,7 +380,8 @@ public partial class MainWindow : Window
         // to 'C:\GitLab\dExcelTools\Releases\Current'.
         Dispatcher.Invoke(() =>
         {
-            this._logger.OkayText = $"Copying version {AvailableDExcelReleases.SelectedItem} of ∂Excel to [[{LocalCurrentReleasePath}]].";
+            this._logger.OkayText = 
+                $"Copying version {AvailableDExcelReleases.SelectedItem} of ∂Excel to [[{LocalCurrentReleasePath}]].";
         });
         try
         {
@@ -385,7 +395,7 @@ public partial class MainWindow : Window
             Dispatcher.Invoke(() =>
             {
                 this._logger.ErrorText = $"Failed to copy version {AvailableDExcelReleases.SelectedItem} of ∂Excel to [[{LocalCurrentReleasePath}]].";
-                this._logger.ErrorText = $"{exception.Message}";
+                this._logger.ErrorText = $"Exception message: {exception.Message}";
                 this._logger.InstallationFailed();
             });
             return;
@@ -396,13 +406,14 @@ public partial class MainWindow : Window
         {
             this._logger.OkayText = $"Installing ∂Excel to Excel.";
         });
-
+        
+        // Excel is temperamental when installing an add-in via C# the very first time.
+        // The first time it is best to use a VBA installer however we try the C# route first regardless.
+        bool failedToInstallTryVBAInstaller = true;
+        
         try
         {
             var excel = new Excel.Application();
-
-            // excel.Visible = true;
-            // excel.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\resources\workbooks\dexcel-testing.xlsm");
             var dExcelAdded = false;
             foreach (Excel.AddIn addIn in excel.AddIns)
             {
@@ -416,32 +427,51 @@ public partial class MainWindow : Window
             // TODO: Check if file exists
             if (!dExcelAdded)
             {
-                Excel.Application xlApp = (Excel.Application) ExcelDnaUtil.Application;
+                Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
                 // excel.RegisterXLL(@"C:\GitLab\dExcelTools\Releases\Current\dExcel-AddIn64.xll");
                 Excel.AddIn dExcelAddIn =
                     excel.AddIns.Add(@"C:\GitLab\dExcelTools\Releases\Current\dExcel-AddIn64.xll");
                 dExcelAddIn.Installed = true;
             }
             excel.Quit();
+            failedToInstallTryVBAInstaller = false;
         }
         catch (Exception exception)
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.ErrorText = $"Failed to install ∂Excel in Excel.";
-                this._logger.ErrorText = $"{exception.Message}";
-
+                this._logger.WarningText = "Failed to install ∂Excel in Excel using C#-based approach.";
+                this._logger.WarningText = $"Exception message: {exception.Message}";
                 CloseAllExcelInstances();
-                this._logger.OkayText = $"Trying to install ∂Excel using VBA.";
-                this._logger.OkayText = $"Opening Excel workbook {SharedDriveInstallationWorkbookPath}.";
-                this._logger.ErrorText = $"If this is the first time you are installing dExcel try manually installing in Excel it from [[{LocalCurrentReleasePath}]].";
-                this._logger.InstallationFailed();
             });
-            var excel = new Excel.Application();
-            excel.Visible = true;
-            excel.Workbooks.Open(SharedDriveInstallationWorkbookPath);
-            excel.Quit();
-            return;
+        }
+
+        // Invoke the VBA installer if the C# installer failed (the case for the very first installation typically).
+        try
+        {
+            if (failedToInstallTryVBAInstaller)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    this._logger.WarningText = "Trying to install ∂Excel using VBA.";
+                    this._logger.OkayText = $"Opening Excel workbook {SharedDriveInstallationWorkbookPath}.";
+                    this._logger.WarningText =
+                        "If this is the first time you are installing dExcel try manually installing in Excel it from " +
+                        $"[[{LocalCurrentReleasePath}]].";
+                });
+                    
+                var excel = new Excel.Application
+                {
+                    Visible = true
+                };
+                excel.Workbooks.Open(SharedDriveInstallationWorkbookPath);
+                excel.Quit();
+            }
+        }
+        catch (Exception e)
+        {
+            this._logger.ErrorText = e.Message;
+            this._logger.InstallationFailed();
         }
 
         Dispatcher.Invoke(() =>
@@ -449,7 +479,7 @@ public partial class MainWindow : Window
             this._logger.InstallationSucceeded();
             this.Install.IsEnabled = false;
             this.Uninstall.IsEnabled = true;
-            this.CurrentDExcelVersion.Text = GetCurrentDExcelVersion();
+            this.CurrentDExcelVersion.Text = GetInstalledDExcelVersion();
             this.Cancel.Content = "Close";
         });
     }
@@ -535,7 +565,7 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.ErrorText = exception.Message;
+                this._logger.ErrorText = $"Exception message: {exception.Message}";
                 this._logger.UninstallationFailed();
             });
             return;
@@ -562,7 +592,7 @@ public partial class MainWindow : Window
         Dispatcher.Invoke(() =>
         {
             this._logger.UninstallationSucceeded();
-            this.CurrentDExcelVersion.Text = GetCurrentDExcelVersion();
+            this.CurrentDExcelVersion.Text = GetInstalledDExcelVersion();
             this.Uninstall.IsEnabled = false;
             this.Install.IsEnabled = true;
         });

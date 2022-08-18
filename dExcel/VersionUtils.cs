@@ -1,7 +1,6 @@
 ﻿namespace dExcel;
 
 using System;
-using System.Reflection;
 using ExcelDna.Integration;
 using Excel = Microsoft.Office.Interop.Excel;
 using Microsoft.Office.Core;
@@ -53,4 +52,3 @@ public static class VersionUtils
         return false;
     }
 }
-
