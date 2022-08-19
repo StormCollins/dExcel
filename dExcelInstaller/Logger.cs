@@ -72,12 +72,12 @@ public class Logger
     private static List<Run> CreateMessage(string message, Brush? fontColor = null, bool isBold = false)
     {
         var paths = Regex.Matches(message, @"(?<=\[\[).+?(?=\]\])").Select(x => x.Value).ToList();
-        var boldStrings = Regex.Matches(message, @"(?<=\[\[).+?(?=\]\])").Select(x => x.Value).ToList();  
+        var highlightedStrings = Regex.Matches(message, @"(?<=\*\*).+?(?=\*\*)").Select(x => x.Value).ToList();  
         
-        if (paths.Any() || boldStrings.Any())
+        if (paths.Any() || highlightedStrings.Any())
         {
-            var subMessages = Regex.Split(message, @"(\[\[)|(\]\])").ToList();
-            subMessages.RemoveAll(x => x is "[[" or "]]");
+            var subMessages = Regex.Split(message, @"(\[\[)|(\]\])|(\*\*)").ToList();
+            subMessages.RemoveAll(x => x is "[[" or "]]" or "**");
 
             List<Run> output = new();
             foreach (var subMessage in subMessages)
@@ -95,6 +95,16 @@ public class Logger
                     run.MouseEnter += LoggerPath_MouseEnter;
                     run.MouseLeave += LoggerPath_MouseLeave;
                     run.MouseLeftButtonDown += LoggerPath_MouseLeftButtonDown;
+                    output.Add(run);
+                }
+                else if (highlightedStrings.Contains(subMessage))
+                {
+                    var run = new Run($"{subMessage}")
+                    {
+                        FontStyle = FontStyles.Italic,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = fontColor ?? PrimaryHueMidBrush,
+                    };
                     output.Add(run);
                 }
                 else

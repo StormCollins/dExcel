@@ -234,8 +234,6 @@
             Name="Uninstall"
             Click="Uninstall_Click"
             Content="Uninstall ∂Excel"
-            Grid.Row="11"
-            Grid.Column="3"
             Margin="5"
             Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
             ToolTipService.InitialShowDelay="100"
@@ -273,8 +271,6 @@
             Name="CloseAndLaunchExcel"
             Click="CloseAndLaunchExcel_OnClick"
             Content="Close and Launch Excel"
-            Grid.Row="11"
-            Grid.Column="3"
             Margin="5"
             Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
             ToolTipService.InitialShowDelay="100"
@@ -295,7 +291,63 @@
         Grid.RowSpan="6"
         Grid.Column="0"
         Grid.ColumnSpan="6">
-        <DockPanel
+        <materialDesign:DialogHost
+          Name="ExcelIsOpenWarningDialog"
+          DialogTheme="Inherit">
+           
+          <materialDesign:DialogHost.DialogContent>
+            <DockPanel
+              Margin="15">
+              <DockPanel
+                DockPanel.Dock="Top">
+                <materialDesign:PackIcon
+                  Foreground="{StaticResource WarningBrush}"
+                  Kind="Alert"
+                  VerticalAlignment="Center"/>
+                <TextBlock
+                  DockPanel.Dock="Right"
+                  Style="{StaticResource AmberHeader2}"
+                  Text="Warning: Closing Excel" />
+              </DockPanel>
+              <Separator
+                Name="WarningSeparator"
+                DockPanel.Dock="Top"/>
+              <TextBlock 
+                DockPanel.Dock="Top"
+                Margin="8 10 0 0"
+                Text="This will terminate all Excel sessions."/>
+              <TextBlock
+                DockPanel.Dock="Top"
+                Text="Any unsaved data will be lost."/>
+              <TextBlock
+                DockPanel.Dock="Top"
+                Margin="8 0 0 20"
+                Text="Proceed?"/>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Button 
+                  Name="IgnoreExcelIsOpenWarning"
+                  Grid.Column="0"
+                  Click="IgnoreExcelIsOpenWarning_OnClick"
+                  BorderBrush="{StaticResource WarningBrush}"
+                  Background="{StaticResource WarningBrush}"
+                  Content="Yes"/>
+                <Button 
+                  Name="StopInstallationAndDontCloseExcel"
+                  Grid.Column="1"
+                  Click="StopInstallationAndDontCloseExcel_OnClick"
+                  Content="No"/>
+              </Grid>
+            </DockPanel>
+          </materialDesign:DialogHost.DialogContent>
+          
+          <DockPanel
           Margin="5">
           <TextBlock
             DockPanel.Dock="Top"
@@ -331,6 +383,8 @@
             </RichTextBox>
           </Border>
         </DockPanel>
+          
+        </materialDesign:DialogHost>
       </materialDesign:Card>
 
       <Button

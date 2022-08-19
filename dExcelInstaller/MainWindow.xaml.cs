@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -22,6 +23,8 @@ using Excel = Microsoft.Office.Interop.Excel;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private readonly FileSystemWatcher _releaseDirectoryWatcher = new();
+    
     /// <summary>
     /// The location of all the add-in versions on the shared drive.
     /// </summary>
@@ -69,15 +72,15 @@ public partial class MainWindow : Window
 
         var currentDExcelVersion = GetInstalledDExcelVersion();
         CurrentDExcelVersion.Text = currentDExcelVersion;
-        
+
         if (string.Compare(
-                strA: currentDExcelVersion, 
-                strB: "Not Installed", 
+                strA: currentDExcelVersion,
+                strB: "Not Installed",
                 comparisonType: StringComparison.InvariantCultureIgnoreCase) == 0)
         {
             this.Uninstall.IsEnabled = false;
         }
-        
+
         AdminRights.Text = IsAdministrator().ToString();
         if (!IsAdministrator())
         {
@@ -91,7 +94,8 @@ public partial class MainWindow : Window
             this.ConnectionStatus.Source =
                 new BitmapImage(
                     new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico",
-                    UriKind.Absolute));
+                        UriKind.Absolute));
+            this._releaseDirectoryWatcher.Path = SharedDriveReleasesPath;
             this.DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
             this._logger.OkayText =
                 $"Checking for latest versions of ∂Excel on the selected remote source: **{DExcelRemoteSource.Text}**";
@@ -113,6 +117,7 @@ public partial class MainWindow : Window
                     new Uri(
                         uriString: @"pack://application:,,,/resources/icons/connection-status-amber.ico",
                         uriKind: UriKind.Absolute));
+            this._releaseDirectoryWatcher.Path = LocalReleasesPath;
             this._logger.WarningText = "User not connected to the VPN.";
             this._logger.WarningText =
                 "The VPN is required to check for the latest versions of the ∂Excel add-in on the selected remote " +
@@ -122,8 +127,38 @@ public partial class MainWindow : Window
             this.DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
         }
 
-        NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback!;
         AvailableDExcelReleases.SelectedIndex = 0;
+
+        NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback!;
+        _releaseDirectoryWatcher.NotifyFilter = NotifyFilters.Attributes
+                               | NotifyFilters.CreationTime
+                               | NotifyFilters.DirectoryName
+                               | NotifyFilters.FileName
+                               | NotifyFilters.LastAccess
+                               | NotifyFilters.LastWrite
+                               | NotifyFilters.Security
+                               | NotifyFilters.Size;
+        _releaseDirectoryWatcher.Changed += ReleasesFolderChanged;
+        _releaseDirectoryWatcher.Deleted += ReleasesFolderChanged;
+        _releaseDirectoryWatcher.Filter = "*.*";
+        _releaseDirectoryWatcher.IncludeSubdirectories = true;
+        _releaseDirectoryWatcher.EnableRaisingEvents = true; 
+    }
+
+    private void ReleasesFolderChanged(object sender, FileSystemEventArgs e)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            if (_releaseDirectoryWatcher.Path == SharedDriveReleasesPath)
+            {
+                this.AvailableDExcelReleases.ItemsSource = GetAllAvailableRemoteDExcelReleases();
+            }
+            else
+            {
+                this.AvailableDExcelReleases.ItemsSource = GetAllAvailableLocalDExcelReleases();
+            }
+            this.AvailableDExcelReleases.SelectedIndex = 0;
+        });
     }
 
     /// <summary>
@@ -156,11 +191,12 @@ public partial class MainWindow : Window
                             new Uri(
                                 uriString: @"pack://application:,,,/resources/icons/connection-status-green.ico",
                                 uriKind: UriKind.Absolute));
+                    this._releaseDirectoryWatcher.Path = SharedDriveReleasesPath;
                     this.DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
                     this._logger.OkayText =
                         "Checking for latest versions of ∂Excel on the selected remote source: " +
                         $"**{this.DExcelRemoteSource.Text}**";
-                    this._logger.WarningText = $"Installation path set to: [[{SharedDriveReleasesPath}]]";
+                    this._logger.OkayText = $"Installation path set to: [[{SharedDriveReleasesPath}]]";
                     this.AvailableDExcelReleases.ItemsSource = GetAllAvailableRemoteDExcelReleases();
                 });
             }
@@ -173,11 +209,12 @@ public partial class MainWindow : Window
                             new Uri(
                                 uriString: @"pack://application:,,,/resources/icons/connection-status-amber.ico",
                                 uriKind: UriKind.Absolute));
+                    this._releaseDirectoryWatcher.Path = LocalReleasesPath;
                     this.DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
                     this._logger.WarningText = "User not connected to VPN.";
                     this._logger.WarningText = 
                         "The VPN is required to check for latest versions of the ∂Excel add-in on the selected " +
-                        $"remote source: {DExcelRemoteSource.Text}.";
+                        $"remote source: **{DExcelRemoteSource.Text}**";
                     this._logger.WarningText =
                         "Only locally available versions of the ∂Excel add-in can be installed.";
                     this._logger.WarningText = $"Installation path set to: [[{LocalReleasesPath}]]";
@@ -246,16 +283,61 @@ public partial class MainWindow : Window
 
         return "Not Installed";
     }
+    
+    TaskCompletionSource<bool> tcs = new();
+    
+    private async void IgnoreExcelIsOpenWarning_OnClick(object sender, RoutedEventArgs e)
+    {
+        // tcs = new TaskCompletionSource<bool>();
+        tcs.SetResult(true);
+    }
+    
 
+    private void StopInstallationAndDontCloseExcel_OnClick(object sender, RoutedEventArgs e)
+    {
+        tcs.SetResult(false);
+    }
+    
     /// <summary>
     /// Installs the specified version of the dExcel AddIn to Excel.
     /// </summary>
-    private void InstallAddIn()
+    private async void InstallAddIn()
     {
+        // Check with user if all unsaved instances of Excel can be terminated.
+        if (Process.GetProcessesByName("Excel").Any())
+        {
+            await Dispatcher.Invoke(async () =>
+            {
+                this.ExcelIsOpenWarningDialog.IsOpen = true;
+                await tcs.Task;
+            });
+            
+            if (tcs.Task.Result)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    this.ExcelIsOpenWarningDialog.IsOpen = false;
+                });
+                
+                tcs = new TaskCompletionSource<bool>();
+            }
+            else
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    this.ExcelIsOpenWarningDialog.IsOpen = false;
+                    this._logger.OkayText = "Installation cancelled by user.";
+                });
+                
+                tcs = new TaskCompletionSource<bool>();
+                return;
+            }
+        } 
+        
         Dispatcher.Invoke(() =>
         {
             this._logger.NewProcess("Installation of ∂Excel started.");
-            this._logger.NewSubProcess("Ensuring Excel is closed.");
+            this._logger.NewSubProcess("Ensuring all instances of Excel are terminated.");
         });
 
         CloseAllExcelInstances();
@@ -374,8 +456,10 @@ public partial class MainWindow : Window
                 this._logger.ErrorText = $"Exception message: {exception.Message}";
                 this._logger.InstallationFailed();
             });
+            
             return;
         }
+        
         // Copy required version from 'C:\GitLab\dExcelTools\Releases\<version number>'
         // to 'C:\GitLab\dExcelTools\Releases\Current'.
         Dispatcher.Invoke(() =>
@@ -394,7 +478,9 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() =>
             {
-                this._logger.ErrorText = $"Failed to copy version {AvailableDExcelReleases.SelectedItem} of ∂Excel to [[{LocalCurrentReleasePath}]].";
+                this._logger.ErrorText = 
+                    $"Failed to copy version {AvailableDExcelReleases.SelectedItem} of ∂Excel to " +
+                    $"[[{LocalCurrentReleasePath}]].";
                 this._logger.ErrorText = $"Exception message: {exception.Message}";
                 this._logger.InstallationFailed();
             });
@@ -404,12 +490,12 @@ public partial class MainWindow : Window
         // Create Excel application and install ∂Excel add-in.
         Dispatcher.Invoke(() =>
         {
-            this._logger.OkayText = $"Installing ∂Excel to Excel.";
+            this._logger.OkayText = "Installing ∂Excel to Excel.";
         });
         
         // Excel is temperamental when installing an add-in via C# the very first time.
         // The first time it is best to use a VBA installer however we try the C# route first regardless.
-        bool failedToInstallTryVBAInstaller = true;
+        var failedToInstallTryVbaInstaller = true;
         
         try
         {
@@ -428,13 +514,12 @@ public partial class MainWindow : Window
             if (!dExcelAdded)
             {
                 Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
-                // excel.RegisterXLL(@"C:\GitLab\dExcelTools\Releases\Current\dExcel-AddIn64.xll");
                 Excel.AddIn dExcelAddIn =
                     excel.AddIns.Add(@"C:\GitLab\dExcelTools\Releases\Current\dExcel-AddIn64.xll");
                 dExcelAddIn.Installed = true;
             }
             excel.Quit();
-            failedToInstallTryVBAInstaller = false;
+            failedToInstallTryVbaInstaller = false;
         }
         catch (Exception exception)
         {
@@ -449,7 +534,7 @@ public partial class MainWindow : Window
         // Invoke the VBA installer if the C# installer failed (the case for the very first installation typically).
         try
         {
-            if (failedToInstallTryVBAInstaller)
+            if (failedToInstallTryVbaInstaller)
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -483,6 +568,7 @@ public partial class MainWindow : Window
             this.Cancel.Content = "Close";
         });
     }
+
 
     /// <summary>
     /// Copies all files, including subdirectories, from one path to path.
@@ -597,7 +683,7 @@ public partial class MainWindow : Window
             this.Install.IsEnabled = true;
         });
     }
-    
+
     /// <summary>
     /// Closes all instances of Excel.
     /// </summary>
@@ -638,7 +724,10 @@ public partial class MainWindow : Window
     /// <param name="e">The RoutedEventArgs.</param>
     private void AvailableDExcelReleases_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        Install.IsEnabled = AvailableDExcelReleases.Text != CurrentDExcelVersion.Text;
+        if (AvailableDExcelReleases.SelectedItem != null)
+        {
+            Install.IsEnabled = AvailableDExcelReleases.SelectedItem.ToString() != CurrentDExcelVersion.Text;
+        }
     }
 
     /// <summary>
