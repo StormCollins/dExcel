@@ -79,18 +79,23 @@
           Label="Current ∂Excel Version: "
           Margin="4 4 0 0"
           Tip="The version of the ∂Excel add-in, currently installed in Excel."/> 
-        <StackPanel Orientation="Horizontal">
-          <materialDesign:PackIcon
-            Foreground="{StaticResource SecondaryHueMidBrush}"
-            Kind="HelpCircleOutline"
-            Margin="4"
-            ToolTip="The version of the ∂Excel add-in you'd like to install/switch to."
-            ToolTipService.InitialShowDelay="100"
-            ToolTipService.BetweenShowDelay="100"
-            VerticalAlignment="Center"/>
-          <TextBlock
-            Margin="-2 0 0 0"
-            Text="Install ∂Excel Version:"/>
+        <StackPanel
+          Margin="4 4 0 0"
+          Orientation="Horizontal">
+          <!-- <materialDesign:PackIcon -->
+          <!--   Foreground="{StaticResource SecondaryHueMidBrush}" -->
+          <!--   Kind="HelpCircleOutline" -->
+          <!--   Margin="4" -->
+          <!--   ToolTip="The version of the ∂Excel add-in you'd like to install/switch to." -->
+          <!--   ToolTipService.InitialShowDelay="100" -->
+          <!--   ToolTipService.BetweenShowDelay="100" -->
+          <!--   VerticalAlignment="Center"/> -->
+          <!-- <TextBlock -->
+          <!--   Margin="-2 0 0 0" -->
+          <!--   Text="Install ∂Excel Version:"/> -->
+          <uc:InformationalLabel
+            Label="Install ∂Excel Version:"
+            Tip="The version of the ∂Excel add-in you'd like to install/switch to."/>
           <ComboBox 
             materialDesign:ColorZoneAssist.Mode="SecondaryMid"
             materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
@@ -99,28 +104,11 @@
             SelectionChanged="AvailableDExcelReleases_OnSelectionChanged"
             Style="{StaticResource MaterialDesignComboBox}"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal">
-          <materialDesign:PackIcon
-            Foreground="{StaticResource SecondaryHueMidBrush}"
-            Kind="HelpCircleOutline"
-            Margin="4"
-            ToolTipService.InitialShowDelay="100"
-            ToolTipService.BetweenShowDelay="100"
-            VerticalAlignment="Center">
-            <materialDesign:PackIcon.ToolTip>
-              <DockPanel>
-                <TextBlock
-                  DockPanel.Dock="Top"
-                  Text="The remote source location of the add-in."/>
-                <TextBlock
-                  DockPanel.Dock="Top"
-                  Text="Currently only the Shared Drive is supported."/>
-              </DockPanel>
-            </materialDesign:PackIcon.ToolTip>
-          </materialDesign:PackIcon>
-          <TextBlock
-            Margin="-2 0 0 0"
-            Text="∂Excel Source:"/>
+        <StackPanel 
+          Margin="4 4 0 0"
+          Orientation="Horizontal">
+          <uc:InformationalLabel
+            Label="∂Excel Source:"/>
           <ComboBox 
             materialDesign:ColorZoneAssist.Mode="SecondaryMid"
             materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
@@ -153,7 +141,7 @@
           BorderThickness="1"
           CornerRadius="5"
           DockPanel.Dock="Top"
-          Margin="5">
+          Margin="8 8 8 0">
           <DockPanel
             HorizontalAlignment="Center"
             Name="DockPanelConnectionStatus">
@@ -175,7 +163,7 @@
           BorderThickness="1"
           CornerRadius="5"
           DockPanel.Dock="Top"
-          Margin="5">
+          Margin="8 10 8 8">
           <DockPanel
             HorizontalAlignment="Center"
             VerticalAlignment="Center">
@@ -200,7 +188,7 @@
           Name="Uninstall"
           Click="Uninstall_Click"
           Content="Uninstall ∂Excel"
-          Margin="5"
+          Margin="10 8 8 0"
           Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
           ToolTipService.InitialShowDelay="100"
           ToolTipService.BetweenShowDelay="100">
@@ -218,9 +206,7 @@
           Name="LaunchExcel"
           Click="LaunchExcel_OnClick"
           Content="Launch Excel"
-          Grid.Row="11"
-          Grid.Column="3"
-          Margin="5"
+          Margin="10 8 8 0"
           Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
           ToolTipService.InitialShowDelay="100"
           ToolTipService.BetweenShowDelay="100">
@@ -237,7 +223,7 @@
           Name="CloseAndLaunchExcel"
           Click="CloseAndLaunchExcel_OnClick"
           Content="Close and Launch Excel"
-          Margin="5"
+          Margin="10 8 8 0"
           Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
           ToolTipService.InitialShowDelay="100"
           ToolTipService.BetweenShowDelay="100">

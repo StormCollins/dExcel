@@ -3,7 +3,7 @@
 using System.ComponentModel;
 
 /// <summary>
-/// Specifies a label with a helpful tooltip.
+/// Specifies a label with a helpful tooltip and settable output.
 /// </summary>
 public partial class InformationalLabelWithOutput : INotifyPropertyChanged
 {
