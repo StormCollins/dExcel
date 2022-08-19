@@ -69,15 +69,15 @@
       <StackPanel>
         <TextBlock Text="Version Information" Style="{StaticResource GreenHeader2}"/>
         <Separator Name="VersionInformationSeparator"/>
-        <uc:InformationalLabel
+        <uc:InformationalLabelWithOutput
           Name="InstallerVersion"
           Label="Installer Version: "
-          Margin="0 8 0 0"
+          Margin="4 8 0 0"
           Tip="The version of this, the currently running, ∂Excel installer."/>
-        <uc:InformationalLabel
+        <uc:InformationalLabelWithOutput
           Name="CurrentDExcelVersion"
           Label="Current ∂Excel Version: "
-          Margin="0 4 0 0"
+          Margin="4 4 0 0"
           Tip="The version of the ∂Excel add-in, currently installed in Excel."/> 
         <StackPanel Orientation="Horizontal">
           <materialDesign:PackIcon
@@ -164,9 +164,6 @@
               Name="ConnectionStatus"
               HorizontalAlignment="Right"
               VerticalAlignment="Top"
-              Grid.Row="0"
-              Grid.RowSpan="2"
-              Grid.Column="7"
               Margin="5"
               Width="50"
               Source="resources/icons/connection-status-green.ico"/>

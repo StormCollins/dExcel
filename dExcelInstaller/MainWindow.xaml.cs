@@ -23,7 +23,10 @@ using Excel = Microsoft.Office.Interop.Excel;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private readonly FileSystemWatcher _releaseDirectoryWatcher = new();
+    /// <summary>
+    /// The directory containing dExcel releases, local or remote, to monitor for new releases.
+    /// </summary>
+    private readonly FileSystemWatcher _releasesDirectoryWatcher = new();
     
     /// <summary>
     /// The location of all the add-in versions on the shared drive.
@@ -68,10 +71,10 @@ public partial class MainWindow : Window
         InitializeComponent();
         this._logger = new Logger(LogWindow);
         var installerVersion = Assembly.GetEntryAssembly()?.GetName().Version;
-        InstallerVersion.Info = $"{installerVersion?.Major}.{installerVersion?.Minor}";
+        InstallerVersion.Output = $"{installerVersion?.Major}.{installerVersion?.Minor}";
 
         var currentDExcelVersion = GetInstalledDExcelVersion();
-        CurrentDExcelVersion.Info = currentDExcelVersion;
+        CurrentDExcelVersion.Output = currentDExcelVersion;
 
         if (string.Compare(
                 strA: currentDExcelVersion,
@@ -95,7 +98,7 @@ public partial class MainWindow : Window
                 new BitmapImage(
                     new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico",
                         UriKind.Absolute));
-            this._releaseDirectoryWatcher.Path = SharedDriveReleasesPath;
+            this._releasesDirectoryWatcher.Path = SharedDriveReleasesPath;
             this.DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
             this._logger.OkayText =
                 $"Checking for latest versions of ∂Excel on the selected remote source: **{DExcelRemoteSource.Text}**";
@@ -117,7 +120,7 @@ public partial class MainWindow : Window
                     new Uri(
                         uriString: @"pack://application:,,,/resources/icons/connection-status-amber.ico",
                         uriKind: UriKind.Absolute));
-            this._releaseDirectoryWatcher.Path = LocalReleasesPath;
+            this._releasesDirectoryWatcher.Path = LocalReleasesPath;
             this._logger.WarningText = "User not connected to the VPN.";
             this._logger.WarningText =
                 "The VPN is required to check for the latest versions of the ∂Excel add-in on the selected remote " +
@@ -129,7 +132,7 @@ public partial class MainWindow : Window
 
         AvailableDExcelReleases.SelectedIndex = 0;
         NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback!;
-        _releaseDirectoryWatcher.NotifyFilter = 
+        _releasesDirectoryWatcher.NotifyFilter = 
             NotifyFilters.Attributes |
             NotifyFilters.CreationTime |
             NotifyFilters.DirectoryName |
@@ -139,18 +142,18 @@ public partial class MainWindow : Window
             NotifyFilters.Security |
             NotifyFilters.Size;
         
-        _releaseDirectoryWatcher.Changed += ReleasesFolderChanged;
-        _releaseDirectoryWatcher.Deleted += ReleasesFolderChanged;
-        _releaseDirectoryWatcher.Filter = "*.*";
-        _releaseDirectoryWatcher.IncludeSubdirectories = true;
-        _releaseDirectoryWatcher.EnableRaisingEvents = true; 
+        _releasesDirectoryWatcher.Changed += ReleasesesFolderChanged;
+        _releasesDirectoryWatcher.Deleted += ReleasesesFolderChanged;
+        _releasesDirectoryWatcher.Filter = "*.*";
+        _releasesDirectoryWatcher.IncludeSubdirectories = true;
+        _releasesDirectoryWatcher.EnableRaisingEvents = true; 
     }
 
-    private void ReleasesFolderChanged(object sender, FileSystemEventArgs e)
+    private void ReleasesesFolderChanged(object sender, FileSystemEventArgs e)
     {
         Dispatcher.Invoke(() =>
         {
-            if (_releaseDirectoryWatcher.Path == SharedDriveReleasesPath)
+            if (_releasesDirectoryWatcher.Path == SharedDriveReleasesPath)
             {
                 this.AvailableDExcelReleases.ItemsSource = GetAllAvailableRemoteDExcelReleases();
             }
@@ -192,7 +195,7 @@ public partial class MainWindow : Window
                             new Uri(
                                 uriString: @"pack://application:,,,/resources/icons/connection-status-green.ico",
                                 uriKind: UriKind.Absolute));
-                    this._releaseDirectoryWatcher.Path = SharedDriveReleasesPath;
+                    this._releasesDirectoryWatcher.Path = SharedDriveReleasesPath;
                     this.DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
                     this._logger.OkayText =
                         "Checking for latest versions of ∂Excel on the selected remote source: " +
@@ -210,7 +213,7 @@ public partial class MainWindow : Window
                             new Uri(
                                 uriString: @"pack://application:,,,/resources/icons/connection-status-amber.ico",
                                 uriKind: UriKind.Absolute));
-                    this._releaseDirectoryWatcher.Path = LocalReleasesPath;
+                    this._releasesDirectoryWatcher.Path = LocalReleasesPath;
                     this.DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
                     this._logger.WarningText = "User not connected to VPN.";
                     this._logger.WarningText = 
@@ -565,7 +568,7 @@ public partial class MainWindow : Window
             this._logger.InstallationSucceeded();
             this.Install.IsEnabled = false;
             this.Uninstall.IsEnabled = true;
-            this.CurrentDExcelVersion.Info = GetInstalledDExcelVersion();
+            this.CurrentDExcelVersion.Output = GetInstalledDExcelVersion();
             this.Cancel.Content = "Close";
         });
     }
@@ -679,7 +682,7 @@ public partial class MainWindow : Window
         Dispatcher.Invoke(() =>
         {
             this._logger.UninstallationSucceeded();
-            this.CurrentDExcelVersion.Info = GetInstalledDExcelVersion();
+            this.CurrentDExcelVersion.Output = GetInstalledDExcelVersion();
             this.Uninstall.IsEnabled = false;
             this.Install.IsEnabled = true;
         });
@@ -727,7 +730,7 @@ public partial class MainWindow : Window
     {
         if (AvailableDExcelReleases.SelectedItem != null)
         {
-            Install.IsEnabled = AvailableDExcelReleases.SelectedItem.ToString() != CurrentDExcelVersion.Info;
+            Install.IsEnabled = AvailableDExcelReleases.SelectedItem.ToString() != CurrentDExcelVersion.Output;
         }
     }
 
