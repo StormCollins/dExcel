@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:dExcelInstaller"
+        xmlns:uc="clr-namespace:dExcelWpf;assembly=dExcelWpf" 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
@@ -18,391 +19,358 @@
         Title="∂Excel Installer"
         Width="900">
 
-  <materialDesign:DialogHost
-    Name="InstallerDialogHost">
-    <materialDesign:DialogHost.DialogContent>
-      <DockPanel>
-        <TextBlock>
-          You are currently missing the following versions.
-        </TextBlock>  
-      </DockPanel>
-    </materialDesign:DialogHost.DialogContent> 
-    
-    <Grid>
-      <Grid.RowDefinitions>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-        <RowDefinition Height="*"/>
-      </Grid.RowDefinitions>
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="*"/>
-      </Grid.ColumnDefinitions>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
 
-      <TextBlock
-        Grid.Row="0"
-        Grid.Column="0"
-        Grid.ColumnSpan="3"
-        Style="{StaticResource GreenHeader1}"
-        Text="∂Excel Installer"/>
+    <TextBlock
+      Grid.Row="0"
+      Grid.Column="0"
+      Grid.ColumnSpan="3"
+      Style="{StaticResource GreenHeader1}"
+      Text="∂Excel Installer"/>
 
-      <Image
-        Name="dExcelIcon"
-        Grid.Row="0"
-        Grid.RowSpan="2"
-        Grid.Column="7"
-        HorizontalAlignment="Right"
-        Margin="5"
-        Source="pack://application:,,,/resources/icons/dExcel48.png"
-        VerticalAlignment="Top"
-        Width="40"/>
+    <Image
+      Name="DExcelIcon"
+      Grid.Row="0"
+      Grid.RowSpan="2"
+      Grid.Column="5"
+      HorizontalAlignment="Right"
+      Margin="5"
+      Source="pack://application:,,,/resources/icons/dExcel48.png"
+      VerticalAlignment="Top"
+      Width="40"/>
 
-      <materialDesign:Card
-        Grid.Row="1"
-        Grid.RowSpan="4"
-        Grid.Column="0"
-        Grid.ColumnSpan="2">
-        <StackPanel>
-          <TextBlock Text="Version Information" Style="{StaticResource GreenHeader2}"/>
-          <Separator Name="VersionInformationSeparator"/>
-          <StackPanel Orientation="Horizontal">
-            <materialDesign:PackIcon
-              Foreground="{StaticResource SecondaryHueMidBrush}"
-              Kind="HelpCircleOutline"
-              Margin="4"
-              ToolTip="The version of this, the currently running, ∂Excel installer."
-              ToolTipService.InitialShowDelay="100"
-              ToolTipService.BetweenShowDelay="100"
-              VerticalAlignment="Center"/>
-            <TextBlock
-              Margin="-2 0 0 0"
-              Text="Installer Version:"/>
-            <TextBlock
-              Name="InstallerVersion" 
-              Style="{StaticResource OutputText}"/>
-          </StackPanel>
-          <StackPanel Orientation="Horizontal">
-            <materialDesign:PackIcon
-              Foreground="{StaticResource SecondaryHueMidBrush}"
-              Kind="HelpCircleOutline"
-              Margin="4"
-              ToolTip="The version of the ∂Excel add-in currently installed in Excel."
-              ToolTipService.InitialShowDelay="100"
-              ToolTipService.BetweenShowDelay="100"
-              VerticalAlignment="Center"/>
-            <TextBlock
-              Margin="-2 0 0 0"
-              Text="Current ∂Excel Version: "/>
-            <TextBlock
-              Name="CurrentDExcelVersion"
-              Style="{StaticResource OutputText}"/>
-          </StackPanel>
-          <StackPanel Orientation="Horizontal">
-            <materialDesign:PackIcon
-              Foreground="{StaticResource SecondaryHueMidBrush}"
-              Kind="HelpCircleOutline"
-              Margin="4"
-              ToolTip="The version of the ∂Excel add-in you'd like to install/switch to."
-              ToolTipService.InitialShowDelay="100"
-              ToolTipService.BetweenShowDelay="100"
-              VerticalAlignment="Center"/>
-            <TextBlock
-              Margin="-2 0 0 0"
-              Text="Install ∂Excel Version:"/>
-            <ComboBox 
-              materialDesign:ColorZoneAssist.Mode="SecondaryMid"
-              materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
-              Name="AvailableDExcelReleases"
-              Padding="0"
-              SelectionChanged="AvailableDExcelReleases_OnSelectionChanged"
-              Style="{StaticResource MaterialDesignComboBox}"/>
-          </StackPanel>
-          <StackPanel Orientation="Horizontal">
-            <materialDesign:PackIcon
-              Foreground="{StaticResource SecondaryHueMidBrush}"
-              Kind="HelpCircleOutline"
-              Margin="4"
-              ToolTipService.InitialShowDelay="100"
-              ToolTipService.BetweenShowDelay="100"
-              VerticalAlignment="Center">
-              <materialDesign:PackIcon.ToolTip>
-                <DockPanel>
-                  <TextBlock
-                    DockPanel.Dock="Top"
-                    Text="The remote source location of the add-in."/>
-                  <TextBlock
-                    DockPanel.Dock="Top"
-                    Text="Currently only the Shared Drive is supported."/>
-                </DockPanel>
-              </materialDesign:PackIcon.ToolTip>
-            </materialDesign:PackIcon>
-            <TextBlock
-              Margin="-2 0 0 0"
-              Text="∂Excel Source:"/>
-            <ComboBox 
-              materialDesign:ColorZoneAssist.Mode="SecondaryMid"
-              materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
-              Name="DExcelRemoteSource"
-              Padding="0"
-              Style="{StaticResource MaterialDesignComboBox}">
-              <ComboBoxItem Content="Shared Drive" IsSelected="True" />  
-              <ComboBoxItem Content="GitLab" IsEnabled="False" />  
-            </ComboBox>
-          </StackPanel>
-        </StackPanel>
-      </materialDesign:Card>
-
-      <materialDesign:Card
-        Grid.Row="1"
-        Grid.RowSpan="4"
-        Grid.Column="2"
-        Grid.ColumnSpan="2">
-        <DockPanel>
+    <materialDesign:Card
+      Grid.Row="1"
+      Grid.RowSpan="4"
+      Grid.Column="0"
+      Grid.ColumnSpan="2">
+      <StackPanel>
+        <TextBlock Text="Version Information" Style="{StaticResource GreenHeader2}"/>
+        <Separator Name="VersionInformationSeparator"/>
+        <uc:InformationalLabel
+          Name="InstallerVersion"
+          Label="Installer Version: "
+          Margin="0 8 0 0"
+          Tip="The version of this, the currently running, ∂Excel installer."/>
+        <uc:InformationalLabel
+          Name="CurrentDExcelVersion"
+          Label="Current ∂Excel Version: "
+          Margin="0 4 0 0"
+          Tip="The version of the ∂Excel add-in, currently installed in Excel."/> 
+        <StackPanel Orientation="Horizontal">
+          <materialDesign:PackIcon
+            Foreground="{StaticResource SecondaryHueMidBrush}"
+            Kind="HelpCircleOutline"
+            Margin="4"
+            ToolTip="The version of the ∂Excel add-in you'd like to install/switch to."
+            ToolTipService.InitialShowDelay="100"
+            ToolTipService.BetweenShowDelay="100"
+            VerticalAlignment="Center"/>
           <TextBlock
-            DockPanel.Dock="Top"
-            Style="{StaticResource GreenHeader2}"
-            Text="Diagnostics" />
-          <Separator
-            DockPanel.Dock="Top"
-            Name="DiagnosticsSeparator"/>
-          <Border
-            Background="{StaticResource MaterialDesignDarkBackground}"
-            BorderBrush="{StaticResource PrimaryHueLightBrush}" 
-            BorderThickness="1"
-            CornerRadius="5"
-            DockPanel.Dock="Top"
-            Margin="5">
-            <DockPanel
-              HorizontalAlignment="Center"
-              Name="DockPanelConnectionStatus">
-              <TextBlock
-                VerticalAlignment="Center"
-                Text="VPN Connection Status"/>
-              <Image
-                Name="ConnectionStatus"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Grid.Row="0"
-                Grid.RowSpan="2"
-                Grid.Column="7"
-                Margin="5"
-                Width="50"
-                Source="resources/icons/connection-status-green.ico"/>
-            </DockPanel>
-          </Border>
-          <Border
-            Background="{StaticResource MaterialDesignDarkBackground}"
-            BorderBrush="{StaticResource PrimaryHueLightBrush}" 
-            BorderThickness="1"
-            CornerRadius="5"
-            DockPanel.Dock="Top"
-            Margin="5">
-            <DockPanel
-              HorizontalAlignment="Center"
-              VerticalAlignment="Center">
-              <TextBlock Text="User Has Admin Rights:"/>
-              <TextBlock Name="AdminRights" Style="{StaticResource OutputText}"/>
-            </DockPanel>
-          </Border>
-        </DockPanel>
-      </materialDesign:Card>
-      
-      <materialDesign:Card
-        Grid.Row="1"
-        Grid.RowSpan="4"
-        Grid.Column="4"
-        Grid.ColumnSpan="2">
-        <StackPanel>
-          <TextBlock
-            Text="Utilities"
-            Style="{StaticResource GreenHeader2}"/>
-          <Separator Name="UtilitiesSeparator"/>
-          <Button
-            Name="Uninstall"
-            Click="Uninstall_Click"
-            Content="Uninstall ∂Excel"
-            Margin="5"
-            Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
-            ToolTipService.InitialShowDelay="100"
-            ToolTipService.BetweenShowDelay="100">
-            <Button.ToolTip>
-              <ToolTip Background="Black">
-                <TextBlock>
-                  Uninstalls ∂Excel from Excel. <LineBreak/>
-                  However, it does not remove any files from your computer.
-                </TextBlock>
-              </ToolTip>
-            </Button.ToolTip>
-          </Button>
-
-          <Button
-            Name="LaunchExcel"
-            Click="LaunchExcel_OnClick"
-            Content="Launch Excel"
-            Grid.Row="11"
-            Grid.Column="3"
-            Margin="5"
-            Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
-            ToolTipService.InitialShowDelay="100"
-            ToolTipService.BetweenShowDelay="100">
-            <Button.ToolTip>
-              <ToolTip Background="Black">
-                <TextBlock>
-                  Opens Excel.
-                </TextBlock>
-              </ToolTip>
-            </Button.ToolTip>
-          </Button>
-
-          <Button
-            Name="CloseAndLaunchExcel"
-            Click="CloseAndLaunchExcel_OnClick"
-            Content="Close and Launch Excel"
-            Margin="5"
-            Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
-            ToolTipService.InitialShowDelay="100"
-            ToolTipService.BetweenShowDelay="100">
-            <Button.ToolTip>
-              <ToolTip Background="Black">
-                <TextBlock>
-                  Closes this dialog and opens Excel.
-                </TextBlock>
-              </ToolTip>
-            </Button.ToolTip>
-          </Button>
+            Margin="-2 0 0 0"
+            Text="Install ∂Excel Version:"/>
+          <ComboBox 
+            materialDesign:ColorZoneAssist.Mode="SecondaryMid"
+            materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
+            Name="AvailableDExcelReleases"
+            Padding="0"
+            SelectionChanged="AvailableDExcelReleases_OnSelectionChanged"
+            Style="{StaticResource MaterialDesignComboBox}"/>
         </StackPanel>
-      </materialDesign:Card>
-      
-      <materialDesign:Card
-        Grid.Row="5"
-        Grid.RowSpan="6"
-        Grid.Column="0"
-        Grid.ColumnSpan="6">
-        <materialDesign:DialogHost
-          Name="ExcelIsOpenWarningDialog"
-          DialogTheme="Inherit">
-           
-          <materialDesign:DialogHost.DialogContent>
-            <DockPanel
-              Margin="15">
-              <DockPanel
-                DockPanel.Dock="Top">
-                <materialDesign:PackIcon
-                  Foreground="{StaticResource WarningBrush}"
-                  Kind="Alert"
-                  VerticalAlignment="Center"/>
+        <StackPanel Orientation="Horizontal">
+          <materialDesign:PackIcon
+            Foreground="{StaticResource SecondaryHueMidBrush}"
+            Kind="HelpCircleOutline"
+            Margin="4"
+            ToolTipService.InitialShowDelay="100"
+            ToolTipService.BetweenShowDelay="100"
+            VerticalAlignment="Center">
+            <materialDesign:PackIcon.ToolTip>
+              <DockPanel>
                 <TextBlock
-                  DockPanel.Dock="Right"
-                  Style="{StaticResource AmberHeader2}"
-                  Text="Warning: Closing Excel" />
+                  DockPanel.Dock="Top"
+                  Text="The remote source location of the add-in."/>
+                <TextBlock
+                  DockPanel.Dock="Top"
+                  Text="Currently only the Shared Drive is supported."/>
               </DockPanel>
-              <Separator
-                Name="WarningSeparator"
-                DockPanel.Dock="Top"/>
-              <TextBlock 
-                DockPanel.Dock="Top"
-                Margin="8 10 0 0"
-                Text="This will terminate all Excel sessions."/>
-              <TextBlock
-                DockPanel.Dock="Top"
-                Text="Any unsaved data will be lost."/>
-              <TextBlock
-                DockPanel.Dock="Top"
-                Margin="8 0 0 20"
-                Text="Proceed?"/>
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="*"/>
-                  <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                  <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Button 
-                  Name="IgnoreExcelIsOpenWarning"
-                  Grid.Column="0"
-                  Click="IgnoreExcelIsOpenWarning_OnClick"
-                  BorderBrush="{StaticResource WarningBrush}"
-                  Background="{StaticResource WarningBrush}"
-                  Content="Yes"/>
-                <Button 
-                  Name="StopInstallationAndDontCloseExcel"
-                  Grid.Column="1"
-                  Click="StopInstallationAndDontCloseExcel_OnClick"
-                  Content="No"/>
-              </Grid>
-            </DockPanel>
-          </materialDesign:DialogHost.DialogContent>
-          
-          <DockPanel
-          Margin="5">
+            </materialDesign:PackIcon.ToolTip>
+          </materialDesign:PackIcon>
           <TextBlock
-            DockPanel.Dock="Top"
-            Style="{StaticResource GreenHeader3}"
-            Text="Log"/>
-          <Border
-            Background="{StaticResource MaterialDesignDarkBackground}"
-            BorderBrush="{StaticResource PrimaryHueLightBrush}" 
-            BorderThickness="1"
-            CornerRadius="5"
-            DockPanel.Dock="Top"
-            Margin="5">
-            <RichTextBox
-              Name="LogWindow"
-              Background="Transparent"
-              BorderThickness="0"
-              FontSize="14"
-              Foreground="{StaticResource PrimaryHueLightBrush}"
-              HorizontalContentAlignment="Stretch"
-              HorizontalAlignment="Stretch"
-              IsReadOnly="True"
-              Margin="5"
-              Width="850"
-              VerticalAlignment="Stretch"
-              VerticalContentAlignment="Top"
-              VerticalScrollBarVisibility="Auto">
-              <RichTextBox.Resources>
-                <Style TargetType="{x:Type Paragraph}">
-                  <Setter Property="Margin" Value="0"/>
-                </Style>
-              </RichTextBox.Resources>
-              <FlowDocument Name="LoggerFlowDocument" PageWidth="{Binding ElementName=LogWindow, Path=ActualWidth}"/>
-            </RichTextBox>
-          </Border>
-        </DockPanel>
-          
-        </materialDesign:DialogHost>
-      </materialDesign:Card>
+            Margin="-2 0 0 0"
+            Text="∂Excel Source:"/>
+          <ComboBox 
+            materialDesign:ColorZoneAssist.Mode="SecondaryMid"
+            materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
+            Name="DExcelRemoteSource"
+            Padding="0"
+            Style="{StaticResource MaterialDesignComboBox}">
+            <ComboBoxItem Content="Shared Drive" IsSelected="True" />  
+            <ComboBoxItem Content="GitLab" IsEnabled="False" />  
+          </ComboBox>
+        </StackPanel>
+      </StackPanel>
+    </materialDesign:Card>
 
-      <Button
-        Name="Install"
-        Grid.Row="11"
-        Grid.Column="4"
-        Content="Install"
-        Click="Install_Click"
-        HorizontalContentAlignment="Center"
-        VerticalContentAlignment="Center"
-        Padding="-5 0 0 0"/>
-      <Button
-        Name="Cancel"
-        Grid.Row="11"
-        Grid.Column="5"
-        Content="Cancel"
-        Click="Cancel_Click"
-        Padding="-5 0 0 0"/>
-    </Grid>
-  </materialDesign:DialogHost>
+    <materialDesign:Card
+      Grid.Row="1"
+      Grid.RowSpan="4"
+      Grid.Column="2"
+      Grid.ColumnSpan="2">
+      <DockPanel>
+        <TextBlock
+          DockPanel.Dock="Top"
+          Style="{StaticResource GreenHeader2}"
+          Text="Diagnostics" />
+        <Separator
+          DockPanel.Dock="Top"
+          Name="DiagnosticsSeparator"/>
+        <Border
+          Background="{StaticResource MaterialDesignDarkBackground}"
+          BorderBrush="{StaticResource PrimaryHueLightBrush}" 
+          BorderThickness="1"
+          CornerRadius="5"
+          DockPanel.Dock="Top"
+          Margin="5">
+          <DockPanel
+            HorizontalAlignment="Center"
+            Name="DockPanelConnectionStatus">
+            <TextBlock
+              VerticalAlignment="Center"
+              Text="VPN Connection Status"/>
+            <Image
+              Name="ConnectionStatus"
+              HorizontalAlignment="Right"
+              VerticalAlignment="Top"
+              Grid.Row="0"
+              Grid.RowSpan="2"
+              Grid.Column="7"
+              Margin="5"
+              Width="50"
+              Source="resources/icons/connection-status-green.ico"/>
+          </DockPanel>
+        </Border>
+        <Border
+          Background="{StaticResource MaterialDesignDarkBackground}"
+          BorderBrush="{StaticResource PrimaryHueLightBrush}" 
+          BorderThickness="1"
+          CornerRadius="5"
+          DockPanel.Dock="Top"
+          Margin="5">
+          <DockPanel
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+            <TextBlock Text="User Has Admin Rights:"/>
+            <TextBlock Name="AdminRights" Style="{StaticResource OutputText}"/>
+          </DockPanel>
+        </Border>
+      </DockPanel>
+    </materialDesign:Card>
+    
+    <materialDesign:Card
+      Grid.Row="1"
+      Grid.RowSpan="4"
+      Grid.Column="4"
+      Grid.ColumnSpan="2">
+      <StackPanel>
+        <TextBlock
+          Text="Utilities"
+          Style="{StaticResource GreenHeader2}"/>
+        <Separator Name="UtilitiesSeparator"/>
+        <Button
+          Name="Uninstall"
+          Click="Uninstall_Click"
+          Content="Uninstall ∂Excel"
+          Margin="5"
+          Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
+          ToolTipService.InitialShowDelay="100"
+          ToolTipService.BetweenShowDelay="100">
+          <Button.ToolTip>
+            <ToolTip Background="Black">
+              <TextBlock>
+                Uninstalls ∂Excel from Excel. <LineBreak/>
+                However, it does not remove any files from your computer.
+              </TextBlock>
+            </ToolTip>
+          </Button.ToolTip>
+        </Button>
+
+        <Button
+          Name="LaunchExcel"
+          Click="LaunchExcel_OnClick"
+          Content="Launch Excel"
+          Grid.Row="11"
+          Grid.Column="3"
+          Margin="5"
+          Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
+          ToolTipService.InitialShowDelay="100"
+          ToolTipService.BetweenShowDelay="100">
+          <Button.ToolTip>
+            <ToolTip Background="Black">
+              <TextBlock>
+                Opens Excel.
+              </TextBlock>
+            </ToolTip>
+          </Button.ToolTip>
+        </Button>
+
+        <Button
+          Name="CloseAndLaunchExcel"
+          Click="CloseAndLaunchExcel_OnClick"
+          Content="Close and Launch Excel"
+          Margin="5"
+          Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
+          ToolTipService.InitialShowDelay="100"
+          ToolTipService.BetweenShowDelay="100">
+          <Button.ToolTip>
+            <ToolTip Background="Black">
+              <TextBlock>
+                Closes this dialog and opens Excel.
+              </TextBlock>
+            </ToolTip>
+          </Button.ToolTip>
+        </Button>
+      </StackPanel>
+    </materialDesign:Card>
+    
+    <materialDesign:Card
+      Grid.Row="5"
+      Grid.RowSpan="6"
+      Grid.Column="0"
+      Grid.ColumnSpan="6">
+      <materialDesign:DialogHost
+        Name="ExcelIsOpenWarningDialog"
+        DialogTheme="Inherit">
+         
+        <materialDesign:DialogHost.DialogContent>
+          <DockPanel
+            Margin="15">
+            <DockPanel
+              DockPanel.Dock="Top">
+              <materialDesign:PackIcon
+                Foreground="{StaticResource WarningBrush}"
+                Kind="Alert"
+                VerticalAlignment="Center"/>
+              <TextBlock
+                DockPanel.Dock="Right"
+                Style="{StaticResource AmberHeader2}"
+                Text="Warning: Closing Excel" />
+            </DockPanel>
+            <Separator
+              Name="WarningSeparator"
+              DockPanel.Dock="Top"/>
+            <TextBlock 
+              DockPanel.Dock="Top"
+              Margin="8 10 0 0"
+              Text="This will terminate all Excel sessions."/>
+            <TextBlock
+              DockPanel.Dock="Top"
+              Text="Any unsaved data will be lost."/>
+            <TextBlock
+              DockPanel.Dock="Top"
+              Margin="8 0 0 20"
+              Text="Proceed?"/>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+              </Grid.RowDefinitions>
+              <Button 
+                Name="IgnoreExcelIsOpenWarning"
+                Grid.Column="0"
+                Click="IgnoreExcelIsOpenWarning_OnClick"
+                BorderBrush="{StaticResource WarningBrush}"
+                Background="{StaticResource WarningBrush}"
+                Content="Yes"/>
+              <Button 
+                Name="StopInstallationAndDontCloseExcel"
+                Grid.Column="1"
+                Click="StopInstallationAndDontCloseExcel_OnClick"
+                Content="No"/>
+            </Grid>
+          </DockPanel>
+        </materialDesign:DialogHost.DialogContent>
+        
+        <DockPanel
+        Margin="5">
+        <TextBlock
+          DockPanel.Dock="Top"
+          Style="{StaticResource GreenHeader3}"
+          Text="Log"/>
+        <Border
+          Background="{StaticResource MaterialDesignDarkBackground}"
+          BorderBrush="{StaticResource PrimaryHueLightBrush}" 
+          BorderThickness="1"
+          CornerRadius="5"
+          DockPanel.Dock="Top"
+          Margin="5">
+          <RichTextBox
+            Name="LogWindow"
+            Background="Transparent"
+            BorderThickness="0"
+            FontSize="14"
+            Foreground="{StaticResource PrimaryHueLightBrush}"
+            HorizontalContentAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            IsReadOnly="True"
+            Margin="5"
+            Width="850"
+            VerticalAlignment="Stretch"
+            VerticalContentAlignment="Top"
+            VerticalScrollBarVisibility="Auto">
+            <RichTextBox.Resources>
+              <Style TargetType="{x:Type Paragraph}">
+                <Setter Property="Margin" Value="0"/>
+              </Style>
+            </RichTextBox.Resources>
+            <FlowDocument Name="LoggerFlowDocument" PageWidth="{Binding ElementName=LogWindow, Path=ActualWidth}"/>
+          </RichTextBox>
+        </Border>
+      </DockPanel>
+        
+      </materialDesign:DialogHost>
+    </materialDesign:Card>
+
+    <Button
+      Name="Install"
+      Grid.Row="11"
+      Grid.Column="4"
+      Content="Install"
+      Click="Install_Click"
+      HorizontalContentAlignment="Center"
+      VerticalContentAlignment="Center"
+      Padding="-5 0 0 0"/>
+    <Button
+      Name="Cancel"
+      Grid.Row="11"
+      Grid.Column="5"
+      Content="Cancel"
+      Click="Cancel_Click"
+      Padding="-5 0 0 0"/>
+  </Grid>
 </Window>

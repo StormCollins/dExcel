@@ -68,10 +68,10 @@ public partial class MainWindow : Window
         InitializeComponent();
         this._logger = new Logger(LogWindow);
         var installerVersion = Assembly.GetEntryAssembly()?.GetName().Version;
-        InstallerVersion.Text = $"{installerVersion?.Major}.{installerVersion?.Minor}";
+        InstallerVersion.Info = $"{installerVersion?.Major}.{installerVersion?.Minor}";
 
         var currentDExcelVersion = GetInstalledDExcelVersion();
-        CurrentDExcelVersion.Text = currentDExcelVersion;
+        CurrentDExcelVersion.Info = currentDExcelVersion;
 
         if (string.Compare(
                 strA: currentDExcelVersion,
@@ -128,16 +128,17 @@ public partial class MainWindow : Window
         }
 
         AvailableDExcelReleases.SelectedIndex = 0;
-
         NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback!;
-        _releaseDirectoryWatcher.NotifyFilter = NotifyFilters.Attributes
-                               | NotifyFilters.CreationTime
-                               | NotifyFilters.DirectoryName
-                               | NotifyFilters.FileName
-                               | NotifyFilters.LastAccess
-                               | NotifyFilters.LastWrite
-                               | NotifyFilters.Security
-                               | NotifyFilters.Size;
+        _releaseDirectoryWatcher.NotifyFilter = 
+            NotifyFilters.Attributes |
+            NotifyFilters.CreationTime |
+            NotifyFilters.DirectoryName |
+            NotifyFilters.FileName | 
+            NotifyFilters.LastAccess |
+            NotifyFilters.LastWrite |
+            NotifyFilters.Security |
+            NotifyFilters.Size;
+        
         _releaseDirectoryWatcher.Changed += ReleasesFolderChanged;
         _releaseDirectoryWatcher.Deleted += ReleasesFolderChanged;
         _releaseDirectoryWatcher.Filter = "*.*";
@@ -564,7 +565,7 @@ public partial class MainWindow : Window
             this._logger.InstallationSucceeded();
             this.Install.IsEnabled = false;
             this.Uninstall.IsEnabled = true;
-            this.CurrentDExcelVersion.Text = GetInstalledDExcelVersion();
+            this.CurrentDExcelVersion.Info = GetInstalledDExcelVersion();
             this.Cancel.Content = "Close";
         });
     }
@@ -678,7 +679,7 @@ public partial class MainWindow : Window
         Dispatcher.Invoke(() =>
         {
             this._logger.UninstallationSucceeded();
-            this.CurrentDExcelVersion.Text = GetInstalledDExcelVersion();
+            this.CurrentDExcelVersion.Info = GetInstalledDExcelVersion();
             this.Uninstall.IsEnabled = false;
             this.Install.IsEnabled = true;
         });
@@ -726,7 +727,7 @@ public partial class MainWindow : Window
     {
         if (AvailableDExcelReleases.SelectedItem != null)
         {
-            Install.IsEnabled = AvailableDExcelReleases.SelectedItem.ToString() != CurrentDExcelVersion.Text;
+            Install.IsEnabled = AvailableDExcelReleases.SelectedItem.ToString() != CurrentDExcelVersion.Info;
         }
     }
 
