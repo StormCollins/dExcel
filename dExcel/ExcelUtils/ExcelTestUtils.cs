@@ -112,7 +112,12 @@ public static class ExcelTestUtils
         [ExcelArgument(
             Name = "b",
             Description = "Input b")]
-        object b)
+        object b,
+        [ExcelArgument(
+            Name = "(Optional)Tolerance",
+            Description = "The threshold used for the calculating numeric equality.\n" +
+                          "Default value = 0.0000001")]
+        double tolerance = 0.0000001)
     {
         if (!AreInputsValid(a) || !AreInputsValid(b))
         {
@@ -121,7 +126,7 @@ public static class ExcelTestUtils
 
         if (double.TryParse(a.ToString(), out var x) && double.TryParse(b.ToString(), out var y))
         {
-            return Math.Abs(y - x) < 0.00000000001 ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+            return Math.Abs(y - x) < tolerance ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
         }
 
         return Compare(a.ToString(), b.ToString(), StringComparison.OrdinalIgnoreCase) == 0

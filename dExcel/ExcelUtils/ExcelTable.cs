@@ -63,12 +63,26 @@ public static class ExcelTable
             return null;
         }
 
-        var column =
-            Enumerable
-                .Range(rowIndexOfColumnHeaders + 1, table.GetLength(0) - (rowIndexOfColumnHeaders + 1))
-                .Select(i => (T)Convert.ChangeType(table[i, index], typeof(T)))
-                .ToList();
-        return column;
+        if (typeof(T) == typeof(DateTime))
+        {
+            var column =
+                Enumerable
+                    .Range(rowIndexOfColumnHeaders + 1, table.GetLength(0) - (rowIndexOfColumnHeaders + 1))
+                    .Select(i => DateTime.FromOADate(int.Parse(table[i, index].ToString())))
+                    .Cast<T>()
+                    .ToList();
+            return column;
+        }
+        else
+        {
+            var column =
+                Enumerable
+                    .Range(rowIndexOfColumnHeaders + 1, table.GetLength(0) - (rowIndexOfColumnHeaders + 1))
+                    .Select(i => (T)Convert.ChangeType(table[i, index], typeof(T)))
+                    .ToList();
+            return column;
+        }
+        
     }
 
     /// <summary>
@@ -105,7 +119,7 @@ public static class ExcelTable
         int rowIndexOfColumnHeaders = 1)
     {
         var columnIndex = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader);
-        var rowIndex = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader) + 2;
+        var rowIndex = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader) + 1;
         if (columnIndex == -1 || rowIndex == 1)
         {
             return default;

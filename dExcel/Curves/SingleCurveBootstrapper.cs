@@ -121,7 +121,7 @@ public static class SingleCurveBootstrapper
         
         Dictionary<string, object> curveDetails = new()
         {
-            ["Curve"] = termStructure,
+            ["Curve.Object"] = termStructure,
         };
         
         return DataObjectController.Add(handle, curveDetails);
