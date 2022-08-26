@@ -2,13 +2,13 @@
 
 using System;
 using System.Diagnostics;
+using System.DirectoryServices.AccountManagement;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +17,8 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
 using Excel = Microsoft.Office.Interop.Excel;
+using System.Security.Principal;
+using System.DirectoryServices.ActiveDirectory;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
@@ -169,11 +171,32 @@ public partial class MainWindow : Window
     /// Checks if the current user is an administrator on the current machine.
     /// </summary>
     /// <returns>Returns true if the user is an administrator otherwise false.</returns>
-    private static bool IsAdministrator()
+    //private static bool IsAdministrator()
+    //{
+    //    using var identity = WindowsIdentity.GetCurrent();
+    //    var principal = new WindowsPrincipal(identity);
+    //    return principal.IsInRole(WindowsBuiltInRole.Administrator);
+    //}
+
+    //public bool IsAdministrator()
+    //{
+    //    using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+    //    var principal = new System.Security.Principal.WindowsPrincipal(identity);
+    //    return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+    //}
+
+    private bool IsAdministrator()
     {
-        using var identity = WindowsIdentity.GetCurrent();
-        var principal = new WindowsPrincipal(identity);
-        return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        // https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/security-identifiers-in-windows
+        // S-1-5-32-544
+        // A built-in group. After the initial installation of the operating system,
+        // the only member of the group is the Administrator account.
+        // When a computer joins a domain, the Domain Admins group is added to
+        // the Administrators group. When a server becomes a domain controller,
+        // the Enterprise Admins group also is added to the Administrators group.
+        var principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+        var claims = principal.Claims;
+        return (claims.FirstOrDefault(c => c.Value == "S-1-5-32-544") != null);
     }
 
     /// <summary>
@@ -507,7 +530,7 @@ public partial class MainWindow : Window
             var dExcelAdded = false;
             foreach (Excel.AddIn addIn in excel.AddIns)
             {
-                if (addIn.Name.Contains("dExcel", StringComparison.InvariantCultureIgnoreCase))
+                if (addIn.Name.Contains("dExcel-AddIn64", StringComparison.InvariantCultureIgnoreCase))
                 {
                     addIn.Installed = true;
                     dExcelAdded = true;
@@ -785,10 +808,10 @@ public partial class MainWindow : Window
                 if (!GetAllAvailableLocalDExcelReleases().Contains(AvailableDExcelReleases.Text))
                 {
                     var sourcePath = Path.Combine(SharedDriveReleasesPath, $"{AvailableDExcelReleases.Text}.zip");
-                    var targetPath = Path.Combine(LocalReleasesPath, $"{AvailableDExcelReleases.Text}");
+                    var targetPath = Path.Combine(LocalReleasesPath, $"{AvailableDExcelReleases.Text}.zip");
                     var zipOutputPath = Path.Combine(LocalReleasesPath, $"{AvailableDExcelReleases.Text}");
                     File.Copy(sourcePath, targetPath, true);
-                    ZipFile.ExtractToDirectory(targetPath, Path.GetDirectoryName(targetPath) ?? string.Empty);
+                    ZipFile.ExtractToDirectory(targetPath, zipOutputPath ?? string.Empty);
                     File.Delete(targetPath);
                 }
             }

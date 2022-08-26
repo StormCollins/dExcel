@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>resources\icons\dExcel.ico</ApplicationIcon>
-	<Version>0.3</Version>
+	<Version>0.6</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -80,6 +80,7 @@
     <PackageReference Include="MaterialDesignColors" Version="2.0.7-ci170" />
     <PackageReference Include="MaterialDesignThemes" Version="4.5.0" />
     <PackageReference Include="squirrel.windows" Version="2.0.1" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
