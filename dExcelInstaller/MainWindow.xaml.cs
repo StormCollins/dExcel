@@ -785,7 +785,7 @@ public partial class MainWindow : Window
                 if (!GetAllAvailableLocalDExcelReleases().Contains(AvailableDExcelReleases.Text))
                 {
                     var sourcePath = Path.Combine(SharedDriveReleasesPath, $"{AvailableDExcelReleases.Text}.zip");
-                    var targetPath = Path.Combine(LocalReleasesPath, $"{AvailableDExcelReleases.Text}.zip");
+                    var targetPath = Path.Combine(LocalReleasesPath, $"{AvailableDExcelReleases.Text}");
                     var zipOutputPath = Path.Combine(LocalReleasesPath, $"{AvailableDExcelReleases.Text}");
                     File.Copy(sourcePath, targetPath, true);
                     ZipFile.ExtractToDirectory(targetPath, Path.GetDirectoryName(targetPath) ?? string.Empty);

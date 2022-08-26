@@ -117,39 +117,61 @@
           Click="OpenInstaller_Click"/>
       </Grid>
     </materialDesign:Card>
-
-    <materialDesign:Card
+    
+    <materialDesign:DialogHost
+      Name="WorkbookVersionNotReady"
       Grid.Row="5"
       Grid.RowSpan="4"
       Grid.Column="0"
-      Grid.ColumnSpan="4">
-      <StackPanel>
-        <TextBlock
-          Style="{StaticResource GreenHeader2}"
-          Text="Workbook Version"/>
-        <Separator/>
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Version History:"/>
+      Grid.ColumnSpan="4"
+      DialogTheme="Inherit"
+      IsOpen="True">
+         
+      <materialDesign:DialogHost.DialogContent>
+        <DockPanel>
           <TextBlock
-              Style="{StaticResource OutputText}"
-              Text="1.0,1.2,2.1,3.2"/>
-        </StackPanel>
-
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Current Version:"/>
+            DockPanel.Dock="Top"
+            Foreground="{StaticResource WarningBrush}"
+            Margin="30 30 30 0"
+            Text="Please ignore."/>  
           <TextBlock
-              Style="{StaticResource OutputText}"
-              Text="3.3"/>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Select Version"/>
-          <ComboBox>
+            DockPanel.Dock="Top"
+            Foreground="{StaticResource WarningBrush}"
+            Margin="30 0 30 30"
+            Text="This feature has not yet been implemented."/>  
+        </DockPanel>
+      </materialDesign:DialogHost.DialogContent>
+      
+      <materialDesign:Card>
+        <StackPanel>
+          <TextBlock
+            Style="{StaticResource GreenHeader2}"
+            Text="Workbook Version"/>
+          <Separator/>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Version History:"/>
+            <TextBlock
+                Style="{StaticResource OutputText}"
+                Text="1.0,1.2,2.1,3.2"/>
+          </StackPanel>
 
-          </ComboBox>
-        </StackPanel>
-      </StackPanel>
-    </materialDesign:Card>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Current Version:"/>
+            <TextBlock
+                Style="{StaticResource OutputText}"
+                Text="3.3"/>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Select Version"/>
+            <ComboBox>
 
+            </ComboBox>
+          </StackPanel>
+        </StackPanel>
+      </materialDesign:Card>
+
+    </materialDesign:DialogHost>
+    
     <materialDesign:Card
       Grid.Row="1"
       Grid.RowSpan="4"

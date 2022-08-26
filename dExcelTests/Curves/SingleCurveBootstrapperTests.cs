@@ -11,7 +11,7 @@ public class SingleCurveBootstrapperTests
     [Test]
     public void BootstrapFlatCurveDepositsTest()
     {
-        DateTime baseDate = new DateTime(2022, 06, 01);
+        DateTime baseDate = new(2022, 06, 01);
         object[,] instruments = 
         {
             {"Deposits", "", "", ""},

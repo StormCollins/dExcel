@@ -14,23 +14,22 @@ public static class SingleCurveBootstrapper
     {
         Settings.setEvaluationDate(baseDate);
         List<RateHelper> rateHelpers = new();
-        IborIndex rateIndex = null;
+        IborIndex? rateIndex = null;
         
         foreach (var instrumentGroup in instrumentGroups)
         {
             var instruments = (object[,])instrumentGroup;
-            
+
             // TODO: Make this case insensitive.
-            List<string> tenors = ExcelTable.GetColumn<string>(instruments, "Tenors");
-            List<DateTime> startDates = ExcelTable.GetColumn<DateTime>(instruments, "StartDates");
-            List<DateTime> endDates = ExcelTable.GetColumn<DateTime>(instruments, "EndDates");
-            List<string> rateIndices = ExcelTable.GetColumn<string>(instruments, "RateIndex");
-            List<double> rates = ExcelTable.GetColumn<double>(instruments, "Rates");
-            List<bool> include = ExcelTable.GetColumn<bool>(instruments, "Include");
+            List<string>? tenors = ExcelTable.GetColumn<string>(instruments, "Tenors");
+            List<DateTime>? startDates = ExcelTable.GetColumn<DateTime>(instruments, "StartDates");
+            List<DateTime>? endDates = ExcelTable.GetColumn<DateTime>(instruments, "EndDates");
+            List<string>? rateIndices = ExcelTable.GetColumn<string>(instruments, "RateIndex");
+            List<double>? rates = ExcelTable.GetColumn<double>(instruments, "Rates");
+            List<bool>? include = ExcelTable.GetColumn<bool>(instruments, "Include");
+            string? instrumentType = ExcelTable.GetTableLabel(instruments);
 
             var instrumentCount = include.Count;
-
-
             var index = rateIndices[0];
             rateIndex =
                 index switch
@@ -41,9 +40,7 @@ public static class SingleCurveBootstrapper
                     "USD-LIBOR" => new USDLibor(new Period("3m")),
                 };
 
-            string? instrumentType = ExcelTable.GetTableLabel(instruments);
-            
-            if (string.Compare(instrumentType, "Deposits", StringComparison.InvariantCultureIgnoreCase) == 0)
+            if (string.Equals(instrumentType, "Deposits", StringComparison.OrdinalIgnoreCase))
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
@@ -51,13 +48,13 @@ public static class SingleCurveBootstrapper
                     {
                         rateHelpers.Add(
                             new DepositRateHelper(
-                                    rate: rates[i],
-                                    tenor: new Period(tenors[i]),
-                                    fixingDays: rateIndex.fixingDays(),
-                                    calendar: rateIndex.fixingCalendar(),
-                                    convention: rateIndex.businessDayConvention(),
-                                    endOfMonth: rateIndex.endOfMonth(),
-                                    dayCounter: rateIndex.dayCounter()));
+                                rate: rates[i],
+                                tenor: new Period(tenors[i]),
+                                fixingDays: rateIndex.fixingDays(),
+                                calendar: rateIndex.fixingCalendar(),
+                                convention: rateIndex.businessDayConvention(),
+                                endOfMonth: rateIndex.endOfMonth(),
+                                dayCounter: rateIndex.dayCounter()));
                     }
                 }
             }

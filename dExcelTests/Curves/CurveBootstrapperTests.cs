@@ -22,6 +22,40 @@ public class CurveBootstrapperTests
                 fedFundsIndex.businessDayConvention(),
                 fedFundsIndex.endOfMonth(),
                 fedFundsIndex.dayCounter());
+//        USDONFSR = X  0.33171
+//USDSWFSR = X	#N/A
+//USD1MFSR = X  0.452
+//USD2MFSR = X	#N/A
+//USD3MFSR = X  0.96157
+//USD1X4F = 1.156
+//USD2X5F = 1.473
+//USD3X6F = 1.666
+//USD4X7F = 1.872
+//USD5X8F = 2.109
+//USD6X9F = 2.2986
+//USD7X10F = 2.4846
+//USD8X11F = 2.636
+//USD9X12F = 2.7651
+//USD12X15F = 3.055
+//USD15X18F = 3.1827
+//USD18X21F = 3.149
+//USD21X24F = FMD   3.01
+//USDSB3L2Y = 2.5665
+//USDSB3L3Y = 2.656
+//USDSB3L4Y = 2.599
+//USDSB3L5Y = 2.5137
+//USDSB3L6Y = 2.476
+//USDSB3L7Y = 2.4513
+//USDSB3L8Y = 2.454
+//USDSB3L9Y = 2.409
+//USDSB3L10Y = 2.3951
+//USDSB3L12Y = 2.4051
+//USDSB3L15Y = 2.42625
+//USDSB3L20Y = 2.3693
+//USDSB3L25Y = 2.34
+//USDSB3L30Y = 2.2424
+//USDSB3L40Y = 2.108
+
         // var oisRateHelper1d = new DatedOISRateHelper(settlementDate, new Date(05, 05, 2022),
         //             new Handle<Quote>(new SimpleQuote(0.00330)), fedFundsIndex);
         var oisRateHelper1m = new DatedOISRateHelper(settlementDate, new Date(04, 05, 2022),
@@ -102,5 +136,13 @@ public class CurveBootstrapperTests
         var df11 = oisCurve.discount(d11);
         var df12 = oisCurve.discount(d12);
         var df13 = oisCurve.discount(d13);
+
+        // ---------------------------------------------------------------
+        // Dual Curve bootstrapping 
+        RelinkableHandle<YieldTermStructure> forecastCurve = new RelinkableHandle<YieldTermStructure>();
+        USDLibor libor = new USDLibor(new Period("3m"), forecastCurve);
+
+        //DepositRateHelper depositRateHelper = new DepositRateHelper()
+
     }
 }
