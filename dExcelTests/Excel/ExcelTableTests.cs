@@ -95,7 +95,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: 0.999,
-            actual: ExcelTable.LookUpTableValue<double>(_discountFactorsTable, "Discount Factors", DateTime.FromOADate(44743).ToString())); 
+            actual: ExcelTable.GetTableValue<double>(_discountFactorsTable, "Discount Factors", DateTime.FromOADate(44743).ToString())); 
     }
 
     [Test]
@@ -103,7 +103,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: 3,
-            actual: ExcelTable.LookUpTableValue<int>(_primeTable, "Primes", "2")); 
+            actual: ExcelTable.GetTableValue<int>(_primeTable, "Primes", "2")); 
     }
     
     [Test]
@@ -111,7 +111,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: "LogLinear",
-            actual: ExcelTable.LookUpTableValue<string>(_parameterTable, "Value", "Interpolation")); 
+            actual: ExcelTable.GetTableValue<string>(_parameterTable, "Value", "Interpolation")); 
     }
     
     [Test]
@@ -119,7 +119,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: null,
-            actual: ExcelTable.LookUpTableValue<string>(_parameterTable, "NotThere", "Interpolation")); 
+            actual: ExcelTable.GetTableValue<string>(_parameterTable, "NotThere", "Interpolation")); 
     }
 
     // --------------------------------------------------------------------------

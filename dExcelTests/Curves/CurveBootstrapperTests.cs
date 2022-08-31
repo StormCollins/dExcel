@@ -143,6 +143,5 @@ public class CurveBootstrapperTests
         USDLibor libor = new USDLibor(new Period("3m"), forecastCurve);
 
         //DepositRateHelper depositRateHelper = new DepositRateHelper()
-
     }
 }

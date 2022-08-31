@@ -8,14 +8,16 @@ public static class SingleCurveBootstrapper
 {
     [ExcelFunction(
         Name = "d.Curve_SingleCurveBootstrap",
-        Description = "Bootstraps a single curve i.e. this is not a multi-curve bootstrapper.",
+        Description = "Bootstraps a single curve i.e. this is not a multi-curve bootstrapper.\n" +
+        "Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR",
         Category = "∂Excel: Interest Rates")]
-    public static string Bootstrap(string handle, DateTime baseDate, params object[] instrumentGroups)
+    public static string Bootstrap(string handle, object[,] curveParameters, params object[] instrumentGroups)
     {
+        DateTime baseDate = ExcelTable.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", 0);
         Settings.setEvaluationDate(baseDate);
         List<RateHelper> rateHelpers = new();
         IborIndex? rateIndex = null;
-        
+
         foreach (var instrumentGroup in instrumentGroups)
         {
             var instruments = (object[,])instrumentGroup;
@@ -38,7 +40,13 @@ public static class SingleCurveBootstrapper
                     "FEDFUND" => new FedFunds(),
                     "JIBAR" => new Jibar(new Period("3m")),
                     "USD-LIBOR" => new USDLibor(new Period("3m")),
+                    _ => null,
                 };
+
+            if (rateIndex is null)
+            {
+                return $"#Error: Unsupported rate index: {index}";
+            }
 
             if (string.Equals(instrumentType, "Deposits", StringComparison.OrdinalIgnoreCase))
             {

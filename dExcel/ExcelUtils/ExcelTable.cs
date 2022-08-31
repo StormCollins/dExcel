@@ -112,7 +112,7 @@ public static class ExcelTable
     /// <param name="rowHeader">The row header.</param>
     /// <param name="rowIndexOfColumnHeaders">The index of the row containing the column headers.</param>
     /// <returns>The looked up value.</returns>
-    public static T? LookUpTableValue<T>(
+    public static T? GetTableValue<T>(
         object[,] table,
         string columnHeader,
         string rowHeader,
@@ -120,12 +120,19 @@ public static class ExcelTable
     {
         var columnIndex = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader);
         var rowIndex = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader) + 1;
-        if (columnIndex == -1 || rowIndex == 1)
+        if (columnIndex == -1)
         {
             return default;
         }
-        
-        return (T)Convert.ChangeType(table[rowIndex, columnIndex], typeof(T));
+
+        if (typeof(T) == typeof(DateTime))
+        {
+            return (T)Convert.ChangeType(DateTime.FromOADate(int.Parse(table[rowIndex, columnIndex].ToString())), typeof(T));
+        }
+        else
+        {
+            return (T)Convert.ChangeType(table[rowIndex, columnIndex], typeof(T));
+        }
     }
     
     /// <summary>
