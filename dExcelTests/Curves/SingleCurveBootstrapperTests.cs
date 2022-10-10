@@ -12,6 +12,15 @@ public class SingleCurveBootstrapperTests
     public void BootstrapFlatCurveDepositsTest()
     {
         DateTime baseDate = new(2022, 06, 01);
+
+        object[,] curveParameters =
+        {
+            {"Curve Parameters", ""},
+            {"Parameter", "Value"},
+            {"BaseDate", baseDate.ToOADate()},
+            {"RateIndex", "JIBAR"},
+        };
+
         object[,] instruments = 
         {
             {"Deposits", "", "", ""},
@@ -22,7 +31,7 @@ public class SingleCurveBootstrapperTests
         };
         
         var dayCounter = new Actual365Fixed();
-        var handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", baseDate, instruments);
+        var handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, instruments);
         var curve = (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve"];
         const double tolerance = 0.001; 
         
@@ -48,7 +57,16 @@ public class SingleCurveBootstrapperTests
     [Test]
     public void BootstrapFlatCurveDepositsAndFrasTest()
     {
-        DateTime baseDate = new DateTime(2022, 06, 01);
+        DateTime baseDate = new(2022, 06, 01);
+        
+        object[,] curveParameters =
+        {
+            {"Curve Parameters", ""},
+            {"Parameter", "Value"},
+            {"BaseDate", baseDate.ToOADate()},
+            {"RateIndex", "JIBAR"},
+        };
+
         object[,] depositInstruments = 
         {
             {"Deposits", "", "", ""},
@@ -68,7 +86,7 @@ public class SingleCurveBootstrapperTests
 
         object[] instruments = {depositInstruments, fraInstruments};
         var dayCounter = new Actual365Fixed();
-        var handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", baseDate, instruments);
+        var handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
         var curve = (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve"];
         const double tolerance = 0.01; 
         
@@ -100,6 +118,15 @@ public class SingleCurveBootstrapperTests
     public void BootstrapFlatCurveDepositsFrasAndSwapsTest()
     {
         var baseDate = new DateTime(2022, 06, 01);
+
+        object[,] curveParameters =
+        {
+            {"Curve Parameters", ""},
+            {"Parameter", "Value"},
+            {"BaseDate", baseDate.ToOADate()},
+            {"RateIndex", "JIBAR"},
+        };
+
         object[,] depositInstruments = 
         {
             {"Deposits", "", "", ""},
@@ -127,7 +154,7 @@ public class SingleCurveBootstrapperTests
 
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
         var dayCounter = new Actual365Fixed();
-        var handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", baseDate, instruments);
+        var handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
         var curve = (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve"];
         const double tolerance = 0.01; 
         

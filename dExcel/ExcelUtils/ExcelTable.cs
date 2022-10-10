@@ -2,7 +2,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ExcelDna.Integration;
+using QLNet;
 
 /// <summary>
 /// A class for manipulating dExcel type tables in Excel.
@@ -73,6 +75,17 @@ public static class ExcelTable
                     .ToList();
             return column;
         }
+        else if (string.Compare(columnHeader, "FRATenors", StringComparison.InvariantCultureIgnoreCase) == 0)
+        {
+            var column =
+                Enumerable
+                    .Range(rowIndexOfColumnHeaders + 1, table.GetLength(0) - (rowIndexOfColumnHeaders + 1))
+                    .Select(i => Regex.Match(table[i, index].ToString(), @"\d+(?=x)").Value)
+                    .Select(startTenor => startTenor + "m")
+                    .Cast<T>()
+                    .ToList();
+            return column;
+        }
         else
         {
             var column =
@@ -119,8 +132,8 @@ public static class ExcelTable
         int rowIndexOfColumnHeaders = 1)
     {
         var columnIndex = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader);
-        var rowIndex = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader) + 1;
-        if (columnIndex == -1)
+        var rowIndex = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader) + rowIndexOfColumnHeaders + 1;
+        if (columnIndex == -1  || rowIndex <= rowIndexOfColumnHeaders)
         {
             return default;
         }
@@ -128,6 +141,47 @@ public static class ExcelTable
         if (typeof(T) == typeof(DateTime))
         {
             return (T)Convert.ChangeType(DateTime.FromOADate(int.Parse(table[rowIndex, columnIndex].ToString())), typeof(T));
+        }
+        else if (typeof(T) == typeof(BusinessDayConvention))
+        {
+            BusinessDayConvention? businessDayConvention =
+                table[rowIndex, columnIndex]?.ToString()?.ToUpper() switch
+                {
+                    "FOLLOWING" or "FOL" => BusinessDayConvention.Following,
+                    "MODIFIEDFOLLOWING" or "MODFOL" => BusinessDayConvention.ModifiedFollowing,
+                    "MODIFIEDPRECEDING" or "MODPREC" => BusinessDayConvention.ModifiedPreceding,
+                    "PRECEDING" or "PREC" => BusinessDayConvention.Preceding,
+                    _ => null,
+                };
+
+            if (businessDayConvention != null)
+            {
+                return (T)Convert.ChangeType(businessDayConvention, typeof(T));
+            }
+            else
+            {
+                return default;
+            }
+        }
+        else if (typeof(T) == typeof(DayCounter))
+        {
+            DayCounter? dayCountConvetion =
+                table[rowIndex, columnIndex]?.ToString()?.ToUpper() switch
+                {
+                    "ACTUAL360" or "ACT360" => new Actual360(),
+                    "ACTUAL365" or "ACT365" => new Actual365Fixed(),
+                    "ACTUALACTUAL" or "ACTACT" => new ActualActual(),
+                    "BUSINESS252" => new Business252(),
+                    _ => null,
+                };
+            if (dayCountConvetion != null)
+            {
+                return (T)Convert.ChangeType(dayCountConvetion, typeof(T));
+            }
+            else
+            {
+                return default;
+            }
         }
         else
         {

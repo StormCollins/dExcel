@@ -10,7 +10,10 @@ public static class CurveBootstrapper
         Name = "d.Curve_CurveBootstrap",
         Description = "Bootstraps a single curve i.e. this is not a multi-curve bootstrapper.",
         Category = "∂Excel: Interest Rates")]
-    public static string Bootstrap(string handle, DateTime baseDate, params object[] instrumentGroups)
+    public static string Bootstrap(
+        string handle, 
+        DateTime baseDate, 
+        params object[] instrumentGroups)
     {
         List<RateHelper> rateHelpers = new();
         IborIndex? rateIndex = null;

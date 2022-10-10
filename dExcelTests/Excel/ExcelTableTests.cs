@@ -22,9 +22,9 @@ public class ExcelTableTests
     {
         { "Discount Factors Table", "" },
         { "Dates", "Discount Factors" },
-        { DateTime.FromOADate(44713), 1.000 },
-        { DateTime.FromOADate(44743), 0.999 },
-        { DateTime.FromOADate(44774), 0.998 },
+        { 44713, 1.000 },
+        { 44743, 0.999 },
+        { 44774, 0.998 },
     };
 
     private readonly object[,] _primeTable =
@@ -95,7 +95,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: 0.999,
-            actual: ExcelTable.GetTableValue<double>(_discountFactorsTable, "Discount Factors", DateTime.FromOADate(44743).ToString())); 
+            actual: ExcelTable.GetTableValue<double>(_discountFactorsTable, "Discount Factors", "44743")); 
     }
 
     [Test]

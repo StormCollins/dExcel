@@ -19,9 +19,9 @@ public static class DateUtils
     /// <param name="holidays">The list of holiday dates.</param>
     /// <returns>Adjusted business day.</returns>
     [ExcelFunction(
-        Name = "d.FolDay",
+        Name = "d.Date_FolDay",
         Description = "Calculates the next business day using the 'following' convention.\n" +
-                        "Deprecates AQS Function: 'FolDay'",
+                      "Deprecates AQS Function: 'FolDay'",
         Category = "∂Excel: Dates")]
     public static object FolDay(
         [ExcelArgument(Name = "Date", Description = "Date to adjust.")]
@@ -41,9 +41,9 @@ public static class DateUtils
     /// <param name="holidays">The list of holiday dates.</param>
     /// <returns>Adjusted business day.</returns>
     [ExcelFunction(
-        Name = "d.ModFolDay",
+        Name = "d.Date_ModFolDay",
         Description = "Calculates the next business day using the 'modified following' convention.\n" +
-                        "Deprecates AQS function: 'ModFolDay'",
+                      "Deprecates AQS function: 'ModFolDay'",
         Category = "∂Excel: Dates")]
     public static object ModFolDay(
         [ExcelArgument(Name = "Date", Description = "The date to adjust.")]
@@ -65,9 +65,9 @@ public static class DateUtils
     /// <param name="holidays">The list of holiday dates.</param>
     /// <returns>The adjusted date.</returns>
     [ExcelFunction(
-        Name = "d.PrevDay",
+        Name = "d.Date_PrevDay",
         Description = "Calculates the previous business day using the 'previous' convention.\n" +
-                        "Deprecates AQS function: 'PrevDay'",
+                      "Deprecates AQS function: 'PrevDay'",
         Category = "∂Excel: Dates")]
     public static object PrevDay(
         [ExcelArgument(Name = "Date", Description = "The date to adjust.")]
@@ -82,6 +82,46 @@ public static class DateUtils
         return (DateTime)calendar.adjust(date, BusinessDayConvention.Preceding);
     }
 
+    /// <summary>
+    /// Advance or retard a date by a given tenor.
+    /// </summary>
+    /// <param name="date">Date.</param>
+    /// <param name="tenor">Tenor.</param>
+    /// <param name="userCalendar">Calendar selected by user e.g., "EUR", "USD", "ZAR".</param>
+    /// <param name="userBusinessDayConvention">Business day convention selected by user e.g., "ModifiedFollowing", "Preceding".</param>
+    /// <returns>The advanced or retarded date.</returns>
+    [ExcelFunction(
+        Name = "d.Date_AddTenorToDate",
+        Description = "Advance or retard a date by a given tenor.",
+        Category = "∂Excel: Dates")]
+    public static object AddTenorToDate(
+        [ExcelArgument(Name = "Date", Description = "Date to adjust.")]
+        DateTime date, 
+        [ExcelArgument(Name = "Tenor", Description = "Tenor amount by which to adjust the date e.g., '1w', '2m', '3y'.")]
+        string tenor, 
+        [ExcelArgument(Name = "Calendar", Description = "The calendar to use e.g., 'ZAR', 'USD'.")]
+        string userCalendar, 
+        [ExcelArgument(Name = "BDC", Description = "Business Day Convention e.g., 'MODFOL'.")]
+        string userBusinessDayConvention)
+    {
+#if DEBUG
+        CommonUtils.InFunctionWizard();
+#endif
+        Calendar? calendar = null;
+        if (userCalendar.ToUpper() == "ZAR")
+        {
+            calendar = new SouthAfrica();
+        }
+
+        BusinessDayConvention? businessDayConvention = null; 
+        if (userBusinessDayConvention.ToUpper() == "MODFOL")
+        {
+            businessDayConvention = BusinessDayConvention.ModifiedFollowing;
+        }
+
+        return (DateTime)calendar?.advance((Date)date, new Period(tenor), (BusinessDayConvention)businessDayConvention);
+    }
+        
     private static Calendar ParseHolidays(object[] holidays, Calendar calendar)
     {
         foreach (var holiday in holidays)
@@ -92,7 +132,7 @@ public static class DateUtils
             }
             else
             {
-                if (!Regex.IsMatch(holiday.ToString(), ValidHolidayTitlePattern))
+                if (!Regex.IsMatch(holiday.ToString() ?? string.Empty, ValidHolidayTitlePattern))
                 {
                     throw new ArgumentException($"Invalid date: {holiday}");
                 }
@@ -101,5 +141,23 @@ public static class DateUtils
 
         return calendar;
     }
-}
 
+    /// <summary>
+    /// Returns the list of available Business Day Conventions so that a user can peruse them in Excel.
+    /// </summary>
+    /// <returns>List of available Business Day Conventions.</returns>
+    [ExcelFunction(
+        Name = "d.Date_GetAvailableBusinessDayConventions",
+        Category = "∂Excel")]
+    public static object[,] GetAvailableBusinessDayConventions()
+    {
+        return new object[,]
+        {
+            { "Variant 1", "Variant 2" },
+            { "Fol", "Following" },
+            { "ModFol", "ModifiedFollowing" },
+            { "ModPrec", "ModPreceding" },
+            { "Prec", "Preceding" },
+        };
+    }
+}

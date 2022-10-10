@@ -11,12 +11,72 @@ public static class SingleCurveBootstrapper
         Description = "Bootstraps a single curve i.e. this is not a multi-curve bootstrapper.\n" +
         "Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR",
         Category = "∂Excel: Interest Rates")]
-    public static string Bootstrap(string handle, object[,] curveParameters, params object[] instrumentGroups)
+    public static string Bootstrap(
+        string handle, 
+        object[,] curveParameters, 
+        object[,]? customRateIndex = null, 
+        params object[] instrumentGroups)
     {
-        DateTime baseDate = ExcelTable.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", 0);
+        DateTime baseDate = ExcelTable.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", 1);
+        if (baseDate == default)
+        {
+            return "#Error: Please provide a base date in the curve parameters.";
+        }
+        
         Settings.setEvaluationDate(baseDate);
-        List<RateHelper> rateHelpers = new();
+
+        string? index = ExcelTable.GetTableValue<string>(curveParameters, "Value", "RateIndex");
+        if (index is null && customRateIndex is null)
+        {
+            return "#Error: Please provide a rate index in the curve parameters.";
+        }
+
+        string? indexTenor = ExcelTable.GetTableValue<string>(curveParameters, "Value", "RateIndexTenor");
+        if (indexTenor is null && customRateIndex is null && index != "FEDFUND")
+        {
+            return $"#Error: Please provide a rate index tenor in the curve parameters.";
+        }
+
         IborIndex? rateIndex = null;
+
+        if (index is not null)
+        {
+            rateIndex =
+                index switch
+                {
+                    "EURIBOR" => new Euribor(new Period(indexTenor)),
+                    "FEDFUND" => new FedFunds(),
+                    "JIBAR" => new Jibar(new Period(indexTenor)),
+                    "USD-LIBOR" => new USDLibor(new Period(indexTenor)),
+                    _ => null,
+                };
+        }
+        // else
+        // {
+        //     string? tenor = ExcelTable.GetTableValue<string>(customRateIndex, "Value", "Tenor");
+        //     int? settlementDays = ExcelTable.GetTableValue<int>(customRateIndex, "Value", "SettlementDay");
+        //     string? currency = ExcelTable.GetTableValue<string>(customRateIndex, "Value", "Currency");
+        //     (Currency x, Calendar y) z =
+        //         currency switch
+        //         {
+        //             // TODO: Use reflection here.
+        //             "USD" => (new USDCurrency(), new UnitedStates()),
+        //             "ZAR" => (new ZARCurrency(), new SouthAfrica()),
+        //             _ => throw new NotImplementedException(),
+        //         };
+        //
+        //     
+        //
+        //     rateIndex = new IborIndex("Test", new Period(tenor), settlementDays, z.x, z.y, )
+        // }
+
+
+        if (rateIndex is null)
+        {
+            return $"#Error: Unsupported rate index: {index}";
+        }
+
+        List<RateHelper> rateHelpers = new();
 
         foreach (var instrumentGroup in instrumentGroups)
         {
@@ -24,30 +84,16 @@ public static class SingleCurveBootstrapper
 
             // TODO: Make this case insensitive.
             List<string>? tenors = ExcelTable.GetColumn<string>(instruments, "Tenors");
+            List<string>? fraTenors = ExcelTable.GetColumn<string>(instruments, "FraTenors");
             List<DateTime>? startDates = ExcelTable.GetColumn<DateTime>(instruments, "StartDates");
             List<DateTime>? endDates = ExcelTable.GetColumn<DateTime>(instruments, "EndDates");
-            List<string>? rateIndices = ExcelTable.GetColumn<string>(instruments, "RateIndex");
+            //List<string>? rateIndices = ExcelTable.GetColumn<string>(instruments, "RateIndex");
             List<double>? rates = ExcelTable.GetColumn<double>(instruments, "Rates");
             List<bool>? include = ExcelTable.GetColumn<bool>(instruments, "Include");
             string? instrumentType = ExcelTable.GetTableLabel(instruments);
 
             var instrumentCount = include.Count;
-            var index = rateIndices[0];
-            rateIndex =
-                index switch
-                {
-                    "EURIBOR" => new Euribor(new Period("3m")),
-                    "FEDFUND" => new FedFunds(),
-                    "JIBAR" => new Jibar(new Period("3m")),
-                    "USD-LIBOR" => new USDLibor(new Period("3m")),
-                    _ => null,
-                };
-
-            if (rateIndex is null)
-            {
-                return $"#Error: Unsupported rate index: {index}";
-            }
-
+            
             if (string.Equals(instrumentType, "Deposits", StringComparison.OrdinalIgnoreCase))
             {
                 for (int i = 0; i < instrumentCount; i++)
@@ -75,7 +121,7 @@ public static class SingleCurveBootstrapper
                         rateHelpers.Add(
                             new FraRateHelper(
                                 rate: new Handle<Quote>(new SimpleQuote(rates[i])),
-                                periodToStart: new Period(tenors[i]),
+                                periodToStart: new Period(fraTenors[i]),
                                 iborIndex: rateIndex));
                     }
                 }
@@ -126,6 +172,8 @@ public static class SingleCurveBootstrapper
         
         Dictionary<string, object> curveDetails = new()
         {
+            // TODO: Add instruments used in bootstrapping.
+            // TODO: Get out anchor dates.
             ["Curve.Object"] = termStructure,
         };
         
