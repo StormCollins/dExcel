@@ -38,12 +38,13 @@ public static class ExcelTable
     /// <returns>The list of column headers.</returns>
     public static List<string> GetColumnHeaders(object[,] table, int rowIndexOfColumnHeaders = 1)
     {
-        var columnHeaders
+        List<string> columnHeaders
             = Enumerable
                 .Range(0, table.GetLength(1))
-                .Select(j => table[rowIndexOfColumnHeaders, j])
+                .Select(j => table[rowIndexOfColumnHeaders, j].ToString()?.ToUpper())
                 .Cast<string>()
                 .ToList();
+        
         return columnHeaders;
     }
 
@@ -59,7 +60,7 @@ public static class ExcelTable
     /// <returns>The table column.</returns>
     public static List<T>? GetColumn<T>(object[,] table, string columnHeader, int rowIndexOfColumnHeaders = 1)
     {
-        var index = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader);
+        int index = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader.ToUpper());
         if (index == -1)
         {
             return null;
@@ -67,35 +68,38 @@ public static class ExcelTable
 
         if (typeof(T) == typeof(DateTime))
         {
-            var column =
+            List<T> column =
                 Enumerable
                     .Range(rowIndexOfColumnHeaders + 1, table.GetLength(0) - (rowIndexOfColumnHeaders + 1))
-                    .Select(i => DateTime.FromOADate(int.Parse(table[i, index].ToString())))
+                    .Select(i => DateTime.FromOADate(int.Parse(table[i, index].ToString() ?? string.Empty)))
                     .Cast<T>()
                     .ToList();
+            
             return column;
         }
-        else if (string.Compare(columnHeader, "FRATenors", StringComparison.InvariantCultureIgnoreCase) == 0)
+
+        if (string.Compare(columnHeader, "FRATenors", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
-            var column =
+            List<T> column =
                 Enumerable
                     .Range(rowIndexOfColumnHeaders + 1, table.GetLength(0) - (rowIndexOfColumnHeaders + 1))
-                    .Select(i => Regex.Match(table[i, index].ToString(), @"\d+(?=x)").Value)
+                    .Select(i => Regex.Match(table[i, index].ToString() ?? string.Empty, @"\d+(?=x)").Value)
                     .Select(startTenor => startTenor + "m")
                     .Cast<T>()
                     .ToList();
+            
             return column;
         }
         else
         {
-            var column =
+            List<T> column =
                 Enumerable
                     .Range(rowIndexOfColumnHeaders + 1, table.GetLength(0) - (rowIndexOfColumnHeaders + 1))
                     .Select(i => (T)Convert.ChangeType(table[i, index], typeof(T)))
                     .ToList();
+            
             return column;
         }
-        
     }
 
     /// <summary>
@@ -110,7 +114,7 @@ public static class ExcelTable
     {
         return Enumerable
                 .Range(rowIndexOfFirstRowHeader, table.GetLength(0) - rowIndexOfFirstRowHeader)
-                .Select(i => table[i, 0].ToString())
+                .Select(i => table[i, 0].ToString()?.ToUpper())
                 .ToList(); 
     }
 
@@ -131,8 +135,8 @@ public static class ExcelTable
         string rowHeader,
         int rowIndexOfColumnHeaders = 1)
     {
-        var columnIndex = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader);
-        var rowIndex = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader) + rowIndexOfColumnHeaders + 1;
+        int columnIndex = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader.ToUpper());
+        int rowIndex = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader.ToUpper()) + rowIndexOfColumnHeaders + 1;
         if (columnIndex == -1  || rowIndex <= rowIndexOfColumnHeaders)
         {
             return default;
@@ -140,12 +144,13 @@ public static class ExcelTable
 
         if (typeof(T) == typeof(DateTime))
         {
-            return (T)Convert.ChangeType(DateTime.FromOADate(int.Parse(table[rowIndex, columnIndex].ToString())), typeof(T));
+            return (T)Convert.ChangeType(DateTime.FromOADate(int.Parse(table[rowIndex, columnIndex].ToString() ?? string.Empty)), typeof(T));
         }
-        else if (typeof(T) == typeof(BusinessDayConvention))
+
+        if (typeof(T) == typeof(BusinessDayConvention))
         {
             BusinessDayConvention? businessDayConvention =
-                table[rowIndex, columnIndex]?.ToString()?.ToUpper() switch
+                table[rowIndex, columnIndex].ToString()?.ToUpper() switch
                 {
                     "FOLLOWING" or "FOL" => BusinessDayConvention.Following,
                     "MODIFIEDFOLLOWING" or "MODFOL" => BusinessDayConvention.ModifiedFollowing,
@@ -158,15 +163,14 @@ public static class ExcelTable
             {
                 return (T)Convert.ChangeType(businessDayConvention, typeof(T));
             }
-            else
-            {
-                return default;
-            }
+
+            return default;
         }
-        else if (typeof(T) == typeof(DayCounter))
+
+        if (typeof(T) == typeof(DayCounter))
         {
-            DayCounter? dayCountConvetion =
-                table[rowIndex, columnIndex]?.ToString()?.ToUpper() switch
+            DayCounter? dayCountConvention =
+                table[rowIndex, columnIndex].ToString()?.ToUpper() switch
                 {
                     "ACTUAL360" or "ACT360" => new Actual360(),
                     "ACTUAL365" or "ACT365" => new Actual365Fixed(),
@@ -174,19 +178,15 @@ public static class ExcelTable
                     "BUSINESS252" => new Business252(),
                     _ => null,
                 };
-            if (dayCountConvetion != null)
+            if (dayCountConvention != null)
             {
-                return (T)Convert.ChangeType(dayCountConvetion, typeof(T));
+                return (T)Convert.ChangeType(dayCountConvention, typeof(T));
             }
-            else
-            {
-                return default;
-            }
+
+            return default;
         }
-        else
-        {
-            return (T)Convert.ChangeType(table[rowIndex, columnIndex], typeof(T));
-        }
+
+        return (T)Convert.ChangeType(table[rowIndex, columnIndex], typeof(T));
     }
     
     /// <summary>
@@ -217,20 +217,20 @@ public static class ExcelTable
         string rowHeader,
         int rowIndexOfColumnHeaders = 1)
     {
-        var columnIndex = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader);
+        int columnIndex = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader.ToUpper());
         if (columnIndex == -1)
         {
             return null;
         }
         
-        var rowIndexStart = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader);
+        int rowIndexStart = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader.ToUpper());
         if (rowIndexStart == -1)
         {
             return null;
         }
         rowIndexStart += rowIndexOfColumnHeaders + 1;
         
-        var rowIndexEnd = 1;
+        int rowIndexEnd = 1;
         
         for (int i = rowIndexStart + 1; i < table.GetLength(0); i++)
         {

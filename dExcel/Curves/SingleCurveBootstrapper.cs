@@ -86,9 +86,7 @@ public static class SingleCurveBootstrapper
             string? instrumentType = ExcelTable.GetTableLabel(instruments);
             List<string>? tenors = ExcelTable.GetColumn<string>(instruments, "Tenors");
             List<string>? fraTenors = ExcelTable.GetColumn<string>(instruments, "FraTenors");
-            List<DateTime>? startDates = ExcelTable.GetColumn<DateTime>(instruments, "StartDates");
             List<DateTime>? endDates = ExcelTable.GetColumn<DateTime>(instruments, "EndDates");
-            //List<string>? rateIndices = ExcelTable.GetColumn<string>(instruments, "RateIndex");
             List<double>? rates = ExcelTable.GetColumn<double>(instruments, "Rates");
             List<bool>? includeInstruments = ExcelTable.GetColumn<bool>(instruments, "Include");
 

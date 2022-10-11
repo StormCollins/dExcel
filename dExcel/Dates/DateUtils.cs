@@ -154,11 +154,12 @@ public static class DateUtils
     }
 
     /// <summary>
-    /// Returns the list of available Business Day Conventions so that a user can view them in Excel.
+    /// Returns the list of available business day conventions so that a user can view them in Excel.
     /// </summary>
     /// <returns>List of available business day conventions.</returns>
     [ExcelFunction(
         Name = "d.Date_GetAvailableBusinessDayConventions",
+        Description = "Lists available business day conventions in ∂Excel.",
         Category = "∂Excel: Dates")]
     public static object[,] GetAvailableBusinessDayConventions()
     {
@@ -198,6 +199,7 @@ public static class DateUtils
     /// <returns>List of available day count conventions.</returns>
     [ExcelFunction(
         Name = "d.Date_GetAvailableDayCountConventions",
+        Description = "Lists available day count conventions in ∂Excel.",
         Category = "∂Excel: Dates")]
     public static object[,] GetAvailableDayCountConventions()
     {
@@ -230,6 +232,11 @@ public static class DateUtils
         return dayCountConvention;
     }
 
+    /// <summary>
+    /// Parses a string as a QLNet calendar.
+    /// </summary>
+    /// <param name="calendarToParse">Calendar to parse.</param>
+    /// <returns>QLNet calendar.</returns>
     public static Calendar? ParseCalendar(string calendarToParse)
     {
         Calendar? calendar = calendarToParse.ToUpper() switch

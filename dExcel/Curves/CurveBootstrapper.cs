@@ -1,6 +1,6 @@
 ﻿namespace dExcel.Curves;
 
-using dExcel.ExcelUtils;
+using ExcelUtils;
 using ExcelDna.Integration;
 using QLNet;
 
@@ -18,16 +18,15 @@ public static class CurveBootstrapper
         List<RateHelper> rateHelpers = new();
         IborIndex? rateIndex = null;
 
-        foreach (var instrumentGroup in instrumentGroups)
+        foreach (object instrumentGroup in instrumentGroups)
         {
-            var instruments = (object[,])instrumentGroup;
+            object[,] instruments = (object[,])instrumentGroup;
 
-            // TODO: Make this case insensitive.
-            List<string> tenors = ExcelTable.GetColumn<string>(instruments, "Tenors");
-            List<string> rateIndices = ExcelTable.GetColumn<string>(instruments, "RateIndex");
-            List<double> rates = ExcelTable.GetColumn<double>(instruments, "Rates");
-            List<bool> include = ExcelTable.GetColumn<bool>(instruments, "Include");
-            var index = rateIndices[0];
+            List<string>? tenors = ExcelTable.GetColumn<string>(instruments, "Tenors");
+            List<string>? rateIndices = ExcelTable.GetColumn<string>(instruments, "RateIndex");
+            List<double>? rates = ExcelTable.GetColumn<double>(instruments, "Rates");
+            List<bool>? include = ExcelTable.GetColumn<bool>(instruments, "Include");
+            string index = rateIndices?[0];
             
             rateIndex =
                 index switch
