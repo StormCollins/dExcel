@@ -1,7 +1,6 @@
 ﻿namespace dExcelTests;
 
 using dExcel;
-using MaterialDesignThemes.Wpf.Transitions;
 using NUnit.Framework;
 using QLNet;
 
