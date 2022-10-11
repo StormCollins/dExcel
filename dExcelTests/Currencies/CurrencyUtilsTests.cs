@@ -13,6 +13,7 @@ public sealed class CurrencyUtilsTests
         yield return new TestCaseData("GBP").Returns(new GBPCurrency());
         yield return new TestCaseData("USD").Returns(new USDCurrency());
         yield return new TestCaseData("ZAR").Returns(new ZARCurrency());
+        yield return new TestCaseData("Invalid").Returns(null);
     }
     
     [Test]

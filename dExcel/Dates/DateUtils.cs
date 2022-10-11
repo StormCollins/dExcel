@@ -1,8 +1,6 @@
-﻿namespace dExcel;
+﻿namespace dExcel.Dates;
 
 using System;
-using System.Reflection;
-using System.Security.Cryptography.Xml;
 using System.Text.RegularExpressions;
 using ExcelDna.Integration;
 using QLNet;
@@ -31,9 +29,11 @@ public static class DateUtils
         [ExcelArgument(Name = "Holidays", Description = "List of holiday dates.")]
         object[] holidays)
     {
-        //CommonUtils.InFunctionWizard();
+#if DEBUG
+        CommonUtils.InFunctionWizard();
+#endif
         Calendar calendar = ParseHolidays(holidays, new WeekendsOnly());
-        return (DateTime)calendar.adjust(date, BusinessDayConvention.Following);
+        return (DateTime)calendar.adjust(date);
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        var calendar = ParseHolidays(holidays, new WeekendsOnly());
+        Calendar calendar = ParseHolidays(holidays, new WeekendsOnly());
         return (DateTime)calendar.adjust(date, BusinessDayConvention.ModifiedFollowing);
     }
         
@@ -80,7 +80,7 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        var calendar = ParseHolidays(holidays, new WeekendsOnly());
+        Calendar calendar = ParseHolidays(holidays, new WeekendsOnly());
         return (DateTime)calendar.adjust(date, BusinessDayConvention.Preceding);
     }
 
@@ -109,26 +109,35 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        Calendar? calendar = null;
-        if (userCalendar.ToUpper() == "ZAR")
+        Calendar? calendar = ParseCalendar(userCalendar);
+        if (calendar is null)
         {
-            calendar = new SouthAfrica();
+            return $"{CommonUtils.DExcelErrorPrefix} Invalid/unsupported calendar '{userCalendar}'.";
         }
-
-        BusinessDayConvention? businessDayConvention = null; 
-        if (userBusinessDayConvention.ToUpper() == "MODFOL")
+        
+        BusinessDayConvention? businessDayConvention = ParseBusinessDayConvention(userBusinessDayConvention);
+        if (businessDayConvention is null)
         {
-            businessDayConvention = BusinessDayConvention.ModifiedFollowing;
+            return
+                $"{CommonUtils.DExcelErrorPrefix} Invalid/unsupported business day convention " +
+                $"'{userBusinessDayConvention}'.";
         }
-
-        return (DateTime)calendar?.advance((Date)date, new Period(tenor), (BusinessDayConvention)businessDayConvention);
+        
+        return (DateTime)calendar.advance((Date)date, new Period(tenor), (BusinessDayConvention)businessDayConvention);
     }
         
+    /// <summary>
+    /// Used to parse a range of Excel dates to a custom QLNet calendar.
+    /// </summary>
+    /// <param name="holidays">Holiday range.</param>
+    /// <param name="calendar">Calendar.</param>
+    /// <returns>A custom QLNet calendar.</returns>
+    /// <exception cref="ArgumentException">Thrown for invalid dates in <param name="holidays"></param>.</exception>
     private static Calendar ParseHolidays(object[] holidays, Calendar calendar)
     {
-        foreach (var holiday in holidays)
+        foreach (object holiday in holidays)
         {
-            if (double.TryParse(holiday.ToString(), out var holidayValue))
+            if (double.TryParse(holiday.ToString(), out double holidayValue))
             {
                 calendar.addHoliday(DateTime.FromOADate(holidayValue));
             }
@@ -136,7 +145,7 @@ public static class DateUtils
             {
                 if (!Regex.IsMatch(holiday.ToString() ?? string.Empty, ValidHolidayTitlePattern))
                 {
-                    throw new ArgumentException($"Invalid date: {holiday}");
+                    throw new ArgumentException($"{CommonUtils.DExcelErrorPrefix} Invalid date '{holiday}'.");
                 }
             }
         }

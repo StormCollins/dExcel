@@ -1,6 +1,7 @@
 ﻿namespace dExcelTests;
 
 using dExcel;
+using dExcel.Dates;
 using NUnit.Framework;
 using QLNet;
 
@@ -45,6 +46,15 @@ public sealed class DateUtilsTests
         return DateUtils.ModFolDay(unadjusted, holidays);
     }
     
+    [Test]
+    public void ModFolDayInvalidHolidaysTest()
+    {
+        object[] holidays = { "Invalid" };
+        Assert.Throws<ArgumentException>(
+            () => DateUtils.ModFolDay(new DateTime(2022, 01, 01), holidays),
+            $"{CommonUtils.DExcelErrorPrefix} Invalid date 'Invalid'.");
+    }
+    
     public static IEnumerable<TestCaseData> PrevDayTestCaseData()
     {
         yield return new TestCaseData(new DateTime(2022, 01, 01))
@@ -77,6 +87,22 @@ public sealed class DateUtilsTests
     }
 
     [Test]
+    public void TestAddTenorToDateWithInvalidCalendar()
+    {
+        object actual = DateUtils.AddTenorToDate(new DateTime(2022, 01, 01), "3m", "Invalid", "ModFol");
+        const string expected = $"{CommonUtils.DExcelErrorPrefix} Invalid/unsupported calendar 'Invalid'.";
+        Assert.AreEqual(expected, actual);
+    }
+    
+    [Test]
+    public void TestAddTenorToDateWithInvalidBusinessDayConvention()
+    {
+        object actual = DateUtils.AddTenorToDate(new DateTime(2022, 01, 01), "3m", "ZAR", "Invalid");
+        const string expected = $"{CommonUtils.DExcelErrorPrefix} Invalid/unsupported business day convention 'Invalid'.";
+        Assert.AreEqual(expected, actual);
+    }
+    
+    [Test]
     public void TestGetAvailableDayCountConvention()
     {
         object[,] expected =
@@ -91,17 +117,24 @@ public sealed class DateUtilsTests
         Assert.AreEqual(expected, DateUtils.GetAvailableBusinessDayConventions());
     }
     
-    [Test]
-    [TestCase("FOL", BusinessDayConvention.Following)]
-    [TestCase("FOLLOWING", BusinessDayConvention.Following)]
-    [TestCase("MODFOL", BusinessDayConvention.ModifiedFollowing)]
-    [TestCase("MODIFIEDFOLLOWING", BusinessDayConvention.ModifiedFollowing)]
-    [TestCase("MODIFIEDPRECEDING", BusinessDayConvention.ModifiedPreceding)]
-    [TestCase("MODIFIEDPRECEDING", BusinessDayConvention.ModifiedPreceding)]
-    [TestCase("PRECEDING", BusinessDayConvention.Preceding)]
-    public void TestParseBusinessDayConvention(string x, BusinessDayConvention businessDayConvention)
+    public static IEnumerable<TestCaseData> BusinessDayConventionTestData()
     {
-        Assert.AreEqual(DateUtils.ParseBusinessDayConvention(x), businessDayConvention);
+        yield return new TestCaseData("FOL").Returns(BusinessDayConvention.Following);
+        yield return new TestCaseData("FOLLOWING").Returns(BusinessDayConvention.Following);
+        yield return new TestCaseData("MODFOL").Returns(BusinessDayConvention.ModifiedFollowing);
+        yield return new TestCaseData("MODIFIEDFOLLOWING").Returns(BusinessDayConvention.ModifiedFollowing);
+        yield return new TestCaseData("MODPREC").Returns(BusinessDayConvention.ModifiedPreceding);
+        yield return new TestCaseData("MODIFIEDPRECEDING").Returns(BusinessDayConvention.ModifiedPreceding);
+        yield return new TestCaseData("PREC").Returns(BusinessDayConvention.Preceding);
+        yield return new TestCaseData("PRECEDING").Returns(BusinessDayConvention.Preceding);
+        yield return new TestCaseData("Invalid").Returns(null);
+    } 
+    
+    [Test]
+    [TestCaseSource(nameof(BusinessDayConventionTestData))]
+    public BusinessDayConvention? TestParseBusinessDayConvention(string businessDayConventionToParse)
+    {
+        return DateUtils.ParseBusinessDayConvention(businessDayConventionToParse);
     }
 
     [Test]
