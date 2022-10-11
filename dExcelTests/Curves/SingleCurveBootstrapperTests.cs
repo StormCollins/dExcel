@@ -9,6 +9,37 @@ using QLNet;
 public class SingleCurveBootstrapperTests
 {
     [Test]
+    public void MissingBaseDate()
+    {
+        object[,] curveParameters =
+        {
+            {"Curve Parameters", ""},
+            {"Parameter", "Value"},
+            {"RateIndexName", "JIBAR"},
+            {"RateIndexTenor", "3m"},
+        };
+
+        object[,] instrumentGroups = 
+        {
+            {"Deposits", "", "", ""},
+            {"Tenors", "RateIndex", "Rates", "Include"},
+            {"1m", "JIBAR", 0.1, "TRUE"},
+            {"3m", "JIBAR", 0.1, "TRUE"},
+            {"6m", "JIBAR", 0.1, "TRUE"},
+        };
+        
+        string handle = 
+            SingleCurveBootstrapper.Bootstrap(
+                handle: "BootstrappedSingleCurve", 
+                curveParameters: curveParameters,
+                customRateIndex: null,
+                instrumentGroups: instrumentGroups);
+        
+        const string expected = $"{CommonUtils.DExcelErrorPrefix} Base date missing from curve parameters.";
+        Assert.AreEqual(expected, handle);
+    }
+    
+    [Test]
     public void BootstrapFlatCurveDepositsTest()
     {
         DateTime baseDate = new(2022, 06, 01);
@@ -18,7 +49,8 @@ public class SingleCurveBootstrapperTests
             {"Curve Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
-            {"RateIndex", "JIBAR"},
+            {"RateIndexName", "JIBAR"},
+            {"RateIndexTenor", "3m"},
         };
 
         object[,] instruments = 
@@ -30,10 +62,18 @@ public class SingleCurveBootstrapperTests
             {"6m", "JIBAR", 0.1, "TRUE"},
         };
         
-        var dayCounter = new Actual365Fixed();
-        var handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, instruments);
-        var curve = (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve"];
-        const double tolerance = 0.001; 
+        DayCounter dayCounter = new Actual365Fixed();
+        string handle = 
+            SingleCurveBootstrapper.Bootstrap(
+                handle: "BootstrappedSingleCurve", 
+                curveParameters, 
+                customRateIndex: null,
+                instruments);
+        
+        YieldTermStructure curve = 
+            (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve.Object"];
+        
+        const double tolerance = 0.01; 
         
         Assert.AreEqual(1.0, curve.discount(baseDate));
         Assert.AreEqual(
@@ -64,7 +104,8 @@ public class SingleCurveBootstrapperTests
             {"Curve Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
-            {"RateIndex", "JIBAR"},
+            {"RateIndexName", "JIBAR"},
+            {"RateIndexTenor", "3m"},
         };
 
         object[,] depositInstruments = 
@@ -79,15 +120,15 @@ public class SingleCurveBootstrapperTests
         object[,] fraInstruments = 
         {
             {"FRAs", "", "", ""},
-            {"Tenors", "RateIndex", "Rates", "Include"},
-            {"6m", "JIBAR", 0.1, "TRUE"},
-            {"9m", "JIBAR", 0.1, "TRUE"},
+            {"FraTenors", "RateIndex", "Rates", "Include"},
+            {"6x9", "JIBAR", 0.1, "TRUE"},
+            {"9x12", "JIBAR", 0.1, "TRUE"},
         };
 
         object[] instruments = {depositInstruments, fraInstruments};
-        var dayCounter = new Actual365Fixed();
-        var handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
-        var curve = (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve"];
+        Actual365Fixed dayCounter = new();
+        string handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
+        YieldTermStructure curve = (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve.Object"];
         const double tolerance = 0.01; 
         
         Assert.AreEqual(1.0, curve.discount(baseDate));
@@ -117,14 +158,15 @@ public class SingleCurveBootstrapperTests
     [Test]
     public void BootstrapFlatCurveDepositsFrasAndSwapsTest()
     {
-        var baseDate = new DateTime(2022, 06, 01);
+        DateTime baseDate = new(2022, 06, 01);
 
         object[,] curveParameters =
         {
             {"Curve Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
-            {"RateIndex", "JIBAR"},
+            {"RateIndexName", "JIBAR"},
+            {"RateIndexTenor", "3m"},
         };
 
         object[,] depositInstruments = 
@@ -139,23 +181,25 @@ public class SingleCurveBootstrapperTests
         object[,] fraInstruments = 
         {
             {"FRAs", "", "", ""},
-            {"Tenors", "RateIndex", "Rates", "Include"},
-            {"6m", "JIBAR", 0.1, "TRUE"},
-            {"9m", "JIBAR", 0.1, "TRUE"},
+            {"FraTenors", "RateIndex", "Rates", "Include"},
+            {"6x9", "JIBAR", 0.1, "TRUE"},
+            {"9x12", "JIBAR", 0.1, "TRUE"},
         };
 
         object[,] swapInstruments =
         {
             {"Interest Rate Swaps", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"1y", "JIBAR", 0.1, "TRUE"},
             {"2y", "JIBAR", 0.1, "TRUE"},
+            {"3y", "JIBAR", 0.1, "TRUE"},
         };
 
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
-        var dayCounter = new Actual365Fixed();
-        var handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
-        var curve = (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve"];
+        Actual365Fixed dayCounter = new();
+        string handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
+        
+        YieldTermStructure curve = 
+            (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve.Object"];
         const double tolerance = 0.01; 
         
         Assert.AreEqual(1.0, curve.discount(baseDate));

@@ -143,7 +143,7 @@ public static class DateUtils
     }
 
     /// <summary>
-    /// Returns the list of available Business Day Conventions so that a user can peruse them in Excel.
+    /// Returns the list of available Business Day Conventions so that a user can view them in Excel.
     /// </summary>
     /// <returns>List of available Business Day Conventions.</returns>
     [ExcelFunction(
@@ -159,5 +159,26 @@ public static class DateUtils
             { "ModPrec", "ModPreceding" },
             { "Prec", "Preceding" },
         };
+    }
+    
+    /// <summary>
+    /// Users can get available <see>
+    ///     <cref>GetAvailableBusinessDayConventions</cref>
+    /// </see>
+    /// </summary>
+    /// <param name="businessDayConventionToParse"></param>
+    /// <returns></returns>
+    public static BusinessDayConvention? ParseBusinessDayConvention(string businessDayConventionToParse)
+    {
+        BusinessDayConvention? businessDayConvention = businessDayConventionToParse.ToUpper() switch
+        {
+            "FOLLOWING" or "FOL" => BusinessDayConvention.Following,
+            "MODIFIEDFOLLOWING" or "MODFOL" => BusinessDayConvention.ModifiedFollowing,
+            "MODIFIEDPRECEDING" or "MODPREC" => BusinessDayConvention.ModifiedPreceding,
+            "PRECEDING" or "PREC" => BusinessDayConvention.Preceding,
+            _ => null,
+        };
+
+        return businessDayConvention;
     }
 }

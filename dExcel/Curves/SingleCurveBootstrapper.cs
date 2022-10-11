@@ -8,7 +8,7 @@ public static class SingleCurveBootstrapper
 {
     [ExcelFunction(
         Name = "d.Curve_SingleCurveBootstrap",
-        Description = "Bootstraps a single curve i.e. this is not a multi-curve bootstrapper.\n" +
+        Description = "Bootstraps a single curve i.e., this is not a multi-curve bootstrapper.\n" +
         "Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR",
         Category = "∂Excel: Interest Rates")]
     public static string Bootstrap(
@@ -20,29 +20,29 @@ public static class SingleCurveBootstrapper
         DateTime baseDate = ExcelTable.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", 1);
         if (baseDate == default)
         {
-            return "#Error: Please provide a base date in the curve parameters.";
+            return $"{CommonUtils.DExcelErrorPrefix} Base date missing from curve parameters.";
         }
         
         Settings.setEvaluationDate(baseDate);
 
-        string? index = ExcelTable.GetTableValue<string>(curveParameters, "Value", "RateIndex");
-        if (index is null && customRateIndex is null)
+        string? rateIndexName = ExcelTable.GetTableValue<string>(curveParameters, "Value", "RateIndexName");
+        if (rateIndexName is null && customRateIndex is null)
         {
-            return "#Error: Please provide a rate index in the curve parameters.";
+            return $"{CommonUtils.DExcelErrorPrefix} Rate index missing from curve parameters (and no custom rate index provided).";
         }
 
         string? indexTenor = ExcelTable.GetTableValue<string>(curveParameters, "Value", "RateIndexTenor");
-        if (indexTenor is null && customRateIndex is null && index != "FEDFUND")
+        if (indexTenor is null && customRateIndex is null && rateIndexName != "FEDFUND")
         {
-            return $"#Error: Please provide a rate index tenor in the curve parameters.";
+            return $"{CommonUtils.DExcelErrorPrefix} Please provide a rate index tenor in the curve parameters.";
         }
 
         IborIndex? rateIndex = null;
 
-        if (index is not null)
+        if (rateIndexName is not null)
         {
             rateIndex =
-                index switch
+                rateIndexName switch
                 {
                     "EURIBOR" => new Euribor(new Period(indexTenor)),
                     "FEDFUND" => new FedFunds(),
@@ -73,42 +73,57 @@ public static class SingleCurveBootstrapper
 
         if (rateIndex is null)
         {
-            return $"#Error: Unsupported rate index: {index}";
+            return $"{CommonUtils.DExcelErrorPrefix} Unsupported rate index: {rateIndexName}";
         }
 
         List<RateHelper> rateHelpers = new();
 
-        foreach (var instrumentGroup in instrumentGroups)
+        foreach (object instrumentGroup in instrumentGroups)
         {
-            var instruments = (object[,])instrumentGroup;
+            object[,] instruments = (object[,])instrumentGroup;
 
             // TODO: Make this case insensitive.
+            string? instrumentType = ExcelTable.GetTableLabel(instruments);
             List<string>? tenors = ExcelTable.GetColumn<string>(instruments, "Tenors");
             List<string>? fraTenors = ExcelTable.GetColumn<string>(instruments, "FraTenors");
             List<DateTime>? startDates = ExcelTable.GetColumn<DateTime>(instruments, "StartDates");
             List<DateTime>? endDates = ExcelTable.GetColumn<DateTime>(instruments, "EndDates");
             //List<string>? rateIndices = ExcelTable.GetColumn<string>(instruments, "RateIndex");
             List<double>? rates = ExcelTable.GetColumn<double>(instruments, "Rates");
-            List<bool>? include = ExcelTable.GetColumn<bool>(instruments, "Include");
-            string? instrumentType = ExcelTable.GetTableLabel(instruments);
+            List<bool>? includeInstruments = ExcelTable.GetColumn<bool>(instruments, "Include");
 
-            var instrumentCount = include.Count;
-            
+            if (includeInstruments is null)
+            {
+                continue;
+            }
+                
+            int instrumentCount = includeInstruments.Count;
+
             if (string.Equals(instrumentType, "Deposits", StringComparison.OrdinalIgnoreCase))
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
-                    if (include[i])
+                    if (rates is null)
+                    {
+                        return $"{CommonUtils.DExcelErrorPrefix} Deposit rates missing.";
+                    }
+
+                    if (tenors is null)
+                    {
+                        return $"{CommonUtils.DExcelErrorPrefix} Deposit tenors missing";
+                    }
+                    
+                    if (includeInstruments[i])
                     {
                         rateHelpers.Add(
-                            new DepositRateHelper(
-                                rate: rates[i],
-                                tenor: new Period(tenors[i]),
-                                fixingDays: rateIndex.fixingDays(),
-                                calendar: rateIndex.fixingCalendar(),
-                                convention: rateIndex.businessDayConvention(),
-                                endOfMonth: rateIndex.endOfMonth(),
-                                dayCounter: rateIndex.dayCounter()));
+                            item: new DepositRateHelper(
+                            rate: rates[i],
+                            tenor: new Period(tenors?[i]),
+                            fixingDays: rateIndex.fixingDays(),
+                            calendar: rateIndex.fixingCalendar(),
+                            convention: rateIndex.businessDayConvention(),
+                            endOfMonth: rateIndex.endOfMonth(),
+                            dayCounter: rateIndex.dayCounter()));
                     }
                 }
             }
@@ -116,13 +131,23 @@ public static class SingleCurveBootstrapper
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
-                    if (include[i])
+                    if (includeInstruments[i])
                     {
+                        if (fraTenors is null)
+                        {
+                            return $"{CommonUtils.DExcelErrorPrefix} FRA tenors missing.";
+                        }
+
+                        if (rates is null)
+                        {
+                            return $"{CommonUtils.DExcelErrorPrefix} FRA rates missing.";
+                        }
+                        
                         rateHelpers.Add(
-                            new FraRateHelper(
-                                rate: new Handle<Quote>(new SimpleQuote(rates[i])),
-                                periodToStart: new Period(fraTenors[i]),
-                                iborIndex: rateIndex));
+                            item: new FraRateHelper(
+                            rate: new Handle<Quote>(new SimpleQuote(rates?[i])),
+                            periodToStart: new Period(fraTenors?[i]),
+                            iborIndex: rateIndex));
                     }
                 }
             }
@@ -130,17 +155,27 @@ public static class SingleCurveBootstrapper
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
-                    if (include[i])
+                    if (rates is null)
+                    {
+                        return $"{CommonUtils.DExcelErrorPrefix} Swap rates missing.";
+                    }
+
+                    if (tenors is null)
+                    {
+                        return $"{CommonUtils.DExcelErrorPrefix} Swap tenors missing";
+                    }
+                    
+                    if (includeInstruments[i])
                     {
                         rateHelpers.Add(
-                            new SwapRateHelper(
-                                    rate: new Handle<Quote>(new SimpleQuote(rates[i])),
-                                    tenor: new Period(tenors[i]),
-                                    calendar: rateIndex.fixingCalendar(),
-                                    fixedFrequency: Frequency.Quarterly,
-                                    fixedConvention: rateIndex.businessDayConvention(),
-                                    fixedDayCount: rateIndex.dayCounter(),
-                                    iborIndex: rateIndex));
+                            item: new SwapRateHelper(
+                            rate: new Handle<Quote>(new SimpleQuote(rates?[i])),
+                            tenor: new Period(tenors?[i]),
+                            calendar: rateIndex.fixingCalendar(),
+                            fixedFrequency: Frequency.Quarterly,
+                            fixedConvention: rateIndex.businessDayConvention(),
+                            fixedDayCount: rateIndex.dayCounter(),
+                            iborIndex: rateIndex));
                     }
                 }
             }
@@ -148,14 +183,14 @@ public static class SingleCurveBootstrapper
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
-                    if (include[i])
+                    if (includeInstruments[i])
                     {
                         rateHelpers.Add(
-                            new DatedOISRateHelper(
-                                startDate: baseDate, 
-                                endDate: endDates[i],
-                                new Handle<Quote>(new SimpleQuote(rates[i])),
-                                (OvernightIndex)rateIndex));
+                            item: new DatedOISRateHelper(
+                            startDate: baseDate, 
+                            endDate: endDates?[i],
+                            fixedRate: new Handle<Quote>(new SimpleQuote(rates?[i])),
+                            overnightIndex: rateIndex as OvernightIndex));
                     }
                 }
             }
@@ -163,12 +198,12 @@ public static class SingleCurveBootstrapper
 
         YieldTermStructure termStructure =
             new PiecewiseYieldCurve<Discount, LogLinear>(
-               new Date(baseDate),
-               rateHelpers,
-               rateIndex.dayCounter(),
-               new List<Handle<Quote>>(),
-               new List<Date>(),
-               1.0e-20);
+               referenceDate: new Date(baseDate),
+               instruments: rateHelpers,
+               dayCounter: rateIndex.dayCounter(),
+               jumps: new List<Handle<Quote>>(),
+               jumpDates: new List<Date>(),
+               accuracy: 1.0e-20);
         
         Dictionary<string, object> curveDetails = new()
         {

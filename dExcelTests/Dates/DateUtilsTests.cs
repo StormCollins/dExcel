@@ -2,6 +2,7 @@
 
 using dExcel;
 using NUnit.Framework;
+using QLNet;
 
 [TestFixture]
 public sealed class DateUtilsTests
@@ -73,5 +74,18 @@ public sealed class DateUtilsTests
     public object TestAddTenorToDate(DateTime date, string tenor, string userCalendar, string userBusinessDayConvention)
     {
         return DateUtils.AddTenorToDate(date, tenor, userCalendar, userBusinessDayConvention);
+    }
+    
+    [Test]
+    [TestCase("FOL", BusinessDayConvention.Following)]
+    [TestCase("FOLLOWING", BusinessDayConvention.Following)]
+    [TestCase("MODFOL", BusinessDayConvention.ModifiedFollowing)]
+    [TestCase("MODIFIEDFOLLOWING", BusinessDayConvention.ModifiedFollowing)]
+    [TestCase("MODIFIEDPRECEDING", BusinessDayConvention.ModifiedPreceding)]
+    [TestCase("MODIFIEDPRECEDING", BusinessDayConvention.ModifiedPreceding)]
+    [TestCase("PRECEDING", BusinessDayConvention.Preceding)]
+    public void TestParseBusinessDayConvention(string x, BusinessDayConvention businessDayConvention)
+    {
+        Assert.AreEqual(DateUtils.ParseBusinessDayConvention(x), businessDayConvention);
     }
 }

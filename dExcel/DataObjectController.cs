@@ -9,22 +9,22 @@ using System.Threading.Tasks;
 
 public static class DataObjectController
 {
-    private static Dictionary<string, object> dataObjects = new();
+    private static readonly Dictionary<string, object> DataObjects = new();
 
     public static string Add(string handle, object dataObject)
     {
         char[] bannedCharacters = new char[] { '@', ':' };
         if (bannedCharacters.Any(handle.Contains))
         {
-            return $"Handle may not contain: {string.Join(", ", bannedCharacters)}";
+            return $"{CommonUtils.DExcelErrorPrefix} Handle may not contain following: {string.Join(", ", bannedCharacters)}";
         }
-        if (!dataObjects.ContainsKey(handle))
+        if (!DataObjects.ContainsKey(handle))
         {
-            dataObjects.Add(handle, dataObject);
+            DataObjects.Add(handle, dataObject);
         }
         else
         {
-            dataObjects[handle] = dataObject;  
+            DataObjects[handle] = dataObject;  
         }
         return $"@@{handle}::{DateTime.Now:HH:mm:ss}";
     }
@@ -36,6 +36,6 @@ public static class DataObjectController
 
     public static object GetDataObject(string handle)
     {
-        return dataObjects[CleanHandle(handle)];
+        return DataObjects[CleanHandle(handle)];
     }
 }
