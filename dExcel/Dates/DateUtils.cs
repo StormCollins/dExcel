@@ -1,6 +1,8 @@
 ﻿namespace dExcel;
 
 using System;
+using System.Reflection;
+using System.Security.Cryptography.Xml;
 using System.Text.RegularExpressions;
 using ExcelDna.Integration;
 using QLNet;
@@ -210,12 +212,57 @@ public static class DateUtils
         DayCounter? dayCountConvention = dayCountConventionToParse.ToUpper() switch
         {
             "ACT360" or "ACTUAL360" => new Actual360(),
-            "ACT365" or "ACT365F" or "ACTUAL365" or "ACTUAL365F"  => new Actual365Fixed(),
+            "ACT365" or "ACT365F" or "ACTUAL365" or "ACTUAL365F" => new Actual365Fixed(),
             "ACTACT" or "ACTUALACTUAL" => new ActualActual(),
             "BUS252" or "BUSINESS252" => new Business252(),
             _ => null,
         };
 
         return dayCountConvention;
+    }
+
+    public static Calendar? ParseCalendar(string calendarToParse)
+    {
+        Calendar? calendar = calendarToParse.ToUpper() switch
+        {
+            "ARS" or "ARGENTINA" => new Argentina(),
+            "AUD" or "AUSTRALIA" => new Australia(),
+            "BWP" or "BOTSWANA" => new Botswana(),
+            "BRL" or "BRAZIL" => new Brazil(),
+            "CAD" or "CANADA" => new Canada(),
+            "CHF" or "SWITZERLAND" => new Switzerland(),
+            "CNH" or "CNY" or "CHINA" => new China(),
+            "CZK" or "CZECH REPUBLIC" => new CzechRepublic(),
+            "DKK" or "DENMARK" => new Denmark(),
+            "EUR" => new TARGET(),
+            "GBP" or "UK" or "UNITED KINGDOM" => new UnitedKingdom(),
+            "GERMANY" => new Germany(),
+            "HKD" or "HONG KONG" => new HongKong(),
+            "HUF" or "HUNGARY" => new Hungary(),
+            "INR" or "INDIA" => new India(),
+            "ILS" or "ISRAEL" => new Israel(),
+            "ITALY" => new Italy(),
+            "JPY" or "JAPAN" => new Japan(), 
+            "KRW" or "SOUTH KOREA" => new SouthKorea(),
+            "MXN" or "MEXICO" => new Mexico(),
+            "NOK" or "NORWAY" => new Norway(),
+            "NZD" or "NEW ZEALAND" => new NewZealand(),
+            "PLN" or "POLAND" => new Poland(),
+            "RON" or "ROMANIA" => new Romania(),
+            "RUB" or "RUSSIA" => new Russia(),
+            "SAR" or "SAUDI ARABIA" => new SaudiArabia(),
+            "SGD" or "SINGAPORE" => new Singapore(),
+            "SKK" or "SWEDEN" => new Sweden(),
+            "SLOVAKIA" => new Slovakia(),
+            "THB" or "THAILAND" => new Thailand(),
+            "TRY" or "TURKEY" => new Turkey(),
+            "TWD" or "TAIWAN" => new Taiwan(),
+            "UAH" or "UKRAINE" => new Ukraine(),
+            "USD" or "USA" or "UNITED STATES" or "UNITED STATES OF AMERICA" => new UnitedStates(),
+            "ZAR" or "SOUTH AFRICA" => new SouthAfrica(),
+            _ => null,
+        };
+
+        return calendar;
     }
 }
