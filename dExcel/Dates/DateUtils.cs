@@ -30,7 +30,7 @@ public static class DateUtils
         object[] holidays)
     {
         //CommonUtils.InFunctionWizard();
-        var calendar = ParseHolidays(holidays, new WeekendsOnly());
+        Calendar calendar = ParseHolidays(holidays, new WeekendsOnly());
         return (DateTime)calendar.adjust(date, BusinessDayConvention.Following);
     }
 
@@ -145,10 +145,10 @@ public static class DateUtils
     /// <summary>
     /// Returns the list of available Business Day Conventions so that a user can view them in Excel.
     /// </summary>
-    /// <returns>List of available Business Day Conventions.</returns>
+    /// <returns>List of available business day conventions.</returns>
     [ExcelFunction(
         Name = "d.Date_GetAvailableBusinessDayConventions",
-        Category = "∂Excel")]
+        Category = "∂Excel: Dates")]
     public static object[,] GetAvailableBusinessDayConventions()
     {
         return new object[,]
@@ -162,23 +162,60 @@ public static class DateUtils
     }
     
     /// <summary>
-    /// Users can get available <see>
-    ///     <cref>GetAvailableBusinessDayConventions</cref>
-    /// </see>
+    /// Parses a string to a business day convention in QLNet.
+    /// Users can get available business day conventions from <see cref="GetAvailableBusinessDayConventions"/>.
     /// </summary>
-    /// <param name="businessDayConventionToParse"></param>
-    /// <returns></returns>
+    /// <param name="businessDayConventionToParse">Business day convention to parse.</param>
+    /// <returns>QLNet business day convention.</returns>
     public static BusinessDayConvention? ParseBusinessDayConvention(string businessDayConventionToParse)
     {
         BusinessDayConvention? businessDayConvention = businessDayConventionToParse.ToUpper() switch
         {
-            "FOLLOWING" or "FOL" => BusinessDayConvention.Following,
-            "MODIFIEDFOLLOWING" or "MODFOL" => BusinessDayConvention.ModifiedFollowing,
-            "MODIFIEDPRECEDING" or "MODPREC" => BusinessDayConvention.ModifiedPreceding,
-            "PRECEDING" or "PREC" => BusinessDayConvention.Preceding,
+            "FOL" or "FOLLOWING" => BusinessDayConvention.Following,
+            "MODFOL" or "MODIFIEDFOLLOWING" => BusinessDayConvention.ModifiedFollowing,
+            "MODPREC" or "MODIFIEDPRECEDING" => BusinessDayConvention.ModifiedPreceding,
+            "PREC" or "PRECEDING" => BusinessDayConvention.Preceding,
             _ => null,
         };
 
         return businessDayConvention;
+    }
+
+    /// <summary>
+    /// Returns the list of available Day Count Conventions so that a user can view them in Excel.
+    /// </summary>
+    /// <returns>List of available day count conventions.</returns>
+    [ExcelFunction(
+        Name = "d.Date_GetAvailableDayCountConventions",
+        Category = "∂Excel: Dates")]
+    public static object[,] GetAvailableDayCountConventions()
+    {
+        return new object[,]
+        {
+            { "Variant 1", "Variant 2", "Variant 3", "Variant 4" },
+            { "Act360", "Actual360", "", "" },
+            { "Act365", "Act365F", "Actual365", "Actual365F" },
+            { "ActAct", "ActualActual", "", "" },
+            { "Bus252", "Business252", "", "" },
+        };
+    }
+    
+    /// <summary>
+    /// Parses a string to a QLNet day counter convention.
+    /// </summary>
+    /// <param name="dayCountConventionToParse">Day count convention to parse.</param>
+    /// <returns>QLNet day count convention.</returns>
+    public static DayCounter? ParseDayCountConvention(string dayCountConventionToParse)
+    {
+        DayCounter? dayCountConvention = dayCountConventionToParse.ToUpper() switch
+        {
+            "ACT360" or "ACTUAL360" => new Actual360(),
+            "ACT365" or "ACT365F" or "ACTUAL365" or "ACTUAL365F"  => new Actual365Fixed(),
+            "ACTACT" or "ACTUALACTUAL" => new ActualActual(),
+            "BUS252" or "BUSINESS252" => new Business252(),
+            _ => null,
+        };
+
+        return dayCountConvention;
     }
 }
