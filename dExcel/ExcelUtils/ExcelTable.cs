@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Dates;
 using ExcelDna.Integration;
 using QLNet;
 
@@ -144,40 +145,29 @@ public static class ExcelTable
 
         if (typeof(T) == typeof(DateTime))
         {
-            return (T)Convert.ChangeType(DateTime.FromOADate(int.Parse(table[rowIndex, columnIndex].ToString() ?? string.Empty)), typeof(T));
+            return (T)Convert.ChangeType(
+                value: DateTime.FromOADate(int.Parse(table[rowIndex, columnIndex].ToString() ?? string.Empty)), 
+                conversionType: typeof(T));
         }
 
         if (typeof(T) == typeof(BusinessDayConvention))
         {
             BusinessDayConvention? businessDayConvention =
-                table[rowIndex, columnIndex].ToString()?.ToUpper() switch
-                {
-                    "FOLLOWING" or "FOL" => BusinessDayConvention.Following,
-                    "MODIFIEDFOLLOWING" or "MODFOL" => BusinessDayConvention.ModifiedFollowing,
-                    "MODIFIEDPRECEDING" or "MODPREC" => BusinessDayConvention.ModifiedPreceding,
-                    "PRECEDING" or "PREC" => BusinessDayConvention.Preceding,
-                    _ => null,
-                };
+                DateUtils.ParseBusinessDayConvention(table[rowIndex, columnIndex].ToString() ?? string.Empty);
 
             if (businessDayConvention != null)
             {
                 return (T)Convert.ChangeType(businessDayConvention, typeof(T));
             }
-
+            
             return default;
         }
 
         if (typeof(T) == typeof(DayCounter))
         {
             DayCounter? dayCountConvention =
-                table[rowIndex, columnIndex].ToString()?.ToUpper() switch
-                {
-                    "ACTUAL360" or "ACT360" => new Actual360(),
-                    "ACTUAL365" or "ACT365" => new Actual365Fixed(),
-                    "ACTUALACTUAL" or "ACTACT" => new ActualActual(),
-                    "BUSINESS252" => new Business252(),
-                    _ => null,
-                };
+                DateUtils.ParseDayCountConvention(table[rowIndex, columnIndex].ToString() ?? string.Empty);
+            
             if (dayCountConvention != null)
             {
                 return (T)Convert.ChangeType(dayCountConvention, typeof(T));
