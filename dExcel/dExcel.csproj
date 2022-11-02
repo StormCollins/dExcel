@@ -12,58 +12,58 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="resources\icons\calculate-range-small-blue.ico" />
-    <None Remove="resources\icons\commodities-large-blue.ico" />
-    <None Remove="resources\icons\connection-status-amber.ico" />
-    <None Remove="resources\icons\connection-status-green.ico" />
-    <None Remove="resources\icons\credit-large-blue.ico" />
-    <None Remove="resources\icons\cross_amber.png" />
-    <None Remove="resources\icons\database-connected-large-green.ico" />
-    <None Remove="resources\icons\database-not-connected-large-amber.ico" />
-    <None Remove="resources\icons\dates-large-green.ico" />
-    <None Remove="resources\icons\derivatives-large-green.ico" />
-    <None Remove="resources\icons\dExcel-ribbon.ico" />
-    <None Remove="resources\icons\dExcel.ico" />
-    <None Remove="resources\icons\dExcel48.png" />
-    <None Remove="resources\icons\dXL-logo-extra-small.ico" />
-    <None Remove="resources\icons\dXL-logo.ico" />
-    <None Remove="resources\icons\dXL-logo.png" />
-    <None Remove="resources\icons\equities-large-blue.ico" />
-    <None Remove="resources\icons\equities-large-green.ico" />
-    <None Remove="resources\icons\fix-links-small-blue.ico" />
-    <None Remove="resources\icons\fix-links-small-green.ico" />
-    <None Remove="resources\icons\follow-link-small-green.ico" />
-    <None Remove="resources\icons\format-painter-large-blue.ico" />
-    <None Remove="resources\icons\format-painter-large-green.ico" />
-    <None Remove="resources\icons\function-search-large-green.ico" />
-    <None Remove="resources\icons\fx-large-blue.ico" />
-    <None Remove="resources\icons\interest-rates-large-blue.ico" />
-    <None Remove="resources\icons\interest-rates-large-green.ico" />
-    <None Remove="resources\icons\m.png" />
-    <None Remove="resources\icons\manage-passwords-large-blue.ico" />
-    <None Remove="resources\icons\mathematics-large-green.ico" />
-    <None Remove="resources\icons\open-audit-small-blue.ico" />
-    <None Remove="resources\icons\open-audit-small-green.ico" />
-    <None Remove="resources\icons\stats-large-green.ico" />
-    <None Remove="resources\icons\table-formatting-column-1-row-1.png" />
-    <None Remove="resources\icons\table-formatting-column-1-row2.png" />
-    <None Remove="resources\icons\table-formatting-column-1.png" />
-    <None Remove="resources\icons\table-formatting-column-2-row-1.png" />
-    <None Remove="resources\icons\table-formatting-column-2-row-2.png" />
-    <None Remove="resources\icons\table-formatting-column-2.png" />
-    <None Remove="resources\icons\table-formatting-column-primary-and-secondary-header-row-primary-and-secondary-header.png" />
-    <None Remove="resources\icons\table-formatting-column-primary-and-secondary-header-row-primary-header.png" />
-    <None Remove="resources\icons\table-formatting-column-primary-and-secondary-header.png" />
-    <None Remove="resources\icons\table-formatting-column-primary-header-row-primary-and-secondary-header.png" />
-    <None Remove="resources\icons\table-formatting-column-primary-header-row-primary-header.png" />
-    <None Remove="resources\icons\table-formatting-column-primary-header.png" />
-    <None Remove="resources\icons\table-formatting-row-1.png" />
-    <None Remove="resources\icons\table-formatting-row-2.png" />
-    <None Remove="resources\icons\table-formatting-row-primary-and-secondary-header.png" />
-    <None Remove="resources\icons\table-formatting-row-primary-header.png" />
-    <None Remove="resources\icons\template-search-large-blue.ico" />
-    <None Remove="resources\icons\wrap-up-audit-small-blue.ico" />
-    <None Remove="resources\icons\wrap-up-audit-small-green.ico" />
+    <None Remove="Resources\Icons\calculate-range-small-blue.ico" />
+    <None Remove="Resources\Icons\commodities-large-blue.ico" />
+    <None Remove="Resources\Icons\connection-status-amber.ico" />
+    <None Remove="Resources\Icons\connection-status-green.ico" />
+    <None Remove="Resources\Icons\credit-large-blue.ico" />
+    <None Remove="Resources\Icons\cross_amber.png" />
+    <None Remove="Resources\Icons\database-connected-large-green.ico" />
+    <None Remove="Resources\Icons\database-not-connected-large-amber.ico" />
+    <None Remove="Resources\Icons\dates-large-green.ico" />
+    <None Remove="Resources\Icons\derivatives-large-green.ico" />
+    <None Remove="Resources\Icons\dExcel-ribbon.ico" />
+    <None Remove="Resources\Icons\dExcel.ico" />
+    <None Remove="Resources\Icons\dExcel48.png" />
+    <None Remove="Resources\Icons\dXL-logo-extra-small.ico" />
+    <None Remove="Resources\Icons\dXL-logo.ico" />
+    <None Remove="Resources\Icons\dXL-logo.png" />
+    <None Remove="Resources\Icons\equities-large-blue.ico" />
+    <None Remove="Resources\Icons\equities-large-green.ico" />
+    <None Remove="Resources\Icons\fix-links-small-blue.ico" />
+    <None Remove="Resources\Icons\fix-links-small-green.ico" />
+    <None Remove="Resources\Icons\follow-link-small-green.ico" />
+    <None Remove="Resources\Icons\format-painter-large-blue.ico" />
+    <None Remove="Resources\Icons\format-painter-large-green.ico" />
+    <None Remove="Resources\Icons\function-search-large-green.ico" />
+    <None Remove="Resources\Icons\fx-large-blue.ico" />
+    <None Remove="Resources\Icons\interest-rates-large-blue.ico" />
+    <None Remove="Resources\Icons\interest-rates-large-green.ico" />
+    <None Remove="Resources\Icons\m.png" />
+    <None Remove="Resources\Icons\manage-passwords-large-blue.ico" />
+    <None Remove="Resources\Icons\mathematics-large-green.ico" />
+    <None Remove="Resources\Icons\open-audit-small-blue.ico" />
+    <None Remove="Resources\Icons\open-audit-small-green.ico" />
+    <None Remove="Resources\Icons\stats-large-green.ico" />
+    <None Remove="Resources\Icons\table-formatting-column-1-row-1.png" />
+    <None Remove="Resources\Icons\table-formatting-column-1-row2.png" />
+    <None Remove="Resources\Icons\table-formatting-column-1.png" />
+    <None Remove="Resources\Icons\table-formatting-column-2-row-1.png" />
+    <None Remove="Resources\Icons\table-formatting-column-2-row-2.png" />
+    <None Remove="Resources\Icons\table-formatting-column-2.png" />
+    <None Remove="Resources\Icons\table-formatting-column-primary-and-secondary-header-row-primary-and-secondary-header.png" />
+    <None Remove="Resources\Icons\table-formatting-column-primary-and-secondary-header-row-primary-header.png" />
+    <None Remove="Resources\Icons\table-formatting-column-primary-and-secondary-header.png" />
+    <None Remove="Resources\Icons\table-formatting-column-primary-header-row-primary-and-secondary-header.png" />
+    <None Remove="Resources\Icons\table-formatting-column-primary-header-row-primary-header.png" />
+    <None Remove="Resources\Icons\table-formatting-column-primary-header.png" />
+    <None Remove="Resources\Icons\table-formatting-row-1.png" />
+    <None Remove="Resources\Icons\table-formatting-row-2.png" />
+    <None Remove="Resources\Icons\table-formatting-row-primary-and-secondary-header.png" />
+    <None Remove="Resources\Icons\table-formatting-row-primary-header.png" />
+    <None Remove="Resources\Icons\template-search-large-blue.ico" />
+    <None Remove="Resources\Icons\wrap-up-audit-small-blue.ico" />
+    <None Remove="Resources\Icons\wrap-up-audit-small-green.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -100,112 +100,112 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="resources\icons\calculate-range-small-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\calculate-range-small-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\commodities-large-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\commodities-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\connection-status-amber.ico">
+    <EmbeddedResource Include="Resources\Icons\connection-status-amber.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\connection-status-green.ico">
+    <EmbeddedResource Include="Resources\Icons\connection-status-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\credit-large-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\credit-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\database-connected-large-green.ico">
+    <EmbeddedResource Include="Resources\Icons\database-connected-large-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\database-not-connected-large-amber.ico">
+    <EmbeddedResource Include="Resources\Icons\database-not-connected-large-amber.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\dates-large-green.ico">
+    <EmbeddedResource Include="Resources\Icons\dates-large-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\derivatives-large-green.ico">
+    <EmbeddedResource Include="Resources\Icons\derivatives-large-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\dExcel-ribbon.ico">
+    <EmbeddedResource Include="Resources\Icons\dExcel-ribbon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\table-formatting-column-1-row-1.png">
+    <EmbeddedResource Include="Resources\Icons\table-formatting-column-1-row-1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\table-formatting-column-1-row2.png">
+    <EmbeddedResource Include="Resources\Icons\table-formatting-column-1-row2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\table-formatting-column-1.png">
+    <EmbeddedResource Include="Resources\Icons\table-formatting-column-1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\table-formatting-column-2-row-1.png">
+    <EmbeddedResource Include="Resources\Icons\table-formatting-column-2-row-1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\table-formatting-column-2-row-2.png">
+    <EmbeddedResource Include="Resources\Icons\table-formatting-column-2-row-2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\table-formatting-column-2.png">
+    <EmbeddedResource Include="Resources\Icons\table-formatting-column-2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\table-formatting-row-1.png">
+    <EmbeddedResource Include="Resources\Icons\table-formatting-row-1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\table-formatting-row-2.png">
+    <EmbeddedResource Include="Resources\Icons\table-formatting-row-2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <Resource Include="resources\icons\dExcel.ico">
+    <Resource Include="Resources\Icons\dExcel.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <EmbeddedResource Include="resources\icons\dExcel48.png">
+    <EmbeddedResource Include="Resources\Icons\dExcel48.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\dXL-logo-extra-small.ico">
+    <EmbeddedResource Include="Resources\Icons\dXL-logo-extra-small.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\equities-large-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\equities-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\equities-large-green.ico">
+    <EmbeddedResource Include="Resources\Icons\equities-large-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\fix-links-small-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\fix-links-small-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\follow-link-small-green.ico">
+    <EmbeddedResource Include="Resources\Icons\follow-link-small-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\format-painter-large-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\format-painter-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\function-search-large-green.ico">
+    <EmbeddedResource Include="Resources\Icons\function-search-large-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\fx-large-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\fx-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\interest-rates-large-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\interest-rates-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\interest-rates-large-green.ico">
+    <EmbeddedResource Include="Resources\Icons\interest-rates-large-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\manage-passwords-large-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\manage-passwords-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\mathematics-large-green.ico">
+    <EmbeddedResource Include="Resources\Icons\mathematics-large-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\open-audit-small-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\open-audit-small-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\stats-large-green.ico">
+    <EmbeddedResource Include="Resources\Icons\stats-large-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\template-search-large-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\template-search-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\icons\wrap-up-audit-small-blue.ico">
+    <EmbeddedResource Include="Resources\Icons\wrap-up-audit-small-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
@@ -240,7 +240,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="resources\workbooks\Deloitte_Brand_Theme.thmx">
+    <None Update="Resources\Workbooks\Deloitte_Brand_Theme.thmx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Workbooks\dexcel-testing.xlsm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="resources\workbooks\Testing.xlsm">

@@ -125,7 +125,8 @@
       Grid.Column="0"
       Grid.ColumnSpan="4"
       DialogTheme="Inherit"
-      IsOpen="True">
+      IsOpen="True"
+      Visibility="Hidden">
          
       <materialDesign:DialogHost.DialogContent>
         <DockPanel>

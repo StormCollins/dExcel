@@ -26,7 +26,7 @@ public class RibbonController : ExcelRibbon
     {
         var assembly = Assembly.GetExecutingAssembly();
         return new Bitmap(
-            assembly.GetManifestResourceStream($"dExcel.resources.icons.{control.Tag}") ??
+            assembly.GetManifestResourceStream($"dExcel.Resources.Icons.{control.Tag}") ??
             throw new ArgumentNullException($"Icon {control.Tag} not found in resources."));
     }
 
@@ -45,13 +45,14 @@ public class RibbonController : ExcelRibbon
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
         thread.Join();
+
         if (string.Compare(dashBoardAction, "OpenTestingWorkbook", true) == 0)
         {
             var xlApp = (Excel.Application)ExcelDnaUtil.Application;
 #if DEBUG
-            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\resources\workbooks\dexcel-testing.xlsm");
+            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\Resources\Workbooks\dexcel-testing.xlsm");
 #else
-            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\Releases\Current\dexcel-testing.xlsm");
+            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\Releases\Current\Resources\dexcel-testing.xlsm");
 #endif
         }
     }

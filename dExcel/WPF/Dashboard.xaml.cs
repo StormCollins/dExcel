@@ -75,6 +75,7 @@ public partial class Dashboard : Window
 
         NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback;
     }
+
     /// <summary>
     /// The location of all the add-in versions on the shared drive.
     /// </summary>
