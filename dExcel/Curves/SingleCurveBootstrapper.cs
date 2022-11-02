@@ -9,7 +9,7 @@ public static class SingleCurveBootstrapper
     [ExcelFunction(
         Name = "d.Curve_SingleCurveBootstrap",
         Description = "Bootstraps a single curve i.e., this is not a multi-curve bootstrapper.\n" +
-        "Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR",
+                      "Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR",
         Category = "∂Excel: Interest Rates")]
     public static string Bootstrap(
         string handle, 
