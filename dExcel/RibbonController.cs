@@ -185,17 +185,25 @@ public class RibbonController : ExcelRibbon
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
         thread.Join();
-        if (formatSettings != null && formatSettings.Value.columnHeaderCount > 0)
+
+        if (formatSettings is { rowHeaderCount: > 0, columnHeaderCount: > 0 })
+        {
+            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            bool hasTwoRowHeaders = formatSettings.Value.rowHeaderCount == 2;
+            bool hasTwoColumnHeaders = formatSettings.Value.columnHeaderCount == 2;
+            RangeFormatUtils.SetColumnAndRowHeaderBasedTableFormatting(hasTwoRowHeaders, hasTwoColumnHeaders);
+        }
+        else if (formatSettings is { columnHeaderCount: > 0 })
         {
             var xlApp = (Excel.Application)ExcelDnaUtil.Application;
             bool hasTwoHeaders = formatSettings.Value.columnHeaderCount == 2;
-            RangeFormatUtils.SetVerticallyAlignedTableFormatting(hasTwoHeaders);
+            RangeFormatUtils.SetColumnHeaderBasedTableFormatting(hasTwoHeaders);
         }
-        else if (formatSettings != null && formatSettings.Value.rowHeaderCount > 0)
+        else if (formatSettings is { rowHeaderCount: > 0 })
         {
             var xlApp = (Excel.Application)ExcelDnaUtil.Application;
             bool hasTwoHeaders = formatSettings.Value.rowHeaderCount == 2;
-            RangeFormatUtils.SetHorizontallyAlignedTableFormatting(hasTwoHeaders);
+            RangeFormatUtils.SetRowHeaderBasedTableFormatting(hasTwoHeaders);
         }
     }
     

@@ -51,7 +51,7 @@
       VerticalAlignment="Top"
       Grid.Row="0"
       Grid.RowSpan="2"
-      Grid.Column="11"
+      Grid.Column="5"
       Margin="5"
       Width="48"
       Source="pack://application:,,,/dExcel;component/resources/icons/dExcel48.png"/>
@@ -166,8 +166,8 @@
     </materialDesign:Card>
 
     <Button
-      Grid.Row="9"
-      Grid.Column="11"
+      Grid.Row="7"
+      Grid.Column="5"
       Content="Close"
       Click="CloseTableFormatter"/>
   </Grid>

@@ -27,7 +27,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 /// | 2m        |  14% |  16% |  18% |  21% |  24% |
 /// | 3m        |  18% |  19% |  21% |  24% |  27% |
 /// 
-/// </summary
+/// </summary>
 public enum TableOrientation
 {
     BothColumnAndRowHeaders, ColumnHeaders, RowHeaders, 
@@ -203,7 +203,7 @@ public static class RangeFormatUtils
     /// Sets the standard formatting for a primary title row or column i.e. a white font on black background.
     /// </summary>
     /// <param name="range">The range to apply the formatting to.</param>
-    public static void SetPrimaryTitleRangeFormatting(Excel.Range? range, TableOrientation tableOrientation = TableOrientation.ColumnHeaders)
+    public static void SetPrimaryTitleRangeFormatting(Excel.Range? range, TableOrientation tableOrientation = TableOrientation.ColumnHeaders, bool merge = true, bool rotateText = true)
     {
         if (tableOrientation == TableOrientation.ColumnHeaders)
         {
@@ -224,8 +224,8 @@ public static class RangeFormatUtils
                 cellBackgroundColor: rgbBlack,
                 horizontalCellAlignment: HorizontalCellContentAlignment.CenterAcrossSelection,
                 verticalCellAlignment: VerticalCellContentAlignment.Center,
-                true,
-                true);
+                merge,
+                rotateText);
         }
         SetBorders(range, false);
     }
@@ -260,15 +260,15 @@ public static class RangeFormatUtils
     }
 
     /// <summary>
-    /// Sets the formatting for a table which is vertically aligned i.e. has column headers with data 
+    /// Sets the formatting for a table which is vertically aligned i.e., has column headers with data 
     /// running column-wise.
     /// </summary>
     /// <param name="hasTwoHeaderRows">True if the table has two header rows.</param>
     [ExcelFunction(
-        Name = "d.Formatting_SetVerticallyAlignedTableFormatting",
+        Name = "d.Formatting_SetColumnHeaderBasedTableFormatting",
         Description = "Sets the default formatting for a vertically aligned (i.e. column-based) table.",
         Category = "∂Excel: Formatting")]
-    public static void SetVerticallyAlignedTableFormatting(bool hasTwoHeaderRows)
+    public static void SetColumnHeaderBasedTableFormatting(bool hasTwoHeaderRows)
     {
         SetSheetWideFormatting();
         var xlApp = (Excel.Application)ExcelDnaUtil.Application;
@@ -298,10 +298,10 @@ public static class RangeFormatUtils
     /// </summary>
     /// <param name="hasTwoHeaderColumns">True if the table has two header columns.</param>
     [ExcelFunction(
-        Name = "d.Formatting_SetHorizontallyAlignedTableFormatting",
-        Description = "Sets the default formatting for a horizontally aligned (i.e. row-based) table.",
+        Name = "d.Formatting_SetRowHeaderBasedTableFormatting",
+        Description = "Sets the default formatting for a horizontally aligned (i.e., row-based) table.",
         Category = "∂Excel: Formatting")]
-    public static void SetHorizontallyAlignedTableFormatting(bool hasTwoHeaderColumns)
+    public static void SetRowHeaderBasedTableFormatting(bool hasTwoHeaderColumns)
     {
         SetSheetWideFormatting();
         var xlApp = (Excel.Application)ExcelDnaUtil.Application;
@@ -310,18 +310,97 @@ public static class RangeFormatUtils
         entireRange.Font.Name = "Calibri Light";
         entireRange.Font.Size = 10;
 
-        SetPrimaryTitleRangeFormatting(entireRange.Columns[1], TableOrientation.RowHeaders);
 
         if (hasTwoHeaderColumns)
         {
+            SetPrimaryTitleRangeFormatting(entireRange.Columns[1], TableOrientation.RowHeaders);
             var rowHeaders = entireRange.Columns[2];
             SetSecondaryTitleRangeFormatting(rowHeaders);
             SetTableContentFormatting(entireRange.Columns[$"{GetColumnLetter(3)}:{GetColumnLetter(entireRange.Columns.Count)}"], rowHeaders, TableOrientation.RowHeaders);
         }
         else
         {
+            SetPrimaryTitleRangeFormatting(entireRange.Columns[1], TableOrientation.RowHeaders, false, false);
             var rowHeaders = entireRange.Columns[1];
-            SetTableContentFormatting(entireRange.Columns[$"2:{entireRange.Columns.Count}"], rowHeaders, TableOrientation.RowHeaders);
+            SetTableContentFormatting(entireRange.Columns[$"{GetColumnLetter(2)}:{GetColumnLetter(entireRange.Columns.Count)}"], rowHeaders, TableOrientation.RowHeaders);
+        }
+    }
+
+    /// <summary>
+    /// Sets the formatting for a table which is horizontally aligned i.e. has row headers with data 
+    /// running row-wise.
+    /// </summary>
+    /// <param name="hasTwoHeaderColumns">True if the table has two header columns.</param>
+    [ExcelFunction(
+        Name = "d.Formatting_SetHorizontalAndVerticalTableFormatting",
+        Description = "Sets the default formatting for a horizontally aligned (i.e., row-based) table.",
+        Category = "∂Excel: Formatting")]
+    public static void SetColumnAndRowHeaderBasedTableFormatting(bool hasTwoHeaderRows, bool hasTwoHeaderColumns)
+    {
+        SetSheetWideFormatting();
+        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        ((Excel.Range)xlApp.Selection).CurrentRegion.Select();
+        var entireRange = (Excel.Range)xlApp.Selection;
+        entireRange.Font.Name = "Calibri Light";
+        entireRange.Font.Size = 10;
+
+        Excel.Range primaryRow = entireRange.Rows[1];
+        Excel.Range secondaryRow = entireRange.Rows[2];
+        Excel.Range primaryColumnHeaders;
+
+        if (hasTwoHeaderRows)
+        {
+            primaryColumnHeaders = primaryRow.Columns[$"{GetColumnLetter(3)}:{GetColumnLetter(entireRange.Columns.Count)}"];
+            SetPrimaryTitleRangeFormatting(primaryColumnHeaders);
+
+            Excel.Range secondaryColumnHeaders;
+            if (hasTwoHeaderColumns)
+            {
+                secondaryColumnHeaders =
+                    secondaryRow.Columns[$"{GetColumnLetter(3)}:{GetColumnLetter(entireRange.Columns.Count)}"];
+                SetTableContentFormatting(entireRange.Rows[$"3:{entireRange.Rows.Count}"].Columns[$"{GetColumnLetter(3)}:{GetColumnLetter(entireRange.Columns.Count)}"], secondaryColumnHeaders, TableOrientation.ColumnHeaders);
+            }
+            else
+            {
+                secondaryColumnHeaders =
+                    secondaryRow.Columns[$"{GetColumnLetter(2)}:{GetColumnLetter(entireRange.Columns.Count)}"];
+                SetTableContentFormatting(entireRange.Rows[$"3:{entireRange.Rows.Count}"].Columns[$"{GetColumnLetter(2)}:{GetColumnLetter(entireRange.Columns.Count)}"], secondaryColumnHeaders, TableOrientation.ColumnHeaders);
+            }
+
+            SetSecondaryTitleRangeFormatting(secondaryColumnHeaders);
+        }
+        else
+        {
+            primaryColumnHeaders = primaryRow.Columns[$"{GetColumnLetter(2)}:{GetColumnLetter(entireRange.Columns.Count)}"];
+            SetPrimaryTitleRangeFormatting(primaryColumnHeaders);
+        }
+
+        Excel.Range primaryColumn = entireRange.Columns[1];
+        Excel.Range secondaryColumn = entireRange.Columns[2];
+        Excel.Range primaryRowHeaders;
+
+        if (hasTwoHeaderColumns)
+        {
+            primaryRowHeaders = primaryColumn.Rows[$"3:{entireRange.Rows.Count}"];
+            Excel.Range secondaryRowHeaders;
+
+            if (hasTwoHeaderRows)
+            {
+                secondaryRowHeaders = secondaryColumn.Rows[$"3:{entireRange.Rows.Count}"];
+                SetPrimaryTitleRangeFormatting(primaryRowHeaders, TableOrientation.RowHeaders);
+            }
+            else
+            {
+                secondaryRowHeaders = secondaryColumn.Rows[$"2:{entireRange.Rows.Count}"];
+                SetPrimaryTitleRangeFormatting(primaryRowHeaders, TableOrientation.RowHeaders, false, false);
+            }
+
+            SetSecondaryTitleRangeFormatting(secondaryRowHeaders);
+        }
+        else
+        {
+            primaryRowHeaders = primaryColumn.Rows[$"2:{entireRange.Rows.Count}"];
+            SetPrimaryTitleRangeFormatting(primaryRowHeaders, TableOrientation.RowHeaders, false, false);
         }
     }
 
