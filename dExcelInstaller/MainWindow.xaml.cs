@@ -72,7 +72,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         this._logger = new Logger(LogWindow);
         Version? installerVersion = Assembly.GetEntryAssembly()?.GetName().Version;
-        InstallerVersion.Output = $"{installerVersion?.Major}.{installerVersion?.Minor}";
+        InstallerVersion.Output = $"{installerVersion?.Major}.{installerVersion?.Minor}.{installerVersion?.Build}";
 
         string currentDExcelVersion = GetInstalledDExcelVersion();
         CurrentDExcelVersion.Output = currentDExcelVersion;
@@ -302,14 +302,14 @@ public partial class MainWindow : Window
     /// <summary>
     /// Gets the version of dExcel currently installed in Excel.
     /// </summary>
-    /// <returns>The dExcel version if available as "Major version number.Minor version number" if installed otherwise
+    /// <returns>The dExcel version if available as "Major version.Minor version.Build" if installed otherwise
     /// "Not Installed".</returns>
     private static string GetInstalledDExcelVersion()
     {
         if (File.Exists(LocalCurrentReleasePath + @"\" + Dll))
         {
             Version? currentDExcelVersion = AssemblyName.GetAssemblyName(LocalCurrentReleasePath + @"\" + Dll).Version;
-            return $"{currentDExcelVersion?.Major}.{currentDExcelVersion?.Minor}";
+            return $"{currentDExcelVersion?.Major}.{currentDExcelVersion?.Minor}.{currentDExcelVersion?.Build}";
         }
 
         return "Not Installed";

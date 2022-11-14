@@ -72,6 +72,6 @@ public static class DebugUtils
     public static string GetAssemblyVersion()
     {
         var dExcelAssembly = Assembly.GetAssembly(typeof(DebugUtils))?.GetName().Version;
-        return dExcelAssembly == null ? "Failed to get version." : $"{dExcelAssembly.Major}.{dExcelAssembly.Minor}";
+        return dExcelAssembly == null ? "Failed to get version." : $"{dExcelAssembly.Major}.{dExcelAssembly.Minor}.{dExcelAssembly.Build}";
     }
 }
