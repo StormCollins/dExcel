@@ -1,4 +1,4 @@
-﻿namespace dExcel;
+﻿namespace dExcel.ExcelUtils;
 
 using ExcelDna.Integration;
 using static Microsoft.Office.Interop.Excel.XlRgbColor;
@@ -6,20 +6,20 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 /// <summary>
 /// Used to specify the orientation of a table.
-/// If it has 'ColumnHeaders' the data is organised into categories along columns e.g.
+/// If it is 'Vertical' the data is organised into categories along columns e.g.,
 ///
 /// | Date       | Cash Flow | Currency |
 /// | 2022-06-30 | 1,000,000 |      ZAR |
 /// | 2022-09-30 | 2,000,000 |      ZAR |
 /// 
-/// As opposed to 'ColumnHeaders' where the data is organised into categories along rows e.g.:
+/// As opposed to 'Horizontal' where the data is organised into categories along rows e.g.,:
 /// 
 /// | Date       | 2022-06-30 | 2022-09-30 |
 /// | Cash Flow  |  1,000,000 |  2,000,000 |
 /// | Currency   |        ZAR |        ZAR |
 /// 
-/// If it has 'BothColumnAndRowHeaders' then the data is usually primarily organised in 
-/// categories along columns but the first row or two also function as headers (this is common for vol surfaces) e.g.:
+/// If it is 'Both' then the data is usually primarily organised in categories along columns but the first column or two
+/// also function as headers (this is common for vol surfaces) e.g.:
 /// 
 /// | Tenor     | 0.50 | 0.75 | 1.00 | 1.25 | 1.50 |
 /// | 1w        |  10% |  12% |  15% |  18% |  20% |
@@ -30,14 +30,21 @@ using Excel = Microsoft.Office.Interop.Excel;
 /// </summary>
 public enum TableOrientation
 {
-    BothColumnAndRowHeaders, ColumnHeaders, RowHeaders, 
+    Both, Horizontal, Vertical, 
 }
 
+/// <summary>
+/// Refers to how content is aligned horizontally within a cell.
+/// </summary>
 public enum HorizontalCellContentAlignment
 {
     Center, CenterAcrossSelection, Left, Right,
 }
 
+
+/// <summary>
+/// Refers to how content is aligned vertically within a cell.
+/// </summary>
 public enum VerticalCellContentAlignment
 {
     Bottom, Center, CenterAcrossSelection, Top,
@@ -56,9 +63,9 @@ public static class RangeFormatUtils
     /// <summary>
     /// Checks if two ranges have the same formatting.
     /// </summary>
-    /// <param name="range1">Range 1</param>
-    /// <param name="range2">Range 2</param>
-    /// <returns>True if Range 1 and Range 2 have the same formatting, otherwise false.</returns>
+    /// <param name="cell1">Cell 1</param>
+    /// <param name="cell2">Cell 2</param>
+    /// <returns>True if Cell 1 and Cell 2 have the same formatting, otherwise false.</returns>
     [ExcelFunction(
         Name = "d.Formatting_Equal",
         Description = "Checks if the formatting of two cells are equal.",
@@ -78,11 +85,11 @@ public static class RangeFormatUtils
     {
         if (cell1 is ExcelReference reference1 && cell2 is ExcelReference reference2)
         {
-            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
-            var range1 = (Excel.Range)xlApp.ActiveSheet.Cells[reference1.RowFirst + 1, reference1.ColumnFirst + 1];
-            var range2 = (Excel.Range)xlApp.ActiveSheet.Cells[reference2.RowFirst + 1, reference2.ColumnFirst + 1];
+            Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            Excel.Range? range1 = (Excel.Range)xlApp.ActiveSheet.Cells[reference1.RowFirst + 1, reference1.ColumnFirst + 1];
+            Excel.Range? range2 = (Excel.Range)xlApp.ActiveSheet.Cells[reference2.RowFirst + 1, reference2.ColumnFirst + 1];
             
-            foreach (var index in BoundaryBorderIndices)
+            foreach (Excel.XlBordersIndex index in BoundaryBorderIndices)
             {
                 if ((range1.Borders[index].Color != range2.Borders[index].Color) ||
                     (range1.Borders[index].LineStyle != range2.Borders[index].LineStyle) ||
@@ -92,17 +99,19 @@ public static class RangeFormatUtils
                 }
             }
 
-            return (range1.Font.Bold == range2.Font.Bold) &&
-                (range1.Font.Color == range2.Font.Color) &&
-                (range1.Font.Italic == range2.Font.Italic) &&
-                (range1.Font.Name == range2.Font.Name) &&
-                (range1.Font.Size == range2.Font.Size) &&
-                (range1.Font.Underline == range2.Font.Underline) &&
-                (range1.Interior.Color == range2.Interior.Color) &&
-                (range1.MergeCells == range2.MergeCells) &&
-                (range1.HorizontalAlignment == range2.HorizontalAlignment) &&
-                (range1.VerticalAlignment == range2.VerticalAlignment);
+            return 
+                range1.Font.Bold == range2.Font.Bold &&
+                range1.Font.Color == range2.Font.Color &&
+                range1.Font.Italic == range2.Font.Italic &&
+                range1.Font.Name == range2.Font.Name &&
+                range1.Font.Size == range2.Font.Size &&
+                range1.Font.Underline == range2.Font.Underline &&
+                range1.Interior.Color == range2.Interior.Color &&
+                range1.MergeCells == range2.MergeCells &&
+                range1.HorizontalAlignment == range2.HorizontalAlignment &&
+                range1.VerticalAlignment == range2.VerticalAlignment;
         }
+        
         return false;
     }
 
@@ -115,6 +124,8 @@ public static class RangeFormatUtils
     /// <param name="cellBackgroundColor">The cell background color.</param>
     /// <param name="horizontalCellAlignment">The horizontal alignment setting of the cell contents.</param>
     /// <param name="verticalCellAlignment">The vertical alignment setting of the cell contents.</param>
+    /// <param name="merge">Whether the cells should be merged. Default = False.</param>
+    /// <param name="rotateText">Whether the contents of the cells should be rotated. Default = False.</param>
     private static void SetRangeFormatting(
         Excel.Range? range,
         bool bold,
@@ -125,20 +136,15 @@ public static class RangeFormatUtils
         bool merge = false,
         bool rotateText = false)
     {
-        range.Font.Bold = bold;
-        range.Font.Color = fontColor;
-        range.HorizontalAlignment = HorizontalAlignment[horizontalCellAlignment];
-        range.Interior.Color = cellBackgroundColor;
-        range.VerticalAlignment = VerticalAlignment[verticalCellAlignment];
-        range.MergeCells = merge;
-        
-        if(rotateText)
+        if (range != null)
         {
-            range.Orientation = 90;
-        }
-        else
-        {
-            range.Orientation = 0;
+            range.Font.Bold = bold;
+            range.Font.Color = fontColor;
+            range.HorizontalAlignment = HorizontalAlignment[horizontalCellAlignment];
+            range.Interior.Color = cellBackgroundColor;
+            range.VerticalAlignment = VerticalAlignment[verticalCellAlignment];
+            range.MergeCells = merge;
+            range.Orientation = rotateText ? 90 : 0;
         }
     }
 
@@ -180,12 +186,12 @@ public static class RangeFormatUtils
         Category = "∂Excel: Formatting")]
     public static void ClearRangeFormatting()
     {
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         xlApp.ActiveWindow.DisplayGridlines = false;
         ((Excel.Worksheet)xlApp.ActiveSheet).DisplayPageBreaks = false;
 
         ((Excel.Range)xlApp.Selection).CurrentRegion.Select();
-        var entireRange = (Excel.Range)xlApp.Selection;
+        Excel.Range? entireRange = (Excel.Range)xlApp.Selection;
         entireRange.Font.Name = "Calibri Light";
         entireRange.Font.Size = 10;
         SetRangeFormatting(
@@ -203,9 +209,17 @@ public static class RangeFormatUtils
     /// Sets the standard formatting for a primary title row or column i.e. a white font on black background.
     /// </summary>
     /// <param name="range">The range to apply the formatting to.</param>
-    public static void SetPrimaryTitleRangeFormatting(Excel.Range? range, TableOrientation tableOrientation = TableOrientation.ColumnHeaders, bool merge = true, bool rotateText = true)
+    /// <param name="tableOrientation">Whether the table is 'vertically' or 'horizontally' aligned i.e., has column or
+    /// row headers. 'Both' is not applicable here.</param>
+    /// <param name="merge">Whether the cells should be merged. Default = true.</param>
+    /// <param name="rotateText">Whether the contents of the cells should be rotated. Default = true.</param>
+    public static void SetPrimaryTitleRangeFormatting(
+        Excel.Range? range, 
+        TableOrientation tableOrientation = TableOrientation.Vertical, 
+        bool merge = true, 
+        bool rotateText = true)
     {
-        if (tableOrientation == TableOrientation.ColumnHeaders)
+        if (tableOrientation == TableOrientation.Vertical)
         {
             SetRangeFormatting(
                 range: range,
@@ -227,6 +241,7 @@ public static class RangeFormatUtils
                 merge,
                 rotateText);
         }
+        
         SetBorders(range, false);
     }
 
@@ -283,12 +298,12 @@ public static class RangeFormatUtils
         {
             var columnHeaders = entireRange.Rows[2];
             SetSecondaryTitleRangeFormatting(columnHeaders);
-            SetTableContentFormatting(entireRange.Rows[$"3:{entireRange.Rows.Count}"], columnHeaders, TableOrientation.ColumnHeaders);
+            SetTableContentFormatting(entireRange.Rows[$"3:{entireRange.Rows.Count}"], columnHeaders, TableOrientation.Vertical);
         }
         else
         {
             var columnHeaders = entireRange.Rows[1];
-            SetTableContentFormatting(entireRange.Rows[$"2:{entireRange.Rows.Count}"], columnHeaders, TableOrientation.ColumnHeaders);
+            SetTableContentFormatting(entireRange.Rows[$"2:{entireRange.Rows.Count}"], columnHeaders, TableOrientation.Vertical);
         }
     }
 
@@ -313,16 +328,16 @@ public static class RangeFormatUtils
 
         if (hasTwoHeaderColumns)
         {
-            SetPrimaryTitleRangeFormatting(entireRange.Columns[1], TableOrientation.RowHeaders);
+            SetPrimaryTitleRangeFormatting(entireRange.Columns[1], TableOrientation.Horizontal);
             var rowHeaders = entireRange.Columns[2];
             SetSecondaryTitleRangeFormatting(rowHeaders);
-            SetTableContentFormatting(entireRange.Columns[$"{GetColumnLetter(3)}:{GetColumnLetter(entireRange.Columns.Count)}"], rowHeaders, TableOrientation.RowHeaders);
+            SetTableContentFormatting(entireRange.Columns[$"{GetColumnLetter(3)}:{GetColumnLetter(entireRange.Columns.Count)}"], rowHeaders, TableOrientation.Horizontal);
         }
         else
         {
-            SetPrimaryTitleRangeFormatting(entireRange.Columns[1], TableOrientation.RowHeaders, false, false);
+            SetPrimaryTitleRangeFormatting(entireRange.Columns[1], TableOrientation.Horizontal, false, false);
             var rowHeaders = entireRange.Columns[1];
-            SetTableContentFormatting(entireRange.Columns[$"{GetColumnLetter(2)}:{GetColumnLetter(entireRange.Columns.Count)}"], rowHeaders, TableOrientation.RowHeaders);
+            SetTableContentFormatting(entireRange.Columns[$"{GetColumnLetter(2)}:{GetColumnLetter(entireRange.Columns.Count)}"], rowHeaders, TableOrientation.Horizontal);
         }
     }
 
@@ -358,13 +373,13 @@ public static class RangeFormatUtils
             {
                 secondaryColumnHeaders =
                     secondaryRow.Columns[$"{GetColumnLetter(3)}:{GetColumnLetter(entireRange.Columns.Count)}"];
-                SetTableContentFormatting(entireRange.Rows[$"3:{entireRange.Rows.Count}"].Columns[$"{GetColumnLetter(3)}:{GetColumnLetter(entireRange.Columns.Count)}"], secondaryColumnHeaders, TableOrientation.ColumnHeaders);
+                SetTableContentFormatting(entireRange.Rows[$"3:{entireRange.Rows.Count}"].Columns[$"{GetColumnLetter(3)}:{GetColumnLetter(entireRange.Columns.Count)}"], secondaryColumnHeaders, TableOrientation.Vertical);
             }
             else
             {
                 secondaryColumnHeaders =
                     secondaryRow.Columns[$"{GetColumnLetter(2)}:{GetColumnLetter(entireRange.Columns.Count)}"];
-                SetTableContentFormatting(entireRange.Rows[$"3:{entireRange.Rows.Count}"].Columns[$"{GetColumnLetter(2)}:{GetColumnLetter(entireRange.Columns.Count)}"], secondaryColumnHeaders, TableOrientation.ColumnHeaders);
+                SetTableContentFormatting(entireRange.Rows[$"3:{entireRange.Rows.Count}"].Columns[$"{GetColumnLetter(2)}:{GetColumnLetter(entireRange.Columns.Count)}"], secondaryColumnHeaders, TableOrientation.Vertical);
             }
 
             SetSecondaryTitleRangeFormatting(secondaryColumnHeaders);
@@ -387,12 +402,12 @@ public static class RangeFormatUtils
             if (hasTwoHeaderRows)
             {
                 secondaryRowHeaders = secondaryColumn.Rows[$"3:{entireRange.Rows.Count}"];
-                SetPrimaryTitleRangeFormatting(primaryRowHeaders, TableOrientation.RowHeaders);
+                SetPrimaryTitleRangeFormatting(primaryRowHeaders, TableOrientation.Horizontal);
             }
             else
             {
                 secondaryRowHeaders = secondaryColumn.Rows[$"2:{entireRange.Rows.Count}"];
-                SetPrimaryTitleRangeFormatting(primaryRowHeaders, TableOrientation.RowHeaders, false, false);
+                SetPrimaryTitleRangeFormatting(primaryRowHeaders, TableOrientation.Horizontal, false, false);
             }
 
             SetSecondaryTitleRangeFormatting(secondaryRowHeaders);
@@ -400,7 +415,7 @@ public static class RangeFormatUtils
         else
         {
             primaryRowHeaders = primaryColumn.Rows[$"2:{entireRange.Rows.Count}"];
-            SetPrimaryTitleRangeFormatting(primaryRowHeaders, TableOrientation.RowHeaders, false, false);
+            SetPrimaryTitleRangeFormatting(primaryRowHeaders, TableOrientation.Horizontal, false, false);
         }
     }
 
@@ -602,7 +617,7 @@ public static class RangeFormatUtils
                 {
                     if (cell.Value2.ToString().ToUpper().Contains(item.ToUpper()))
                     {
-                        indices.Add(tableOrientation == TableOrientation.ColumnHeaders
+                        indices.Add(tableOrientation == TableOrientation.Vertical
                             ? cell.Column - firstColumnIndex + 1
                             : cell.Row - firstRowIndex + 1);
                     }
@@ -611,7 +626,7 @@ public static class RangeFormatUtils
 
             foreach (var index in indices)
             {
-                if (tableOrientation == TableOrientation.ColumnHeaders)
+                if (tableOrientation == TableOrientation.Vertical)
                 {
                     ((Excel.Range)contentRange.Columns[index]).NumberFormat = format.Value;
                     ((Excel.Range)contentRange.Columns[index]).HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;

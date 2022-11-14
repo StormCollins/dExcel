@@ -9,6 +9,7 @@ using ExcelDna.Integration.CustomUI;
 using Excel = Microsoft.Office.Interop.Excel;
 using FuzzySharp;
 using System.Windows.Threading;
+using ExcelUtils;
 
 [ComVisible(true)]
 public class RibbonController : ExcelRibbon
