@@ -2,13 +2,13 @@
 
 using System;
 using System.Diagnostics;
-using System.DirectoryServices.AccountManagement;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +18,6 @@ using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Security.Principal;
-using System.DirectoryServices.ActiveDirectory;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
@@ -72,10 +71,10 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         this._logger = new Logger(LogWindow);
-        var installerVersion = Assembly.GetEntryAssembly()?.GetName().Version;
+        Version? installerVersion = Assembly.GetEntryAssembly()?.GetName().Version;
         InstallerVersion.Output = $"{installerVersion?.Major}.{installerVersion?.Minor}";
 
-        var currentDExcelVersion = GetInstalledDExcelVersion();
+        string currentDExcelVersion = GetInstalledDExcelVersion();
         CurrentDExcelVersion.Output = currentDExcelVersion;
 
         if (string.Compare(
@@ -100,14 +99,17 @@ public partial class MainWindow : Window
                 new BitmapImage(
                     new Uri(@"pack://application:,,,/resources/icons/connection-status-green.ico",
                         UriKind.Absolute));
+            
             this._releasesDirectoryWatcher.Path = SharedDriveReleasesPath;
             this.DockPanelConnectionStatus.ToolTip = "You are connected to the VPN.";
             this._logger.OkayText =
                 $"Checking for latest versions of ∂Excel on the selected remote source: **{DExcelRemoteSource.Text}**";
+            
             this._logger.WarningText = $"Installation path set to: [[{SharedDriveReleasesPath}]]";
+            
             try
             {
-                this.AvailableDExcelReleases.ItemsSource = GetAllAvailableRemoteDExcelReleases();
+                this.ComboBoxAvailableDExcelReleases.ItemsSource = GetAllAvailableRemoteDExcelReleases();
             }
             catch (Exception e)
             {
@@ -122,17 +124,19 @@ public partial class MainWindow : Window
                     new Uri(
                         uriString: @"pack://application:,,,/resources/icons/connection-status-amber.ico",
                         uriKind: UriKind.Absolute));
+            
             this._releasesDirectoryWatcher.Path = LocalReleasesPath;
             this._logger.WarningText = "User not connected to the VPN.";
             this._logger.WarningText =
                 "The VPN is required to check for the latest versions of the ∂Excel add-in on the selected remote " +
                 $"source: **{this.DExcelRemoteSource.Text}**";
+            
             this._logger.WarningText = $"Installation path set to: [[{LocalReleasesPath}]]";
-            AvailableDExcelReleases.ItemsSource = GetAllAvailableLocalDExcelReleases();
+            ComboBoxAvailableDExcelReleases.ItemsSource = GetAllAvailableLocalDExcelReleases();
             this.DockPanelConnectionStatus.ToolTip = "You are not connected to the VPN.";
         }
 
-        AvailableDExcelReleases.SelectedIndex = 0;
+        ComboBoxAvailableDExcelReleases.SelectedIndex = 0;
         NetworkChange.NetworkAddressChanged += ConnectionStatusChangedCallback!;
         _releasesDirectoryWatcher.NotifyFilter = 
             NotifyFilters.Attributes |
@@ -144,26 +148,26 @@ public partial class MainWindow : Window
             NotifyFilters.Security |
             NotifyFilters.Size;
         
-        _releasesDirectoryWatcher.Changed += ReleasesesFolderChanged;
-        _releasesDirectoryWatcher.Deleted += ReleasesesFolderChanged;
+        _releasesDirectoryWatcher.Changed += ReleasesFolderChanged;
+        _releasesDirectoryWatcher.Deleted += ReleasesFolderChanged;
         _releasesDirectoryWatcher.Filter = "*.*";
         _releasesDirectoryWatcher.IncludeSubdirectories = true;
         _releasesDirectoryWatcher.EnableRaisingEvents = true; 
     }
 
-    private void ReleasesesFolderChanged(object sender, FileSystemEventArgs e)
+    private void ReleasesFolderChanged(object sender, FileSystemEventArgs e)
     {
         Dispatcher.Invoke(() =>
         {
             if (_releasesDirectoryWatcher.Path == SharedDriveReleasesPath)
             {
-                this.AvailableDExcelReleases.ItemsSource = GetAllAvailableRemoteDExcelReleases();
+                this.ComboBoxAvailableDExcelReleases.ItemsSource = GetAllAvailableRemoteDExcelReleases();
             }
             else
             {
-                this.AvailableDExcelReleases.ItemsSource = GetAllAvailableLocalDExcelReleases();
+                this.ComboBoxAvailableDExcelReleases.ItemsSource = GetAllAvailableLocalDExcelReleases();
             }
-            this.AvailableDExcelReleases.SelectedIndex = 0;
+            this.ComboBoxAvailableDExcelReleases.SelectedIndex = 0;
         });
     }
 
@@ -185,7 +189,7 @@ public partial class MainWindow : Window
     //    return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
     //}
 
-    private bool IsAdministrator()
+    private static bool IsAdministrator()
     {
         // https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/security-identifiers-in-windows
         // S-1-5-32-544
@@ -194,8 +198,8 @@ public partial class MainWindow : Window
         // When a computer joins a domain, the Domain Admins group is added to
         // the Administrators group. When a server becomes a domain controller,
         // the Enterprise Admins group also is added to the Administrators group.
-        var principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-        var claims = principal.Claims;
+        WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+        IEnumerable<Claim> claims = principal.Claims;
         return (claims.FirstOrDefault(c => c.Value == "S-1-5-32-544") != null);
     }
 
@@ -224,7 +228,7 @@ public partial class MainWindow : Window
                         "Checking for latest versions of ∂Excel on the selected remote source: " +
                         $"**{this.DExcelRemoteSource.Text}**";
                     this._logger.OkayText = $"Installation path set to: [[{SharedDriveReleasesPath}]]";
-                    this.AvailableDExcelReleases.ItemsSource = GetAllAvailableRemoteDExcelReleases();
+                    this.ComboBoxAvailableDExcelReleases.ItemsSource = GetAllAvailableRemoteDExcelReleases();
                 });
             }
             else
@@ -245,13 +249,13 @@ public partial class MainWindow : Window
                     this._logger.WarningText =
                         "Only locally available versions of the ∂Excel add-in can be installed.";
                     this._logger.WarningText = $"Installation path set to: [[{LocalReleasesPath}]]";
-                    this.AvailableDExcelReleases.ItemsSource = GetAllAvailableLocalDExcelReleases();
+                    this.ComboBoxAvailableDExcelReleases.ItemsSource = GetAllAvailableLocalDExcelReleases();
                 });
             }
 
             Dispatcher.Invoke(() =>
             {
-                this.AvailableDExcelReleases.SelectedIndex = 0;
+                this.ComboBoxAvailableDExcelReleases.SelectedIndex = 0;
             });
         }
     }
@@ -304,25 +308,23 @@ public partial class MainWindow : Window
     {
         if (File.Exists(LocalCurrentReleasePath + @"\" + Dll))
         {
-            var currentDExcelVersion = AssemblyName.GetAssemblyName(LocalCurrentReleasePath + @"\" + Dll).Version;
+            Version? currentDExcelVersion = AssemblyName.GetAssemblyName(LocalCurrentReleasePath + @"\" + Dll).Version;
             return $"{currentDExcelVersion?.Major}.{currentDExcelVersion?.Minor}";
         }
 
         return "Not Installed";
     }
     
-    TaskCompletionSource<bool> tcs = new();
+    private TaskCompletionSource<bool> _taskCompletionSource = new();
     
-    private async void IgnoreExcelIsOpenWarning_OnClick(object sender, RoutedEventArgs e)
+    private void IgnoreExcelIsOpenWarning_OnClick(object sender, RoutedEventArgs e)
     {
-        // tcs = new TaskCompletionSource<bool>();
-        tcs.SetResult(true);
+        _taskCompletionSource.SetResult(true);
     }
-    
 
-    private void StopInstallationAndDontCloseExcel_OnClick(object sender, RoutedEventArgs e)
+    private void StopInstallationAndDoNotCloseExcel_OnClick(object sender, RoutedEventArgs e)
     {
-        tcs.SetResult(false);
+        _taskCompletionSource.SetResult(false);
     }
     
     /// <summary>
@@ -336,17 +338,17 @@ public partial class MainWindow : Window
             await Dispatcher.Invoke(async () =>
             {
                 this.ExcelIsOpenWarningDialog.IsOpen = true;
-                await tcs.Task;
+                await _taskCompletionSource.Task;
             });
             
-            if (tcs.Task.Result)
+            if (_taskCompletionSource.Task.Result)
             {
                 Dispatcher.Invoke(() =>
                 {
                     this.ExcelIsOpenWarningDialog.IsOpen = false;
                 });
                 
-                tcs = new TaskCompletionSource<bool>();
+                _taskCompletionSource = new TaskCompletionSource<bool>();
             }
             else
             {
@@ -356,7 +358,7 @@ public partial class MainWindow : Window
                     this._logger.OkayText = "Installation cancelled by user.";
                 });
                 
-                tcs = new TaskCompletionSource<bool>();
+                _taskCompletionSource = new TaskCompletionSource<bool>();
                 return;
             }
         } 
@@ -377,11 +379,13 @@ public partial class MainWindow : Window
         });
         try
         {
-            var currentAddIns =
+            string[] currentAddIns =
                 Directory.GetFiles(Environment.ExpandEnvironmentVariables(@"%appdata%\Microsoft\AddIns"));
-            var obsoleteDExcelAddIn =
+            
+            string? obsoleteDExcelAddIn =
                 currentAddIns.Length == 0 ?
                 null : currentAddIns.First(x => x.Contains("dExcel", StringComparison.InvariantCultureIgnoreCase));
+            
             if (obsoleteDExcelAddIn != null)
             {
                 Dispatcher.Invoke(() =>
@@ -470,9 +474,9 @@ public partial class MainWindow : Window
             {
                 file.Delete();
             }
-            foreach (DirectoryInfo dir in currentVersionDirectory.GetDirectories())
+            foreach (DirectoryInfo directory in currentVersionDirectory.GetDirectories())
             {
-                dir.Delete(true);
+                directory.Delete(true);
             }
         }
         catch (Exception exception)
@@ -492,13 +496,13 @@ public partial class MainWindow : Window
         Dispatcher.Invoke(() =>
         {
             this._logger.OkayText = 
-                $"Copying version {AvailableDExcelReleases.SelectedItem} of ∂Excel to [[{LocalCurrentReleasePath}]].";
+                $"Copying version {ComboBoxAvailableDExcelReleases.SelectedItem} of ∂Excel to [[{LocalCurrentReleasePath}]].";
         });
         try
         {
             Dispatcher.Invoke(() =>
             {
-                CopyFilesRecursively(LocalReleasesPath + AvailableDExcelReleases.SelectedItem, LocalCurrentReleasePath);
+                CopyFilesRecursively(LocalReleasesPath + ComboBoxAvailableDExcelReleases.SelectedItem, LocalCurrentReleasePath);
             });
         }
         catch (Exception exception)
@@ -506,7 +510,7 @@ public partial class MainWindow : Window
             Dispatcher.Invoke(() =>
             {
                 this._logger.ErrorText = 
-                    $"Failed to copy version {AvailableDExcelReleases.SelectedItem} of ∂Excel to " +
+                    $"Failed to copy version {ComboBoxAvailableDExcelReleases.SelectedItem} of ∂Excel to " +
                     $"[[{LocalCurrentReleasePath}]].";
                 this._logger.ErrorText = $"Exception message: {exception.Message}";
                 this._logger.InstallationFailed();
@@ -522,12 +526,12 @@ public partial class MainWindow : Window
         
         // Excel is temperamental when installing an add-in via C# the very first time.
         // The first time it is best to use a VBA installer however we try the C# route first regardless.
-        var failedToInstallTryVbaInstaller = true;
+        bool failedToInstallTryVbaInstaller = true;
         
         try
         {
-            var excel = new Excel.Application();
-            var dExcelAdded = false;
+            Excel.Application excel = new Excel.Application();
+            bool dExcelAdded = false;
             foreach (Excel.AddIn addIn in excel.AddIns)
             {
                 if (addIn.Name.Contains("dExcel-AddIn64", StringComparison.InvariantCultureIgnoreCase))
@@ -537,14 +541,17 @@ public partial class MainWindow : Window
                     break;
                 }
             }
+            
             // TODO: Check if file exists
             if (!dExcelAdded)
             {
                 Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
                 Excel.AddIn dExcelAddIn =
                     excel.AddIns.Add(@"C:\GitLab\dExcelTools\Releases\Current\dExcel-AddIn64.xll");
+                
                 dExcelAddIn.Installed = true;
             }
+            
             excel.Quit();
             failedToInstallTryVbaInstaller = false;
         }
@@ -572,7 +579,7 @@ public partial class MainWindow : Window
                         $"[[{LocalCurrentReleasePath}]].";
                 });
                     
-                var excel = new Excel.Application
+                Excel.Application excel = new Excel.Application
                 {
                     Visible = true
                 };
@@ -621,7 +628,7 @@ public partial class MainWindow : Window
     /// <param name="directoryPath">The directory path.</param>
     private static void DeleteFilesRecursively(string directoryPath)
     {
-        var directory = new DirectoryInfo(directoryPath);
+        DirectoryInfo directory = new DirectoryInfo(directoryPath);
         directory.EnumerateFiles().ToList().ForEach(f => f.Delete());
         directory.EnumerateDirectories().ToList().ForEach(d => d.Delete(true)); 
     }
@@ -718,20 +725,22 @@ public partial class MainWindow : Window
     {
         try
         {
-            var excelInstances = Process.GetProcessesByName("Excel");
+            Process[] excelInstances = Process.GetProcessesByName("Excel");
             Dispatcher.Invoke(() =>
             {
                 this._logger.OkayText = $"Excel instances found: {excelInstances.Length}";
             });
+
             foreach (Process excelInstance in excelInstances)
             {
                 excelInstance.Kill();
                 excelInstance.WaitForExit();
                 excelInstance.Dispose();
             }
+
             Dispatcher.Invoke(() =>
             {
-                this._logger.OkayText = $"All Excel instances terminated.";
+                this._logger.OkayText = "All Excel instances terminated.";
             });
         }
         catch (Exception exception)
@@ -751,9 +760,9 @@ public partial class MainWindow : Window
     /// <param name="e">The RoutedEventArgs.</param>
     private void AvailableDExcelReleases_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (AvailableDExcelReleases.SelectedItem != null)
+        if (ComboBoxAvailableDExcelReleases.SelectedItem != null)
         {
-            Install.IsEnabled = AvailableDExcelReleases.SelectedItem.ToString() != CurrentDExcelVersion.Output;
+            Install.IsEnabled = ComboBoxAvailableDExcelReleases.SelectedItem.ToString() != CurrentDExcelVersion.Output;
         }
     }
 
@@ -779,8 +788,8 @@ public partial class MainWindow : Window
     /// <summary>
     /// Launches an instance of Excel.
     /// </summary>
-    /// <param name="sender">The Sender.</param>
-    /// <param name="e">The RoutedEventArgs.</param>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">The event arguments.</param>
     private void LaunchExcel_OnClick(object sender, RoutedEventArgs e)
     {
         try
@@ -792,10 +801,21 @@ public partial class MainWindow : Window
         catch (Exception exception)
         {
             this._logger.ErrorText = "Failed to launch Excel.";
+            this._logger.ErrorText = "This may be due to it not being in the expected location:";
+            this._logger.ErrorText = @"[[C:\Program Files\Microsoft Office\root\Office16\excel.exe]]";
             this._logger.ErrorText = exception.Message;
         }
     }
-
+    
+    
+    /*
+     * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     * Reviewed
+     */ 
+    
+    /// <summary>
+    /// Downloads the add-in from the remote source. Currently the only remote source supported is the shared drive.
+    /// </summary>
     private void DownloadRequiredDExcelAddInFromRemoteSource()
     {
         Dispatcher.Invoke(() =>
@@ -803,18 +823,59 @@ public partial class MainWindow : Window
             if (string.Compare(
                     strA: DExcelRemoteSource.Text, 
                     strB: "Shared Drive", 
-                    comparisonType: StringComparison.InvariantCultureIgnoreCase) == 0)
+                    comparisonType: StringComparison.InvariantCultureIgnoreCase) == 0 && 
+                !GetAllAvailableLocalDExcelReleases().Contains(ComboBoxAvailableDExcelReleases.Text))
             {
-                if (!GetAllAvailableLocalDExcelReleases().Contains(AvailableDExcelReleases.Text))
-                {
-                    var sourcePath = Path.Combine(SharedDriveReleasesPath, $"{AvailableDExcelReleases.Text}.zip");
-                    var targetPath = Path.Combine(LocalReleasesPath, $"{AvailableDExcelReleases.Text}.zip");
-                    var zipOutputPath = Path.Combine(LocalReleasesPath, $"{AvailableDExcelReleases.Text}");
-                    File.Copy(sourcePath, targetPath, true);
-                    ZipFile.ExtractToDirectory(targetPath, zipOutputPath ?? string.Empty);
-                    File.Delete(targetPath);
-                }
+                string sourcePath = Path.Combine(SharedDriveReleasesPath, $"{ComboBoxAvailableDExcelReleases.Text}.zip");
+                string targetPath = Path.Combine(LocalReleasesPath, $"{ComboBoxAvailableDExcelReleases.Text}.zip");
+                string zipOutputPath = Path.Combine(LocalReleasesPath, $"{ComboBoxAvailableDExcelReleases.Text}");
+                File.Copy(sourcePath, targetPath, true);
+                ZipFile.ExtractToDirectory(targetPath, zipOutputPath);
+                File.Delete(targetPath);
             }
         });
+    }
+
+    /// <summary>
+    /// Purges i.e., deletes all contents of the local ∂Excel installation folder.  
+    /// </summary>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">The event arguments.</param>
+    private void PurgeInstalledDExcelFiles_OnClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this._logger.NewProcess("Purging contents of ∂Excel installation folder.");
+                this._logger.NewSubProcess("Closing all instances of Excel.");
+            });
+            this.CloseAllExcelInstances();
+
+            DirectoryInfo directoryInfo = new DirectoryInfo(LocalReleasesPath);
+
+            foreach (FileInfo file in directoryInfo.GetFiles())
+            {
+                Dispatcher.Invoke(() => this._logger.OkayText = $"Deleting: {file.Name}");
+                file.Delete(); 
+            }
+
+            foreach (DirectoryInfo directory in directoryInfo.GetDirectories())
+            {
+                directory.Delete(true);
+            }
+
+            this._logger.ProcessSucceeded("Purge Succeeded");
+        }
+        catch (Exception exception)
+        {
+            this._logger.ProcessFailed("Purge Failed");
+            Dispatcher.Invoke(() =>
+            {
+                this._logger.ErrorText = $"Failed to purge directory: ";
+                this._logger.ErrorText = $"[[{LocalReleasesPath}]]";
+                this._logger.ErrorText = $"Exception thrown: {exception.Message}";
+            });
+        }
     }
 }

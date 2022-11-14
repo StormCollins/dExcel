@@ -233,6 +233,10 @@ public class Logger
     
     public void UninstallationSucceeded() => EndProcessMessage("Uninstallation Succeeded", PrimaryHueLightBrush);
 
+    public void ProcessSucceeded(string message) => EndProcessMessage(message, PrimaryHueLightBrush);
+
+    public void ProcessFailed(string message) => EndProcessMessage(message, ErrorBrush);
+
     private void EndProcessMessage(string message, Brush fontColor)
     {
         var formattedMessage =

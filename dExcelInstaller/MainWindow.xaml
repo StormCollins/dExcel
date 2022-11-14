@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource Calibri}"
-        Height="600"
+        Height="680"
         Icon="resources/icons/dExcel.ico"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
@@ -99,7 +99,7 @@
           <ComboBox 
             materialDesign:ColorZoneAssist.Mode="SecondaryMid"
             materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
-            Name="AvailableDExcelReleases"
+            Name="ComboBoxAvailableDExcelReleases"
             Padding="0"
             SelectionChanged="AvailableDExcelReleases_OnSelectionChanged"
             Style="{StaticResource MaterialDesignComboBox}"/>
@@ -141,7 +141,8 @@
           BorderThickness="1"
           CornerRadius="5"
           DockPanel.Dock="Top"
-          Margin="8 8 8 0">
+          Margin="8 8 8 0"
+          VerticalAlignment="Top">
           <DockPanel
             HorizontalAlignment="Center"
             Name="DockPanelConnectionStatus">
@@ -163,7 +164,8 @@
           BorderThickness="1"
           CornerRadius="5"
           DockPanel.Dock="Top"
-          Margin="8 10 8 8">
+          Margin="8 10 8 8"
+          VerticalAlignment="Top">
           <DockPanel
             HorizontalAlignment="Center"
             VerticalAlignment="Center">
@@ -196,7 +198,7 @@
             <ToolTip Background="Black">
               <TextBlock>
                 Uninstalls ∂Excel from Excel. <LineBreak/>
-                However, it does not remove any files from your computer.
+                However, it does not remove/delete any files from your computer.
               </TextBlock>
             </ToolTip>
           </Button.ToolTip>
@@ -231,6 +233,23 @@
             <ToolTip Background="Black">
               <TextBlock>
                 Closes this dialog and opens Excel.
+              </TextBlock>
+            </ToolTip>
+          </Button.ToolTip>
+        </Button>
+
+        <Button
+          Name="PurgeInstalledDExcelFiles"
+          Click="PurgeInstalledDExcelFiles_OnClick"
+          Content="Purge Installed ∂Excel Files"
+          Margin="10 8 8 0"
+          Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
+          ToolTipService.InitialShowDelay="100"
+          ToolTipService.BetweenShowDelay="100">
+          <Button.ToolTip>
+            <ToolTip Background="Black">
+              <TextBlock>
+                Purges all contents in the existing, local ∂Excel location.
               </TextBlock>
             </ToolTip>
           </Button.ToolTip>
@@ -293,7 +312,7 @@
               <Button 
                 Name="StopInstallationAndDontCloseExcel"
                 Grid.Column="1"
-                Click="StopInstallationAndDontCloseExcel_OnClick"
+                Click="StopInstallationAndDoNotCloseExcel_OnClick"
                 Content="No"/>
             </Grid>
           </DockPanel>
@@ -348,6 +367,7 @@
       HorizontalContentAlignment="Center"
       VerticalContentAlignment="Center"
       Padding="-5 0 0 0"/>
+    
     <Button
       Name="Cancel"
       Grid.Row="11"
