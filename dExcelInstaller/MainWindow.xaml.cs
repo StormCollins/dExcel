@@ -384,7 +384,7 @@ public partial class MainWindow : Window
             
             string? obsoleteDExcelAddIn =
                 currentAddIns.Length == 0 ?
-                null : currentAddIns.First(x => x.Contains("dExcel", StringComparison.InvariantCultureIgnoreCase));
+                null : currentAddIns.FirstOrDefault(x => x.Contains("dExcel", StringComparison.InvariantCultureIgnoreCase));
             
             if (obsoleteDExcelAddIn != null)
             {

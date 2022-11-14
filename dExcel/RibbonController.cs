@@ -52,7 +52,7 @@ public class RibbonController : ExcelRibbon
 #if DEBUG
             xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\Resources\Workbooks\dexcel-testing.xlsm");
 #else
-            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\Releases\Current\Resources\dexcel-testing.xlsm");
+            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\Releases\Current\Resources\Workbooks\dexcel-testing.xlsm");
 #endif
         }
     }
