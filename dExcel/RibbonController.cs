@@ -198,13 +198,13 @@ public class RibbonController : ExcelRibbon
         {
             var xlApp = (Excel.Application)ExcelDnaUtil.Application;
             bool hasTwoHeaders = formatSettings.Value.columnHeaderCount == 2;
-            RangeFormatUtils.SetColumnHeaderBasedTableFormatting(hasTwoHeaders);
+            RangeFormatUtils.SetVerticallyAlignedTableFormatting(hasTwoHeaders);
         }
         else if (formatSettings is { rowHeaderCount: > 0 })
         {
             var xlApp = (Excel.Application)ExcelDnaUtil.Application;
             bool hasTwoHeaders = formatSettings.Value.rowHeaderCount == 2;
-            RangeFormatUtils.SetRowHeaderBasedTableFormatting(hasTwoHeaders);
+            RangeFormatUtils.SetHorizontallyAlignedTableFormatting(hasTwoHeaders);
         }
     }
     

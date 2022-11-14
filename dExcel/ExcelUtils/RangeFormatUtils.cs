@@ -280,10 +280,10 @@ public static class RangeFormatUtils
     /// </summary>
     /// <param name="hasTwoHeaderRows">True if the table has two header rows.</param>
     [ExcelFunction(
-        Name = "d.Formatting_SetColumnHeaderBasedTableFormatting",
+        Name = "d.Formatting_SetVerticallyAlignedTableFormatting",
         Description = "Sets the default formatting for a vertically aligned (i.e. column-based) table.",
         Category = "∂Excel: Formatting")]
-    public static void SetColumnHeaderBasedTableFormatting(bool hasTwoHeaderRows)
+    public static void SetVerticallyAlignedTableFormatting(bool hasTwoHeaderRows)
     {
         SetSheetWideFormatting();
         var xlApp = (Excel.Application)ExcelDnaUtil.Application;
@@ -313,10 +313,10 @@ public static class RangeFormatUtils
     /// </summary>
     /// <param name="hasTwoHeaderColumns">True if the table has two header columns.</param>
     [ExcelFunction(
-        Name = "d.Formatting_SetRowHeaderBasedTableFormatting",
+        Name = "d.Formatting_SetHorizontallyAlignedTableFormatting",
         Description = "Sets the default formatting for a horizontally aligned (i.e., row-based) table.",
         Category = "∂Excel: Formatting")]
-    public static void SetRowHeaderBasedTableFormatting(bool hasTwoHeaderColumns)
+    public static void SetHorizontallyAlignedTableFormatting(bool hasTwoHeaderColumns)
     {
         SetSheetWideFormatting();
         var xlApp = (Excel.Application)ExcelDnaUtil.Application;
@@ -345,15 +345,16 @@ public static class RangeFormatUtils
     /// Sets the formatting for a table which is horizontally aligned i.e. has row headers with data 
     /// running row-wise.
     /// </summary>
+    /// <param name="hasTwoHeaderRows">True if the table has two header rows.</param>
     /// <param name="hasTwoHeaderColumns">True if the table has two header columns.</param>
     [ExcelFunction(
         Name = "d.Formatting_SetHorizontalAndVerticalTableFormatting",
-        Description = "Sets the default formatting for a horizontally aligned (i.e., row-based) table.",
+        Description = "Sets the default formatting a table which has both column and row headers.",
         Category = "∂Excel: Formatting")]
     public static void SetColumnAndRowHeaderBasedTableFormatting(bool hasTwoHeaderRows, bool hasTwoHeaderColumns)
     {
         SetSheetWideFormatting();
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         ((Excel.Range)xlApp.Selection).CurrentRegion.Select();
         var entireRange = (Excel.Range)xlApp.Selection;
         entireRange.Font.Name = "Calibri Light";
