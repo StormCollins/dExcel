@@ -10,7 +10,7 @@
         BorderBrush="{DynamicResource MaterialDesignPaper}"
         Title="∂Excel Function Search"
         Height="550"
-        Width="850"
+        Width="1000"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}">
   <Window.Resources>
@@ -62,19 +62,25 @@
       Grid.Column="0"
       Grid.ColumnSpan="6">
       <StackPanel
-        Grid.Row="0"
-        Grid.RowSpan="3"
-        Grid.Column="0"
-        Grid.ColumnSpan="3"
         VerticalAlignment="Center">
       <TextBox
         Name="SearchTerm"
         materialDesign:HintAssist.Hint="Search Term"
+        materialDesign:HintAssist.IsFloating="True"
         Margin="0 0 0 10"
+        Padding="0 0 0 0"
         TextChanged="SearchTerm_TextChanged"
         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
         HorizontalAlignment="Center"
-        VerticalAlignment="Center" />
+        HorizontalContentAlignment="Center"
+        VerticalAlignment="Center">
+        <TextBox.Resources>
+          <Style TargetType="{x:Type materialDesign:SmartHint}">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+          </Style>
+        </TextBox.Resources>
+      </TextBox>
       </StackPanel>
     </materialDesign:Card>
 
@@ -94,26 +100,40 @@
             Name="SearchResults"
             CanUserAddRows="False"
             CanUserSortColumns="False"
+            GridLinesVisibility="Horizontal"
             AutoGenerateColumns="False"
             IsReadOnly="True"
-            HeadersVisibility="All"
+            HeadersVisibility="Column"
             SelectionChanged="SearchResults_SelectionChanged">
+          <DataGrid.ColumnHeaderStyle>
+            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+              <Setter Property="BorderThickness" Value="0 1 0 1"/>
+              <Setter Property="Foreground" Value="{StaticResource PrimaryHueLightBrush}"/>
+            </Style>
+          </DataGrid.ColumnHeaderStyle>
           <DataGrid.CellStyle>
             <Style TargetType="DataGridCell">
               <Setter Property="BorderThickness" Value="0"/>
               <Setter Property="Background" Value="{x:Null}" />
               <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+              <Setter Property="Padding" Value="10 5 0 10"/>
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate TargetType="{x:Type DataGridCell}">
+                    <Border Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                      <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                    </Border>
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
             </Style>
           </DataGrid.CellStyle>
           <DataGrid.RowStyle>
             <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
               <Style.Triggers>
-                <Trigger Property="IsSelected"
-                        Value="True">
-                  <Setter Property="BorderBrush"
-                        Value="{StaticResource PrimaryHueLightBrush}" />
-                  <Setter Property="BorderThickness"
-                        Value="1" />
+                <Trigger Property="IsSelected" Value="True">
+                  <Setter Property="BorderBrush" Value="{StaticResource PrimaryHueLightBrush}" />
+                  <Setter Property="BorderThickness" Value="1" />
                 </Trigger>
               </Style.Triggers>
             </Style>

@@ -7,7 +7,6 @@ using System.Text;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 using Excel = Microsoft.Office.Interop.Excel;
-using FuzzySharp;
 using System.Windows.Threading;
 using ExcelUtils;
 
@@ -115,13 +114,15 @@ public class RibbonController : ExcelRibbon
                 .ElementAt(i)
                 .GetCustomAttribute(typeof(ExcelFunctionAttribute)))
                 .Select((excelFunctionAttribute, i)
-                    => (Name: methodInfos.ElementAt(i).Name,
+                    => (Name: excelFunctionAttribute.Name,
                         Description: excelFunctionAttribute.Description,
                         Category: excelFunctionAttribute.Category));
+                    // => (Name: methodInfos.ElementAt(i).Name,
     }
 
     public string GetFunctionContent(IRibbonControl control)
     {
+        string methodId = control.Id.Replace("_", " ");
         var methods = GetCategoryMethods(control.Id.Replace("_", " "));
         var content = "";
         content += $"<menu xmlns=\"http://schemas.microsoft.com/office/2006/01/customui\">";
@@ -129,8 +130,8 @@ public class RibbonController : ExcelRibbon
         {
             content +=
                 $"<button " +
-                $"id=\"{name.Replace(".", "")}\" " +
-                $"label=\"d.{name}\" " +
+                $"id=\"{methodId}_{name.Replace(".", "")}\" " +
+                $"label=\"d.{methodId}_{name}\" " +
                 $"onAction=\"InsertFunction\" />";
         }
 

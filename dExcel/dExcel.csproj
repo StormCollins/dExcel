@@ -16,7 +16,9 @@
     <None Remove="Resources\Icons\commodities-large-blue.ico" />
     <None Remove="Resources\Icons\connection-status-amber.ico" />
     <None Remove="Resources\Icons\connection-status-green.ico" />
+    <None Remove="Resources\Icons\credit-green.ico" />
     <None Remove="Resources\Icons\credit-large-blue.ico" />
+    <None Remove="Resources\Icons\credit_green.ico" />
     <None Remove="Resources\Icons\cross_amber.png" />
     <None Remove="Resources\Icons\database-connected-large-green.ico" />
     <None Remove="Resources\Icons\database-not-connected-large-amber.ico" />
@@ -36,7 +38,9 @@
     <None Remove="Resources\Icons\format-painter-large-blue.ico" />
     <None Remove="Resources\Icons\format-painter-large-green.ico" />
     <None Remove="Resources\Icons\function-search-large-green.ico" />
+    <None Remove="Resources\Icons\fx-green.ico" />
     <None Remove="Resources\Icons\fx-large-blue.ico" />
+    <None Remove="Resources\Icons\fx_green.ico" />
     <None Remove="Resources\Icons\interest-rates-large-blue.ico" />
     <None Remove="Resources\Icons\interest-rates-large-green.ico" />
     <None Remove="Resources\Icons\m.png" />
@@ -44,6 +48,8 @@
     <None Remove="Resources\Icons\mathematics-large-green.ico" />
     <None Remove="Resources\Icons\open-audit-small-blue.ico" />
     <None Remove="Resources\Icons\open-audit-small-green.ico" />
+    <None Remove="Resources\Icons\other-green.ico" />
+    <None Remove="Resources\Icons\other_green.ico" />
     <None Remove="Resources\Icons\stats-large-green.ico" />
     <None Remove="Resources\Icons\table-formatting-column-1-row-1.png" />
     <None Remove="Resources\Icons\table-formatting-column-1-row2.png" />
@@ -112,6 +118,9 @@
     <EmbeddedResource Include="Resources\Icons\connection-status-green.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Icons\credit-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\Icons\credit-large-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -129,6 +138,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Icons\dExcel-ribbon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Icons\fx-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Icons\other-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Icons\table-formatting-column-1-row-1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

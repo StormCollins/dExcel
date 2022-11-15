@@ -9,11 +9,11 @@ using mns = MathNet.Numerics.Statistics;
 public static class StatsUtils
 {
     [ExcelFunction(
-        Name = "d.Chol",
+        Name = "d.Stats_Cholesky",
         Description = "Calculates the Cholesky decomposition of a matrix.\n" +
-                      "Deprecates AQS function: 'Chol'",
+                      "Deprecates the AQS function: 'Chol'",
         Category = "∂Excel: Stats")]
-    public static double[,] CholeskyDecomposition(
+    public static double[,] Cholesky(
         [ExcelArgument(
             Name = "Range",
             Description = "The range containing the nxn matrix.")]
@@ -24,11 +24,11 @@ public static class StatsUtils
     }
 
     [ExcelFunction(
-        Name = "d.Corr",
-        Description = "Calculates the Pearson correlation matrix." +
-                      "\nDeprecates the AQS function 'corr'.",
+        Name = "d.Stats_CorrelationMatrix",
+        Description = "Calculates the Pearson correlation matrix.\n" +
+                      "Deprecates the AQS function 'corr'.",
         Category = "∂Excel: Stats")]
-    public static double[,] Correlation(
+    public static double[,] CorrelationMatrix(
         [ExcelArgument(
             Name = "Range",
             Description = "The range containing the column-wise data.")]
@@ -47,11 +47,11 @@ public static class StatsUtils
     }
 
     [ExcelFunction(
-        Name = "d.Randn",
-        Description = "Generates standard random normal variates.\n" +
+        Name = "d.Stats_NormalRandomNumbers",
+        Description = "Generates a sequence of standard normal random variates.\n" +
                       "Deprecates AQS function: 'Randn'",
         Category = "∂Excel: Stats")]
-    public static double[,] Randn(
+    public static double[,] NormalRandomNumbers(
     [ExcelArgument(
             Name = "Seed",
             Description = "The seed for the random number generator.")]

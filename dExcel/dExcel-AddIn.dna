@@ -108,28 +108,7 @@
 				size='large'
 				tag='dates-large-green.ico'/>
 			  <dynamicMenu
-				id='Derivatives'
-				label='Derivatives'
-				getContent='GetFunctionContent'
-				getImage='GetImage'
-				size='large'
-				tag='derivatives-large-green.ico'/>
-			  <dynamicMenu
-				id='Equities'
-				label='Equities'
-				getContent='GetFunctionContent'
-				getImage='GetImage'
-				size='large'
-				tag='equities-large-green.ico'/>
-			  <dynamicMenu
-				id='Interest_Rates'
-				label='Interest Rates'
-				getContent='GetFunctionContent'
-				getImage='GetImage'
-				size='large'
-				tag='interest-rates-large-green.ico'/>
-			  <dynamicMenu
-				id='Mathematics'
+				id='Math'
 				label='Mathematics'
 				getContent='GetFunctionContent'
 				getImage='GetImage'
@@ -142,6 +121,43 @@
 				getImage='GetImage'
 				size='large'
 				tag='stats-large-green.ico'/>
+			  <separator id='separatorAssetClassFunctions'/>
+			  <dynamicMenu
+				id='Credit'
+				label='Credit'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='credit-green.ico'/>
+			  <dynamicMenu
+				id='Equities'
+				label='Equities'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='equities-large-green.ico'/>
+			  <dynamicMenu
+				id='FX'
+				label='FX'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='fx-green.ico'/>
+			  <dynamicMenu
+				id='Interest_Rates'
+				label='Interest Rates'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='interest-rates-large-green.ico'/>
+			  <separator id='separatorOtherFunctions'/>
+			  <dynamicMenu
+				id='Other'
+				label='Other'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='other-green.ico'/>
 			  <separator id='separatorFunctionSearch'/>
 			  <button
 				id='FunctionSearch'

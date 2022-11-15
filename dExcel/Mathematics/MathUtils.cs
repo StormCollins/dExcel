@@ -12,8 +12,8 @@ using MathNet.Numerics;
 public static class MathUtils
 {
     [ExcelFunction(
-        Name = "d.Bilinterp",
-        Description = "Performs bilinear interpolation on two variables.",
+        Name = "d.Math_Bilinterp",
+        Description = "Performs bi-linear interpolation on two variables.",
         Category = "∂Excel: Mathematics")]
     public static object Bilinterp(
         [ExcelArgument(Name = "XY", Description = "Matrix from which to interpolate.")]
@@ -68,7 +68,7 @@ public static class MathUtils
     }
 
     [ExcelFunction(
-        Name = "d.InterpContiguousArea",
+        Name = "d.Math_InterpolateContiguousArea",
         Description = "Performs linear or log-linear interpolation on a range for a single point.\n" +
                       "Deprecates AQS function: 'dt_interp1'",
         Category = "∂Excel: Mathematics")]
@@ -140,7 +140,7 @@ public static class MathUtils
     }
 
     [ExcelFunction(
-        Name = "d.InterpTwoColumns",
+        Name = "d.Math_InterpolateTwoColumns",
         Description = "Performs linear or log-linear interpolation on a range for a single point.\n" +
                       "Deprecates AQS function: 'dt_interp'",
         Category = "∂Excel: Mathematics")]
@@ -199,16 +199,9 @@ public static class MathUtils
             Complex32 x1Complex = (Complex32)x[index + 1];
             Complex32 y0Complex = (Complex32)y[index];
             Complex32 y1Complex = (Complex32)y[index + 1];
-
             Complex32 yi = (Complex32.Log(y1Complex) - Complex32.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + Complex32.Log(y0Complex);
             Complex32 outputY = Complex32.Exp(yi);
-
             return (double)outputY.Real;
-
-            if (x.Min() <= xi && xi <= x.Max())
-                return interpolator.Interpolate(xi);
-            else
-                return "Extrapolation not supported.";
         }
         else
         {

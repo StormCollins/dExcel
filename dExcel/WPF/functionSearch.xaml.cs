@@ -1,4 +1,6 @@
-﻿namespace dExcel;
+﻿using FuzzySharp.Extractor;
+
+namespace dExcel;
 
 using System;
 using System.Collections.Generic;
@@ -77,8 +79,7 @@ public partial class FunctionSearch : Window
 
     public ObservableCollection<FunctionMatch> FunctionMatches { get; set; }
 
-    private readonly List<(string name, string description, string category)> methods =
-        RibbonController.GetExposedMethods().ToList();
+    private readonly List<(string name, string description, string category)> methods = RibbonController.GetExposedMethods().ToList();
 
     public FunctionSearch()
     {
@@ -90,21 +91,39 @@ public partial class FunctionSearch : Window
 
     private void CloseFunctionSearch(object sender, RoutedEventArgs e) => this.Close();
 
+    private Dictionary<string, string> AQSTodExcelFunctionMapping = new Dictionary<string, string>()
+    {
+        ["DT_INTERP1"] = "d.Math_InterpolateContiguousArea",
+        ["CHOL"] = "d.Stats_Cholesky",
+        ["CORR"] = "d.Stats_CorrelationMatrix",
+        ["RANDN"] = "d.Stats_NormalRandomNumbers",
+    };
+
     private void SearchTerm_TextChanged(object sender, TextChangedEventArgs e)
     {
         Insert.IsEnabled = false;
-        var matches =
-             Process.ExtractTop(SearchTerm.Text, methods.Select(x => x.name)).Where(y => y.Score >= 65);
-                
-        if (matches.Any())
+
+        if (AQSTodExcelFunctionMapping.Keys.Contains(SearchTerm.Text.ToUpper()))
         {
-            FunctionMatches = new();
-            foreach (var match in matches)
-            {
-                var method = methods.First(x => x.name == match.Value);
-                FunctionMatches.Add(new FunctionMatch(method));
-            }
+            (string name, string description, string category) method = methods.First(y => string.Compare(y.name, AQSTodExcelFunctionMapping[SearchTerm.Text.ToUpper()]) == 0);
+            FunctionMatches = new() { new FunctionMatch(method) };
             SearchResults.ItemsSource = FunctionMatches;
+        }
+        else
+        {
+            IEnumerable<ExtractedResult<string>> matches = Process.ExtractTop(SearchTerm.Text, methods.Select(x => x.name)).Where(y => y.Score >= 65);
+            var extractedResults = matches as ExtractedResult<string>[] ?? matches.ToArray();
+            if (extractedResults.Any())
+            {
+                FunctionMatches = new();
+                foreach (var match in extractedResults)
+                {
+                    var method = methods.First(x => x.name == match.Value);
+                    FunctionMatches.Add(new FunctionMatch(method));
+                }
+
+                SearchResults.ItemsSource = FunctionMatches;
+            }
         }
     }
 
