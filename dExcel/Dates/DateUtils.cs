@@ -140,8 +140,10 @@ public static class DateUtils
     /// </summary>
     /// <param name="date">Date.</param>
     /// <param name="tenor">Tenor.</param>
-    /// <param name="userCalendar">Calendar selected by user e.g., "EUR", "USD", "ZAR".</param>
-    /// <param name="userBusinessDayConvention">Business day convention selected by user e.g., "ModifiedFollowing", "Preceding".</param>
+    /// <param name="userCalendar">Calendar to use. Supports single calendars "EUR", "USD", "ZAR" and joint calendars
+    /// e.g., "USD,ZAR".</param>
+    /// <param name="userBusinessDayConvention">Business day convention selected by user e.g., "ModifiedFollowing",
+    /// "Preceding".</param>
     /// <returns>The advanced or retarded date.</returns>
     [ExcelFunction(
         Name = "d.Date_AddTenorToDate",
@@ -152,7 +154,8 @@ public static class DateUtils
         DateTime date, 
         [ExcelArgument(Name = "Tenor", Description = "Tenor amount by which to adjust the date e.g., '1w', '2m', '3y'.")]
         string tenor, 
-        [ExcelArgument(Name = "Calendar", Description = "The calendar to use e.g., 'ZAR', 'USD'.")]
+        [ExcelArgument(Name = "Calendar", Description = "Calendar to use. Supports single calendars 'EUR', 'USD', 'ZAR' " +
+                                                        "and joint calendars e.g., 'USD,ZAR'.")]
         string? userCalendar, 
         [ExcelArgument(Name = "BDC", Description = "Business Day Convention e.g., 'MODFOL'.")]
         string userBusinessDayConvention)
@@ -160,18 +163,18 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        (Calendar? calendar, string errorMessage) = ParseSingleCalendar(userCalendar);
+        (Calendar? calendar, string calendarErrorMessage) = ParseCalendars(userCalendar);
         if (calendar is null)
         {
-            return CommonUtils.DExcelErrorMessage("Invalid/unsupported calendar '{userCalendar}'.");
+            return calendarErrorMessage;
         }
         
-        BusinessDayConvention? businessDayConvention = ParseBusinessDayConvention(userBusinessDayConvention);
+        (BusinessDayConvention? businessDayConvention, string errorMessage) =
+            ParseBusinessDayConvention(userBusinessDayConvention);
+        
         if (businessDayConvention is null)
         {
-            return
-                CommonUtils.DExcelErrorMessage(
-                    $"Invalid/unsupported business day convention '{userBusinessDayConvention}'.");
+            return errorMessage;
         }
         
         return (DateTime)calendar.advance((Date)date, new Period(tenor), (BusinessDayConvention)businessDayConvention);
@@ -230,7 +233,8 @@ public static class DateUtils
     /// </summary>
     /// <param name="businessDayConventionToParse">Business day convention to parse.</param>
     /// <returns>QLNet business day convention.</returns>
-    public static BusinessDayConvention? ParseBusinessDayConvention(string businessDayConventionToParse)
+    public static (BusinessDayConvention? businessDayConvention, string errorMessage) ParseBusinessDayConvention(
+        string businessDayConventionToParse)
     {
         BusinessDayConvention? businessDayConvention = businessDayConventionToParse.ToUpper() switch
         {
@@ -241,7 +245,9 @@ public static class DateUtils
             _ => null,
         };
 
-        return businessDayConvention;
+        return businessDayConvention is null
+            ? (null, CommonUtils.DExcelErrorMessage($"Unknown business day convention: {businessDayConventionToParse}"))
+            : (businessDayConvention, "");
     }
 
     /// <summary>
@@ -282,7 +288,7 @@ public static class DateUtils
 
         return dayCountConvention;
     }
-
+    
     /// <summary>
     /// Parses a string as a QLNet calendar.
     /// </summary>
@@ -330,12 +336,9 @@ public static class DateUtils
             _ => null,
         };
 
-        if (calendar is not null)
-        {
-            return (calendar, "");
-        }
-
-        return (null, CommonUtils.DExcelErrorMessage($"Unknown calendar: {calendarToParse}"));
+        return calendar is not null
+            ? (calendar, "")
+            : (null, CommonUtils.DExcelErrorMessage($"Unknown calendar: {calendarToParse}"));
     }
     
     /// <summary>

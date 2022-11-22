@@ -134,7 +134,7 @@ public sealed class DateUtilsTests
     [TestCaseSource(nameof(BusinessDayConventionTestData))]
     public BusinessDayConvention? TestParseBusinessDayConvention(string businessDayConventionToParse)
     {
-        return DateUtils.ParseBusinessDayConvention(businessDayConventionToParse);
+        return DateUtils.ParseBusinessDayConvention(businessDayConventionToParse).businessDayConvention;
     }
 
     [Test]

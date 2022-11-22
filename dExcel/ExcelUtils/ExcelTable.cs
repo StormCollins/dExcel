@@ -152,7 +152,7 @@ public static class ExcelTable
 
         if (typeof(T) == typeof(BusinessDayConvention))
         {
-            BusinessDayConvention? businessDayConvention =
+            (BusinessDayConvention? businessDayConvention, string errorMessage) =
                 DateUtils.ParseBusinessDayConvention(table[rowIndex, columnIndex].ToString() ?? string.Empty);
 
             if (businessDayConvention != null)
