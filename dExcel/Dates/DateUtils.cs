@@ -16,7 +16,8 @@ public static class DateUtils
     /// Calculates the next business day using the 'following' convention.
     /// </summary>
     /// <param name="date">The date to adjust.</param>
-    /// <param name="holidays">The list of holiday dates.</param>
+    /// <param name="holidaysOrCalendar">The list of holiday dates or a calendar string (e.g., 'USD', 'ZAR' or
+    /// 'USD,ZAR').</param>
     /// <returns>Adjusted business day.</returns>
     [ExcelFunction(
         Name = "d.Date_FolDay",
@@ -26,21 +27,38 @@ public static class DateUtils
     public static object FolDay(
         [ExcelArgument(Name = "Date", Description = "Date to adjust.")]
         DateTime date,
-        [ExcelArgument(Name = "Holidays", Description = "List of holiday dates.")]
-        object[] holidays)
+        [ExcelArgument(
+            Name = "Holidays/Calendar",
+            Description = "The list of holiday dates or a calendar string (e.g., 'USD', 'ZAR' or 'USD,ZAR').")]
+        object[,] holidaysOrCalendar)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        Calendar calendar = ParseHolidays(holidays, new WeekendsOnly());
-        return (DateTime)calendar.adjust(date);
+        (Calendar? calendar, string errorMessage) result;
+        if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
+        {
+            result = ParseCalendars(holidaysOrCalendar[0, 0].ToString());
+        }
+        else
+        {
+            result = ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+        }
+
+        if (result.calendar is null)
+        {
+            return new object[,] {{result.errorMessage}};
+        }
+        
+        return (DateTime)result.calendar?.adjust(date);
     }
 
     /// <summary>
     /// Calculates the next business day using the modified following convention.
     /// </summary>
     /// <param name="date">The date to adjust.</param>
-    /// <param name="holidays">The list of holiday dates.</param>
+    /// <param name="holidaysOrCalendar">The list of holiday dates or a calendar string (e.g., 'USD', 'ZAR' or
+    /// 'USD,ZAR').</param>
     /// <returns>Adjusted business day.</returns>
     [ExcelFunction(
         Name = "d.Date_ModFolDay",
@@ -50,21 +68,38 @@ public static class DateUtils
     public static object ModFolDay(
         [ExcelArgument(Name = "Date", Description = "The date to adjust.")]
         DateTime date,
-        [ExcelArgument(Name = "Holidays", Description = "The list of holiday dates.")]
-        object[] holidays)
+        [ExcelArgument(
+            Name = "Holidays/Calendar", 
+            Description = "The list of holiday dates or a calendar string (e.g., 'USD', 'ZAR' or 'USD,ZAR').")]
+        object[,] holidaysOrCalendar)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        Calendar calendar = ParseHolidays(holidays, new WeekendsOnly());
-        return (DateTime)calendar.adjust(date, BusinessDayConvention.ModifiedFollowing);
+        (Calendar? calendar, string errorMessage) result;
+        if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
+        {
+            result = ParseCalendars(holidaysOrCalendar[0, 0].ToString());
+        }
+        else
+        {
+            result = ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+        }
+
+        if (result.calendar is null)
+        {
+            return result.errorMessage;
+        }
+        
+        return (DateTime)result.calendar.adjust(date, BusinessDayConvention.ModifiedFollowing);
     }
         
     /// <summary>
     /// Calculates the previous business day using the 'previous' convention.
     /// </summary>
     /// <param name="date">The date to adjust.</param>
-    /// <param name="holidays">The list of holiday dates.</param>
+    /// <param name="holidaysOrCalendar">The list of holiday dates or a calendar string (e.g., 'USD', 'ZAR' or
+    /// 'USD,ZAR').</param>
     /// <returns>The adjusted date.</returns>
     [ExcelFunction(
         Name = "d.Date_PrevDay",
@@ -74,14 +109,30 @@ public static class DateUtils
     public static object PrevDay(
         [ExcelArgument(Name = "Date", Description = "The date to adjust.")]
         DateTime date,
-        [ExcelArgument(Name = "Holidays", Description = "The list of holiday dates.")]
-        object[] holidays)
+        [ExcelArgument(
+            Name = "Holidays/Calendar", 
+            Description = "The list of holiday dates or a calendar string (e.g., 'USD', 'ZAR' or 'USD,ZAR').")]
+        object[,] holidaysOrCalendar)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        Calendar calendar = ParseHolidays(holidays, new WeekendsOnly());
-        return (DateTime)calendar.adjust(date, BusinessDayConvention.Preceding);
+        (Calendar? calendar, string errorMessage) result;
+        if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
+        {
+            result = ParseCalendars(holidaysOrCalendar[0, 0].ToString());
+        }
+        else
+        {
+            result = ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+        }
+
+        if (result.calendar is null)
+        {
+            return result.errorMessage;
+        }
+        
+        return (DateTime)result.calendar.adjust(date, BusinessDayConvention.Preceding);
     }
 
     /// <summary>
@@ -102,25 +153,25 @@ public static class DateUtils
         [ExcelArgument(Name = "Tenor", Description = "Tenor amount by which to adjust the date e.g., '1w', '2m', '3y'.")]
         string tenor, 
         [ExcelArgument(Name = "Calendar", Description = "The calendar to use e.g., 'ZAR', 'USD'.")]
-        string userCalendar, 
+        string? userCalendar, 
         [ExcelArgument(Name = "BDC", Description = "Business Day Convention e.g., 'MODFOL'.")]
         string userBusinessDayConvention)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        Calendar? calendar = ParseCalendar(userCalendar);
+        (Calendar? calendar, string errorMessage) = ParseSingleCalendar(userCalendar);
         if (calendar is null)
         {
-            return $"{CommonUtils.DExcelErrorPrefix} Invalid/unsupported calendar '{userCalendar}'.";
+            return CommonUtils.DExcelErrorMessage("Invalid/unsupported calendar '{userCalendar}'.");
         }
         
         BusinessDayConvention? businessDayConvention = ParseBusinessDayConvention(userBusinessDayConvention);
         if (businessDayConvention is null)
         {
             return
-                $"{CommonUtils.DExcelErrorPrefix} Invalid/unsupported business day convention " +
-                $"'{userBusinessDayConvention}'.";
+                CommonUtils.DExcelErrorMessage(
+                    $"Invalid/unsupported business day convention '{userBusinessDayConvention}'.");
         }
         
         return (DateTime)calendar.advance((Date)date, new Period(tenor), (BusinessDayConvention)businessDayConvention);
@@ -129,13 +180,13 @@ public static class DateUtils
     /// <summary>
     /// Used to parse a range of Excel dates to a custom QLNet calendar.
     /// </summary>
-    /// <param name="holidays">Holiday range.</param>
+    /// <param name="holidaysOrCalendars">Holiday range.</param>
     /// <param name="calendar">Calendar.</param>
     /// <returns>A custom QLNet calendar.</returns>
-    /// <exception cref="ArgumentException">Thrown for invalid dates in <param name="holidays"></param>.</exception>
-    private static Calendar ParseHolidays(object[] holidays, Calendar calendar)
+    /// <exception cref="ArgumentException">Thrown for invalid dates in <param name="holidaysOrCalendars"></param>.</exception>
+    private static (Calendar? calendar, string errorMessage) ParseHolidays(object[,] holidaysOrCalendars, Calendar calendar)
     {
-        foreach (object holiday in holidays)
+        foreach (object holiday in holidaysOrCalendars)
         {
             if (double.TryParse(holiday.ToString(), out double holidayValue))
             {
@@ -150,7 +201,7 @@ public static class DateUtils
             }
         }
 
-        return calendar;
+        return (calendar, "");
     }
 
     /// <summary>
@@ -237,9 +288,9 @@ public static class DateUtils
     /// </summary>
     /// <param name="calendarToParse">Calendar to parse.</param>
     /// <returns>QLNet calendar.</returns>
-    public static Calendar? ParseCalendar(string calendarToParse)
+    public static (Calendar? calendar, string errorMessage) ParseSingleCalendar(string? calendarToParse)
     {
-        Calendar? calendar = calendarToParse.ToUpper() switch
+        Calendar? calendar = calendarToParse?.ToUpper() switch
         {
             "ARS" or "ARGENTINA" => new Argentina(),
             "AUD" or "AUSTRALIA" => new Australia(),
@@ -279,6 +330,107 @@ public static class DateUtils
             _ => null,
         };
 
-        return calendar;
+        if (calendar is not null)
+        {
+            return (calendar, "");
+        }
+
+        return (null, CommonUtils.DExcelErrorMessage($"Unknown calendar: {calendarToParse}"));
+    }
+    
+    /// <summary>
+    /// Get a list of holidays between, and including, two dates and excluding weekends. If a holiday falls on a weekend
+    /// it will not be included in this list.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date</param>
+    /// <param name="calendarsToParse">Calendars to parse.</param>
+    /// <returns>List of holidays.</returns>
+    [ExcelFunction(
+        Name = "d.Date_GetListOfHolidays", 
+        Description = "Get a list of holidays between, and including, two dates and excluding weekends.\n" +
+                      "Note, if a holiday falls on a weekend it will not be included in this list.",
+        Category = "∂Excel: Dates")]
+    public static object[,] GetListOfHolidays(DateTime startDate, DateTime endDate, string calendarsToParse)
+    {
+        (Calendar? calendar, string errorMessage) = ParseCalendars(calendarsToParse);
+        if (calendar is null)
+        {
+            return new object[,] {{ errorMessage }};
+        }
+        
+        List<DateTime> holidays = new();
+        
+        for (int i = 0; i <= endDate.Subtract(startDate).Days; i++)
+        {
+            DateTime currentDate = startDate.AddDays(i);
+            
+            if (!calendar.isWeekend(currentDate.DayOfWeek) && calendar.isHoliday(currentDate))
+            {
+                holidays.Add(currentDate);
+            }
+        }
+
+        if (holidays.Count == 0)
+        {
+            return new object[,] {{ }};
+        }
+
+        object[,] output = new object[holidays.Count, 1];
+        for (int i = 0; i < holidays.Count; i++)
+        {
+            output[i, 0] = holidays[i];
+        }
+
+        return output;
+    }
+    
+    private static (Calendar? calendar, string errorMessage) ParseJointCalendar(string? calendarsToParse)
+    {
+        IEnumerable<string>? calendars = calendarsToParse?.Split(',').Select(x => x.Trim());
+
+        if (calendars != null)
+        {
+            IEnumerable<string> enumerable = calendars as string[] ?? calendars.ToArray();
+            (Calendar? calendar0, string errorMessage0) = ParseSingleCalendar(enumerable.ElementAt(0));
+            (Calendar? calendar1, string errorMessage1) = ParseSingleCalendar(enumerable.ElementAt(1));
+
+            if (calendar0 is null)
+            {
+                return (calendar0, errorMessage0);
+            }
+            
+            if (calendar1 is null)
+            {
+                return (calendar1, errorMessage1);
+            }
+            
+            JointCalendar jointCalendar = new(calendar0, calendar1);
+
+            for (int i = 2; i < enumerable.Count(); i++)
+            {
+                (Calendar? currentCalendar, string currentErrorMessage) = ParseSingleCalendar(enumerable.ElementAt(i));
+                if (currentCalendar is null)
+                {
+                    return (currentCalendar, currentErrorMessage);
+                }
+                
+                jointCalendar = new JointCalendar(jointCalendar, currentCalendar);
+            }
+
+            return (jointCalendar, "");
+        }
+
+        return (null, CommonUtils.DExcelErrorMessage("No valid calendars found."));
+    }
+
+    private static (Calendar? calendar, string errorMessage) ParseCalendars(string? calendarsToParse)
+    {
+        if (calendarsToParse != null && calendarsToParse.Contains(','))
+        {
+            return ParseJointCalendar(calendarsToParse);
+        }
+
+        return ParseSingleCalendar(calendarsToParse);
     }
 }

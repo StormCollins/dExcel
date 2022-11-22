@@ -281,7 +281,7 @@ public partial class MainWindow : Window
         {
             return Directory
                 .GetFiles(SharedDriveReleasesPath)
-                .Where(x => Regex.IsMatch(x, @"\d+(.\d+)(?=\.zip)"))
+                .Where(x => Regex.IsMatch(x, @"\d+(\.\d+)*(?=\.zip)"))
                 .Select(Path.GetFileNameWithoutExtension)
                 .Reverse();
         }

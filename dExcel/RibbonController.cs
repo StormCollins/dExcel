@@ -160,24 +160,24 @@ public class RibbonController : ExcelRibbon
     public void LoadDeloitteTheme(IRibbonControl control)
     {
 #if DEBUG
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         xlApp.ActiveWorkbook.ApplyTheme(
             Path.Combine(
-                Path.GetDirectoryName(DebugUtils.GetXllPath()),
+                Path.GetDirectoryName(DebugUtils.GetXllPath()) ?? string.Empty,
                 @"resources\workbooks\Deloitte_Brand_Theme.thmx"));
 #else
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         xlApp.ActiveWorkbook.ApplyTheme(
-                @"C:\GitLab\dExcelTools\Versions\CurrentDeloitte_Brand_Theme.thmx");
+                @"C:\GitLab\dExcelTools\Releases\Current\Deloitte_Brand_Theme.thmx");
 #endif
     }
 
     public void FormatTable(IRibbonControl control)
     {
         FormattingSettings? formatSettings = null;
-        var thread = new Thread(() =>
+        Thread thread = new(() =>
         {
-            var tableFormatter = TableFormatter.Instance;
+            TableFormatter tableFormatter = TableFormatter.Instance;
             tableFormatter.Show();
             tableFormatter.Closed += (sender2, e2) => tableFormatter.Dispatcher.InvokeShutdown();
             Dispatcher.Run();
@@ -190,20 +190,20 @@ public class RibbonController : ExcelRibbon
 
         if (formatSettings is { rowHeaderCount: > 0, columnHeaderCount: > 0 })
         {
-            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
             bool hasTwoRowHeaders = formatSettings.Value.rowHeaderCount == 2;
             bool hasTwoColumnHeaders = formatSettings.Value.columnHeaderCount == 2;
             RangeFormatUtils.SetColumnAndRowHeaderBasedTableFormatting(hasTwoRowHeaders, hasTwoColumnHeaders);
         }
         else if (formatSettings is { columnHeaderCount: > 0 })
         {
-            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
             bool hasTwoHeaders = formatSettings.Value.columnHeaderCount == 2;
             RangeFormatUtils.SetVerticallyAlignedTableFormatting(hasTwoHeaders);
         }
         else if (formatSettings is { rowHeaderCount: > 0 })
         {
-            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
             bool hasTwoHeaders = formatSettings.Value.rowHeaderCount == 2;
             RangeFormatUtils.SetHorizontallyAlignedTableFormatting(hasTwoHeaders);
         }
@@ -216,7 +216,7 @@ public class RibbonController : ExcelRibbon
     /// <param name="control">Ribbon control.</param>
     public void CalculateRange(IRibbonControl control)
     {
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         ((Excel.Range)xlApp.Selection).Calculate();
     }
 

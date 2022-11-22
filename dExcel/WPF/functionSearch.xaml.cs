@@ -21,40 +21,51 @@ public partial class FunctionSearch : Window
 {
     public string FunctionName { get; set; }
 
+    private readonly Dictionary<string, string> _aqsTodExcelFunctionMapping = new()
+    {
+        ["FOLDAY"] = "d.Date_FolDay",
+        ["MODFOLDAY"] = "d.Date_ModFolDay",
+        ["PREVDAY"] = "d.Date_PrevDay",
+        ["DT_INTERP1"] = "d.Math_InterpolateContiguousArea",
+        ["CHOL"] = "d.Stats_Cholesky",
+        ["CORR"] = "d.Stats_CorrelationMatrix",
+        ["RANDN"] = "d.Stats_NormalRandomNumbers",
+    };
+
     public class FunctionMatch : INotifyPropertyChanged
     {
-        private string name;
+        private string _name;
 
-        private string category;
+        private string _category;
 
-        private string description;
+        private string _description;
 
         public string Name
         {
-            get => name; 
+            get => _name; 
             set
             { 
-                name = value;
+                _name = value;
                 this.OnPropertyChanged("Name");
             }
         }
 
         public string Category
         {
-            get => category; 
+            get => _category; 
             set
             {
-                category = value;
+                _category = value;
                 this.OnPropertyChanged("Category");
             }
         }
 
         public string Description
         {
-            get => description;
+            get => _description;
             set
             {
-                description = value;
+                _description = value;
                 this.OnPropertyChanged("Description");
             }
         }
@@ -91,21 +102,13 @@ public partial class FunctionSearch : Window
 
     private void CloseFunctionSearch(object sender, RoutedEventArgs e) => this.Close();
 
-    private Dictionary<string, string> AQSTodExcelFunctionMapping = new Dictionary<string, string>()
-    {
-        ["DT_INTERP1"] = "d.Math_InterpolateContiguousArea",
-        ["CHOL"] = "d.Stats_Cholesky",
-        ["CORR"] = "d.Stats_CorrelationMatrix",
-        ["RANDN"] = "d.Stats_NormalRandomNumbers",
-    };
-
     private void SearchTerm_TextChanged(object sender, TextChangedEventArgs e)
     {
         Insert.IsEnabled = false;
 
-        if (AQSTodExcelFunctionMapping.Keys.Contains(SearchTerm.Text.ToUpper()))
+        if (_aqsTodExcelFunctionMapping.Keys.Contains(SearchTerm.Text.ToUpper()))
         {
-            (string name, string description, string category) method = methods.First(y => string.Compare(y.name, AQSTodExcelFunctionMapping[SearchTerm.Text.ToUpper()]) == 0);
+            (string name, string description, string category) method = methods.First(y => string.Compare(y.name, _aqsTodExcelFunctionMapping[SearchTerm.Text.ToUpper()]) == 0);
             FunctionMatches = new() { new FunctionMatch(method) };
             SearchResults.ItemsSource = FunctionMatches;
         }

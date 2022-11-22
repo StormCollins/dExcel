@@ -15,4 +15,11 @@ public static class CommonUtils
     /// The prefix used by error messages from ∂Excel.
     /// </summary>
     public const string DExcelErrorPrefix = "#∂Excel Error:";
+
+    /// <summary>
+    /// Returns a ∂Excel specific error message.
+    /// </summary>
+    /// <param name="message">The error message.</param>
+    /// <returns>∂Excel error message with ∂Excel prefix.</returns>
+    public static string DExcelErrorMessage(string message) => $"{DExcelErrorPrefix} {message}";
 }

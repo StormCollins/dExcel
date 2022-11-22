@@ -1,4 +1,4 @@
-﻿namespace dExcelTests;
+﻿namespace dExcelTests.Dates;
 
 using dExcel;
 using dExcel.Dates;
@@ -22,7 +22,7 @@ public sealed class DateUtilsTests
     [TestCaseSource(nameof(FolDayTestCaseData))]
     public object FolDayTest(DateTime unadjusted)
     {
-        object[] holidays = { new DateTime(2022, 01, 03).ToOADate() };
+        object[,] holidays = { { new DateTime(2022, 01, 03).ToOADate() } };
         return DateUtils.FolDay(unadjusted, holidays);
     }
     
@@ -42,14 +42,14 @@ public sealed class DateUtilsTests
     [TestCaseSource(nameof(ModFolDayTestCaseData))]
     public object ModFolDayTest(DateTime unadjusted)
     {
-        object[] holidays = { new DateTime(2022, 01, 03).ToOADate() };
+        object[,] holidays = { { new DateTime(2022, 01, 03).ToOADate() } };
         return DateUtils.ModFolDay(unadjusted, holidays);
     }
     
     [Test]
     public void ModFolDayInvalidHolidaysTest()
     {
-        object[] holidays = { "Invalid" };
+        object[,] holidays = { { "Invalid" } };
         Assert.Throws<ArgumentException>(
             () => DateUtils.ModFolDay(new DateTime(2022, 01, 01), holidays),
             $"{CommonUtils.DExcelErrorPrefix} Invalid date 'Invalid'.");
@@ -69,7 +69,7 @@ public sealed class DateUtilsTests
     [TestCaseSource(nameof(PrevDayTestCaseData))]
     public object PrevDayTest(DateTime unadjusted)
     {
-        object[] holidays = { new DateTime(2022, 01, 03).ToOADate() };
+        object[,] holidays = { { new DateTime(2022, 01, 03).ToOADate() } };
         return DateUtils.PrevDay(unadjusted, holidays);
     }
 
@@ -81,7 +81,7 @@ public sealed class DateUtilsTests
 
     [Test]
     [TestCaseSource(nameof(AddTenorToDateTestCaseData))]
-    public object TestAddTenorToDate(DateTime date, string tenor, string userCalendar, string userBusinessDayConvention)
+    public object TestAddTenorToDate(DateTime date, string tenor, string? userCalendar, string userBusinessDayConvention)
     {
         return DateUtils.AddTenorToDate(date, tenor, userCalendar, userBusinessDayConvention);
     }
@@ -250,8 +250,8 @@ public sealed class DateUtilsTests
 
     [Test]
     [TestCaseSource(nameof(CalendarTestData))]
-    public Calendar? TestParseCalendar(string calendarToParse)
+    public Calendar? TestParseCalendar(string? calendarToParse)
     {
-        return DateUtils.ParseCalendar(calendarToParse);
+        return DateUtils.ParseSingleCalendar(calendarToParse).calendar;
     }
 }
