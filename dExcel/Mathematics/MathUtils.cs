@@ -68,19 +68,19 @@ public static class MathUtils
 
     [ExcelFunction(
         Name = "d.Math_Interpolate",
-        Description = "Performs linear or log-linear interpolation on a range for a single point.\n" +
+        Description = "Performs linear, exponential, or flat interpolation on a range for a single point.\n" +
                       "Deprecates AQS function: 'dt_interp'",
         Category = "∂Excel: Mathematics")]
-    public static object InterpolateTwoColumns(
+    public static object Interpolate(
         [ExcelArgument(Name = "X-column", Description = "Independent variable.")]
         object[,] xCol,
-        [ExcelArgument(Name = "Y-column", Description = "Dependent Variable.")]
+        [ExcelArgument(Name = "Y-column", Description = "Dependent variable.")]
         object[,] yCol,
-        [ExcelArgument(Name = "xi", Description = "Value for which to interpolate.")]
+        [ExcelArgument(Name = "Xi", Description = "Value for which to interpolate.")]
         double xi,
         [ExcelArgument(
             Name = "Method",
-            Description = "Method of interpolation: 'l' = 'linear', 'e' = 'exponential/log linear' ")]
+            Description = "Method of interpolation: 'linear', 'exponential', 'flat'")]
         string method)
     {
 #if DEBUG
@@ -101,24 +101,21 @@ public static class MathUtils
 
             switch (method.ToUpper())
             {
-                case "L":
+                case "LINEAR":
                     interpolator = mni.LinearSpline.Interpolate(x, y);
-                    break;
-                case "E":
-                    interpolator = mni.LogLinear.Interpolate(x, y);
-                    break;
+                    return interpolator.Interpolate(xi);
+                case "EXPONENTIAL":
+                    return ExponentialInterpolation();
+                case "FLAT":
+                    interpolator = mni.StepInterpolation.Interpolate(x, y);
+                    return interpolator.Interpolate(xi);
                 default:
-                    break;
+                    return CommonUtils.DExcelErrorMessage("Invalid method of interpolation specified.");
             }
 
-            if (method.ToUpper() == "L")
-            {
-                if (interpolator != null) return interpolator.Interpolate(xi);
-            }
-            
             // Log-linear interpolation fails for negative y-values therefore we move to the complex plane here then 
             // back to real numbers.
-            if (method.ToUpper() == "E")
+            double ExponentialInterpolation()
             {
                 int index = 0;
                 for (int i = 0; i < rowCount; i++)
@@ -138,7 +135,7 @@ public static class MathUtils
                 Complex32 yi = (Complex32.Log(y1Complex) - Complex32.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + Complex32.Log(y0Complex);
                 Complex32 outputY = Complex32.Exp(yi);
                 return (double)outputY.Real;
-            } 
+            }
         }
         
         return CommonUtils.DExcelErrorMessage("Row dimensions do not match or there is more than one column in x or y.");
