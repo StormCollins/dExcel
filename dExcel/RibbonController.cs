@@ -8,6 +8,7 @@ using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Windows.Threading;
+using FuzzySharp;
 using ExcelUtils;
 
 [ComVisible(true)]
@@ -83,8 +84,48 @@ public class RibbonController : ExcelRibbon
     public void InsertFunction(IRibbonControl control)
     {
         var xlApp = (Excel.Application)ExcelDnaUtil.Application;
-        ((Excel.Range)xlApp.Selection).Formula = $"=d.{control.Id}()";
+        ((Excel.Range)xlApp.Selection).Formula = $"={control.Id}()";
         ((Excel.Range)xlApp.Selection).FunctionWizard();
+    }
+
+    public void CreateLinkToSheet(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        List<string> sheetNames = new();
+        foreach (Excel.Worksheet sheet in xlApp.Sheets)
+        {
+            sheetNames.Add(sheet.Name);
+        }
+
+        string searchText = ((Excel.Range)xlApp.Selection).Value2;
+        string matchedSheet = Process.ExtractTop(searchText, sheetNames).Where(x => x.Score > 90).First().Value;
+
+        ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", matchedSheet + "!A1");
+    }
+    public void CreateLinkToHeading(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Range usedRange = xlApp.ActiveSheet.UsedRange;
+
+        Dictionary<string, string> headings = new Dictionary<string, string>();
+
+        for (int i = 1; i < usedRange.Rows.Count + 1; i++)
+        {
+            for (int j = 1; j < usedRange.Columns.Count + 1; j++)
+            {
+                Excel.Range currentCell = usedRange.Cells[i, j];
+                string style = ((Excel.Style)currentCell.Style).Value.ToUpper();
+                if (style.Contains("HEADING"))
+                {
+                    headings[currentCell.Value2] = currentCell.Address;
+                }
+            }
+        }
+
+        string searchText = ((Excel.Range)xlApp.Selection).Value2;
+        string matchedHeading = Process.ExtractTop(searchText, headings.Keys).Where(x => x.Score > 90).First().Value;
+
+        ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", headings[matchedHeading]);
     }
 
     public static IEnumerable<(string name, string description, string category)> GetCategoryMethods(string categoryName)

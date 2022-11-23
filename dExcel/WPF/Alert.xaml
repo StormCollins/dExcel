@@ -1,0 +1,45 @@
+﻿<Window x:Class="dExcel.WPF.Alert"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:dExcel.WPF"
+        mc:Ignorable="d"
+        BorderThickness="5"
+        BorderBrush="{DynamicResource MaterialDesignPaper}"
+        Title="∂Excel Alert"
+        Icon="pack://application:,,,/dExcel;component/resources/icons/dExcel.ico"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        Height="150" Width="350">
+    <Window.Resources>
+      <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"/>
+    </Window.Resources>
+  <Grid>
+    <materialDesign:Card>
+      <DockPanel>
+        <DockPanel 
+          DockPanel.Dock="Top"
+          Margin="10 0 0 2">
+          <materialDesign:PackIcon 
+            DockPanel.Dock="Left"
+            Kind="Alert" 
+            VerticalAlignment="Center"
+            Foreground="{StaticResource WarningBrush}"/>
+          <TextBlock
+            Name="AlertCaption"
+            DockPanel.Dock="Left"
+            FontSize="18"
+            Style="{StaticResource AmberHeader2}"
+            Text="Warning"/>
+        </DockPanel>
+        <Separator Name="Separator" DockPanel.Dock="Top"/>
+        <TextBlock
+          Name="AlertBody"
+          DockPanel.Dock="Top"
+          Text="Warning details."/>
+      </DockPanel>
+    </materialDesign:Card>
+  </Grid>
+</Window>

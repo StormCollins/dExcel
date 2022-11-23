@@ -61,6 +61,26 @@
 				getImage='GetImage'
 				size='large'
 				tag='manage-passwords-large-blue.ico'/>
+			  <splitButton id='btnWorkbookLinks' size='large'>
+				  <button
+					id='btnCreateLinkToSheet'
+					getImage='GetImage'
+					label='Workbook Links'
+					onAction='CreateLinkToSheet'
+					tag='workbook_link_blue.ico'/>
+				  <menu id='menuWorkbookLinks'>
+					<button 
+				      id='btnCreateLinkToSheet2'
+				      label='Create Link to Sheet'
+					  onAction='CreateLinkToSheet'
+					  screentip='Creates a link to cell A1 in the sheet with the same name as the selected cell.'/>
+					<button 
+				      id='btnCreateLinkToHeading'
+				      label='Create Link to Heading'
+					  onAction='CreateLinkToHeading'
+					  screentip='Creates a link to a cell with a heading style.'/>
+				  </menu>		
+			  </splitButton>
 			  <splitButton id='btnFormatPainter' size='large'>
 				<button
 			      id='btnFormatTable'

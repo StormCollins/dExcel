@@ -49,8 +49,8 @@ public static class DateUtils
         {
             return new object[,] {{result.errorMessage}};
         }
-        
-        return (DateTime)result.calendar?.adjust(date);
+
+        return (DateTime) result.calendar?.adjust(date);
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public static class DateUtils
         [ExcelArgument(Name = "Date", Description = "The date to adjust.")]
         DateTime date,
         [ExcelArgument(
-            Name = "Holidays/Calendar", 
+            Name = "Holidays/Calendar",
             Description = "The list of holiday dates or a calendar string (e.g., 'USD', 'ZAR' or 'USD,ZAR').")]
         object[,] holidaysOrCalendar)
     {
@@ -90,10 +90,10 @@ public static class DateUtils
         {
             return result.errorMessage;
         }
-        
-        return (DateTime)result.calendar.adjust(date, BusinessDayConvention.ModifiedFollowing);
+
+        return (DateTime) result.calendar.adjust(date, BusinessDayConvention.ModifiedFollowing);
     }
-        
+
     /// <summary>
     /// Calculates the previous business day using the 'previous' convention.
     /// </summary>
@@ -110,7 +110,7 @@ public static class DateUtils
         [ExcelArgument(Name = "Date", Description = "The date to adjust.")]
         DateTime date,
         [ExcelArgument(
-            Name = "Holidays/Calendar", 
+            Name = "Holidays/Calendar",
             Description = "The list of holiday dates or a calendar string (e.g., 'USD', 'ZAR' or 'USD,ZAR').")]
         object[,] holidaysOrCalendar)
     {
@@ -131,8 +131,8 @@ public static class DateUtils
         {
             return result.errorMessage;
         }
-        
-        return (DateTime)result.calendar.adjust(date, BusinessDayConvention.Preceding);
+
+        return (DateTime) result.calendar.adjust(date, BusinessDayConvention.Preceding);
     }
 
     /// <summary>
@@ -151,12 +151,14 @@ public static class DateUtils
         Category = "∂Excel: Dates")]
     public static object AddTenorToDate(
         [ExcelArgument(Name = "Date", Description = "Date to adjust.")]
-        DateTime date, 
-        [ExcelArgument(Name = "Tenor", Description = "Tenor amount by which to adjust the date e.g., '1w', '2m', '3y'.")]
-        string tenor, 
-        [ExcelArgument(Name = "Calendar", Description = "Calendar to use. Supports single calendars 'EUR', 'USD', 'ZAR' " +
-                                                        "and joint calendars e.g., 'USD,ZAR'.")]
-        string? userCalendar, 
+        DateTime date,
+        [ExcelArgument(Name = "Tenor",
+            Description = "Tenor amount by which to adjust the date e.g., '1w', '2m', '3y'.")]
+        string tenor,
+        [ExcelArgument(Name = "Calendar", Description =
+            "Calendar to use. Supports single calendars 'EUR', 'USD', 'ZAR' " +
+            "and joint calendars e.g., 'USD,ZAR'.")]
+        string? userCalendar,
         [ExcelArgument(Name = "BDC", Description = "Business Day Convention e.g., 'MODFOL'.")]
         string userBusinessDayConvention)
     {
@@ -168,18 +170,19 @@ public static class DateUtils
         {
             return calendarErrorMessage;
         }
-        
+
         (BusinessDayConvention? businessDayConvention, string errorMessage) =
             ParseBusinessDayConvention(userBusinessDayConvention);
-        
+
         if (businessDayConvention is null)
         {
             return errorMessage;
         }
-        
-        return (DateTime)calendar.advance((Date)date, new Period(tenor), (BusinessDayConvention)businessDayConvention);
+
+        return (DateTime) calendar.advance((Date) date, new Period(tenor),
+            (BusinessDayConvention) businessDayConvention);
     }
-        
+
     /// <summary>
     /// Used to parse a range of Excel dates to a custom QLNet calendar.
     /// </summary>
@@ -187,7 +190,8 @@ public static class DateUtils
     /// <param name="calendar">Calendar.</param>
     /// <returns>A custom QLNet calendar.</returns>
     /// <exception cref="ArgumentException">Thrown for invalid dates in <param name="holidaysOrCalendars"></param>.</exception>
-    private static (Calendar? calendar, string errorMessage) ParseHolidays(object[,] holidaysOrCalendars, Calendar calendar)
+    private static (Calendar? calendar, string errorMessage) ParseHolidays(object[,] holidaysOrCalendars,
+        Calendar calendar)
     {
         foreach (object holiday in holidaysOrCalendars)
         {
@@ -219,14 +223,14 @@ public static class DateUtils
     {
         return new object[,]
         {
-            { "Variant 1", "Variant 2" },
-            { "Fol", "Following" },
-            { "ModFol", "ModifiedFollowing" },
-            { "ModPrec", "ModPreceding" },
-            { "Prec", "Preceding" },
+            {"Variant 1", "Variant 2"},
+            {"Fol", "Following"},
+            {"ModFol", "ModifiedFollowing"},
+            {"ModPrec", "ModPreceding"},
+            {"Prec", "Preceding"},
         };
     }
-    
+
     /// <summary>
     /// Parses a string to a business day convention in QLNet.
     /// Users can get available business day conventions from <see cref="GetAvailableBusinessDayConventions"/>.
@@ -262,14 +266,14 @@ public static class DateUtils
     {
         return new object[,]
         {
-            { "Variant 1", "Variant 2", "Variant 3", "Variant 4" },
-            { "Act360", "Actual360", "", "" },
-            { "Act365", "Act365F", "Actual365", "Actual365F" },
-            { "ActAct", "ActualActual", "", "" },
-            { "Bus252", "Business252", "", "" },
+            {"Variant 1", "Variant 2", "Variant 3", "Variant 4"},
+            {"Act360", "Actual360", "", ""},
+            {"Act365", "Act365F", "Actual365", "Actual365F"},
+            {"ActAct", "ActualActual", "", ""},
+            {"Bus252", "Business252", "", ""},
         };
     }
-    
+
     /// <summary>
     /// Parses a string to a QLNet day counter convention.
     /// </summary>
@@ -288,7 +292,7 @@ public static class DateUtils
 
         return dayCountConvention;
     }
-    
+
     /// <summary>
     /// Parses a string as a QLNet calendar.
     /// </summary>
@@ -315,7 +319,7 @@ public static class DateUtils
             "INR" or "INDIA" => new India(),
             "ILS" or "ISRAEL" => new Israel(),
             "ITALY" => new Italy(),
-            "JPY" or "JAPAN" => new Japan(), 
+            "JPY" or "JAPAN" => new Japan(),
             "KRW" or "SOUTH KOREA" => new SouthKorea(),
             "MXN" or "MEXICO" => new Mexico(),
             "NOK" or "NORWAY" => new Norway(),
@@ -340,7 +344,56 @@ public static class DateUtils
             ? (calendar, "")
             : (null, CommonUtils.DExcelErrorMessage($"Unknown calendar: {calendarToParse}"));
     }
-    
+
+    /// <summary>
+    /// Gets the list of available calendars.
+    /// </summary>
+    /// <returns>List of available calendars.</returns>
+    [ExcelFunction(Name = "d.Date_GetListOfCalendars", Description = "Get the list of available calendars.")]
+    public static object[,] GetListOfCalendars()
+    {
+        object[,] calendars = new object[34, 4]
+        {
+            {"Variant 1", "Variant 2", "Variant 3", "Variant 4"},
+            {"ARS", "Argentina", "", ""},
+            {"AUD", "Australia", "", ""},
+            {"BWP", "Botswana", "", ""},
+            {"BRL", "Brazil", "", ""},
+            {"CAD", "Canada", "", ""},
+            {"CHF", "Switzerland", "", ""},
+            {"CNH", "China", "", ""},
+            {"CZK", "Czech Republic", "", ""},
+            {"DKK", "Denmark", "", ""},
+            {"EUR", "Euro", "", ""},
+            {"GBP", "Great Britain", "", ""},
+            {"Germany", "", "", ""},
+            {"HUF", "Hungary", "", ""},
+            {"INR", "India", "", ""},
+            {"ILS", "Israel", "", ""},
+            {"Italy", "", "", ""},
+            {"JPY", "Japan", "", ""},
+            {"KRW", "South Korea", "", ""},
+            {"MXN", "Mexico", "", ""},
+            {"NOK", "Norway", "", ""},
+            {"NZD", "New Zealand", "", ""},
+            {"PLN", "Poland", "", ""},
+            {"RON", "Romania", "", ""},
+            {"RUB", "Russia", "", ""},
+            {"SGD", "Singapore", "", ""},
+            {"SKK", "Sweden", "", ""},
+            {"SLOVAKIA", "", "", ""},
+            {"THB", "Thailand", "", ""},
+            {"TRY", "Turkey", "", ""},
+            {"TWD", "Taiwan", "", ""},
+            {"UAH", "Ukraine", "", ""},
+            {"USD", "USA", "United States", "United States of America"},
+            {"ZAR", "South Africa", "", ""},
+        };
+        
+        return calendars;
+    }
+
+
     /// <summary>
     /// Get a list of holidays between, and including, two dates and excluding weekends. If a holiday falls on a weekend
     /// it will not be included in this list.
@@ -350,7 +403,7 @@ public static class DateUtils
     /// <param name="calendarsToParse">Calendars to parse.</param>
     /// <returns>List of holidays.</returns>
     [ExcelFunction(
-        Name = "d.Date_GetListOfHolidays", 
+        Name = "d.Date_GetListOfHolidays",
         Description = "Get a list of holidays between, and including, two dates and excluding weekends.\n" +
                       "Note, if a holiday falls on a weekend it will not be included in this list.",
         Category = "∂Excel: Dates")]
@@ -359,15 +412,15 @@ public static class DateUtils
         (Calendar? calendar, string errorMessage) = ParseCalendars(calendarsToParse);
         if (calendar is null)
         {
-            return new object[,] {{ errorMessage }};
+            return new object[,] {{errorMessage}};
         }
-        
+
         List<DateTime> holidays = new();
-        
+
         for (int i = 0; i <= endDate.Subtract(startDate).Days; i++)
         {
             DateTime currentDate = startDate.AddDays(i);
-            
+
             if (!calendar.isWeekend(currentDate.DayOfWeek) && calendar.isHoliday(currentDate))
             {
                 holidays.Add(currentDate);
@@ -387,7 +440,7 @@ public static class DateUtils
 
         return output;
     }
-    
+
     private static (Calendar? calendar, string errorMessage) ParseJointCalendar(string? calendarsToParse)
     {
         IEnumerable<string>? calendars = calendarsToParse?.Split(',').Select(x => x.Trim());
@@ -402,12 +455,12 @@ public static class DateUtils
             {
                 return (calendar0, errorMessage0);
             }
-            
+
             if (calendar1 is null)
             {
                 return (calendar1, errorMessage1);
             }
-            
+
             JointCalendar jointCalendar = new(calendar0, calendar1);
 
             for (int i = 2; i < enumerable.Count(); i++)
@@ -417,7 +470,7 @@ public static class DateUtils
                 {
                     return (currentCalendar, currentErrorMessage);
                 }
-                
+
                 jointCalendar = new JointCalendar(jointCalendar, currentCalendar);
             }
 
@@ -436,4 +489,85 @@ public static class DateUtils
 
         return ParseSingleCalendar(calendarsToParse);
     }
-}
+
+    /// <summary>
+    /// Generates a date schedule. Does not currently support stub periods.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date.</param>
+    /// <param name="frequency">Frequency.</param>
+    /// <param name="calendarsToParse">The calendar(s).</param>
+    /// <param name="businessDayConventionToParse">Business day convention.</param>
+    /// <param name="ruleToParse">The date generation rule. 'Backward' = Start from end date and work backwards.
+    /// 'Forward' = Start from start date and work forwards. 'IMM' = IMM dates.</param>
+    /// <returns></returns>
+    [ExcelFunction(
+        Name = "d.Date_GenerateSchedule",
+        Description = "Generates a schedule of dates.",
+        Category = "∂Excel: Dates")]
+    public static object[,] GenerateSchedule(
+        [ExcelArgument(Name = "Start Date", Description= "Start date.")]
+        DateTime startDate,
+        [ExcelArgument(Name = "End Date", Description = "End date.")]
+        DateTime endDate,
+        [ExcelArgument(Name = "Frequency", Description = "Frequency e.g., '3m', '6m', '1y' etc.")]
+        string frequency,
+        [ExcelArgument(Name = "Calendar(s)", Description = "The calendar(s) to parse e.g., 'USD', 'ZAR', 'USD,ZAR' etc.")]
+        string calendarsToParse,
+        [ExcelArgument(Name = "BDC", Description = "Business day convention e.g., 'FOL', 'MODFOL', 'PREC' etc.")]
+        string businessDayConventionToParse,
+        [ExcelArgument(
+            Name = "Rule", 
+            Description = "The date generation rule. " +
+                          "\n'Backward' = Start from end date and move backwards. " +
+                          "\n'Forward' = Start from start date and move forwards. " +
+                          "\n'IMM' = IMM dates.")]
+        string ruleToParse)
+    {
+        (Calendar? calendar, string calendarErrorMessage) = ParseCalendars(calendarsToParse);
+        if (calendar is null)
+        {
+            return new object[,] {{calendarErrorMessage}};
+        }
+
+        (BusinessDayConvention? businessDayConvention, string errorMessage) =
+            ParseBusinessDayConvention(businessDayConventionToParse);
+
+        if (businessDayConvention is null)
+        {
+            return new object[,] {{errorMessage}};
+        }
+
+        if (ruleToParse.ToUpper()!= "BACKWARD" && ruleToParse.ToUpper() != "FORWARD" && ruleToParse.ToUpper() != "IMM") 
+        {
+            return new object[,] {{ CommonUtils.DExcelErrorMessage($"Invalid rule specified: {ruleToParse}") }};
+        }
+
+        DateGeneration.Rule rule = ruleToParse.ToUpper() switch
+        {
+            "BACKWARD" => DateGeneration.Rule.Backward,
+            "FORWARD" => DateGeneration.Rule.Forward,
+            "IMM" => DateGeneration.Rule.TwentiethIMM,
+            _ => DateGeneration.Rule.Forward,
+        };
+
+        Schedule schedule =
+            new(
+                effectiveDate: new Date(startDate),
+                terminationDate: new Date(endDate),
+                tenor: new Period(frequency),
+                calendar: calendar,
+                convention: (BusinessDayConvention) businessDayConvention,
+                terminationDateConvention: (BusinessDayConvention) businessDayConvention,
+                rule: rule,
+                endOfMonth: false);
+
+        object[,] output = new object[schedule.dates().Count, 1];
+        for (int i = 0; i < schedule.dates().Count; i++)
+        {
+            output[i, 0] = schedule.dates()[i].ToDateTime();
+        }
+
+        return output;
+    }
+} 

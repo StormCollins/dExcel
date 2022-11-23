@@ -68,6 +68,7 @@
     <None Remove="Resources\Icons\table-formatting-row-primary-and-secondary-header.png" />
     <None Remove="Resources\Icons\table-formatting-row-primary-header.png" />
     <None Remove="Resources\Icons\template-search-large-blue.ico" />
+    <None Remove="Resources\Icons\workbook_link_blue.ico" />
     <None Remove="Resources\Icons\wrap-up-audit-small-blue.ico" />
     <None Remove="Resources\Icons\wrap-up-audit-small-green.ico" />
   </ItemGroup>
@@ -167,6 +168,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Icons\table-formatting-row-2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Icons\workbook_link_blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <Resource Include="Resources\Icons\dExcel.ico">

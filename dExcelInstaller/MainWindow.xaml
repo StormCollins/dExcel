@@ -224,7 +224,7 @@
         <Button
           Name="CloseAndLaunchExcel"
           Click="CloseAndLaunchExcel_OnClick"
-          Content="Close and Launch Excel"
+          Content="Close Installer and Launch Excel"
           Margin="10 8 8 0"
           Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
           ToolTipService.InitialShowDelay="100"
