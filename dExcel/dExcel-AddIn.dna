@@ -75,9 +75,9 @@
 					  onAction='CreateLinkToSheet'
 					  screentip='Creates a link to cell A1 in the sheet with the same name as the selected cell.'/>
 					<button 
-				      id='btnCreateLinkToHeading'
-				      label='Create Link to Heading'
-					  onAction='CreateLinkToHeading'
+				      id='btnCreateLinksToHeadings'
+				      label='Create Link(s) to Heading(s) in Sheet'
+					  onAction='CreateLinksToHeadings'
 					  screentip='Creates a link to a cell with a heading style.'/>
 				  </menu>		
 			  </splitButton>
