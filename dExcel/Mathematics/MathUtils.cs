@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using ExcelDna.Integration;
 using MathNet.Numerics;
+using QLNet;
 using mni = MathNet.Numerics.Interpolation;
 
 /// <summary>
@@ -12,70 +13,98 @@ using mni = MathNet.Numerics.Interpolation;
 public static class MathUtils
 {
     [ExcelFunction(
-        Name = "d.Math_Bilinterp",
-        Description = "Performs bi-linear interpolation on two variables.",
+        Name = "d.Math_Interpolate2D",
+        Description = "Performs linear, exponential, or flat interpolation on a two-dimensional surface for two given points.",
         Category = "∂Excel: Mathematics")]
-    public static object Bilinterp(
-        [ExcelArgument(Name = "XY", Description = "Matrix from which to interpolate.")]
+    public static object Interpolate2D(
+        [ExcelArgument(Name = "XY", Description = "Matrix from which to interpolate, where X is the horizontal dimension and Y the vertical dimension. XY must include the numeric row and column headings.")]
         object[,] xy,
-        [ExcelArgument(Name = "X", Description = "X-value (along column-axis) for which to interpolate.")]
+        [ExcelArgument(Name = "X", Description = "X-value (along horizontal-axis) for which to interpolate.")]
         double x,
-        [ExcelArgument(Name = "Y", Description = "Y-value (along row-axis) for which to interpolate.")]
-        double y)
+        [ExcelArgument(Name = "Y", Description = "Y-value (along vertical-axis) for which to interpolate.")]
+        double y,
+        [ExcelArgument(
+            Name = "Method",
+            Description = "Method of interpolation: 'linear', 'exponential', 'flat'")]
+        string method)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
         // TODO: Add check that 'xy' is numeric data only.
-        int rowCount = xy.GetLength(0) - 1;
-        int colCount = xy.GetLength(1) - 1;
-        double[] rowValues = new double[rowCount];
-        double[] colValues = new double[colCount];
+        int xCount = xy.GetLength(1) - 1;
+        int yCount = xy.GetLength(0) - 1;
+        double[] xValues = new double[xCount];
+        object[,] xValuesObject = new object[1,xCount];
+        double[] yValues = new double[yCount];
+        object[,] yValuesObject = new object[yCount, 1];
 
-        for (int i = 1; i <= rowCount; i++)
+        for (int i = 0; i < xCount; i++)
         {
-            rowValues[i-1] = (double)xy[i, 0];
+            xValues[i] = (double)xy[0, i + 1];
+            xValuesObject[0,i] = xy[0, i + 1];
         }
 
-        for (int i = 1; i <= colCount; i++)
+        for (int i = 0; i < yCount; i++)
         {
-            colValues[i-1] = (double)xy[0, i];
+            yValues[i] = (double)xy[i + 1, 0];
+            yValuesObject[i,0] = xy[i + 1, 0];
         }
 
-        if (y <= rowValues.Min() || y >= rowValues.Max() || x <= colValues.Min() || x >= colValues.Max())
+        if (x < xValues.Min() || x > xValues.Max() || y < yValues.Min() || y > yValues.Max())
         {
             return $"{CommonUtils.DExcelErrorPrefix} Extrapolation not supported.";
         }
 
-        double z = 0.0;
-        // TODO: Find the row values and column value satisfying this first.
-        for (int i = 0; i < rowValues.Length - 1; i++)
+        double yLeft = yValues.Where(element => element <= y).Max();
+        int yIndexLeft = Array.IndexOf(yValues, yLeft);
+
+        double yRight = yValues.Where(element => element >= y).Min();
+        int yIndexRight = Array.IndexOf(yValues, yRight);
+
+        object[,] zLeftRange = new object[1, xCount];
+        for (int i = 0; i < xCount; i++)
         {
-            for (int j = 0; j < colValues.Length - 1; j++)
-            {
-                if (y >= rowValues[i] && y < rowValues[i + 1] && x >= colValues[j] && x < colValues[j + 1])
-                {
-                    z =
-                        (double)xy[i + 1, j + 1] * (rowValues[i + 1] - y) * (colValues[j + 1] - x) / (rowValues[i + 1] - rowValues[i]) / (colValues[j + 1] - colValues[j]) +
-                        (double)xy[i + 2, j + 1] * (y - rowValues[i]) * (colValues[j + 1] - x) / (rowValues[i + 1] - rowValues[i]) / (colValues[j + 1] - colValues[j]) +
-                        (double)xy[i + 1, j + 2] * (rowValues[i + 1] - y) * (x - colValues[j]) / (rowValues[i + 1] - rowValues[i]) / (colValues[j + 1] - colValues[j]) +
-                        (double)xy[i + 2, j + 2] * (y - rowValues[i]) * (x - colValues[j]) / (rowValues[i + 1] - rowValues[i]) / (colValues[j + 1] - colValues[j]);
-                }
-            }
+            zLeftRange[0, i] = xy[yIndexLeft + 1, i + 1];
         }
+
+        object[,] zRightRange = new object[1, xCount];
+        for (int i = 0; i < xCount; i++)
+        {
+            zRightRange[0, i] = xy[yIndexRight + 1, i + 1];
+        }
+
+        object zLeft = Interpolate(xValuesObject, zLeftRange, x, method);
+        object zRight = Interpolate(xValuesObject, zRightRange, x, method);
+
+        object z;
+
+        if (zLeft.Equals(zRight))
+        {
+            z = zLeft;
+        }
+        else
+        {
+            object[,] zLeftAndRight = { { zLeft }, { zRight } };
+            object[,] yLeftAndRight = { { yLeft }, { yRight } };
+
+            z = Interpolate(yLeftAndRight, zLeftAndRight, y, method);
+        }
+        
+        
         return z;
     }
 
     [ExcelFunction(
         Name = "d.Math_Interpolate",
-        Description = "Performs linear, exponential, or flat interpolation on a range for a single point.\n" +
-                      "Deprecates AQS function: 'dt_interp'",
+        Description = "Performs linear, exponential, or flat interpolation on a range for a single given point.\n" +
+                      "Deprecates AQS function: 'DT_Interp' and 'DT_Interp1'",
         Category = "∂Excel: Mathematics")]
     public static object Interpolate(
-        [ExcelArgument(Name = "X-column", Description = "Independent variable.")]
-        object[,] xCol,
-        [ExcelArgument(Name = "Y-column", Description = "Dependent variable.")]
-        object[,] yCol,
+        [ExcelArgument(Name = "X-values", Description = "Independent variable.")]
+        object[,] xValues,
+        [ExcelArgument(Name = "Y-values", Description = "Dependent variable.")]
+        object[,] yValues,
         [ExcelArgument(Name = "Xi", Description = "Value for which to interpolate.")]
         double xi,
         [ExcelArgument(
@@ -86,16 +115,40 @@ public static class MathUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-
-        if ((xCol.GetLength(0) == yCol.GetLength(0)) && (xCol.GetLength(1)==1) && (yCol.GetLength(1) == 1))
+        // If xValues or yValues is a row, then transpose so that a column is supplied:
+        object[,] Transpose(object[,] matrix)
         {
-            int rowCount = Math.Max(xCol.GetLength(0), yCol.GetLength(0));
+            int matrixRows = matrix.GetLength(0);
+            int matrixCols = matrix.GetLength(1);
+
+            object[,] matrixTransposed = new object[matrixCols, matrixRows];
+
+            for (int i = 0; i < matrixRows; i++)
+            {
+                for (int j = 0; j < matrixCols; j++)
+                {
+                    matrixTransposed[j, i] = matrix[i, j];
+                }
+            }
+
+            return matrixTransposed;
+        }
+
+        if (xValues.GetLength(1) > xValues.GetLength(0))
+            xValues = Transpose(xValues);
+
+        if (yValues.GetLength(1) > yValues.GetLength(0))
+            yValues = Transpose(yValues);
+
+        if ((xValues.GetLength(0) == yValues.GetLength(0)) && (xValues.GetLength(1)==1) && (yValues.GetLength(1) == 1))
+        {
+            int rowCount = Math.Max(xValues.GetLength(0), yValues.GetLength(0));
             double[] x = new double[rowCount];
             double[] y = new double[rowCount];
             for (int i = 0; i < rowCount; i++)
             {
-                x[i] = (double)xCol[i, 0];
-                y[i] = (double)yCol[i, 0];
+                x[i] = (double)xValues[i, 0];
+                y[i] = (double)yValues[i, 0];
             }
             mni.IInterpolation interpolator = null;
 
@@ -117,27 +170,30 @@ public static class MathUtils
             // back to real numbers.
             double ExponentialInterpolation()
             {
-                int index = 0;
-                for (int i = 0; i < rowCount; i++)
+
+                int index0 = Array.IndexOf(x, x.Where(element => element <= xi).Max());
+                int index1 = Array.IndexOf(x, x.Where(element => element >= xi).Min());
+
+                if (index0 == index1)
                 {
-                    if (x[i] <= xi && xi < x[i + 1])
-                    {
-                        index = i;
-                        break;
-                    }
+                    return y[index0];
+                }
+                else
+                {
+                    Complex32 xiComplex = (Complex32)xi;
+                    Complex32 x0Complex = (Complex32)x[index0];
+                    Complex32 x1Complex = (Complex32)x[index1];
+                    Complex32 y0Complex = (Complex32)y[index0];
+                    Complex32 y1Complex = (Complex32)y[index1];
+                    Complex32 yi = (Complex32.Log(y1Complex) - Complex32.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + Complex32.Log(y0Complex);
+                    Complex32 outputY = Complex32.Exp(yi);
+                    return (double)outputY.Real;
                 }
 
-                Complex32 xiComplex = (Complex32)xi;
-                Complex32 x0Complex = (Complex32)x[index];
-                Complex32 x1Complex = (Complex32)x[index + 1];
-                Complex32 y0Complex = (Complex32)y[index];
-                Complex32 y1Complex = (Complex32)y[index + 1];
-                Complex32 yi = (Complex32.Log(y1Complex) - Complex32.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + Complex32.Log(y0Complex);
-                Complex32 outputY = Complex32.Exp(yi);
-                return (double)outputY.Real;
+                
             }
         }
-        
+
         return CommonUtils.DExcelErrorMessage("Row dimensions do not match or there is more than one column in x or y.");
     }
 }
