@@ -1,6 +1,9 @@
 ﻿namespace dExcel;
 
 using ExcelDna.Integration;
+using ExcelDna.Registration;
+using System.Linq;
+using System.Windows.Media.Media3D;
 using mnd = MathNet.Numerics.Distributions;
 using mnl = MathNet.Numerics.LinearAlgebra;
 using mnr = MathNet.Numerics.Random;
@@ -10,17 +13,38 @@ public static class StatsUtils
 {
     [ExcelFunction(
         Name = "d.Stats_Cholesky",
-        Description = "Calculates the Cholesky decomposition of a matrix.\n" +
+        Description = "Calculates the Cholesky decomposition of a symmetric positive-definite matrix.\n" +
                       "Deprecates the AQS function: 'Chol'",
         Category = "∂Excel: Stats")]
-    public static double[,] Cholesky(
+    public static object Cholesky(
         [ExcelArgument(
             Name = "Range",
-            Description = "The range containing the nxn matrix.")]
+            Description = "The range containing the NxN (square) matrix.")]
         double[,] range)
     {
         var matrix = mnl.CreateMatrix.DenseOfArray(range);
-        return matrix.Cholesky().Factor.Transpose().ToArray();
+
+        if(matrix.RowCount != matrix.ColumnCount)
+        {
+            return CommonUtils.DExcelErrorMessage("Matrix supplied is not square.");
+        }
+        else if (matrix.IsSymmetric() == false)
+        {
+            return CommonUtils.DExcelErrorMessage("Matrix supplied is not symmetric.");
+        }
+        else
+        {
+            try
+            {
+                return matrix.Cholesky().Factor.ToArray();
+            }
+            catch
+            {
+                return CommonUtils.DExcelErrorMessage("Matrix supplied is not positive-definite.");
+            }
+            
+        }
+        
     }
 
     [ExcelFunction(
