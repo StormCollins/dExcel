@@ -54,15 +54,16 @@ public class AddInController : IExcelAddIn
 
             using SQLiteCommand writeCommand = new(connection);
             writeCommand.CommandText =
-                $@"INSERT INTO users(username, firstname, surname, created, active)
-               SELECT '{userName}', '{firstName}', '{surname}', DATETIME('NOW'), TRUE
+                $@"INSERT INTO users(username, firstname, surname, date_created, active)
+               SELECT '{userName}', '{firstName}', '{surname}', DATETIME('NOW', 'localtime'), TRUE
                WHERE NOT EXISTS (SELECT * FROM users WHERE username='{userName}');";
 
             writeCommand.ExecuteNonQuery();
+            string dexcelVersion = DebugUtils.GetAssemblyVersion();
             writeCommand.CommandText =
-                $@"INSERT INTO dexcel_usage(username, version, date)
-               VALUES
-               ('{userName}', '{DebugUtils.GetAssemblyVersion()}', DATETIME('NOW'));";
+                $@"INSERT INTO dexcel_usage(username, version, date_logged)
+               SELECT '{userName}', '{DebugUtils.GetAssemblyVersion()}', DATETIME('NOW', 'localtime')
+               WHERE NOT EXISTS (SELECT * FROM dexcel_usage WHERE username='{userName}' AND version='{dexcelVersion}' AND DATE(date_logged)=DATE('NOW', 'localtime'));";
 
             writeCommand.ExecuteNonQuery();
         }

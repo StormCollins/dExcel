@@ -95,15 +95,15 @@ public partial class MainWindow : Window
 
             using SQLiteCommand writeCommand = new(connection);
             writeCommand.CommandText =
-                $@"INSERT INTO users(username, firstname, surname, created, active)
-               SELECT '{userName}', '{firstName}', '{surname}', DATETIME('NOW'), TRUE
+                $@"INSERT INTO users(username, firstname, surname, date_created, active)
+               SELECT '{userName}', '{firstName}', '{surname}', DATETIME('NOW', 'localtime'), TRUE
                WHERE NOT EXISTS (SELECT * FROM users WHERE username='{userName}');";
 
             writeCommand.ExecuteNonQuery();
             writeCommand.CommandText =
-                $@"INSERT INTO dexcel_installer_usage(username, version, date)
+                $@"INSERT INTO dexcel_installer_usage(username, version, date_logged)
                VALUES
-               ('{userName}', '{installerVersion}', DATETIME('NOW'));";
+               ('{userName}', '{installerVersion}', DATETIME('NOW', 'localtime'));";
 
             writeCommand.ExecuteNonQuery();
         }
