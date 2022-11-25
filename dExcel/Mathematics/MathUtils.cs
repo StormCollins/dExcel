@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using System.Numerics;
 using ExcelDna.Integration;
 using MathNet.Numerics;
 using QLNet;
@@ -180,17 +181,15 @@ public static class MathUtils
                 }
                 else
                 {
-                    Complex32 xiComplex = (Complex32)xi;
-                    Complex32 x0Complex = (Complex32)x[index0];
-                    Complex32 x1Complex = (Complex32)x[index1];
-                    Complex32 y0Complex = (Complex32)y[index0];
-                    Complex32 y1Complex = (Complex32)y[index1];
-                    Complex32 yi = (Complex32.Log(y1Complex) - Complex32.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + Complex32.Log(y0Complex);
-                    Complex32 outputY = Complex32.Exp(yi);
+                    Complex xiComplex = (Complex)xi;
+                    Complex x0Complex = (Complex)x[index0];
+                    Complex x1Complex = (Complex)x[index1];
+                    Complex y0Complex = (Complex)y[index0];
+                    Complex y1Complex = (Complex)y[index1];
+                    Complex yi = (Complex.Log(y1Complex) - Complex.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + Complex.Log(y0Complex);
+                    Complex outputY = Complex.Exp(yi);
                     return (double)outputY.Real;
                 }
-
-                
             }
         }
 
