@@ -218,9 +218,8 @@ public class RibbonController : ExcelRibbon
 
     public string GetFunctionContent(IRibbonControl control)
     {
-        // string methodId = control.Id.Replace("_", " ");
         string methodId = RibbonFunctionLabelToMethodCategoryMappings[control.Id.ToUpper()];
-        IEnumerable<(string name, string description, string category)> methods = GetCategoryMethods(control.Id.Replace("_", " "));
+        IEnumerable<(string name, string description, string category)> methods = GetCategoryMethods(methodId);
         string content = "";
         content += $"<menu xmlns=\"http://schemas.microsoft.com/office/2006/01/customui\">";
         foreach (var (name, _, _) in methods)
