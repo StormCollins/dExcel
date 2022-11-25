@@ -53,10 +53,13 @@ public class RibbonController : ExcelRibbon
         {
             var xlApp = (Excel.Application)ExcelDnaUtil.Application;
 #if DEBUG
-            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\Resources\Workbooks\dexcel-testing.xlsm");
+            Excel.Workbook wb = xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\Resources\Workbooks\dexcel-testing.xlsm");
 #else
-            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\Releases\Current\Resources\Workbooks\dexcel-testing.xlsm");
+            Excel.Workbook wb = xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\Releases\Current\Resources\Workbooks\dexcel-testing.xlsm", ReadOnly: true);
 #endif
+            Excel.Worksheet ws = wb.Worksheets["Summary"];
+            ws.Activate();
+            ws.Cells[1, 1].Select();
         }
     }
 
