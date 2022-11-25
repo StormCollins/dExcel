@@ -207,11 +207,18 @@ public class RibbonController : ExcelRibbon
                     // => (Name: methodInfos.ElementAt(i).Name,
     }
 
+    private Dictionary<string, string> _ribbonFunctionLabelToMethodCategoryMappings = new()
+    {
+        ["DATE"] = "Date",
+        ["MATH"] = "Math",
+        ["Stats"] = "Stats",
+    };
+
     public string GetFunctionContent(IRibbonControl control)
     {
-        string methodId = control.Id.Replace("_", " ");
-        var methods = GetCategoryMethods(control.Id.Replace("_", " "));
-        var content = "";
+        string methodId = _ribbonFunctionLabelToMethodCategoryMappings[control.Id.ToUpper()];
+        IEnumerable<(string name, string description, string category)> methods = GetCategoryMethods(methodId);
+        string content = "";
         content += $"<menu xmlns=\"http://schemas.microsoft.com/office/2006/01/customui\">";
         foreach (var (name, _, _) in methods)
         {
