@@ -12,25 +12,25 @@
         Icon="pack://application:,,,/dExcel;component/resources/icons/dExcel.ico"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
-        Height="150" Width="350">
-    <Window.Resources>
-      <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"/>
-    </Window.Resources>
+        Height="250" Width="450">
+  <Window.Resources>
+    <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"/>
+  </Window.Resources>
   <Grid>
     <materialDesign:Card>
       <DockPanel>
         <DockPanel 
           DockPanel.Dock="Top"
-          Margin="10 0 0 2">
+          Margin="10 10 0 2">
           <materialDesign:PackIcon 
             DockPanel.Dock="Left"
             Kind="Alert" 
-            VerticalAlignment="Center"
-            Foreground="{StaticResource WarningBrush}"/>
+            Foreground="{StaticResource WarningBrush}"
+            VerticalAlignment="Center"/>
           <TextBlock
             Name="AlertCaption"
             DockPanel.Dock="Left"
-            FontSize="18"
+            FontSize="20"
             Style="{StaticResource AmberHeader2}"
             Text="Warning"/>
         </DockPanel>
@@ -38,7 +38,27 @@
         <TextBlock
           Name="AlertBody"
           DockPanel.Dock="Top"
+          Margin="10 10 0 0"
           Text="Warning details."/>
+
+        <Grid
+          DockPanel.Dock="Bottom"
+          Margin="0 0 10, 10">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="46*"/>
+            <ColumnDefinition Width="169*"/>
+            <ColumnDefinition Width="215*"/>
+          </Grid.ColumnDefinitions>
+          <Button
+            Name="AlertOk"
+            Grid.Column="2"
+            Grid.Row="0"
+            Background="{StaticResource WarningBrush}"
+            BorderBrush="{StaticResource WarningBrush}"
+            Click="AlertOK_Click"
+            Content="OK"
+            VerticalAlignment="Bottom"/>
+        </Grid>
       </DockPanel>
     </materialDesign:Card>
   </Grid>

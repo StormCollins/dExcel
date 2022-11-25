@@ -23,5 +23,10 @@ namespace dExcel.WPF
         {
             InitializeComponent();
         }
+
+        private void AlertOK_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
     }
 }

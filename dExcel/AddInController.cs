@@ -1,7 +1,10 @@
 ﻿namespace dExcel;
 
+using System.Data.SQLite;
+using System.DirectoryServices;
 using System.IO;
 using System.Reflection;
+using System.Security.Principal;
 using ExcelDna.Integration;
 using ExcelDna.Registration;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -34,5 +37,34 @@ public class AddInController : IExcelAddIn
             .ProcessParamsRegistrations()
             .ProcessParameterConversions(paramConversionConfig)
             .RegisterFunctions();
+
+        if (NetworkUtils.GetConnectionStatus())
+        {
+            var identity = WindowsIdentity.GetCurrent();
+            string userName = identity.Name.Split('\\')[1];
+            var user = new DirectoryEntry($"LDAP://<SID={identity.User?.Value}>");
+            user.RefreshCache(new[] { "givenName", "sn" });
+            string? firstName = user.Properties["givenName"].Value?.ToString();
+            string? surname = user.Properties["sn"].Value?.ToString();
+
+            SQLiteConnection connection =
+                new(
+                    @"URI=file:\\\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\dExcelUsageStats\dexcel_usage_stats.sqlite");
+            connection.Open();
+
+            using SQLiteCommand writeCommand = new(connection);
+            writeCommand.CommandText =
+                $@"INSERT INTO users(username, firstname, surname, created, active)
+               SELECT '{userName}', '{firstName}', '{surname}', DATETIME('NOW'), TRUE
+               WHERE NOT EXISTS (SELECT * FROM users WHERE username='{userName}');";
+
+            writeCommand.ExecuteNonQuery();
+            writeCommand.CommandText =
+                $@"INSERT INTO dexcel_usage(username, version, date)
+               VALUES
+               ('{userName}', '{DebugUtils.GetAssemblyVersion()}', DATETIME('NOW'));";
+
+            writeCommand.ExecuteNonQuery();
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace dExcel;
+﻿using dExcel.WPF;
+
+namespace dExcel;
 
 using System.IO;
 using System.Reflection;
@@ -102,12 +104,12 @@ public class RibbonController : ExcelRibbon
 
         ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", matchedSheet + "!A1");
     }
-    public void CreateLinkToHeading(IRibbonControl control)
+
+    public void CreateLinksToHeadings(IRibbonControl control)
     {
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         Excel.Range usedRange = xlApp.ActiveSheet.UsedRange;
-
-        Dictionary<string, string> headings = new Dictionary<string, string>();
+        Dictionary<string, string> headings = new();
 
         for (int i = 1; i < usedRange.Rows.Count + 1; i++)
         {
@@ -117,15 +119,59 @@ public class RibbonController : ExcelRibbon
                 string style = ((Excel.Style)currentCell.Style).Value.ToUpper();
                 if (style.Contains("HEADING"))
                 {
-                    headings[currentCell.Value2] = currentCell.Address;
+                    try
+                    {
+                        headings[currentCell.Value2] = currentCell.Address;
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
             }
         }
 
-        string searchText = ((Excel.Range)xlApp.Selection).Value2;
-        string matchedHeading = Process.ExtractTop(searchText, headings.Keys).Where(x => x.Score > 90).First().Value;
+        Excel.Range selectedRange = ((Excel.Range)xlApp.Selection);
+        List<string> failedHyperlinks = new List<string>();
 
-        ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", headings[matchedHeading]);
+        for (int i = 1; i < selectedRange.Rows.Count + 1; i++)
+        {
+            string searchText = "";
+            for (int j = 1; j < selectedRange.Columns.Count + 1; j++)
+            {
+                Excel.Range currentCell = selectedRange.Rows[i].Columns[j];
+                if (currentCell.Value2 != null && currentCell.Value2?.ToString() != "" && currentCell.Value2?.ToString() != ExcelEmpty.Value.ToString())
+                {
+                    searchText = selectedRange.Rows[i].Columns[j].Value2;
+                }
+            }
+
+            try
+            {
+                string matchedHeading = Process.ExtractTop(searchText, headings.Keys).First(x => x.Score > 90).Value;
+                ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(selectedRange.Rows[i], "", headings[matchedHeading]);
+            }
+            catch (Exception)
+            {
+                failedHyperlinks.Add(searchText);
+            }
+        }
+
+        if (failedHyperlinks.Count > 0)
+        {
+            Alert alert = new Alert
+            {
+                AlertCaption =
+                {
+                    Text = "Warning: Section Headings Not Found"
+                },
+                AlertBody =
+                {
+                    Text = "The following headings could not be found: \n  •" + string.Join("\n  • ", failedHyperlinks)
+                },
+            };
+
+            alert.Show();
+        }
     }
 
     public static IEnumerable<(string name, string description, string category)> GetCategoryMethods(string categoryName)
