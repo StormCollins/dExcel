@@ -23,13 +23,23 @@ public partial class FunctionSearch : Window
 
     private readonly Dictionary<string, string> _aqsTodExcelFunctionMapping = new()
     {
+        // Dates
         ["FOLDAY"] = "d.Date_FolDay",
         ["MODFOLDAY"] = "d.Date_ModFolDay",
         ["PREVDAY"] = "d.Date_PrevDay",
-        ["DT_INTERP1"] = "d.Math_InterpolateContiguousArea",
+        // Math
+        ["DT_INTERP"] = "d.Math_Interpolate",
+        ["DT_INTERP1"] = "d.Math_Interpolate",
+        // Stats
         ["CHOL"] = "d.Stats_Cholesky",
         ["CORR"] = "d.Stats_CorrelationMatrix",
         ["RANDN"] = "d.Stats_NormalRandomNumbers",
+        // Equities
+        ["DT_VOLATILITY"] = "d.Equity_Volatility",
+        ["BS"] = "d.Equity_BlackScholes",
+        // Interest Rates
+        ["BLACK"] = "d.IR_Black",
+        ["INTCONVERT"] = "d.IR_ConvertInterestRate",
     };
 
     public class FunctionMatch : INotifyPropertyChanged

@@ -1,10 +1,12 @@
-﻿
-namespace dExcel;
+﻿using System.Data.Common;
+
+namespace dExcel.EquityUtils;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ExcelDna.Integration;
+using mnd = MathNet.Numerics.Distributions;
 using mns = MathNet.Numerics.Statistics;
 
 /// <summary>
@@ -13,8 +15,8 @@ using mns = MathNet.Numerics.Statistics;
 public static class EquityUtils
 {
     [ExcelFunction(
-        Name = "d.Volatility",
-        Description = "Calculates the historic volatility of an equity.\nDeprecates AQS function: ''",
+        Name = "d.Equity_Volatility",
+        Description = "Calculates the historic volatility of an equity.\nDeprecates AQS function: 'DT_Volatility'",
         Category = "∂Excel: Equities")]
     public static object Volatility(
         [ExcelArgument(
@@ -26,7 +28,7 @@ public static class EquityUtils
             Description = "The valuation date.")]
         DateTime valDate,
         [ExcelArgument(
-            Name = "Maturity Date", 
+            Name = "Maturity Date",
             Description = "The maturity date.")]
         DateTime maturityDate,
         [ExcelArgument(
@@ -49,7 +51,6 @@ public static class EquityUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-
         var datesAndPrices = new List<(DateTime date, double price)>();
         for (int i = 0; i < priceData.GetLength(0); i++)
         {
@@ -92,7 +93,75 @@ public static class EquityUtils
         {
             return new double[1, 2] { { equallyWeightedVolatility, ewmaVolatility } };
         }
-        
+
         return Math.Max(equallyWeightedVolatility, ewmaVolatility);
     }
+
+   [ExcelFunction(
+       Name = "d.Equity_BlackScholes",
+       Description = "Black-Scholes option pricer. \nDeprecates AQS function: 'BS'",
+       Category = "∂Excel: Equities")]
+    public static object BlackScholes(
+        [ExcelArgument(Name = "Option Type", Description = "'Call'/'C' or 'Put'/'P'.")]
+        string optionType,
+        [ExcelArgument(Name = "Long/Short", Description = "'Long' or 'Short'.")]
+        string longOrShort,
+        [ExcelArgument(Name = "S", Description = "Current stock price.")]
+        double spotPrice,
+        [ExcelArgument(Name = "K", Description = "Strike.")]
+        double strike,
+        [ExcelArgument(Name = "r", Description = "Risk free (NACC) rate. Only required for discounting.")]
+        double rate,
+        [ExcelArgument(Name = "q", Description = "Dividend Yield (NACC).")]
+        double dividendYield,
+        [ExcelArgument(Name = "T", Description = "Time to maturity.")]
+        double timeToMaturity,
+        [ExcelArgument(Name = "σ", Description = "Volatility.")]
+        double vol)
+    {
+#if DEBUG
+        CommonUtils.InFunctionWizard();
+#endif 
+        int sign;
+
+        switch (optionType.ToUpper())
+        {
+            case "C":
+            case "CALL":
+                sign = 1;
+                break;
+            case "P":
+            case "PUT":
+                sign = -1;
+                break;
+            default:
+                return CommonUtils.DExcelErrorMessage($"Invalid option type: {optionType}");
+        }
+
+        int longOrShortDirection;
+        switch (longOrShort.ToUpper())
+        {
+            case "LONG":
+                longOrShortDirection = 1;
+                break;
+            case "SHORT":
+                longOrShortDirection = -1;
+                break;
+            default:
+                return CommonUtils.DExcelErrorMessage($"Invalid 'long'/'short' direction: {longOrShort}");
+        }
+
+        double d1 = (Math.Log(spotPrice / strike) + (rate-dividendYield+Math.Pow(vol, 2)/2) * timeToMaturity) / (vol * Math.Sqrt(timeToMaturity));
+        double d2 = d1 - vol * Math.Sqrt(timeToMaturity);
+
+        if (timeToMaturity <= 0)
+        {
+            return Math.Exp(-(rate-dividendYield) * timeToMaturity) * Math.Max(0, sign * (spotPrice - strike));
+        }
+
+        return longOrShortDirection *
+               (sign * (spotPrice * Math.Exp(-dividendYield * timeToMaturity) * mnd.Normal.CDF(0, 1, sign * d1) -
+                        strike * Math.Exp(-rate * timeToMaturity) * mnd.Normal.CDF(0, 1, sign * d2)));
+    }
 }
+

@@ -1,4 +1,4 @@
-﻿namespace dExcel;
+﻿namespace dExcel.CreditUtils;
 
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ public static class CreditUtils
             dates.Add((Date)DateTime.FromOADate((double)datesRange[i, 0]));
             survivalProbabilities.Add((double)survivalProbabilitiesRange[i, 0]);
         }
-        QLNet.InterpolatedSurvivalProbabilityCurve<LogLinear> curve =
+        InterpolatedSurvivalProbabilityCurve<LogLinear> curve =
             new(dates, survivalProbabilities, new Actual360());
         return DataObjectController.Add(handle, curve);
     }

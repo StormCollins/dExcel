@@ -67,7 +67,7 @@ public static class DebugUtils
 
     [ExcelFunction(
         Name = "d.Debug_GetAssemblyVersion",
-        Description = "Gets a List of all assemblies loaded into the current domain.",
+        Description = "Gets a list of all assemblies loaded into the current domain.",
         Category = "∂Excel: Debug")]
     public static string GetAssemblyVersion()
     {

@@ -1,6 +1,5 @@
 ﻿namespace dExcel;
 
-
 using WPF;
 using System.IO;
 using System.Reflection;
@@ -9,6 +8,7 @@ using System.Text;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 using Excel = Microsoft.Office.Interop.Excel;
+using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using FuzzySharp;
 using ExcelUtils;
@@ -175,14 +175,17 @@ public class RibbonController : ExcelRibbon
         }
     }
 
-    public static IEnumerable<(string name, string description, string category)> GetCategoryMethods(
-        string categoryName)
+    public static IEnumerable<(string name, string description, string category)> 
+        GetCategoryMethods(List<string> categoryNames)
     {
         foreach (var method in GetExposedMethods())
         {
-            if (method.category.ToUpper().Contains(categoryName.ToUpper()))
+            foreach (string categoryName in categoryNames)
             {
-                yield return method;
+                if (method.category.ToUpper().Contains(categoryName.ToUpper()))
+                {
+                    yield return method;
+                }
             }
         }
     }
@@ -206,32 +209,47 @@ public class RibbonController : ExcelRibbon
                 => (Name: excelFunctionAttribute.Name,
                     Description: excelFunctionAttribute.Description,
                     Category: excelFunctionAttribute.Category));
-        // => (Name: methodInfos.ElementAt(i).Name,
     }
 
-    public static Dictionary<string, string> RibbonFunctionLabelToMethodCategoryMappings = new()
+    public static Dictionary<string, List<string>> RibbonFunctionLabelToMethodCategoryMappings = new()
     {
-        ["DATE"] = "Date",
-        ["MATH"] = "Math",
-        ["STATS"] = "Stats",
+        ["DATE"] = new List<string> { "Date" },
+        ["MATH"] = new List<string> { "Math" },
+        ["STATS"] = new List<string> { "Stats" },
+        ["CREDIT"] = new List<string> { "Credit" },
+        ["COMMODITIES"] = new List<string> { "Commodities" },
+        ["EQUITIES"] = new List<string> { "Equities" },
+        ["FX"] = new List<string> { "FX", "XCCY"},
+        ["INTERESTRATES"] = new List<string> { "Curve", "Interest Rates", "XCCY"},
+        ["OTHER"] = new List<string> { "Debug", "Test"},
     };
 
     public string GetFunctionContent(IRibbonControl control)
     {
-        string methodId = RibbonFunctionLabelToMethodCategoryMappings[control.Id.ToUpper()];
-        IEnumerable<(string name, string description, string category)> methods = GetCategoryMethods(methodId);
+        List<string> methodIds = RibbonFunctionLabelToMethodCategoryMappings[control.Id.ToUpper()];
+        IEnumerable<(string name, string description, string category)> methods = GetCategoryMethods(methodIds);
         string content = "";
         content += $"<menu xmlns=\"http://schemas.microsoft.com/office/2006/01/customui\">";
+        string currentSubcategory = "";
         foreach (var (name, _, _) in methods)
         {
+            var previousSubcategory = currentSubcategory;
+            currentSubcategory = 
+                Regex.Match(name, @"(?<=d\.)[^_]+", RegexOptions.Compiled | RegexOptions.IgnoreCase).Value;
+
+            if (previousSubcategory != "" && previousSubcategory != currentSubcategory)
+            {
+                content += $"<menuSeparator id='separator{currentSubcategory}'/>";
+            }
+
             content +=
                 $"<button " +
                 $"id=\"{name}\" " +
                 $"label=\"{name}\" " +
                 $"onAction=\"InsertFunction\" />";
+
         }
 
-                // $"id=\"{methodId}_{name.Replace(".", "")}\" " +
         content += "</menu>";
         return content;
     }
