@@ -121,7 +121,7 @@
 			</group>
 			<group id='grpFunctionLibrary' label='Function Library'>
 			  <dynamicMenu
-				id='Dates'
+				id='Date'
 				label='Dates'
 				getContent='GetFunctionContent'
 				getImage='GetImage'
@@ -149,6 +149,13 @@
 				getImage='GetImage'
 				size='large'
 				tag='credit-green.ico'/>
+			  <dynamicMenu
+			    id='Commodities'
+			    label='Commodities'
+			    getContent='GetFunctionContent'
+			    getImage='GetImage'
+			    size='large'
+			    tag='commodities-green.ico'/>
 			  <dynamicMenu
 				id='Equities'
 				label='Equities'

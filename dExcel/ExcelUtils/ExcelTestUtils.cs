@@ -2,7 +2,7 @@
 
 using System;
 using ExcelDna.Integration;
-using static System.String;
+using static String;
 
 /// <summary>
 /// A collection of utilities for performing basic fuzzy logic on tests/checks in Excel.
@@ -14,13 +14,13 @@ public static class ExcelTestUtils
     /// </summary>
     private enum TestOutputs
     {
-        OK, ERROR, WARNING,
+        Ok, Error, Warning
     }
 
     /// <summary>
     /// Values that are (semantically) equivalent to ERROR in Excel.
     /// </summary>
-    private static readonly List<string> excelErrorValues = new()
+    private static readonly List<string> ExcelErrorValues = new()
     {
         ExcelError.ExcelErrorDiv0.ToString(),
         ExcelError.ExcelErrorName.ToString(),
@@ -38,7 +38,7 @@ public static class ExcelTestUtils
     /// <returns>True if the input is valid, false otherwise.</returns>
     private static bool AreInputsValid(object x)
     {
-        foreach (var excelErrorValue in excelErrorValues)
+        foreach (var excelErrorValue in ExcelErrorValues)
         {
             if (String.Equals(x.ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
             {
@@ -50,7 +50,7 @@ public static class ExcelTestUtils
     }
 
     /// <summary>
-    /// Checks that inputs in the form of an array from Excel aren't invalid e.g. #NA, #VALUE etc.
+    /// Checks that inputs in the form of an array from Excel aren't invalid e.g., #NA, #VALUE etc.
     /// </summary>
     /// <param name="x">The input array.</param>
     /// <returns>True if the inputs are valid, false otherwise.</returns>
@@ -58,9 +58,9 @@ public static class ExcelTestUtils
     {
         for (int i = 0; i < x.Length; i++)
         {
-            foreach (var excelErrorValue in excelErrorValues)
+            foreach (string excelErrorValue in ExcelErrorValues)
             {
-                if (String.Equals(x[i].ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(x[i].ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
@@ -81,9 +81,9 @@ public static class ExcelTestUtils
         {
             for (int j = 0; j < x.GetLength(1); j++)
             {
-                foreach (var excelErrorValue in excelErrorValues)
+                foreach (string excelErrorValue in ExcelErrorValues)
                 {
-                    if (String.Equals(x[i, j].ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(x[i, j].ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
                     {
                         return false;
                     }
@@ -99,6 +99,7 @@ public static class ExcelTestUtils
     /// </summary>
     /// <param name="a">Input a</param>
     /// <param name="b">Input b</param>
+    /// <param name="tolerance">The tolerance for testing numeric equality e.g., default = 0.0000001.</param>
     /// <returns>'OK' if the values are equal otherwise 'ERROR'.</returns>
     [ExcelFunction(
         Name = "d.TestUtils_Equal",
@@ -116,22 +117,22 @@ public static class ExcelTestUtils
         [ExcelArgument(
             Name = "(Optional)Tolerance",
             Description = "The threshold used for the calculating numeric equality.\n" +
-                          "Default value = 0.0000001")]
+                          "Default = 0.0000001")]
         double tolerance = 0.0000001)
     {
         if (!AreInputsValid(a) || !AreInputsValid(b))
         {
-            return TestOutputs.ERROR.ToString();
+            return TestOutputs.Error.ToString();
         }
 
-        if (double.TryParse(a.ToString(), out var x) && double.TryParse(b.ToString(), out var y))
+        if (double.TryParse(a.ToString(), out double x) && double.TryParse(b.ToString(), out var y))
         {
-            return Math.Abs(y - x) < tolerance ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+            return Math.Abs(y - x) < tolerance ? TestOutputs.Ok.ToString() : TestOutputs.Error.ToString();
         }
 
         return Compare(a.ToString(), b.ToString(), StringComparison.OrdinalIgnoreCase) == 0
-            ? TestOutputs.OK.ToString()
-            : TestOutputs.ERROR.ToString();
+            ? TestOutputs.Ok.ToString()
+            : TestOutputs.Error.ToString();
     }
 
     /// <summary>
@@ -151,10 +152,10 @@ public static class ExcelTestUtils
     {
         if (!AreInputsValid(x))
         {
-            return TestOutputs.ERROR.ToString();
+            return TestOutputs.Error.ToString();
         }
 
-        return (bool)x ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+        return (bool)x ? TestOutputs.Ok.ToString() : TestOutputs.Error.ToString();
     }
 
     /// <summary>
@@ -174,10 +175,10 @@ public static class ExcelTestUtils
     {
         if (!AreInputsValid(x))
         {
-            return TestOutputs.ERROR.ToString();
+            return TestOutputs.Error.ToString();
         }
 
-        return !(bool)x ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+        return !(bool)x ? TestOutputs.Ok.ToString() : TestOutputs.Error.ToString();
     }
 
     /// <summary>
@@ -202,10 +203,10 @@ public static class ExcelTestUtils
     {
         if (!AreInputsValid(a) || !AreInputsValid(b))
         {
-            return TestOutputs.ERROR.ToString();
+            return TestOutputs.Error.ToString();
         }
 
-        return (double)a > (double)b? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+        return (double)a > (double)b? TestOutputs.Ok.ToString() : TestOutputs.Error.ToString();
     }
 
     /// <summary>
@@ -230,10 +231,10 @@ public static class ExcelTestUtils
     {
         if (!AreInputsValid(a) || !AreInputsValid(b))
         {
-            return TestOutputs.ERROR.ToString();
+            return TestOutputs.Error.ToString();
         }
 
-        return (double)a < (double)b ? TestOutputs.OK.ToString() : TestOutputs.ERROR.ToString();
+        return (double)a < (double)b ? TestOutputs.Ok.ToString() : TestOutputs.Error.ToString();
     }
 
     /// <summary>
@@ -258,7 +259,7 @@ public static class ExcelTestUtils
             Description = "Input range.")]
         params object[] xRange)
     {
-        var resultArray = new object[xRange.Length];
+        object[] resultArray = new object[xRange.Length];
 
         for (int i = 0; i < xRange.Length; i++)
         {
@@ -282,26 +283,26 @@ public static class ExcelTestUtils
         {
             if (!AreInputsValid(x))
             {
-                return TestOutputs.ERROR.ToString();
+                return TestOutputs.Error.ToString();
             }
 
-            var result = TestOutputs.OK.ToString();
+            string result = TestOutputs.Ok.ToString();
             for (int i = 0; i < x.GetLength(0); i++)
             {
-                if (String.Equals(x[i].ToString(), TestOutputs.ERROR.ToString(), StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(x[i].ToString(), TestOutputs.Error.ToString(), StringComparison.OrdinalIgnoreCase))
                 {
-                    return TestOutputs.ERROR.ToString();
+                    return TestOutputs.Error.ToString();
                 }
                 
-                if (Compare(x[i].ToString(), TestOutputs.WARNING.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
+                if (Compare(x[i].ToString(), TestOutputs.Warning.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    result = TestOutputs.WARNING.ToString();
+                    result = TestOutputs.Warning.ToString();
                 }
                 else
                 {
-                    result = result == TestOutputs.WARNING.ToString()
-                        ? TestOutputs.WARNING.ToString()
-                        : TestOutputs.OK.ToString();
+                    result = result == TestOutputs.Warning.ToString()
+                        ? TestOutputs.Warning.ToString()
+                        : TestOutputs.Ok.ToString();
                 }
             }
 
@@ -312,28 +313,28 @@ public static class ExcelTestUtils
         {
             if (!AreInputsValid(x))
             {
-                return TestOutputs.ERROR.ToString();
+                return TestOutputs.Error.ToString();
             }
 
-            var result = TestOutputs.OK.ToString();
+            string result = TestOutputs.Ok.ToString();
             for (int i = 0; i < x.GetLength(0); i++)
             {
                 for (int j = 0; j < x.GetLength(1); j++)
                 {
-                    if (Compare(x[i, j].ToString(), TestOutputs.ERROR.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
+                    if (Compare(x[i, j].ToString(), TestOutputs.Error.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        return TestOutputs.ERROR.ToString();
+                        return TestOutputs.Error.ToString();
                     }
                     
-                    if (Compare(x[i, j].ToString(), TestOutputs.WARNING.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
+                    if (Compare(x[i, j].ToString(), TestOutputs.Warning.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        result = TestOutputs.WARNING.ToString();
+                        result = TestOutputs.Warning.ToString();
                     }
                     else
                     {
-                        result = result == TestOutputs.WARNING.ToString()
-                            ? TestOutputs.WARNING.ToString()
-                            : TestOutputs.OK.ToString();
+                        result = result == TestOutputs.Warning.ToString()
+                            ? TestOutputs.Warning.ToString()
+                            : TestOutputs.Ok.ToString();
                     }
                 }
             }
@@ -357,7 +358,7 @@ public static class ExcelTestUtils
             Description = "Input range.")]
         object[,] x)
     {
-        var output = new object[x.GetLength(0), x.GetLength(1)];
+        object[,] output = new object[x.GetLength(0), x.GetLength(1)];
         
         if (!AreInputsValid(x))
         {
@@ -365,7 +366,7 @@ public static class ExcelTestUtils
             {
                 for (int j = 0; j < output.GetLength(1); j++)
                 {
-                    output[i, j] = TestOutputs.ERROR.ToString();
+                    output[i, j] = TestOutputs.Error.ToString();
                 } 
             }
 
@@ -378,18 +379,18 @@ public static class ExcelTestUtils
             {
                 if (Compare(
                         strA: x[i, j].ToString(), 
-                        strB: TestOutputs.OK.ToString(),
+                        strB: TestOutputs.Ok.ToString(),
                         comparisonType: StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    output[i, j] = TestOutputs.ERROR.ToString();
+                    output[i, j] = TestOutputs.Error.ToString();
                 }
-                else if (Compare(x[i, j].ToString(), TestOutputs.ERROR.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
+                else if (Compare(x[i, j].ToString(), TestOutputs.Error.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    output[i, j] = TestOutputs.OK.ToString();
+                    output[i, j] = TestOutputs.Ok.ToString();
                 }
                 else
                 {
-                    output[i, j] = TestOutputs.WARNING.ToString();
+                    output[i, j] = TestOutputs.Warning.ToString();
                 }
             }
         }
@@ -419,7 +420,7 @@ public static class ExcelTestUtils
             Description = "Input range.")]
         params object[] xRange)
     {
-        var resultArray = new object[xRange.Length];
+        object[] resultArray = new object[xRange.Length];
 
         for (int i = 0; i < xRange.Length; i++)
         {
@@ -443,29 +444,29 @@ public static class ExcelTestUtils
         {
             if (!AreInputsValid(x))
             {
-                return TestOutputs.ERROR.ToString();
+                return TestOutputs.Error.ToString();
             }
 
-            var result = TestOutputs.OK.ToString();
+            string result = TestOutputs.Ok.ToString();
             for (int i = 0; i < x.GetLength(0); i++)
             {
-                if (Compare(x[i].ToString(), TestOutputs.OK.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
+                if (Compare(x[i].ToString(), TestOutputs.Ok.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return TestOutputs.OK.ToString();
+                    return TestOutputs.Ok.ToString();
                 }
                 
                 if (Compare(
                         strA: x[i].ToString(), 
-                        strB: TestOutputs.WARNING.ToString(),
+                        strB: TestOutputs.Warning.ToString(),
                         comparisonType: StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    result = TestOutputs.WARNING.ToString();
+                    result = TestOutputs.Warning.ToString();
                 }
                 else
                 {
-                    result = result == TestOutputs.WARNING.ToString()
-                        ? TestOutputs.WARNING.ToString()
-                        : TestOutputs.ERROR.ToString();
+                    result = result == TestOutputs.Warning.ToString()
+                        ? TestOutputs.Warning.ToString()
+                        : TestOutputs.Error.ToString();
                 }
             }
             
@@ -476,34 +477,34 @@ public static class ExcelTestUtils
         {
             if (!AreInputsValid(x))
             {
-                return TestOutputs.ERROR.ToString();
+                return TestOutputs.Error.ToString();
             }
 
-            var result = TestOutputs.OK.ToString();
+            string result = TestOutputs.Ok.ToString();
             for (int i = 0; i < x.GetLength(0); i++)
             {
                 for (int j = 0; j < x.GetLength(1); j++)
                 {
                     if (Compare(
                             strA: x[i, j].ToString(), 
-                            strB: TestOutputs.OK.ToString(),
+                            strB: TestOutputs.Ok.ToString(),
                             comparisonType: StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        return TestOutputs.OK.ToString();
+                        return TestOutputs.Ok.ToString();
                     }
                     
                     if (Compare(
                             strA: x[i, j].ToString(), 
-                            strB: TestOutputs.WARNING.ToString(),
+                            strB: TestOutputs.Warning.ToString(),
                             comparisonType: StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        result = TestOutputs.WARNING.ToString();
+                        result = TestOutputs.Warning.ToString();
                     }
                     else
                     {
-                        result = result == TestOutputs.WARNING.ToString()
-                            ? TestOutputs.WARNING.ToString()
-                            : TestOutputs.ERROR.ToString();
+                        result = result == TestOutputs.Warning.ToString()
+                            ? TestOutputs.Warning.ToString()
+                            : TestOutputs.Error.ToString();
                     }
                 }
             }

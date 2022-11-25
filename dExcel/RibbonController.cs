@@ -1,7 +1,7 @@
-﻿using dExcel.WPF;
+﻿namespace dExcel;
 
-namespace dExcel;
 
+using WPF;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -100,8 +100,7 @@ public class RibbonController : ExcelRibbon
         }
 
         string searchText = ((Excel.Range)xlApp.Selection).Value2;
-        string matchedSheet = Process.ExtractTop(searchText, sheetNames).Where(x => x.Score > 90).First().Value;
-
+        string matchedSheet = Process.ExtractTop(searchText, sheetNames).First(x => x.Score > 90).Value;
         ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", matchedSheet + "!A1");
     }
 
@@ -131,7 +130,7 @@ public class RibbonController : ExcelRibbon
         }
 
         Excel.Range selectedRange = ((Excel.Range)xlApp.Selection);
-        List<string> failedHyperlinks = new List<string>();
+        List<string> failedHyperlinks = new();
 
         for (int i = 1; i < selectedRange.Rows.Count + 1; i++)
         {
@@ -139,7 +138,8 @@ public class RibbonController : ExcelRibbon
             for (int j = 1; j < selectedRange.Columns.Count + 1; j++)
             {
                 Excel.Range currentCell = selectedRange.Rows[i].Columns[j];
-                if (currentCell.Value2 != null && currentCell.Value2?.ToString() != "" && currentCell.Value2?.ToString() != ExcelEmpty.Value.ToString())
+                if (currentCell.Value2 != null && currentCell.Value2?.ToString() != "" &&
+                    currentCell.Value2?.ToString() != ExcelEmpty.Value.ToString())
                 {
                     searchText = selectedRange.Rows[i].Columns[j].Value2;
                 }
@@ -148,7 +148,8 @@ public class RibbonController : ExcelRibbon
             try
             {
                 string matchedHeading = Process.ExtractTop(searchText, headings.Keys).First(x => x.Score > 90).Value;
-                ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(selectedRange.Rows[i], "", headings[matchedHeading]);
+                ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(selectedRange.Rows[i], "",
+                    headings[matchedHeading]);
             }
             catch (Exception)
             {
@@ -158,7 +159,7 @@ public class RibbonController : ExcelRibbon
 
         if (failedHyperlinks.Count > 0)
         {
-            Alert alert = new Alert
+            Alert alert = new()
             {
                 AlertCaption =
                 {
@@ -174,7 +175,8 @@ public class RibbonController : ExcelRibbon
         }
     }
 
-    public static IEnumerable<(string name, string description, string category)> GetCategoryMethods(string categoryName)
+    public static IEnumerable<(string name, string description, string category)> GetCategoryMethods(
+        string categoryName)
     {
         foreach (var method in GetExposedMethods())
         {
@@ -197,31 +199,40 @@ public class RibbonController : ExcelRibbon
 
         var methodInfos = methods as MethodInfo[] ?? methods.ToArray();
         return methodInfos.Select((t, i)
-            => (ExcelFunctionAttribute)methodInfos
-                .ElementAt(i)
-                .GetCustomAttribute(typeof(ExcelFunctionAttribute)))
-                .Select((excelFunctionAttribute, i)
-                    => (Name: excelFunctionAttribute.Name,
-                        Description: excelFunctionAttribute.Description,
-                        Category: excelFunctionAttribute.Category));
-                    // => (Name: methodInfos.ElementAt(i).Name,
+                => (ExcelFunctionAttribute)methodInfos
+                    .ElementAt(i)
+                    .GetCustomAttribute(typeof(ExcelFunctionAttribute)))
+            .Select((excelFunctionAttribute, i)
+                => (Name: excelFunctionAttribute.Name,
+                    Description: excelFunctionAttribute.Description,
+                    Category: excelFunctionAttribute.Category));
+        // => (Name: methodInfos.ElementAt(i).Name,
     }
+
+    public static Dictionary<string, string> RibbonFunctionLabelToMethodCategoryMappings = new()
+    {
+        ["DATE"] = "Date",
+        ["MATH"] = "Math",
+        ["STATS"] = "Stats",
+    };
 
     public string GetFunctionContent(IRibbonControl control)
     {
-        string methodId = control.Id.Replace("_", " ");
-        var methods = GetCategoryMethods(control.Id.Replace("_", " "));
-        var content = "";
+        // string methodId = control.Id.Replace("_", " ");
+        string methodId = RibbonFunctionLabelToMethodCategoryMappings[control.Id.ToUpper()];
+        IEnumerable<(string name, string description, string category)> methods = GetCategoryMethods(control.Id.Replace("_", " "));
+        string content = "";
         content += $"<menu xmlns=\"http://schemas.microsoft.com/office/2006/01/customui\">";
         foreach (var (name, _, _) in methods)
         {
             content +=
                 $"<button " +
-                $"id=\"{methodId}_{name.Replace(".", "")}\" " +
-                $"label=\"d.{methodId}_{name}\" " +
+                $"id=\"{name}\" " +
+                $"label=\"{name}\" " +
                 $"onAction=\"InsertFunction\" />";
         }
 
+                // $"id=\"{methodId}_{name.Replace(".", "")}\" " +
         content += "</menu>";
         return content;
     }

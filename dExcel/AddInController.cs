@@ -40,13 +40,13 @@ public class AddInController : IExcelAddIn
 
         if (NetworkUtils.GetConnectionStatus())
         {
-            var identity = WindowsIdentity.GetCurrent();
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
             string userName = identity.Name.Split('\\')[1];
-            var user = new DirectoryEntry($"LDAP://<SID={identity.User?.Value}>");
+            DirectoryEntry user = new($"LDAP://<SID={identity.User?.Value}>");
             user.RefreshCache(new[] { "givenName", "sn" });
             string? firstName = user.Properties["givenName"].Value?.ToString();
             string? surname = user.Properties["sn"].Value?.ToString();
-
+            
             SQLiteConnection connection =
                 new(
                     @"URI=file:\\\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\dExcelUsageStats\dexcel_usage_stats.sqlite");
