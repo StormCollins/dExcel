@@ -8,7 +8,7 @@ public static class NetworkUtils
     /// <summary>
     /// Gets a boolean value indicating whether the user is currently connected to the Deloitte network.
     /// </summary>
-    /// <returns>True if connected to network otherwise false.</returns>
+    /// <returns>True if connected to the Deloitte network otherwise false.</returns>
     public static bool GetConnectionStatus()
     {
         try

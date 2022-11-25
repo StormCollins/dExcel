@@ -18,6 +18,8 @@ using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Security.Principal;
+using System.Data.SQLite;
+using System.DirectoryServices;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
@@ -76,6 +78,35 @@ public partial class MainWindow : Window
 
         string currentDExcelVersion = GetInstalledDExcelVersion();
         CurrentDExcelVersion.Output = currentDExcelVersion;
+
+        if (NetworkUtils.GetConnectionStatus())
+        {
+            var identity = WindowsIdentity.GetCurrent();
+            string userName = identity.Name.Split('\\')[1];
+            var user = new DirectoryEntry($"LDAP://<SID={identity.User?.Value}>");
+            user.RefreshCache(new[] { "givenName", "sn" });
+            string? firstName = user.Properties["givenName"].Value?.ToString();
+            string? surname = user.Properties["sn"].Value?.ToString();
+
+            SQLiteConnection connection =
+                new(
+                    @"URI=file:\\\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\dExcelUsageStats\dexcel_usage_stats.sqlite");
+            connection.Open();
+
+            using SQLiteCommand writeCommand = new(connection);
+            writeCommand.CommandText =
+                $@"INSERT INTO users(username, firstname, surname, created, active)
+               SELECT '{userName}', '{firstName}', '{surname}', DATETIME('NOW'), TRUE
+               WHERE NOT EXISTS (SELECT * FROM users WHERE username='{userName}');";
+
+            writeCommand.ExecuteNonQuery();
+            writeCommand.CommandText =
+                $@"INSERT INTO dexcel_installer_usage(username, version, date)
+               VALUES
+               ('{userName}', '{installerVersion}', DATETIME('NOW'));";
+
+            writeCommand.ExecuteNonQuery();
+        }
 
         if (string.Compare(
                 strA: currentDExcelVersion,

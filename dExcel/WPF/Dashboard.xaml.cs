@@ -1,15 +1,14 @@
-﻿namespace dExcel;
+﻿namespace dExcel.WPF;
 
-using System;
 using System.Diagnostics;
-using System.Windows.Navigation;
-using System.Net.NetworkInformation;
 using System.IO;
+using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using ExcelDna.Integration;
-using Excel = Microsoft.Office.Interop.Excel;
+
 
 /// <summary>
 /// Interaction logic for Dashboard.xaml
