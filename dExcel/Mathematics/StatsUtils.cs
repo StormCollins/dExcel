@@ -50,7 +50,7 @@ public static class StatsUtils
     [ExcelFunction(
         Name = "d.Stats_CorrelationMatrix",
         Description = "Calculates the Pearson correlation matrix.\n" +
-                      "Deprecates the AQS function 'corr'.",
+                      "Deprecates the AQS function 'Corr'.",
         Category = "∂Excel: Stats")]
     public static double[,] CorrelationMatrix(
         [ExcelArgument(
