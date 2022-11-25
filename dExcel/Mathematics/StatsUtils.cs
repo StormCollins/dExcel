@@ -74,18 +74,32 @@ public static class StatsUtils
         Name = "d.Stats_NormalRandomNumbers",
         Description = "Generates a sequence of standard normal random variates.\n" +
                       "Deprecates AQS function: 'Randn'",
-        Category = "∂Excel: Stats")]
-    public static double[,] NormalRandomNumbers(
+        Category = "∂Excel: Stats",
+        IsVolatile = true)]
+    public static object NormalRandomNumbers(
     [ExcelArgument(
             Name = "Seed",
-            Description = "The seed for the random number generator.")]
-        int seed)
+            Description = "The seed for the random number generator. If left blank, a random seed will be used.")]
+        object seed)
     {
         var caller = XlCall.Excel(XlCall.xlfCaller) as ExcelReference;
         var rowCount = caller.RowLast - caller.RowFirst + 1;
         var columnCount = caller.ColumnLast - caller.ColumnFirst + 1;
         var results = new double[rowCount, columnCount];
-        var random = new mnr.MersenneTwister(seed);
+        var random = new mnr.MersenneTwister();
+
+        if (seed is not ExcelDna.Integration.ExcelMissing)
+        {
+            try
+            {
+                random = new mnr.MersenneTwister(Convert.ToInt32(seed));
+            }
+            catch
+            {
+                return CommonUtils.DExcelErrorMessage("Invalid seed specified.");
+            }
+        }
+        
         for (int j = 0; j < columnCount; j++)
         {
             for (int i = 0; i < rowCount; i++)
