@@ -68,6 +68,5 @@ public class AddInController : IExcelAddIn
             writeCommand.ExecuteNonQuery();
         }
 
-        xlapp.Calculation = Excel.XlCalculation.xlCalculationManual;
     }
 }

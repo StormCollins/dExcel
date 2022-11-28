@@ -217,7 +217,7 @@ public static class Curve
         (Compounding? compounding, Frequency? frequency)
             = compoundingConvention.ToUpper() switch
             {
-                "Simple" => (Compounding.Compounded, Frequency.Once),
+                "SIMPLE" => (Compounding.Simple, Frequency.Once),
                 "NACM" => (Compounding.Compounded, Frequency.Monthly),
                 "NACQ" => (Compounding.Compounded, Frequency.Quarterly),
                 "NACS" => (Compounding.Compounded, Frequency.Semiannual),
