@@ -121,14 +121,13 @@ public static class Curve
 
         if (interpolation == null)
         {
-            return $"Interpolation '{interpolationParameter}' invalid.";
+            return CommonUtils.DExcelErrorMessage($"Invalid interpolation method: {interpolationParameter}");
         }
 
         string? calendarsParameter = ExcelTable.GetTableValue<string>(curveParameters, "Value", "Calendars");
-        var calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
-
-        var interpolationType = typeof(InterpolatedDiscountCurve<>).MakeGenericType(interpolation.GetType());
-        var termStructure= Activator.CreateInstance(interpolationType, dates, discountFactors, dayCountConvention, interpolation);
+        IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
+        Type interpolationType = typeof(InterpolatedDiscountCurve<>).MakeGenericType(interpolation.GetType());
+        object? termStructure= Activator.CreateInstance(interpolationType, dates, discountFactors, dayCountConvention, interpolation);
         Dictionary<string, object> curveDetails = new()
         {
             ["Curve.Object"] = termStructure,
@@ -161,7 +160,7 @@ public static class Curve
             string handle,
         [ExcelArgument(
             Name = "Dates",
-            Description = "The dates for which to get the disocunt factors.")]
+            Description = "The dates for which to get the discount factors.")]
             object[] dates)
     {
         var discountFactors = new object[dates.Length, 1];
@@ -187,8 +186,9 @@ public static class Curve
     /// <summary>
     /// Gets the zero rate(s) from a YieldTermStructure curve object for a given set of date(s).
     /// </summary>
-    /// <param name="handle">The curve object handle (i.e. name).</param>
+    /// <param name="handle">The curve object handle (i.e., name).</param>
     /// <param name="datesRange">The range of dates.</param>
+    /// <param name="compoundingConvention">The compounding convention.</param>
     /// <returns>The zero rate(s) for the given date(s).</returns>
     [ExcelFunction(
         Name = "d.Curve_GetZeroRates",
@@ -205,8 +205,9 @@ public static class Curve
             Description = "The dates for which to calculate the zero rates.")]
             object[,] datesRange,
         [ExcelArgument(
-            Name = "(Optional)Compounding",
-            Description = "The compounding convention: NACC, NACM, NACQ, NACS, NACA \nDefault = NACC")]
+            Name = "(Optional)Compounding Convention",
+            Description = "The compounding convention: Simple, NACC, NACM, NACQ, NACS, NACA \n" +
+                          "Default = NACC")]
             string compoundingConvention = "NACC")
     {
         var curve = GetCurveObject(handle);
@@ -216,6 +217,7 @@ public static class Curve
         (Compounding? compounding, Frequency? frequency)
             = compoundingConvention.ToUpper() switch
             {
+                "Simple" => (Compounding.Compounded, Frequency.Once),
                 "NACM" => (Compounding.Compounded, Frequency.Monthly),
                 "NACQ" => (Compounding.Compounded, Frequency.Quarterly),
                 "NACS" => (Compounding.Compounded, Frequency.Semiannual),
@@ -227,7 +229,7 @@ public static class Curve
         var zeroRates = new object[datesRange.Length, 1];
         if (compounding == null)
         {
-            zeroRates[0, 0] = $"#ERROR: Invalid compounding convention '{compoundingConvention}'.";
+            zeroRates[0, 0] = CommonUtils.DExcelErrorMessage($"Invalid compounding convention '{compoundingConvention}'.");
             return zeroRates;
         }
 

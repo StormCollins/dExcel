@@ -82,9 +82,15 @@ public static class StatsUtils
             Description = "The seed for the random number generator. If left blank, a random seed will be used.")]
         object seed)
     {
-        var caller = XlCall.Excel(XlCall.xlfCaller) as ExcelReference;
-        var rowCount = caller.RowLast - caller.RowFirst + 1;
-        var columnCount = caller.ColumnLast - caller.ColumnFirst + 1;
+        int rowCount = 1;
+        int columnCount = 1;
+        if (ExcelDnaUtil.Application is not null)
+        {
+            var caller = XlCall.Excel(XlCall.xlfCaller) as ExcelReference;
+            rowCount = caller.RowLast - caller.RowFirst + 1;
+            columnCount = caller.ColumnLast - caller.ColumnFirst + 1;
+        }
+
         var results = new double[rowCount, columnCount];
         var random = new mnr.MersenneTwister();
 

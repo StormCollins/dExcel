@@ -1,7 +1,6 @@
-﻿using dExcel.WPF;
+﻿namespace dExcel;
 
-namespace dExcel;
-
+using WPF;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -9,6 +8,7 @@ using System.Text;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 using Excel = Microsoft.Office.Interop.Excel;
+using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using FuzzySharp;
 using ExcelUtils;
@@ -53,10 +53,13 @@ public class RibbonController : ExcelRibbon
         {
             var xlApp = (Excel.Application)ExcelDnaUtil.Application;
 #if DEBUG
-            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\Resources\Workbooks\dexcel-testing.xlsm");
+            Excel.Workbook wb = xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\Resources\Workbooks\dexcel-testing.xlsm");
 #else
-            xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\Releases\Current\Resources\Workbooks\dexcel-testing.xlsm");
+            Excel.Workbook wb = xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\Releases\Current\Resources\Workbooks\dexcel-testing.xlsm", ReadOnly: true);
 #endif
+            Excel.Worksheet ws = wb.Worksheets["Summary"];
+            ws.Activate();
+            ws.Cells[1, 1].Select();
         }
     }
 
@@ -100,9 +103,8 @@ public class RibbonController : ExcelRibbon
         }
 
         string searchText = ((Excel.Range)xlApp.Selection).Value2;
-        string matchedSheet = Process.ExtractTop(searchText, sheetNames).Where(x => x.Score > 90).First().Value;
-
-        ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", matchedSheet + "!A1");
+        string matchedSheet = Process.ExtractTop(searchText, sheetNames).First(x => x.Score > 90).Value;
+        ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", $"'{matchedSheet}'!A1");
     }
 
     public void CreateLinksToHeadings(IRibbonControl control)
@@ -131,7 +133,7 @@ public class RibbonController : ExcelRibbon
         }
 
         Excel.Range selectedRange = ((Excel.Range)xlApp.Selection);
-        List<string> failedHyperlinks = new List<string>();
+        List<string> failedHyperlinks = new();
 
         for (int i = 1; i < selectedRange.Rows.Count + 1; i++)
         {
@@ -139,7 +141,8 @@ public class RibbonController : ExcelRibbon
             for (int j = 1; j < selectedRange.Columns.Count + 1; j++)
             {
                 Excel.Range currentCell = selectedRange.Rows[i].Columns[j];
-                if (currentCell.Value2 != null && currentCell.Value2?.ToString() != "" && currentCell.Value2?.ToString() != ExcelEmpty.Value.ToString())
+                if (currentCell.Value2 != null && currentCell.Value2?.ToString() != "" &&
+                    currentCell.Value2?.ToString() != ExcelEmpty.Value.ToString())
                 {
                     searchText = selectedRange.Rows[i].Columns[j].Value2;
                 }
@@ -148,7 +151,8 @@ public class RibbonController : ExcelRibbon
             try
             {
                 string matchedHeading = Process.ExtractTop(searchText, headings.Keys).First(x => x.Score > 90).Value;
-                ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(selectedRange.Rows[i], "", headings[matchedHeading]);
+                ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(selectedRange.Rows[i], "",
+                    headings[matchedHeading]);
             }
             catch (Exception)
             {
@@ -158,7 +162,7 @@ public class RibbonController : ExcelRibbon
 
         if (failedHyperlinks.Count > 0)
         {
-            Alert alert = new Alert
+            Alert alert = new()
             {
                 AlertCaption =
                 {
@@ -174,13 +178,17 @@ public class RibbonController : ExcelRibbon
         }
     }
 
-    public static IEnumerable<(string name, string description, string category)> GetCategoryMethods(string categoryName)
+    public static IEnumerable<(string name, string description, string category)> 
+        GetCategoryMethods(List<string> categoryNames)
     {
         foreach (var method in GetExposedMethods())
         {
-            if (method.category.ToUpper().Contains(categoryName.ToUpper()))
+            foreach (string categoryName in categoryNames)
             {
-                yield return method;
+                if (method.category.ToUpper().Contains(categoryName.ToUpper()))
+                {
+                    yield return method;
+                }
             }
         }
     }
@@ -197,29 +205,52 @@ public class RibbonController : ExcelRibbon
 
         var methodInfos = methods as MethodInfo[] ?? methods.ToArray();
         return methodInfos.Select((t, i)
-            => (ExcelFunctionAttribute)methodInfos
-                .ElementAt(i)
-                .GetCustomAttribute(typeof(ExcelFunctionAttribute)))
-                .Select((excelFunctionAttribute, i)
-                    => (Name: excelFunctionAttribute.Name,
-                        Description: excelFunctionAttribute.Description,
-                        Category: excelFunctionAttribute.Category));
-                    // => (Name: methodInfos.ElementAt(i).Name,
+                => (ExcelFunctionAttribute)methodInfos
+                    .ElementAt(i)
+                    .GetCustomAttribute(typeof(ExcelFunctionAttribute)))
+            .Select((excelFunctionAttribute, i)
+                => (Name: excelFunctionAttribute.Name,
+                    Description: excelFunctionAttribute.Description,
+                    Category: excelFunctionAttribute.Category));
     }
+
+    public static Dictionary<string, List<string>> RibbonFunctionLabelToMethodCategoryMappings = new()
+    {
+        ["DATE"] = new List<string> { "Date" },
+        ["MATH"] = new List<string> { "Math" },
+        ["STATS"] = new List<string> { "Stats" },
+        ["CREDIT"] = new List<string> { "Credit" },
+        ["COMMODITIES"] = new List<string> { "Commodities" },
+        ["EQUITIES"] = new List<string> { "Equities" },
+        ["FX"] = new List<string> { "FX", "XCCY"},
+        ["INTERESTRATES"] = new List<string> { "Curve", "Interest Rates", "XCCY"},
+        ["OTHER"] = new List<string> { "Debug", "Test"},
+    };
 
     public string GetFunctionContent(IRibbonControl control)
     {
-        string methodId = control.Id.Replace("_", " ");
-        var methods = GetCategoryMethods(control.Id.Replace("_", " "));
-        var content = "";
+        List<string> methodIds = RibbonFunctionLabelToMethodCategoryMappings[control.Id.ToUpper()];
+        IEnumerable<(string name, string description, string category)> methods = GetCategoryMethods(methodIds);
+        string content = "";
         content += $"<menu xmlns=\"http://schemas.microsoft.com/office/2006/01/customui\">";
+        string currentSubcategory = "";
         foreach (var (name, _, _) in methods)
         {
+            var previousSubcategory = currentSubcategory;
+            currentSubcategory = 
+                Regex.Match(name, @"(?<=d\.)[^_]+", RegexOptions.Compiled | RegexOptions.IgnoreCase).Value;
+
+            if (previousSubcategory != "" && previousSubcategory != currentSubcategory)
+            {
+                content += $"<menuSeparator id='separator{currentSubcategory}'/>";
+            }
+
             content +=
                 $"<button " +
-                $"id=\"{methodId}_{name.Replace(".", "")}\" " +
-                $"label=\"d.{methodId}_{name}\" " +
+                $"id=\"{name}\" " +
+                $"label=\"{name}\" " +
                 $"onAction=\"InsertFunction\" />";
+
         }
 
         content += "</menu>";

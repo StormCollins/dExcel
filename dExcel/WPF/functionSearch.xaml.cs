@@ -1,18 +1,14 @@
-﻿using FuzzySharp.Extractor;
-
-namespace dExcel;
-
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
 using FuzzySharp;
+using FuzzySharp.Extractor;
+
+namespace dExcel.WPF;
 
 /// <summary>
 /// Interaction logic for FunctionSearch.xaml
@@ -23,13 +19,24 @@ public partial class FunctionSearch : Window
 
     private readonly Dictionary<string, string> _aqsTodExcelFunctionMapping = new()
     {
+        // Dates
         ["FOLDAY"] = "d.Date_FolDay",
         ["MODFOLDAY"] = "d.Date_ModFolDay",
         ["PREVDAY"] = "d.Date_PrevDay",
-        ["DT_INTERP1"] = "d.Math_InterpolateContiguousArea",
+        // Math
+        ["DT_INTERP"] = "d.Math_Interpolate",
+        ["DT_INTERP1"] = "d.Math_Interpolate",
+        // Stats
         ["CHOL"] = "d.Stats_Cholesky",
         ["CORR"] = "d.Stats_CorrelationMatrix",
         ["RANDN"] = "d.Stats_NormalRandomNumbers",
+        // Equities
+        ["DT_VOLATILITY"] = "d.Equity_Volatility",
+        ["BS"] = "d.Equity_BlackScholes",
+        // Interest Rates
+        ["BLACK"] = "d.IR_Black",
+        ["Disc2ForwardRate"] = "d.IR_DiscountFactorsToForwardRate",
+        ["INTCONVERT"] = "d.IR_ConvertInterestRate",
     };
 
     public class FunctionMatch : INotifyPropertyChanged

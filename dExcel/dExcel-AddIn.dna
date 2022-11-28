@@ -121,7 +121,7 @@
 			</group>
 			<group id='grpFunctionLibrary' label='Function Library'>
 			  <dynamicMenu
-				id='Dates'
+				id='Date'
 				label='Dates'
 				getContent='GetFunctionContent'
 				getImage='GetImage'
@@ -150,6 +150,13 @@
 				size='large'
 				tag='credit-green.ico'/>
 			  <dynamicMenu
+			    id='Commodities'
+			    label='Commodities'
+			    getContent='GetFunctionContent'
+			    getImage='GetImage'
+			    size='large'
+			    tag='commodities-green.ico'/>
+			  <dynamicMenu
 				id='Equities'
 				label='Equities'
 				getContent='GetFunctionContent'
@@ -164,7 +171,7 @@
 				size='large'
 				tag='fx-green.ico'/>
 			  <dynamicMenu
-				id='Interest_Rates'
+				id='InterestRates'
 				label='Interest Rates'
 				getContent='GetFunctionContent'
 				getImage='GetImage'
@@ -192,39 +199,51 @@
 				id='btnCommodities_Templates'
 				label='Commodities'
 				getImage='GetImage'
+				enabled='false'
 				size='large'
+				supertip='This feature is still under development.'
 				tag='commodities-large-blue.ico'/>
 			  <button 
 				id='btnCredit_Templates' 
 				label='Credit' 
 				getImage='GetImage' 
+				enabled='false'
 				size='large' 
+				supertip='This feature is still under development.'
 				tag='credit-large-blue.ico'/>
 			  <button 
 				id='btnEquities_Templates'
 				label='Equities'
 				getImage='GetImage'
+				enabled='false'
 				size='large'
+				supertip='This feature is still under development.'
 				tag='equities-large-blue.ico'/>
 			  <button
 				id='btnFX_Templates'
 				label='FX'
 				getImage='GetImage'
+				enabled='false'
 				size='large'
+				supertip='This feature is still under development.'
 				tag='fx-large-blue.ico'/>
 			  <button
 				id='btnInterest_Rates_Templates'
 				label='Interest Rates'
 				getImage='GetImage'
+				enabled='false'
 				size='large'
+				supertip='This feature is still under development.'
 				tag='interest-rates-large-blue.ico'/>
 			  <separator id='separatorTemplateSearch'/>
 			  <button
 				id='TemplateSearch'
 				label='Template Search'
 				getImage='GetImage'
+				enabled='false'
 				onAction='OpenTemplateSearch'
 				size='large'
+				supertip='This feature is still under development.'
 				tag='template-search-large-blue.ico'/>
 			</group>
 			<group id='grpMarketData' label='Market Data'>
@@ -232,7 +251,9 @@
 				id='btnMarketData'
 				label='Database'
 				getImage='GetImage'
+				enabled='false'
 				size='large'
+				supertip='This feature is still under development.'
 				tag='database-connected-large-green.ico'/>	  
 			</group>
 		  </tab>

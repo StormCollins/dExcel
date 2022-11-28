@@ -20,7 +20,7 @@ public static class DateUtils
     /// 'USD,ZAR').</param>
     /// <returns>Adjusted business day.</returns>
     [ExcelFunction(
-        Name = "d.Date_FolDay",
+        Name = "d.Dates_FolDay",
         Description = "Calculates the next business day using the 'following' convention.\n" +
                       "Deprecates AQS Function: 'FolDay'",
         Category = "∂Excel: Dates")]
@@ -61,7 +61,7 @@ public static class DateUtils
     /// 'USD,ZAR').</param>
     /// <returns>Adjusted business day.</returns>
     [ExcelFunction(
-        Name = "d.Date_ModFolDay",
+        Name = "d.Dates_ModFolDay",
         Description = "Calculates the next business day using the 'modified following' convention.\n" +
                       "Deprecates AQS function: 'ModFolDay'",
         Category = "∂Excel: Dates")]
@@ -102,7 +102,7 @@ public static class DateUtils
     /// 'USD,ZAR').</param>
     /// <returns>The adjusted date.</returns>
     [ExcelFunction(
-        Name = "d.Date_PrevDay",
+        Name = "d.Dates_PrevDay",
         Description = "Calculates the previous business day using the 'previous' convention.\n" +
                       "Deprecates AQS function: 'PrevDay'",
         Category = "∂Excel: Dates")]
@@ -146,7 +146,7 @@ public static class DateUtils
     /// "Preceding".</param>
     /// <returns>The advanced or retarded date.</returns>
     [ExcelFunction(
-        Name = "d.Date_AddTenorToDate",
+        Name = "d.Dates_AddTenorToDate",
         Description = "Advance or retard a date by a given tenor.",
         Category = "∂Excel: Dates")]
     public static object AddTenorToDate(
@@ -216,7 +216,7 @@ public static class DateUtils
     /// </summary>
     /// <returns>List of available business day conventions.</returns>
     [ExcelFunction(
-        Name = "d.Date_GetAvailableBusinessDayConventions",
+        Name = "d.Dates_GetAvailableBusinessDayConventions",
         Description = "Lists available business day conventions in ∂Excel.",
         Category = "∂Excel: Dates")]
     public static object[,] GetAvailableBusinessDayConventions()
@@ -259,7 +259,7 @@ public static class DateUtils
     /// </summary>
     /// <returns>List of available day count conventions.</returns>
     [ExcelFunction(
-        Name = "d.Date_GetAvailableDayCountConventions",
+        Name = "d.Dates_GetAvailableDayCountConventions",
         Description = "Lists available day count conventions in ∂Excel.",
         Category = "∂Excel: Dates")]
     public static object[,] GetAvailableDayCountConventions()
@@ -349,7 +349,10 @@ public static class DateUtils
     /// Gets the list of available calendars.
     /// </summary>
     /// <returns>List of available calendars.</returns>
-    [ExcelFunction(Name = "d.Date_GetListOfCalendars", Description = "Get the list of available calendars.")]
+    [ExcelFunction(
+        Name = "d.Dates_GetListOfCalendars", 
+        Description = "Get the list of available calendars.",
+        Category = "∂Excel: Dates")]
     public static object[,] GetListOfCalendars()
     {
         object[,] calendars = new object[34, 4]
@@ -403,11 +406,23 @@ public static class DateUtils
     /// <param name="calendarsToParse">Calendars to parse.</param>
     /// <returns>List of holidays.</returns>
     [ExcelFunction(
-        Name = "d.Date_GetListOfHolidays",
+        Name = "d.Dates_GetListOfHolidays",
         Description = "Get a list of holidays between, and including, two dates and excluding weekends.\n" +
                       "Note, if a holiday falls on a weekend it will not be included in this list.",
         Category = "∂Excel: Dates")]
-    public static object[,] GetListOfHolidays(DateTime startDate, DateTime endDate, string calendarsToParse)
+    public static object[,] GetListOfHolidays(
+        [ExcelArgument(
+            Name = "Start Date", 
+            Description = "Holidays are determined between start date, inclusive, and end date, inclusive.")]
+        DateTime startDate, 
+        [ExcelArgument(
+            Name = "End Date", 
+            Description = "Holidays are determined between start date, inclusive, and end date, inclusive.")]
+        DateTime endDate,
+        [ExcelArgument(
+            Name = "Calendar(s) to Parse",
+            Description = "The single calendar (e.g., 'USD', 'ZAR') or joint calendar (e.g., 'USD,ZAR') to parse.")]
+        string calendarsToParse)
     {
         (Calendar? calendar, string errorMessage) = ParseCalendars(calendarsToParse);
         if (calendar is null)
@@ -502,7 +517,7 @@ public static class DateUtils
     /// 'Forward' = Start from start date and work forwards. 'IMM' = IMM dates.</param>
     /// <returns></returns>
     [ExcelFunction(
-        Name = "d.Date_GenerateSchedule",
+        Name = "d.Dates_GenerateSchedule",
         Description = "Generates a schedule of dates.",
         Category = "∂Excel: Dates")]
     public static object[,] GenerateSchedule(
