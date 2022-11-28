@@ -55,6 +55,7 @@ public static class RatesUtils
     /// Converts an interest rate from one compounding convention to another.
     /// </summary>
     /// <param name="rate">Interest rate.</param>
+    /// <param name="rateTenor">The tenor associated with the supplied interest rate, inputted as a year fraction.</param>
     /// <param name="oldCompoundingConvention">Compounding convention to convert from.</param>
     /// <param name="newCompoundingConvention">Compounding convention to convert to.</param>
     /// <returns>Interest rate converted to new compounding convention.</returns>
@@ -68,6 +69,10 @@ public static class RatesUtils
                 Name = "Rate",
                 Description = "The interest rate to convert.")]
         double rate,
+        [ExcelArgument(
+                Name = "Rate Tenor",
+                Description = "The tenor of the supplied interest rate to convert, as a fraction of a year.")]
+        double rateTenor,
         [ExcelArgument(
                 Name = "Old Compounding Convention ",
                 Description = "The compounding convention to convert from.\n" +
@@ -86,69 +91,69 @@ public static class RatesUtils
         {
             // First we do all conversions from simple rate to other.
             case "SIMPLE" when newCompoundingConvention.ToUpper() == "NACA":
-                return (Math.Pow(1 + rate, 1) - 1);
+                return (Math.Pow(1 + rate * rateTenor, 1.0 / rateTenor) - 1);
             case "SIMPLE" when newCompoundingConvention.ToUpper() == "NACS":
-                return 2 * (Math.Pow(1 + rate, 1.0 / 2.0) - 1);
+                return 2.0 * (Math.Pow(1 + rate * rateTenor, 1.0 / (2.0 * rateTenor)) - 1);
             case "SIMPLE" when newCompoundingConvention.ToUpper() == "NACQ":
-                return 4 * (Math.Pow(1 + rate, 1.0 / 4.0) - 1);
+                return 4.0 * (Math.Pow(1 + rate * rateTenor, 1.0 / (4.0 * rateTenor)) - 1);
             case "SIMPLE" when newCompoundingConvention.ToUpper() == "NACM":
-                return 12 * (Math.Pow(1 + rate, 1.0 / 12.0) - 1);
+                return 12.0 * (Math.Pow(1 + rate * rateTenor, 1.0 / (12.0 * rateTenor)) - 1);
             case "SIMPLE" when newCompoundingConvention.ToUpper() == "NACC":
-                return Math.Log(1+rate);
+                return Math.Log(1 + rate * rateTenor) / rateTenor;
             // Second we do all conversions from rates to simple.
             case "NACA" when newCompoundingConvention.ToUpper() == "SIMPLE":
-                return Math.Pow(1 + rate / 1.0, 1) - 1;
+                return (Math.Pow(1 + rate / 1.0, 1.0 * rateTenor) - 1) / rateTenor;
             case "NACS" when newCompoundingConvention.ToUpper() == "SIMPLE":
-                return Math.Pow(1 + rate / 2.0, 2) - 1;
+                return (Math.Pow(1 + rate / 2.0, 2.0 * rateTenor) - 1) / rateTenor;
             case "NACQ" when newCompoundingConvention.ToUpper() == "SIMPLE":
-                return Math.Pow(1 + rate / 4.0, 4) - 1;
+                return (Math.Pow(1 + rate / 4.0, 4.0 * rateTenor) - 1) / rateTenor;
             case "NACM" when newCompoundingConvention.ToUpper() == "SIMPLE":
-                return Math.Pow(1 + rate / 12.0, 12) - 1;
+                return (Math.Pow(1 + rate / 12.0, 12.0 * rateTenor) - 1) / rateTenor;
             case "NACC" when newCompoundingConvention.ToUpper() == "SIMPLE":
-                return Math.Exp(rate) - 1;
+                return (Math.Exp(rate * rateTenor) - 1) / rateTenor;
             // Third we do all conversions from NACx rate to NACy (excluding NACC).
             case "NACA" when newCompoundingConvention.ToUpper() == "NACS":
-                return 2*(Math.Pow(1+rate,1/2.0)-1);
+                return 2.0 * (Math.Pow(1 + rate, 1.0 / 2.0) - 1);
             case "NACA" when newCompoundingConvention.ToUpper() == "NACQ":
-                return 4 * (Math.Pow(1 + rate, 1 / 4.0) - 1);
+                return 4.0 * (Math.Pow(1 + rate, 1.0 / 4.0) - 1);
             case "NACA" when newCompoundingConvention.ToUpper() == "NACM":
-                return 12 * (Math.Pow(1 + rate, 1 / 12.0) - 1);
+                return 12.0 * (Math.Pow(1 + rate, 1.0 / 12.0) - 1);
             case "NACS" when newCompoundingConvention.ToUpper() == "NACA":
-                return 1 * (Math.Pow(1 + rate/2, 2 / 1) - 1);
+                return 1.0 * (Math.Pow(1 + rate / 2.0, 2.0 / 1.0) - 1);
             case "NACS" when newCompoundingConvention.ToUpper() == "NACQ":
-                return 4 * (Math.Pow(1 + rate/2, 2 / 4.0) - 1);
+                return 4.0 * (Math.Pow(1 + rate / 2.0, 2.0 / 4.0) - 1);
             case "NACS" when newCompoundingConvention.ToUpper() == "NACM":
-                return 12 * (Math.Pow(1 + rate/2, 2 / 12.0) - 1);
+                return 12.0 * (Math.Pow(1 + rate / 2.0, 2.0 / 12.0) - 1);
             case "NACQ" when newCompoundingConvention.ToUpper() == "NACA":
-                return 1 * (Math.Pow(1 + rate/4, 4) - 1);
+                return 1.0 * (Math.Pow(1 + rate / 4.0, 4.0 / 1.0) - 1);
             case "NACQ" when newCompoundingConvention.ToUpper() == "NACS":
-                return 2 * (Math.Pow(1 + rate / 4, 4/2) - 1);
+                return 2.0 * (Math.Pow(1 + rate / 4.0, 4.0 / 2.0) - 1);
             case "NACQ" when newCompoundingConvention.ToUpper() == "NACM":
-                return 12 * (Math.Pow(1 + rate / 4, 4 / 12.0) - 1);
+                return 12.0 * (Math.Pow(1 + rate / 4.0, 4.0 / 12.0) - 1);
             case "NACM" when newCompoundingConvention.ToUpper() == "NACA":
-                return 1 * (Math.Pow(1 + rate / 12, 12 / 1) - 1);
+                return 1.0 * (Math.Pow(1 + rate / 12.0, 12.0 / 1.0) - 1);
             case "NACM" when newCompoundingConvention.ToUpper() == "NACS":
-                return 2 * (Math.Pow(1 + rate / 12, 12 / 2) - 1);
+                return 2.0 * (Math.Pow(1 + rate / 12.0, 12.0 / 2.0) - 1);
             case "NACM" when newCompoundingConvention.ToUpper() == "NACQ":
-                return 4 * (Math.Pow(1 + rate / 12, 12 / 4) - 1);
+                return 4.0 * (Math.Pow(1 + rate / 12.0, 12.0 / 4.0) - 1);
             // Fourth we do all conversions from NACx rate to NACC.
             case "NACA" when newCompoundingConvention.ToUpper() == "NACC":
-                return 1 * Math.Log(1 + rate / 1) ;
+                return 1.0 * Math.Log(1 + rate / 1.0) ;
             case "NACS" when newCompoundingConvention.ToUpper() == "NACC":
-                return 2 * Math.Log(1 + rate / 2);
+                return 2.0 * Math.Log(1 + rate / 2.0);
             case "NACQ" when newCompoundingConvention.ToUpper() == "NACC":
-                return 4 * Math.Log(1 + rate / 4);
+                return 4.0 * Math.Log(1 + rate / 4.0);
             case "NACM" when newCompoundingConvention.ToUpper() == "NACC":
-                return 12 * Math.Log(1 + rate / 12);
+                return 12.0 * Math.Log(1 + rate / 12.0);
             // Fifth we do all conversions from NACC rate to NACx.
             case "NACC" when newCompoundingConvention.ToUpper() == "NACA":
-                return 1 * (Math.Exp(rate / 1)-1);
+                return 1.0 * (Math.Exp(rate / 1.0)-1);
             case "NACC" when newCompoundingConvention.ToUpper() == "NACS":
-                return 2 * (Math.Exp(rate / 2) - 1);
+                return 2.0 * (Math.Exp(rate / 2.0) - 1);
             case "NACC" when newCompoundingConvention.ToUpper() == "NACQ":
-                return 4 * (Math.Exp(rate / 4) - 1);
+                return 4.0 * (Math.Exp(rate / 4.0) - 1);
             case "NACC" when newCompoundingConvention.ToUpper() == "NACM":
-                return 12 * (Math.Exp(rate / 12) - 1);
+                return 12.0 * (Math.Exp(rate / 12.0) - 1);
             // Sixth - if the same rate is used for conversion, it should output that rate
             default:
             {
