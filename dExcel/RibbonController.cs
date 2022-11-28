@@ -60,6 +60,7 @@ public class RibbonController : ExcelRibbon
             Excel.Worksheet ws = wb.Worksheets["Summary"];
             ws.Activate();
             ws.Cells[1, 1].Select();
+            xlApp.Calculation = Excel.XlCalculation.xlCalculationManual;
         }
     }
 
@@ -81,7 +82,7 @@ public class RibbonController : ExcelRibbon
         if (functionName != null)
         {
             var xlApp = (Excel.Application)ExcelDnaUtil.Application;
-            ((Excel.Range)xlApp.Selection).Formula = $"=d.{functionName}()";
+            ((Excel.Range)xlApp.Selection).Formula = $"={functionName}()";
             ((Excel.Range)xlApp.Selection).FunctionWizard();
         }
     }
