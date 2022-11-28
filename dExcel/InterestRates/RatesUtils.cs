@@ -4,160 +4,163 @@ using ExcelDna.Integration;
 
 public static class RatesUtils
 {
+    /// <summary>
+    /// Calculates the forward rate from two discount factors.
+    /// </summary>
+    /// <param name="compoundingConvention">The compounding convention.</param>
+    /// <param name="nearDiscountFactor">The discount factor nearest to the discount curve base date.</param>
+    /// <param name="farDiscountFactor">The discount factor furthest from the discount curve base date.</param>
+    /// <param name="dT">The year fraction between discount factors.</param>
+    /// <returns>Forward rate over the period dT.</returns>
     [ExcelFunction(
-       Name = "d.IR_Disc2ForwardRate",
-       Description = "Calculates the forward rate from two discount factors. \n" +
+       Name = "d.IR_DiscountFactorsToForwardRate",
+       Description = "Calculates the forward rate from two discount factors.\n" +
                      "Deprecates AQS Function: 'Disc2ForwardRate'",
        Category = "∂Excel: Interest Rates")]
     public static object Disc2ForwardRate(
        [ExcelArgument(
-            Name = "RateType",
-            Description = "Type of Rate: 'simple' = 'simple', 'naca' = 'naca', 'nacs' = 'nacs', 'nacq' = 'nacq', 'nacm' = 'nacm', 'nacc' = 'nacc' ")]
-        string rateType,
+            Name = "Compounding Convention",
+            Description = "Options: 'Simple', 'NACA', 'NACS', 'NACQ', 'NACM', 'NACC'")]
+        string compoundingConvention,
        [ExcelArgument(
-            Name = "DFPrevious",
-            Description = "Discount Factor at time t-1.")]
-        double dFPrevious,
+            Name = "Near DF",
+            Description = "Discount factor nearest to the discount curve base date.")]
+        double nearDiscountFactor,
        [ExcelArgument(
-            Name = "DFCurrent",
-            Description = "Discount Factor at time t.")]
-        double dFCurrent,
+            Name = "Far DF",
+            Description = "Discount factor furthest from the discount curve base date.")]
+        double farDiscountFactor,
        [ExcelArgument(
-            Name = "dT",
-            Description = "Change in time.")]
+            Name = "ΔT",
+            Description = "The year fraction between discount factors.")]
         double dT)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
-#endif 
+#endif
 
-        object getForward = 0;
-        switch (rateType.ToUpper())
+        return compoundingConvention.ToUpper() switch
         {
-            case "SIMPLE":
-                getForward = (dFPrevious / dFCurrent - 1) / dT;
-                break;
-            case "NACC":
-                getForward = (Math.Log(dFPrevious) - Math.Log(dFCurrent)) / dT;
-                break;
-            case "NACA":
-                getForward = Math.Exp((Math.Log(dFPrevious) - Math.Log(dFCurrent)) / dT) - 1;
-                break;
-            case "NACS":
-                getForward = (Math.Pow(Math.Exp((Math.Log(dFPrevious) - Math.Log(dFCurrent)) / dT), 1.0 / 2.0) - 1) * 2;
-                break;
-            case "NACQ":
-                getForward = (Math.Pow(Math.Exp((Math.Log(dFPrevious) - Math.Log(dFCurrent)) / dT), 1.0 / 4.0) - 1) * 4;
-                break;
-            case "NACM":
-                getForward = (Math.Pow(Math.Exp((Math.Log(dFPrevious) - Math.Log(dFCurrent)) / dT), 1.0 / 12.0) - 1) * 12;
-                break;
-            default:
-                break;
-        }
-        return getForward;
+            "SIMPLE" => (nearDiscountFactor / farDiscountFactor - 1) / dT,
+            "NACC" => (Math.Log(nearDiscountFactor) - Math.Log(farDiscountFactor)) / dT,
+            "NACA" => Math.Exp((Math.Log(nearDiscountFactor) - Math.Log(farDiscountFactor)) / dT) - 1,
+            "NACS" => (Math.Pow(Math.Exp((Math.Log(nearDiscountFactor) - Math.Log(farDiscountFactor)) / dT), 1.0 / 2.0) - 1) * 2,
+            "NACQ" => (Math.Pow(Math.Exp((Math.Log(nearDiscountFactor) - Math.Log(farDiscountFactor)) / dT), 1.0 / 4.0) - 1) * 4,
+            "NACM" => (Math.Pow(Math.Exp((Math.Log(nearDiscountFactor) - Math.Log(farDiscountFactor)) / dT), 1.0 / 12.0) - 1) * 12,
+            _ => CommonUtils.DExcelErrorMessage($"Invalid compounding convention: {compoundingConvention}")
+        };
     }
 
+    /// <summary>
+    /// Converts an interest rate from one compounding convention to another.
+    /// </summary>
+    /// <param name="rate">Interest rate.</param>
+    /// <param name="oldCompoundingConvention">Compounding convention to convert from.</param>
+    /// <param name="newCompoundingConvention">Compounding convention to convert to.</param>
+    /// <returns>Interest rate converted to new compounding convention.</returns>
     [ExcelFunction(
        Name = "d.IR_ConvertInterestRate",
-       Description = "Calculates the forward rate from two discount factors.\n" +
-                     "Deprecates AQS Function: 'ConvertInterestRate'",
+       Description = "Converts an interest rate from one compounding convention to another.\n" +
+                     "Deprecates AQS Function: 'IntConvert'",
        Category = "∂Excel: Interest Rates")]
     public static object ConvertInterestRate(
         [ExcelArgument(
                 Name = "Rate",
-                Description = "Rate to convert.")]
+                Description = "The interest rate to convert.")]
         double rate,
         [ExcelArgument(
-                Name = "RateFrom",
-                Description = "Rate to convert from.")]
-        string RateFrom,
+                Name = "Old Compounding Convention ",
+                Description = "The compounding convention to convert from.\n" +
+                              "Options:'Simple', 'NACC', 'NACA', 'NACS', 'NACQ', 'NACM'")]
+        string oldCompoundingConvention,
         [ExcelArgument(
-                Name = "RateTo",
-                Description = "Rate we want to convert to.")]
-        string RateTo)
+                Name = "New Compounding Convention ",
+                Description = "The compounding convention to convert from.\n" +
+                              "Options: 'Simple', 'NACC', 'NACA', 'NACS', 'NACQ', 'NACM'")]
+        string newCompoundingConvention)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        switch (RateFrom.ToUpper())
+        switch (oldCompoundingConvention.ToUpper())
         {
             // First we do all conversions from simple rate to other.
-            case "SIMPLE" when RateTo.ToUpper() == "NACA":
+            case "SIMPLE" when newCompoundingConvention.ToUpper() == "NACA":
                 return (Math.Pow(1 + rate, 1) - 1);
-            case "SIMPLE" when RateTo.ToUpper() == "NACS":
+            case "SIMPLE" when newCompoundingConvention.ToUpper() == "NACS":
                 return 2 * (Math.Pow(1 + rate, 1.0 / 2.0) - 1);
-            case "SIMPLE" when RateTo.ToUpper() == "NACQ":
+            case "SIMPLE" when newCompoundingConvention.ToUpper() == "NACQ":
                 return 4 * (Math.Pow(1 + rate, 1.0 / 4.0) - 1);
-            case "SIMPLE" when RateTo.ToUpper() == "NACM":
+            case "SIMPLE" when newCompoundingConvention.ToUpper() == "NACM":
                 return 12 * (Math.Pow(1 + rate, 1.0 / 12.0) - 1);
-            case "SIMPLE" when RateTo.ToUpper() == "NACC":
+            case "SIMPLE" when newCompoundingConvention.ToUpper() == "NACC":
                 return Math.Log(1+rate);
             // Second we do all conversions from rates to simple.
-            case "NACA" when RateTo.ToUpper() == "SIMPLE":
+            case "NACA" when newCompoundingConvention.ToUpper() == "SIMPLE":
                 return Math.Pow(1 + rate / 1.0, 1) - 1;
-            case "NACS" when RateTo.ToUpper() == "SIMPLE":
+            case "NACS" when newCompoundingConvention.ToUpper() == "SIMPLE":
                 return Math.Pow(1 + rate / 2.0, 2) - 1;
-            case "NACQ" when RateTo.ToUpper() == "SIMPLE":
+            case "NACQ" when newCompoundingConvention.ToUpper() == "SIMPLE":
                 return Math.Pow(1 + rate / 4.0, 4) - 1;
-            case "NACM" when RateTo.ToUpper() == "SIMPLE":
+            case "NACM" when newCompoundingConvention.ToUpper() == "SIMPLE":
                 return Math.Pow(1 + rate / 12.0, 12) - 1;
-            case "NACC" when RateTo.ToUpper() == "SIMPLE":
+            case "NACC" when newCompoundingConvention.ToUpper() == "SIMPLE":
                 return Math.Exp(rate) - 1;
             // Third we do all conversions from NACx rate to NACy (excluding NACC).
-            case "NACA" when RateTo.ToUpper() == "NACS":
+            case "NACA" when newCompoundingConvention.ToUpper() == "NACS":
                 return 2*(Math.Pow(1+rate,1/2.0)-1);
-            case "NACA" when RateTo.ToUpper() == "NACQ":
+            case "NACA" when newCompoundingConvention.ToUpper() == "NACQ":
                 return 4 * (Math.Pow(1 + rate, 1 / 4.0) - 1);
-            case "NACA" when RateTo.ToUpper() == "NACM":
+            case "NACA" when newCompoundingConvention.ToUpper() == "NACM":
                 return 12 * (Math.Pow(1 + rate, 1 / 12.0) - 1);
-            case "NACS" when RateTo.ToUpper() == "NACA":
+            case "NACS" when newCompoundingConvention.ToUpper() == "NACA":
                 return 1 * (Math.Pow(1 + rate/2, 2 / 1) - 1);
-            case "NACS" when RateTo.ToUpper() == "NACQ":
+            case "NACS" when newCompoundingConvention.ToUpper() == "NACQ":
                 return 4 * (Math.Pow(1 + rate/2, 2 / 4.0) - 1);
-            case "NACS" when RateTo.ToUpper() == "NACM":
+            case "NACS" when newCompoundingConvention.ToUpper() == "NACM":
                 return 12 * (Math.Pow(1 + rate/2, 2 / 12.0) - 1);
-            case "NACQ" when RateTo.ToUpper() == "NACA":
+            case "NACQ" when newCompoundingConvention.ToUpper() == "NACA":
                 return 1 * (Math.Pow(1 + rate/4, 4) - 1);
-            case "NACQ" when RateTo.ToUpper() == "NACS":
+            case "NACQ" when newCompoundingConvention.ToUpper() == "NACS":
                 return 2 * (Math.Pow(1 + rate / 4, 4/2) - 1);
-            case "NACQ" when RateTo.ToUpper() == "NACM":
+            case "NACQ" when newCompoundingConvention.ToUpper() == "NACM":
                 return 12 * (Math.Pow(1 + rate / 4, 4 / 12.0) - 1);
-            case "NACM" when RateTo.ToUpper() == "NACA":
+            case "NACM" when newCompoundingConvention.ToUpper() == "NACA":
                 return 1 * (Math.Pow(1 + rate / 12, 12 / 1) - 1);
-            case "NACM" when RateTo.ToUpper() == "NACS":
+            case "NACM" when newCompoundingConvention.ToUpper() == "NACS":
                 return 2 * (Math.Pow(1 + rate / 12, 12 / 2) - 1);
-            case "NACM" when RateTo.ToUpper() == "NACQ":
+            case "NACM" when newCompoundingConvention.ToUpper() == "NACQ":
                 return 4 * (Math.Pow(1 + rate / 12, 12 / 4) - 1);
             // Fourth we do all conversions from NACx rate to NACC.
-            case "NACA" when RateTo.ToUpper() == "NACC":
+            case "NACA" when newCompoundingConvention.ToUpper() == "NACC":
                 return 1 * Math.Log(1 + rate / 1) ;
-            case "NACS" when RateTo.ToUpper() == "NACC":
+            case "NACS" when newCompoundingConvention.ToUpper() == "NACC":
                 return 2 * Math.Log(1 + rate / 2);
-            case "NACQ" when RateTo.ToUpper() == "NACC":
+            case "NACQ" when newCompoundingConvention.ToUpper() == "NACC":
                 return 4 * Math.Log(1 + rate / 4);
-            case "NACM" when RateTo.ToUpper() == "NACC":
+            case "NACM" when newCompoundingConvention.ToUpper() == "NACC":
                 return 12 * Math.Log(1 + rate / 12);
             // Fifth we do all conversions from NACC rate to NACx.
-            case "NACC" when RateTo.ToUpper() == "NACA":
+            case "NACC" when newCompoundingConvention.ToUpper() == "NACA":
                 return 1 * (Math.Exp(rate / 1)-1);
-            case "NACC" when RateTo.ToUpper() == "NACS":
+            case "NACC" when newCompoundingConvention.ToUpper() == "NACS":
                 return 2 * (Math.Exp(rate / 2) - 1);
-            case "NACC" when RateTo.ToUpper() == "NACQ":
+            case "NACC" when newCompoundingConvention.ToUpper() == "NACQ":
                 return 4 * (Math.Exp(rate / 4) - 1);
-            case "NACC" when RateTo.ToUpper() == "NACM":
+            case "NACC" when newCompoundingConvention.ToUpper() == "NACM":
                 return 12 * (Math.Exp(rate / 12) - 1);
             // Sixth - if the same rate is used for conversion, it should output that rate
             default:
             {
-                if (string.Equals(RateFrom, RateTo, StringComparison.CurrentCultureIgnoreCase) )
+                if (string.Equals(oldCompoundingConvention, newCompoundingConvention, StringComparison.CurrentCultureIgnoreCase) )
                 {
                     return rate;
                 }
-                else
-                {
-                    return "Invalid Rate";
-                }
+
+                return CommonUtils.DExcelErrorMessage(
+                    !new List<string> { "Simple", "NACC", "NACA", "NACS", "NACQ", "NACM" }.Contains(newCompoundingConvention)
+                        ? $"Invalid new compounding convention: {newCompoundingConvention}"
+                        : $"Invalid old compounding convention: {oldCompoundingConvention}");
             }
         }
     }

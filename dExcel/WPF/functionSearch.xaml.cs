@@ -1,18 +1,14 @@
-﻿using FuzzySharp.Extractor;
-
-namespace dExcel;
-
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
 using FuzzySharp;
+using FuzzySharp.Extractor;
+
+namespace dExcel.WPF;
 
 /// <summary>
 /// Interaction logic for FunctionSearch.xaml
@@ -39,6 +35,7 @@ public partial class FunctionSearch : Window
         ["BS"] = "d.Equity_BlackScholes",
         // Interest Rates
         ["BLACK"] = "d.IR_Black",
+        ["Disc2ForwardRate"] = "d.IR_DiscountFactorsToForwardRate",
         ["INTCONVERT"] = "d.IR_ConvertInterestRate",
     };
 

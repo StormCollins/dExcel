@@ -100,6 +100,7 @@ public static class ExcelTestUtils
     /// <param name="a">Input a</param>
     /// <param name="b">Input b</param>
     /// <param name="tolerance">The tolerance for testing numeric equality e.g., default = 0.0000001.</param>
+    /// <param name="useWarning">Set to 'True' to use 'Warning' as the output instead of 'Error' in the case of inequality.</param>
     /// <returns>'OK' if the values are equal otherwise 'ERROR'.</returns>
     [ExcelFunction(
         Name = "d.TestUtils_Equal",
@@ -118,7 +119,12 @@ public static class ExcelTestUtils
             Name = "(Optional)Tolerance",
             Description = "The threshold used for the calculating numeric equality.\n" +
                           "Default = 0.0000001")]
-        double tolerance = 0.0000001)
+        double tolerance = 0.0000001,
+        [ExcelArgument(
+            Name = "(Optional)Use Warning",
+            Description = "Set to 'True' to use 'Warning' as the output instead of 'Error' in the case of inequality.\n" +
+                          "Default = false")]
+        bool useWarning = false)
     {
         if (!AreInputsValid(a) || !AreInputsValid(b))
         {
@@ -132,7 +138,9 @@ public static class ExcelTestUtils
 
         return Compare(a.ToString(), b.ToString(), StringComparison.OrdinalIgnoreCase) == 0
             ? TestOutputs.Ok.ToString()
-            : TestOutputs.Error.ToString();
+            : (useWarning) 
+                ? TestOutputs.Warning.ToString() 
+                : TestOutputs.Error.ToString();
     }
 
     /// <summary>

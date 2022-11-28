@@ -104,7 +104,7 @@ public class RibbonController : ExcelRibbon
 
         string searchText = ((Excel.Range)xlApp.Selection).Value2;
         string matchedSheet = Process.ExtractTop(searchText, sheetNames).First(x => x.Score > 90).Value;
-        ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", matchedSheet + "!A1");
+        ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", $"'{matchedSheet}'!A1");
     }
 
     public void CreateLinksToHeadings(IRibbonControl control)

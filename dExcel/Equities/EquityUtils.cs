@@ -1,6 +1,4 @@
-﻿using System.Data.Common;
-
-namespace dExcel.EquityUtils;
+﻿namespace dExcel.EquityUtils;
 
 using System;
 using System.Collections.Generic;
@@ -14,85 +12,101 @@ using mns = MathNet.Numerics.Statistics;
 /// </summary>
 public static class EquityUtils
 {
+    /// <summary>
+    /// Calculates the historic volatility of an equity.
+    /// </summary>
+    /// <param name="valuationDate">The valuation date.</param>
+    /// <param name="maturityDate">The maturity date.</param>
+    /// <param name="businessDaysPerYear">The number of business days in a year.</param>
+    /// <param name="dates">The dates for the corresponding stock prices.</param>
+    /// <param name="prices">The stock prices for the corresponding dates.</param>
+    /// <param name="weightingStyle">Set to 'Equal' or 'Exponential' for equally or exponentially weighted volatilities respectively.</param>
+    /// <param name="lambda"></param>
+    /// <returns></returns>
     [ExcelFunction(
         Name = "d.Equity_Volatility",
-        Description = "Calculates the historic volatility of an equity.\nDeprecates AQS function: 'DT_Volatility'",
+        Description = "Calculates the historic volatility of an equity.\n" +
+                      "Deprecates AQS function: 'DT_Volatility'",
         Category = "∂Excel: Equities")]
     public static object Volatility(
         [ExcelArgument(
-            Name = "Dates and Prices",
-            Description = "The two columned range containing the dates and prices.")]
-        object[,] priceData,
-        [ExcelArgument(
             Name = "Valuation Date",
             Description = "The valuation date.")]
-        DateTime valDate,
+        DateTime valuationDate,
         [ExcelArgument(
             Name = "Maturity Date",
             Description = "The maturity date.")]
         DateTime maturityDate,
         [ExcelArgument(
-            Name = "Equally Weighted",
-            Description = "(Boolean) Set to 'True' to calculate the equally weighted vol.")]
-        bool equallyWeighted,
-        [ExcelArgument(
-            Name = "Exp. Weighted",
-            Description = "(Boolean) Set to 'True' to calculate the exponentially weighted vol.")]
-        bool exponentiallyWeighted,
-        [ExcelArgument(
-            Name = "Business Day Count",
-            Description = "The rolling number of business days in a year.")]
+            Name = "Business Days in Year",
+            Description = "The number of business days in a year.")]
         int businessDaysPerYear,
+        [ExcelArgument(
+            Name = "Weighting Style",
+            Description = "Set to 'Equal' or 'Exponential' for equally or exponentially weighted volatilities respectively.")]
+        string weightingStyle,
         [ExcelArgument(
             Name = "Lambda",
             Description = "EWMA Lambda parameter.")]
-        double lambda)
+        double lambda,
+        [ExcelArgument(
+            Name = "Dates",
+            Description = "The dates for the corresponding stock prices.")]
+        object[,] dates,
+        [ExcelArgument(
+            Name = "Prices",
+            Description = "Stock prices for the corresponding dates.")]
+        object[,] prices)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        var datesAndPrices = new List<(DateTime date, double price)>();
-        for (int i = 0; i < priceData.GetLength(0); i++)
+        if (dates.GetLength(0) != prices.GetLength(0))
         {
-            datesAndPrices.Add((DateTime.FromOADate((double)priceData[i, 0]), (double)priceData[i, 1]));
+            return CommonUtils.DExcelErrorMessage("Date array and stock price array have different sizes.");
         }
 
-        var sortedDatesAndPrices = datesAndPrices.OrderBy(x => x.date).ToList();
-        var endDate = valDate;
-        var startDate = valDate - (maturityDate - valDate);
+        List<(DateTime date, double price)> datesAndPrices = new();
+        for (int i = 0; i < dates.GetLength(0); i++)
+        {
+            datesAndPrices.Add((DateTime.FromOADate((double)dates[i, 0]), (double)prices[i, 0]));
+        }
+
+        List<(DateTime date, double price)> sortedDatesAndPrices = datesAndPrices.OrderBy(x => x.date).ToList();
+        DateTime endDate = valuationDate;
+        DateTime startDate = valuationDate - (maturityDate - valuationDate);
 
         // Determine the relevant time period over which volatility should be calculated.
-        var sortedDatesAndPricesForVolCalculation = sortedDatesAndPrices.Where(x => startDate <= x.date && x.date <= endDate).ToList();
-        var returns = new List<double>();
+        List<(DateTime date, double price)> sortedDatesAndPricesForVolCalculation = sortedDatesAndPrices.Where(x => startDate <= x.date && x.date <= endDate).ToList();
+        List<double> returns = new List<double>();
         for (int i = 0; i < sortedDatesAndPricesForVolCalculation.Count - 1; i++)
         {
             returns.Add(Math.Log(sortedDatesAndPricesForVolCalculation[i].price / sortedDatesAndPricesForVolCalculation[i + 1].price));
         }
 
-        var equallyWeightedVolatility = 0.0;
-        if (equallyWeighted)
+        double equallyWeightedVolatility = 0.0;
+        double ewmaVolatility = 0.0;
+        if (weightingStyle.ToUpper() == "EQUAL")
         {
             equallyWeightedVolatility = mns.Statistics.StandardDeviation(returns) * Math.Sqrt(businessDaysPerYear);
         }
-
-        var ewmaVolatility = 0.0;
-        if (exponentiallyWeighted)
+        else if (weightingStyle.ToUpper() == "EXPONENTIAL")
         {
-            var squareReturns = returns.Select(x => x * x).ToList();
-            var initialEwma = Math.Sqrt(squareReturns.Skip(Math.Max(0, squareReturns.Count() - 24)).Sum());
-            var ewmaSeries = Enumerable.Repeat(0.0, squareReturns.Count - 1).Append(initialEwma).ToList();
-            var m = ewmaSeries.Count - 1;
+            List<double> squareReturns = returns.Select(x => x * x).ToList();
+            double initialEwma = Math.Sqrt(squareReturns.Skip(Math.Max(0, squareReturns.Count() - 24)).Sum());
+            List<double> ewmaSeries = Enumerable.Repeat(0.0, squareReturns.Count - 1).Append(initialEwma).ToList();
+            int m = ewmaSeries.Count - 1;
             for (int i = ewmaSeries.Count - 1; i > 0; i--)
             {
                 ewmaSeries[i] = Math.Sqrt(Math.Pow(ewmaSeries[i + 1], 2) * lambda + (1 - lambda) * squareReturns[i] * businessDaysPerYear);
             }
             ewmaVolatility = ewmaSeries[0];
         }
-
-        if (equallyWeighted && exponentiallyWeighted)
+        else
         {
-            return new double[1, 2] { { equallyWeightedVolatility, ewmaVolatility } };
+            return CommonUtils.DExcelErrorMessage($"Invalid weighting style: {weightingStyle}");
         }
+
 
         return Math.Max(equallyWeightedVolatility, ewmaVolatility);
     }
@@ -104,7 +118,7 @@ public static class EquityUtils
     public static object BlackScholes(
         [ExcelArgument(Name = "Option Type", Description = "'Call'/'C' or 'Put'/'P'.")]
         string optionType,
-        [ExcelArgument(Name = "Long/Short", Description = "'Long' or 'Short'.")]
+        [ExcelArgument(Name = "Long/Short", Description = "'Long' or 'Short' position.")]
         string longOrShort,
         [ExcelArgument(Name = "S", Description = "Current stock price.")]
         double spotPrice,
@@ -148,7 +162,7 @@ public static class EquityUtils
                 longOrShortDirection = -1;
                 break;
             default:
-                return CommonUtils.DExcelErrorMessage($"Invalid 'long'/'short' direction: {longOrShort}");
+                return CommonUtils.DExcelErrorMessage($"Invalid 'long'/'short' position: {longOrShort}");
         }
 
         double d1 = (Math.Log(spotPrice / strike) + (rate-dividendYield+Math.Pow(vol, 2)/2) * timeToMaturity) / (vol * Math.Sqrt(timeToMaturity));
