@@ -115,7 +115,7 @@ public static class Curve
                 "FORWARDFLAT" => new ForwardFlat(),
                 "LINEAR" => new Linear(),
                 "LOGCUBIC" => new LogCubic(),
-                "LOGLINEAR" => new LogLinear(),
+                "EXPONENTIAL" => new LogLinear(),
                 _ => null,
             };
 
