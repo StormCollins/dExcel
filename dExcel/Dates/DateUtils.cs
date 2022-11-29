@@ -585,4 +585,18 @@ public static class DateUtils
 
         return output;
     }
+
+    /// <summary>
+    /// Gets the day of week for the given date.
+    /// </summary>
+    /// <param name="date">The date.</param>
+    /// <returns>The day of the week.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_GetWeekday", 
+        Description = "Gets the day of the week for the given date.",
+        Category = "∂Excel: Dates")]
+    public static string GetWeekday(DateTime date)
+    {
+        return date.DayOfWeek.ToString();
+    }
 } 

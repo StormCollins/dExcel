@@ -165,6 +165,21 @@ public static class EquityUtils
                 return CommonUtils.DExcelErrorMessage($"Invalid 'long'/'short' position: {longOrShort}");
         }
 
+        if (spotPrice <= 0)
+        {
+            return CommonUtils.DExcelErrorMessage($"Spot price cannot be negative: {spotPrice}");
+        }
+
+        if (vol <= 0)
+        {
+            return CommonUtils.DExcelErrorMessage($"Volatility cannot be negative: {vol}");
+        }
+
+        if (dividendYield <= 0)
+        {
+            return CommonUtils.DExcelErrorMessage($"Dividend yield cannot be negative: {dividendYield}");
+        }
+
         double d1 = (Math.Log(spotPrice / strike) + (rate-dividendYield+Math.Pow(vol, 2)/2) * timeToMaturity) / (vol * Math.Sqrt(timeToMaturity));
         double d2 = d1 - vol * Math.Sqrt(timeToMaturity);
 
