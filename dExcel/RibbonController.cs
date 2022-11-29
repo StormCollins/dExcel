@@ -108,7 +108,7 @@ public class RibbonController : ExcelRibbon
         ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", $"'{matchedSheet}'!A1");
     }
 
-    public void CreateLinksToHeadings(IRibbonControl control)
+    public void CreateLinksToHeadingsInCurrentSheet(IRibbonControl control)
     {
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         Excel.Range usedRange = xlApp.ActiveSheet.UsedRange;
@@ -178,6 +178,89 @@ public class RibbonController : ExcelRibbon
             alert.Show();
         }
     }
+    public void CreateLinksToHeadingsInOtherSheets(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Workbook wb = xlApp.ActiveWorkbook;
+        foreach (Excel.Worksheet ws in wb.Worksheets)
+        {
+            Excel.Range usedRange = ws.UsedRange;
+            Dictionary<string, List<string>> headings = new();
+
+            for (int i = 1; i < usedRange.Rows.Count + 1; i++)
+            {
+                for (int j = 1; j < usedRange.Columns.Count + 1; j++)
+                {
+                    Excel.Range currentCell = usedRange.Cells[i, j];
+                    string style = ((Excel.Style)currentCell.Style).Value.ToUpper();
+                    if (style.Contains("HEADING"))
+                    {
+                        try
+                        {
+                            if (!headings.ContainsKey(currentCell.Value2))
+                            {
+                                headings.Add(currentCell.Value2, new List<string>() {$"'{currentCell.Name}'!{currentCell.Address}"});
+                            }
+                            else
+                            {
+                                headings[currentCell.Value2].Add($"'{currentCell.Name}'!{currentCell.Address}");
+                            }
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                }
+            }
+
+            Excel.Range selectedRange = ((Excel.Range)xlApp.Selection);
+            List<string> failedHyperlinks = new();
+
+            for (int i = 1; i < selectedRange.Rows.Count + 1; i++)
+            {
+                string searchText = "";
+                for (int j = 1; j < selectedRange.Columns.Count + 1; j++)
+                {
+                    Excel.Range currentCell = selectedRange.Rows[i].Columns[j];
+                    if (currentCell.Value2 != null && currentCell.Value2?.ToString() != "" &&
+                        currentCell.Value2?.ToString() != ExcelEmpty.Value.ToString())
+                    {
+                        searchText = selectedRange.Rows[i].Columns[j].Value2;
+                    }
+                }
+
+                try
+                {
+                    string matchedHeading = Process.ExtractTop(searchText, headings.Keys).First(x => x.Score > 90).Value;
+                    ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(selectedRange.Rows[i], "",
+                        headings[matchedHeading]);
+                }
+                catch (Exception)
+                {
+                    failedHyperlinks.Add(searchText);
+                }
+            }
+
+            if (failedHyperlinks.Count > 0)
+            {
+                Alert alert = new()
+                {
+                    AlertCaption =
+                    {
+                        Text = "Warning: Section Headings Not Found"
+                    },
+                    AlertBody =
+                    {
+                        Text = "The following headings could not be found: \n  •" + string.Join("\n  • ", failedHyperlinks)
+                    },
+                };
+
+                alert.Show();
+            }
+
+        }
+    }
+    
 
     public static IEnumerable<(string name, string description, string category)> 
         GetCategoryMethods(List<string> categoryNames)
@@ -267,6 +350,16 @@ public class RibbonController : ExcelRibbon
     }
 
     /// <summary>
+    /// Sets the official ISO-8601 date format in the selected cell i.e., yyyy-MM-dd.
+    /// This is quicker than having to navigate to it via the standard Excel menus.
+    /// </summary>
+    public void SetIso8601DateFormatting(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        ((Excel.Range)xlApp.Selection).NumberFormat = "yyyy-mm-dd;@";
+    }
+
+    /// <summary>
     /// Removes the formatting from a table (or rather contiguous region) in Excel.
     /// </summary>
     /// <param name="control">The ribbon control.</param>
@@ -339,9 +432,9 @@ public class RibbonController : ExcelRibbon
         ((Excel.Range)xlApp.Selection).Calculate();
     }
 
-    public void ApplyLogicFormatting(IRibbonControl control)
+    public void ApplyTestUtilsFormatting(IRibbonControl control)
     {
-        RangeFormatUtils.SetRangeConditionalLogicFormatting();
+        RangeFormatUtils.SetConditionalTestUtilsFormatting();
     }
 
     public void ApplyPrimaryHeaderFormatting(IRibbonControl control)

@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using ExcelDna.Integration;
-using ExcelDna.Registration;
 using ExcelUtils;
 using QLNet;
 
@@ -29,14 +28,14 @@ public static class Curve
     /// Gets the interpolation object from a given handle.
     /// </summary>
     /// <param name="handle">The handle for the relevant curve object.</param>
-    /// <returns>Returns the interplation object e.g. LogLinear.</returns>   
-    private static IInterpolationFactory GetInteroplation(string handle)
+    /// <returns>Returns the interpolation object e.g. LogLinear.</returns>   
+    private static IInterpolationFactory GetInterpolation(string handle)
         => (IInterpolationFactory)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve.Interpolation"];
 
     /// <summary>
     /// Creates a QLNet YieldTermStructure curve object which is stored in the DataObjectController.
     /// </summary>
-    /// <param name="handle">Handle or name to extract curve from DataObjectContronller.</param>
+    /// <param name="handle">Handle or name to extract curve from DataObjectController.</param>
     /// <param name="curveParameters">The parameters for curve construction e.g. interpolation, day count convention etc.</param>
     /// <param name="datesRange">The dates for the corresponding discount factors.</param>
     /// <param name="discountFactorsRange">The discount factors for the corresponding dates.</param>

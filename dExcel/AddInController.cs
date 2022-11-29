@@ -67,6 +67,5 @@ public class AddInController : IExcelAddIn
 
             writeCommand.ExecuteNonQuery();
         }
-
     }
 }

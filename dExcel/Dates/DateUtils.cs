@@ -159,7 +159,7 @@ public static class DateUtils
             "Calendar to use. Supports single calendars 'EUR', 'USD', 'ZAR' " +
             "and joint calendars e.g., 'USD,ZAR'.")]
         string? userCalendar,
-        [ExcelArgument(Name = "BDC", Description = "Business Day Convention e.g., 'MODFOL'.")]
+        [ExcelArgument(Name = "Business Day Convention", Description = "Business Day Convention e.g., 'MODFOL'.")]
         string userBusinessDayConvention)
     {
 #if DEBUG
@@ -529,7 +529,7 @@ public static class DateUtils
         string frequency,
         [ExcelArgument(Name = "Calendar(s)", Description = "The calendar(s) to parse e.g., 'USD', 'ZAR', 'USD,ZAR' etc.")]
         string calendarsToParse,
-        [ExcelArgument(Name = "BDC", Description = "Business day convention e.g., 'FOL', 'MODFOL', 'PREC' etc.")]
+        [ExcelArgument(Name = "Business Day Convention", Description = "Business day convention e.g., 'FOL', 'MODFOL', 'PREC' etc.")]
         string businessDayConventionToParse,
         [ExcelArgument(
             Name = "Rule", 

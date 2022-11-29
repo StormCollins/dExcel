@@ -59,6 +59,7 @@
 				id='btnManagePasswords'
 				label='Manage Passwords'
 				getImage='GetImage'
+				enabled='false'
 				size='large'
 				tag='manage-passwords-large-blue.ico'/>
 			  <splitButton id='btnWorkbookLinks' size='large'>
@@ -77,8 +78,13 @@
 					<button 
 				      id='btnCreateLinksToHeadings'
 				      label='Create Link(s) to Heading(s) in Sheet'
-					  onAction='CreateLinksToHeadings'
-					  screentip='Creates a link to a cell with a heading style.'/>
+					  onAction='CreateLinksToHeadingsInCurrentSheet'
+					  screentip='Creates link(s) to cell(s) with a heading style.'/>
+					<button
+					  id='btnCreateLinksToHeadingsInOtherSheet'
+					  label='Create Link(s) to Heading(s) in Other Sheet'
+					  onAction='CreateLinksToHeadingsInOtherSheets'
+					  screentip='Creates link(s) to cell(s) with a heading style in sheets other than the current one.'/>
 				  </menu>		
 			  </splitButton>
 			  <splitButton id='btnFormatPainter' size='large'>
@@ -98,8 +104,13 @@
 				  <button
 					id='btnApplyTestUtilsFormatting'
 					label='Apply Test Utils Formatting'
-					onAction='ApplyLogicFormatting'
+					onAction='ApplyTestUtilsFormatting'
 					screentip='Applies the ∂Excel conditional formatting for OK, ERROR, and Warning.'/>
+				  <button
+					id='btnApplyDateFormatting'
+					label='Apply Date Formatting'
+					onAction='SetIso8601DateFormatting'
+					screentip='Applies the ISO-8601 formatting to a date i.e., yyyy-MM-dd.'/>
 				  <menuSeparator id='HeaderMenuSeparator'/>
 				  <button
 					id='btnApplyPrimaryHeaderFormatting'

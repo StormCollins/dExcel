@@ -641,11 +641,10 @@ public static class RangeFormatUtils
         }
     }
 
-    
-    public static void SetRangeConditionalLogicFormatting()
+    public static void SetConditionalTestUtilsFormatting()
     {
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
-        var selectedRange = (Excel.Range)xlApp.Selection;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Range? selectedRange = (Excel.Range)xlApp.Selection;
         selectedRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
         selectedRange.VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
 
