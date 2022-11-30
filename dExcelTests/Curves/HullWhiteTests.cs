@@ -1,4 +1,6 @@
-﻿namespace dExcelTests;
+﻿using dExcel.InterestRates;
+
+namespace dExcelTests;
 
 using dExcel;
 using NUnit.Framework;
@@ -91,7 +93,7 @@ public class HullWhiteTests
             { 0.499731 },
         };
 
-        string curveHandle = dExcel.Curves.Curve.Create("DiscountCurve", curveParameters, dates, discountFactors);
+        string curveHandle = Curve.Create("DiscountCurve", curveParameters, dates, discountFactors);
         
         var swaptionMaturities = new object[,] 
         { 

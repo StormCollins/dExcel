@@ -1,4 +1,6 @@
-﻿namespace dExcel;
+﻿using dExcel.InterestRates;
+
+namespace dExcel;
 
 using dExcel.Curves;
 using ExcelDna.Integration;

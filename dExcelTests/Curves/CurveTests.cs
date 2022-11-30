@@ -1,4 +1,6 @@
-﻿namespace dExcelTests.Curves;
+﻿using dExcel.InterestRates;
+
+namespace dExcelTests.Curves;
 
 using dExcel.Curves;
 using NUnit.Framework;

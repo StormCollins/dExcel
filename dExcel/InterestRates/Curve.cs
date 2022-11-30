@@ -1,10 +1,9 @@
-﻿namespace dExcel.Curves;
+﻿namespace dExcel.InterestRates;
 
-using System;
-using System.Collections.Generic;
-using ExcelDna.Integration;
 using ExcelUtils;
+using ExcelDna.Integration;
 using QLNet;
+
 
 public static class Curve
 {
@@ -174,12 +173,44 @@ public static class Curve
 
     [ExcelFunction(
         Name = "d.Curve_GetForwardRates",
-        Description = "",
+        Description = "Gets forward rate from the curve for the given start and end date as well as the compounding convention.",
         Category = "∂Excel: Interest Rates")]
-    public static double GetForwardRate(string handle, DateTime startDate, DateTime endDate)
+    public static object GetForwardRate(
+        string handle, 
+        object[,] startDatesRange, 
+        object[,] endDatesRange, 
+        string compoundingConvention)
     {
-        var curve = GetCurveObject(handle);
-        return curve.forwardRate((Date)startDate, (Date)endDate, new Actual365Fixed(), Compounding.Continuous).rate();
+        YieldTermStructure curve = GetCurveObject(handle);
+        (Compounding? compounding, Frequency? frequency)
+            = compoundingConvention.ToUpper() switch
+            {
+                "SIMPLE" => (Compounding.Simple, Frequency.Once),
+                "NACM" => (Compounding.Compounded, Frequency.Monthly),
+                "NACQ" => (Compounding.Compounded, Frequency.Quarterly),
+                "NACS" => (Compounding.Compounded, Frequency.Semiannual),
+                "NACA" => (Compounding.Compounded, Frequency.Annual),
+                "NACC" => (Compounding.Continuous, Frequency.NoFrequency),
+                _ => ((Compounding?)null, (Frequency?)null),
+            };
+
+        if (compounding == null || frequency == null)
+        {
+            return CommonUtils.DExcelErrorMessage($"Invalid compounding convention: {compoundingConvention}");
+        }
+
+        List<DateTime> startDates = ArrayUtils.ConvertExcelRangeToList<DateTime>(startDatesRange, 0);
+        List<DateTime> endDates = ArrayUtils.ConvertExcelRangeToList<DateTime>(endDatesRange, 0);
+        DayCounter dayCountConvention = GetCurveDayCountConvention(handle);
+
+        object[,] forwardRates = new object[startDates.Count, 1];
+        for (int i = 0; i < startDates.Count; i++)
+        {
+            forwardRates[i, 0] = 
+                curve.forwardRate((Date)startDates[i], (Date)endDates[i], dayCountConvention, (Compounding)compounding, (Frequency)frequency).rate();
+        }
+
+        return forwardRates;
     }
 
     /// <summary>
@@ -209,9 +240,9 @@ public static class Curve
                           "Default = NACC")]
             string compoundingConvention = "NACC")
     {
-        var curve = GetCurveObject(handle);
+        YieldTermStructure curve = GetCurveObject(handle);
         List<Date> dates = new();
-        var dayCountConvention = GetCurveDayCountConvention(handle);
+        DayCounter dayCountConvention = GetCurveDayCountConvention(handle);
 
         (Compounding? compounding, Frequency? frequency)
             = compoundingConvention.ToUpper() switch
@@ -225,7 +256,7 @@ public static class Curve
                 _ => ((Compounding?)null, (Frequency?)null),
             };
 
-        var zeroRates = new object[datesRange.Length, 1];
+        object[,] zeroRates = new object[datesRange.Length, 1];
         if (compounding == null)
         {
             zeroRates[0, 0] = CommonUtils.DExcelErrorMessage($"Invalid compounding convention '{compoundingConvention}'.");
