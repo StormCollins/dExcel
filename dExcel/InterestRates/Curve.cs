@@ -89,7 +89,7 @@ public static class Curve
                 "ACT365" or "ACTUAL365" => new Actual365Fixed(),
                 "ACTACT" or "ACTUALACTUAL" => new ActualActual(),
                 "BUSINESS252" => new Business252(),
-                "30360" or "THIRTY360" => new Thirty360(),
+                "30360" or "THIRTY360" => new Thirty360(Thirty360.Thirty360Convention.BondBasis, null),
                 _ => null,
             };
 

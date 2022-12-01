@@ -129,6 +129,14 @@
 					screentip='Clears the formatting from a ∂Excel formatted table.'/>
 				</menu>
 			  </splitButton>
+			  <button
+				id='btnViewChart'
+				label='View object chart'
+				getImage='GetImage'
+				onAction='ViewObjectChart'
+				screentip='Opens a chart displaying the contents of an object e.g., an interest rate curve.'
+				size='large'
+				tag='chart-blue.ico'/>
 			</group>
 			<group id='grpFunctionLibrary' label='Function Library'>
 			  <dynamicMenu

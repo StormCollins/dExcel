@@ -76,12 +76,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ExcelDna.Integration" Version="1.6.0-preview4" />
-    <PackageReference Include="MaterialDesignColors" Version="2.0.7-ci170" />
-    <PackageReference Include="MaterialDesignThemes" Version="4.5.0" />
+    <PackageReference Include="ExcelDna.Integration" Version="1.6.1-beta1" />
+    <PackageReference Include="MaterialDesignColors" Version="2.1.0-ci378" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.7.0-ci378" />
     <PackageReference Include="squirrel.windows" Version="2.0.1" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.116" />
-    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>

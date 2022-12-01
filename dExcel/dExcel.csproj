@@ -231,17 +231,25 @@
     <EmbeddedResource Include="Resources\Icons\wrap-up-audit-small-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <None Remove="Resources\Icons\chart-blue.ico" />
+    <EmbeddedResource Include="Resources\Icons\chart-blue.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ExcelDna.AddIn" Version="1.6.0-preview3" />
-    <PackageReference Include="ExcelDna.Integration" Version="1.6.0-preview4" />
-    <PackageReference Include="ExcelDna.Registration" Version="1.6.0-preview3" />
+    <PackageReference Include="ExcelDna.AddIn" Version="1.6.1-beta1" />
+    <PackageReference Include="ExcelDna.Integration" Version="1.6.1-beta1" />
+    <PackageReference Include="ExcelDna.Registration" Version="1.6.1-beta1" />
     <PackageReference Include="fuzzysharp" Version="2.0.2" />
-    <PackageReference Include="MaterialDesignThemes" Version="4.5.0" />
+    <PackageReference Include="GtkSharp.Dependencies" Version="1.1.1" />
+    <PackageReference Include="LiveCharts.Core" Version="0.9.8" />
+    <PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.603" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.7.0-ci378" />
     <PackageReference Include="mathnet.numerics" Version="5.0.0" />
-    <PackageReference Include="QLNet" Version="1.12.1-preview.2" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.116" />
+    <PackageReference Include="QLNet" Version="1.12.1-preview.28" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
   </ItemGroup>
 
   <ItemGroup>

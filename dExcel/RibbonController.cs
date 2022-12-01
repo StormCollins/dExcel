@@ -564,4 +564,10 @@ public class RibbonController : ExcelRibbon
         xlApp.Application.ScreenUpdating = true;
         wb.Activate();
     }
+
+    public void ViewObjectChart(IRibbonControl control)
+    {
+        CurvePlotter curvePlot = new();
+        curvePlot.Show();
+    }
 }
