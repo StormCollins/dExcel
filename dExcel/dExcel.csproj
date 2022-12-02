@@ -242,9 +242,6 @@
     <PackageReference Include="ExcelDna.Integration" Version="1.6.1-beta1" />
     <PackageReference Include="ExcelDna.Registration" Version="1.6.1-beta1" />
     <PackageReference Include="fuzzysharp" Version="2.0.2" />
-    <PackageReference Include="GtkSharp.Dependencies" Version="1.1.1" />
-    <PackageReference Include="LiveCharts.Core" Version="0.9.8" />
-    <PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.603" />
     <PackageReference Include="MaterialDesignThemes" Version="4.7.0-ci378" />
     <PackageReference Include="mathnet.numerics" Version="5.0.0" />
@@ -287,6 +284,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="WPF\CurvePlotter.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="WPF\TableFormatter.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>

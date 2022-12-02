@@ -1,4 +1,6 @@
-﻿namespace dExcel;
+﻿using SkiaSharp;
+
+namespace dExcel;
 
 using WPF;
 using System.IO;
@@ -567,7 +569,8 @@ public class RibbonController : ExcelRibbon
 
     public void ViewObjectChart(IRibbonControl control)
     {
-        CurvePlotter curvePlot = new();
-        curvePlot.Show();
+        SkiaSharp.Views.WPF.WPFExtensions.ToColor(SKColor.Empty);
+        CurvePlotter curvePlotter = CurvePlotter.Instance;
+        curvePlotter.Show();
     }
 }
