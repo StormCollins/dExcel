@@ -1,35 +1,54 @@
-﻿using SkiaSharp;
+﻿namespace dExcel;
 
-namespace dExcel;
-
-using WPF;
+using Excel = Microsoft.Office.Interop.Excel;
+using ExcelDna.Integration.CustomUI;
+using ExcelDna.Integration;
+using ExcelUtils;
+using FuzzySharp;
+using SkiaSharp;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using ExcelDna.Integration;
-using ExcelDna.Integration.CustomUI;
-using Excel = Microsoft.Office.Interop.Excel;
 using System.Text.RegularExpressions;
+using System.Text;
 using System.Windows.Threading;
-using FuzzySharp;
-using ExcelUtils;
+using WPF;
 
 [ComVisible(true)]
 public class RibbonController : ExcelRibbon
 {
-    // TODO: Remove blanks.
-
-    public static IRibbonUI RibbonUi;
-
-    public void LoadRibbon(IRibbonUI sender)
+    /// <summary>
+    /// This maps category names, in the ExcelFunction attribute, to the relevant ribbon function drop down menu.
+    ///
+    /// For instance, the function 'd.Equity_BlackScholes' is in the category '∂Excel: Equities' (the '∂Excel: ' part is
+    /// ignored in the mapping). So obviously it is added to the drop down menu for 'Equities'.
+    ///
+    /// This also allows us to map multiple function categories to the same drop down menu e.g., anything involving
+    /// cross currency swaps, 'XCCY', can be mapped to 'InterestRates' and 'FX' simultaneously.
+    /// </summary>
+    private static Dictionary<string, List<string>> _excelFunctionCategoriesToRibbonLabels = new()
     {
-        RibbonUi = sender;
+        ["DATE"] = new List<string> { "Date" },
+        ["MATH"] = new List<string> { "Math" },
+        ["STATS"] = new List<string> { "Stats" },
+        ["CREDIT"] = new List<string> { "Credit" },
+        ["COMMODITIES"] = new List<string> { "Commodities" },
+        ["EQUITIES"] = new List<string> { "Equities" },
+        ["FX"] = new List<string> { "FX", "XCCY"},
+        ["INTERESTRATES"] = new List<string> { "CurveUtils", "HullWhite", "Interest Rates", "XCCY"},
+        ["OTHER"] = new List<string> { "Debug", "Test"},
+    };
+
+    private static IRibbonUI? _ribbonUi;
+    
+    public void LoadRibbon(IRibbonUI? sender)
+    {
+        _ribbonUi = sender;
     }
 
     public object GetImage(IRibbonControl control)
     {
-        var assembly = Assembly.GetExecutingAssembly();
+        Assembly assembly = Assembly.GetExecutingAssembly();
         return new Bitmap(
             assembly.GetManifestResourceStream($"dExcel.Resources.Icons.{control.Tag}") ??
             throw new ArgumentNullException($"Icon {control.Tag} not found in resources."));
@@ -38,9 +57,9 @@ public class RibbonController : ExcelRibbon
     public void OpenDashboard(IRibbonControl control)
     {
         string? dashBoardAction = null;
-        var thread = new Thread(() =>
+        Thread thread = new(() =>
         {
-            var dashboard = Dashboard.Instance;
+            Dashboard dashboard = Dashboard.Instance;
             dashboard.Show();
             dashboard.Closed += (sender2, e2) => dashboard.Dispatcher.InvokeShutdown();
             Dispatcher.Run();
@@ -53,7 +72,7 @@ public class RibbonController : ExcelRibbon
 
         if (string.Compare(dashBoardAction, "OpenTestingWorkbook", true) == 0)
         {
-            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
 #if DEBUG
             Excel.Workbook wb = xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\Resources\Workbooks\dexcel-testing.xlsm");
 #else
@@ -69,7 +88,7 @@ public class RibbonController : ExcelRibbon
     public void OpenFunctionSearch(IRibbonControl control)
     {
         string? functionName = null;
-        var thread = new Thread(() =>
+        Thread thread = new(() =>
         {
             var functionSearch = new FunctionSearch();
             functionSearch.Show();
@@ -91,7 +110,7 @@ public class RibbonController : ExcelRibbon
 
     public void InsertFunction(IRibbonControl control)
     {
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         ((Excel.Range)xlApp.Selection).Formula = $"={control.Id}()";
         ((Excel.Range)xlApp.Selection).FunctionWizard();
     }
@@ -135,7 +154,7 @@ public class RibbonController : ExcelRibbon
             }
         }
 
-        Excel.Range selectedRange = ((Excel.Range)xlApp.Selection);
+        Excel.Range selectedRange = (Excel.Range)xlApp.Selection;
         List<string> failedHyperlinks = new();
 
         for (int i = 1; i < selectedRange.Rows.Count + 1; i++)
@@ -267,7 +286,7 @@ public class RibbonController : ExcelRibbon
     public static IEnumerable<(string name, string description, string category)> 
         GetCategoryMethods(List<string> categoryNames)
     {
-        foreach (var method in GetExposedMethods())
+        foreach ((string name, string description, string category) method in GetExposedMethods())
         {
             foreach (string categoryName in categoryNames)
             {
@@ -281,7 +300,7 @@ public class RibbonController : ExcelRibbon
 
     public static IEnumerable<(string name, string description, string category)> GetExposedMethods()
     {
-        var methods =
+        IEnumerable<MethodInfo> methods =
             Assembly
                 .GetExecutingAssembly()
                 .GetTypes()
@@ -300,22 +319,9 @@ public class RibbonController : ExcelRibbon
                     Category: excelFunctionAttribute.Category));
     }
 
-    public static Dictionary<string, List<string>> RibbonFunctionLabelToMethodCategoryMappings = new()
-    {
-        ["DATE"] = new List<string> { "Date" },
-        ["MATH"] = new List<string> { "Math" },
-        ["STATS"] = new List<string> { "Stats" },
-        ["CREDIT"] = new List<string> { "Credit" },
-        ["COMMODITIES"] = new List<string> { "Commodities" },
-        ["EQUITIES"] = new List<string> { "Equities" },
-        ["FX"] = new List<string> { "FX", "XCCY"},
-        ["INTERESTRATES"] = new List<string> { "Curve", "Interest Rates", "XCCY"},
-        ["OTHER"] = new List<string> { "Debug", "Test"},
-    };
-
     public string GetFunctionContent(IRibbonControl control)
     {
-        List<string> methodIds = RibbonFunctionLabelToMethodCategoryMappings[control.Id.ToUpper()];
+        List<string> methodIds = _excelFunctionCategoriesToRibbonLabels[control.Id.ToUpper()];
         IEnumerable<(string name, string description, string category)> methods = GetCategoryMethods(methodIds);
         string content = "";
         content += $"<menu xmlns=\"http://schemas.microsoft.com/office/2006/01/customui\">";

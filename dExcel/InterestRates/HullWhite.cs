@@ -74,7 +74,7 @@ public static class HullWhite
             volTypes.Add(swaptionData[i, volTypesIndex].ToString());
         }
         
-        var discountCurve = Curve.GetDiscountCurve(curveHandle);
+        var discountCurve = CurveUtils.GetDiscountCurve(curveHandle);
         var termStructure = new Handle<YieldTermStructure>(discountCurve);
         var jibar = new Jibar(new Period(3, TimeUnit.Months), termStructure);
 

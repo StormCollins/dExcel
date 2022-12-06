@@ -207,7 +207,7 @@ public static class SingleCurveBootstrapper
         {
             // TODO: Add instruments used in bootstrapping.
             // TODO: Get out anchor dates.
-            ["Curve.Object"] = termStructure,
+            ["CurveUtils.Object"] = termStructure,
         };
         
         return DataObjectController.Add(handle, curveDetails);

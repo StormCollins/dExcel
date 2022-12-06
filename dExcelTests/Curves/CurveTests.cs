@@ -35,7 +35,7 @@ public class CurveTests
         { 0.62 },
     };
 
-    private static readonly string Handle = Curve.Create("ZarSwapCurve", CurveParameters, DatesRange, DiscountFactorRange);
+    private static readonly string Handle = CurveUtils.Create("ZarSwapCurve", CurveParameters, DatesRange, DiscountFactorRange);
         
     [TestCase]
     public void TestZarGetZeroRates()
@@ -49,7 +49,7 @@ public class CurveTests
             { new DateTime(2025, 12, 31).ToOADate() },
         };
 
-        var zeroRates = Curve.GetZeroRates(Handle, dates);
+        var zeroRates = CurveUtils.GetZeroRates(Handle, dates);
         
         // The "actual" figures can be found in the sheet "Curves" of the workbook "Testing.xlsm".
         Assert.AreEqual(0.118335, (double)zeroRates[0, 0], 0.00001);
@@ -63,7 +63,7 @@ public class CurveTests
     public void TestZarGetDiscountFactors()
     {
         var interpolationDates = new object[] { new DateTime(2022, 01, 15).ToOADate() };
-        object[,] dfs = Curve.GetDiscountFactors(Handle, interpolationDates);
+        object[,] dfs = CurveUtils.GetDiscountFactors(Handle, interpolationDates);
 
         double expectedDf =
             Math.Exp((Math.Log(0.99) - Math.Log(1.00))

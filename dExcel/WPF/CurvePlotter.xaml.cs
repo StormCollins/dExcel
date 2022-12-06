@@ -1,10 +1,17 @@
-﻿using LiveChartsCore.SkiaSharpView;
+﻿using LiveChartsCore.Kernel.Sketches;
 
 namespace dExcel.WPF;
 
-using System.Windows;
+using dExcel.InterestRates;
+using Excel = Microsoft.Office.Interop.Excel;
+using ExcelDna.Integration;
+using LiveChartsCore.Defaults;
+using LiveChartsCore.SkiaSharpView.Painting;
+using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore;
-using SkiaSharp.Views.WPF;
+using SkiaSharp;
+using System.Collections.ObjectModel;
+using System.Windows;
 
 /// <summary>
 /// Interaction logic for TableFormatter.xaml which allows users to quickly select and apply the format for a selected
@@ -14,22 +21,10 @@ public partial class CurvePlotter: Window
 {
     private static CurvePlotter? _instance;
 
-    public FormattingSettings? FormatSettings { get; set; }
-
     /// <summary>
     /// Creates an instance of <see cref="TableFormatter"/> using the Singleton pattern.
     /// </summary>
-    public static CurvePlotter Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = new CurvePlotter();
-            }
-            return _instance;
-        }
-    }
+    public static CurvePlotter Instance => _instance ??= new CurvePlotter();
 
     /// <summary>
     /// Creates an instance of <see cref="CurvePlotter"/>.
@@ -37,27 +32,41 @@ public partial class CurvePlotter: Window
     private CurvePlotter()
     {
         InitializeComponent();
-
-        // SkiaSharp.Views.WPF.SKElement skElement = new SKElement();
-        ChartArea.Series = new ISeries[]
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        CurveDetails curveDetails = CurveUtils.GetCurveDetails(xlApp.Selection.Value2);
+        ObservableCollection<DateTimePoint> values = new();
+        for (int i = 0; i < curveDetails.Dates?.Count; i++)
         {
-            new LineSeries<double>
+            values.Add(new DateTimePoint(curveDetails.Dates[i].ToDateTime(), curveDetails.DiscountFactors?[i]));
+        }
+        
+        ChartArea.Series = new ObservableCollection<ISeries>
+        {
+            new LineSeries<DateTimePoint>
             {
-                Values = new double[] { 2, 1, 3, 5, 3, 4, 6 }
+                Fill = null,
+                GeometryFill = null,
+                GeometrySize = 7,
+                GeometryStroke = new SolidColorPaint(SKColor.Parse("#86BC25")),
+                Stroke = new SolidColorPaint(SKColor.Parse("#86BC25")) { StrokeThickness = 3 },
+                Values = values,
+            },
+        };
+
+        ChartArea.XAxes = new Axis[]
+        {
+            new Axis
+            {
+                Labeler = x => new DateTime((long)x).ToString("yyyy-MM-dd"),
+                LabelsPaint = new SolidColorPaint(SKColors.White),
+                LabelsRotation = 15,
+                Name = "Dates",
+                NamePaint = new SolidColorPaint(SKColors.White),
             }
         };
+        
         Closing += CurvePlotter_Closing;
     }
-
-    // void OnLoad(object sender, RoutedEventArgs e)
-    // {
-        // HasZeroColumnHeaders.IsChecked = false;
-        // HasOneColumnHeader.IsChecked = true;
-        // HasTwoColumnHeaders.IsChecked = false;
-        // HasZeroRowHeaders.IsChecked = true;
-        // HasOneRowHeader.IsChecked = false;
-        // HasTwoRowHeaders.IsChecked = false;
-    // }
 
     /// <summary>
     /// Event called when TableFormatter WPF form closes.
@@ -76,7 +85,11 @@ public partial class CurvePlotter: Window
     /// <param name="e">Event args.</param>
     private void CloseCurvePlotter(object sender, RoutedEventArgs e)
     {
-        // this.FormatSettings = null;
         this.Close();
+    }
+
+    private void btnClose_Click(object sender, RoutedEventArgs e)
+    {
+        this.CloseCurvePlotter(sender, e);
     }
 }

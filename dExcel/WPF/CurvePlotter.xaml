@@ -4,14 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:local="clr-namespace:dExcel.WPF"
         xmlns:wpf="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
         BorderThickness="5"
         BorderBrush="{DynamicResource MaterialDesignPaper}"
         Title="∂Excel Table Formatter"
-        Height="540"
-        Width="500"
+        Height="450"
+        Width="600"
         Icon="pack://application:,,,/dExcel;component/resources/icons/dExcel.ico"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}">
@@ -20,6 +19,8 @@
   </Window.Resources>
   <Grid>
     <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="*"/>
@@ -42,8 +43,8 @@
       Grid.Row="0"
       Grid.Column="0"
       Grid.ColumnSpan="5"
-      Style="{StaticResource GreenHeader1}"
-      Text="∂Excel Table Formatter"/>
+      Style="{StaticResource GreenHeader2}"
+      Text="∂Excel CurveUtils Viewer"/>
 
     <Image
       Name="dExcelIcon"
@@ -52,13 +53,13 @@
       Grid.Row="0"
       Grid.RowSpan="2"
       Grid.Column="5"
-      Margin="5"
-      Width="48"
+      Margin="0 5  5 0"
+      Width="32"
       Source="pack://application:,,,/dExcel;component/resources/icons/dExcel48.png"/>
     
     <materialDesign:Card
       Grid.Row="1"
-      Grid.RowSpan="6"
+      Grid.RowSpan="8"
       Grid.Column="0"
       Grid.ColumnSpan="6">
       <Grid>
@@ -79,22 +80,18 @@
         <wpf:CartesianChart
           Name="ChartArea"
           Grid.Row="0"
-          Grid.RowSpan="3"
+          Grid.RowSpan="6"
           Grid.Column="0"
           Grid.ColumnSpan="3">
         </wpf:CartesianChart>
 
-        <Button
-          Name="FormatTable"
-          Grid.Row="5"
-          Grid.Column="2"
-          Content="Format Table" />
       </Grid>
     </materialDesign:Card>
 
     <Button
-      Grid.Row="7"
+      Grid.Row="9"
       Grid.Column="5"
-      Content="Close"/>
+      Content="Close" 
+      Click="btnClose_Click"/>
   </Grid>
 </Window>

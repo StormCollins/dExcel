@@ -110,7 +110,7 @@ public static class CurveBootstrapper
 
         Dictionary<string, object> curveDetails = new()
         {
-            ["Curve.Object"] = termStructure,
+            ["CurveUtils.Object"] = termStructure,
         };
 
         return DataObjectController.Add(handle, curveDetails);

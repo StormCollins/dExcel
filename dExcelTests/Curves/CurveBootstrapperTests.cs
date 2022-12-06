@@ -138,7 +138,7 @@ public class CurveBootstrapperTests
         var df13 = oisCurve.discount(d13);
 
         // ---------------------------------------------------------------
-        // Dual Curve bootstrapping 
+        // Dual CurveUtils bootstrapping 
         RelinkableHandle<YieldTermStructure> forecastCurve = new RelinkableHandle<YieldTermStructure>();
         USDLibor libor = new USDLibor(new Period("3m"), forecastCurve);
 

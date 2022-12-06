@@ -93,7 +93,7 @@ public class HullWhiteTests
             { 0.499731 },
         };
 
-        string curveHandle = Curve.Create("DiscountCurve", curveParameters, dates, discountFactors);
+        string curveHandle = CurveUtils.Create("DiscountCurve", curveParameters, dates, discountFactors);
         
         var swaptionMaturities = new object[,] 
         { 

@@ -18,13 +18,7 @@ public static class CurrencyUtils
         Assembly? qlNet = 
             AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == "QLNet");
         
-        Type? type = qlNet?.GetType($"QLNet.{currencyToParse.ToUpper()}Currency"); 
-        
-        if (type is not null)
-        {
-            return (Currency?)Activator.CreateInstance(type);
-        }
-        
-        return null;
+        Type? type = qlNet?.GetType($"QLNet.{currencyToParse.ToUpper()}Currency");
+        return type is not null ? (Currency?) Activator.CreateInstance(type) : null;
     }
 }

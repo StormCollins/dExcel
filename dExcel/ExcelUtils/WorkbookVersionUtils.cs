@@ -1,4 +1,4 @@
-﻿namespace dExcel;
+﻿namespace dExcel.ExcelUtils;
 
 using System;
 using ExcelDna.Integration;
@@ -47,7 +47,7 @@ public static class VersionUtils
                 return true;
             }
         }
-        
+
         version = null;
         return false;
     }

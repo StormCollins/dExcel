@@ -4,16 +4,18 @@ using ExcelUtils;
 using ExcelDna.Integration;
 using QLNet;
 
-
-public static class Curve
+public static class CurveUtils
 {
+    public static CurveDetails GetCurveDetails(string handle)
+        => (CurveDetails)DataObjectController.GetDataObject(handle);
+
     /// <summary>
     /// Gets the curve object from a given handle which can be used to extract discount factors, zero rates etc.
     /// </summary>
     /// <param name="handle">The handle for the relevant curve object.</param>
     /// <returns>Returns the YieldTermStructure object.</returns>
-    private static YieldTermStructure GetCurveObject(string handle)
-        => (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve.Object"];
+    public static YieldTermStructure? GetCurveObject(string handle)
+        => ((CurveDetails)DataObjectController.GetDataObject(handle)).TermStructure as YieldTermStructure;
 
     /// <summary>
     /// Gets the DayCounter object from a given handle which can be used to calculate year fractions.
@@ -21,7 +23,7 @@ public static class Curve
     /// <param name="handle">The handle for the relevant curve object.</param>
     /// <returns>Returns the DayCounter object e.g. Actual365Fixed.</returns>
     private static DayCounter GetCurveDayCountConvention(string handle)
-        => (DayCounter)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve.DayCountConvention"]; 
+        => ((CurveDetails)DataObjectController.GetDataObject(handle)).DayCountConvention; 
     
     /// <summary>
     /// Gets the interpolation object from a given handle.
@@ -29,7 +31,7 @@ public static class Curve
     /// <param name="handle">The handle for the relevant curve object.</param>
     /// <returns>Returns the interpolation object e.g. LogLinear.</returns>   
     private static IInterpolationFactory GetInterpolation(string handle)
-        => (IInterpolationFactory)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve.Interpolation"];
+        => ((CurveDetails)DataObjectController.GetDataObject(handle)).Interpolation;
 
     /// <summary>
     /// Creates a QLNet YieldTermStructure curve object which is stored in the DataObjectController.
@@ -63,12 +65,12 @@ public static class Curve
     {
         if (datesRange.GetLength(0) != discountFactorsRange.GetLength(0))
         {
-            return $"#Error: Dates and discount factors have incompatible sizes " +
-                $"({datesRange.GetLength(0)} & {discountFactorsRange.GetLength(0)}).";
+            return CommonUtils.DExcelErrorMessage("Dates and discount factors have incompatible sizes: " +
+                $"({datesRange.GetLength(0)} != {discountFactorsRange.GetLength(0)}).");
         }
 
-        List<Date> dates = new();
-        List<double> discountFactors = new();
+        List<Date>? dates = new();
+        List<double>? discountFactors = new();
         for (int i = 0; i < datesRange.GetLength(0); i++)
         {
             dates.Add((Date)DateTime.FromOADate((double)datesRange[i, 0]));
@@ -79,7 +81,7 @@ public static class Curve
         
         if (dayCountConventionParameter == null)
         {
-            return "DayCountConvention not set in parameters.";
+            return CommonUtils.DExcelErrorMessage("'DayCountConvention' not set in parameters.");
         }
 
         DayCounter? dayCountConvention =
@@ -95,14 +97,14 @@ public static class Curve
 
         if (dayCountConvention == null)
         {
-            return $"DayCountConvention '{dayCountConventionParameter}' invalid.";
+            return CommonUtils.DExcelErrorMessage($"Invalid 'DayCountConvention': {dayCountConventionParameter}");
         }
 
         string? interpolationParameter = ExcelTable.GetTableValue<string>(curveParameters, "Value", "Interpolation", 0);
 
         if (interpolationParameter == null)
         {
-            return "Interpolation not set in parameters.";
+            return CommonUtils.DExcelErrorMessage("'Interpolation' not set in parameters.");
         }
 
         IInterpolationFactory? interpolation =
@@ -119,20 +121,14 @@ public static class Curve
 
         if (interpolation == null)
         {
-            return CommonUtils.DExcelErrorMessage($"Invalid interpolation method: {interpolationParameter}");
+            return CommonUtils.DExcelErrorMessage($"Invalid 'interpolation' method: {interpolationParameter}");
         }
 
         string? calendarsParameter = ExcelTable.GetTableValue<string>(curveParameters, "Value", "Calendars");
         IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
         Type interpolationType = typeof(InterpolatedDiscountCurve<>).MakeGenericType(interpolation.GetType());
         object? termStructure= Activator.CreateInstance(interpolationType, dates, discountFactors, dayCountConvention, interpolation);
-        Dictionary<string, object> curveDetails = new()
-        {
-            ["Curve.Object"] = termStructure,
-            ["Curve.DayCountConvention"] = dayCountConvention,
-            ["Curve.Interpolation"] = interpolation,
-        };
-        
+        CurveDetails curveDetails = new(termStructure, dayCountConvention, interpolation, dates, discountFactors);
         return DataObjectController.Add(handle, curveDetails);
     }
 
@@ -161,8 +157,8 @@ public static class Curve
             Description = "The dates for which to get the discount factors.")]
             object[] dates)
     {
-        var discountFactors = new object[dates.Length, 1];
-        var curve = GetCurveObject(handle);
+        object[,] discountFactors = new object[dates.Length, 1];
+        YieldTermStructure? curve = GetCurveObject(handle);
         for (int i = 0; i < dates.Length; i++)
         {
             discountFactors[i, 0] = curve.discount((Date)DateTime.FromOADate((double)dates[i]));
@@ -181,7 +177,12 @@ public static class Curve
         object[,] endDatesRange, 
         string compoundingConvention)
     {
-        YieldTermStructure curve = GetCurveObject(handle);
+        YieldTermStructure? curve = GetCurveObject(handle);
+        if (curve is null)
+        {
+            return CommonUtils.DExcelErrorMessage($"{handle} returned null object.");
+        }
+        
         (Compounding? compounding, Frequency? frequency)
             = compoundingConvention.ToUpper() switch
             {
@@ -240,7 +241,7 @@ public static class Curve
                           "Default = NACC")]
             string compoundingConvention = "NACC")
     {
-        YieldTermStructure curve = GetCurveObject(handle);
+        YieldTermStructure? curve = GetCurveObject(handle);
         List<Date> dates = new();
         DayCounter dayCountConvention = GetCurveDayCountConvention(handle);
 

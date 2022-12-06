@@ -10,7 +10,7 @@ public class ExcelTableTests
     {
         { "Example Table", "" },
         { "Parameter", "Value" },
-        { "Curve Name", "SingleCurve" },
+        { "CurveUtils Name", "SingleCurve" },
         { "Interpolation", "LogLinear" },
         { "Instruments", "Deposits" },
         { "", "FRAs" },
@@ -76,7 +76,7 @@ public class ExcelTableTests
     public void GetColumnStringTest()
     {
         Assert.AreEqual(
-            expected: new List<string> {"Curve Name", "Interpolation", "Instruments", "", "", "Base Date"},
+            expected: new List<string> {"CurveUtils Name", "Interpolation", "Instruments", "", "", "Base Date"},
             actual: ExcelTable.GetColumn<string>(_parameterTable, "Parameter", 1));
     }
 

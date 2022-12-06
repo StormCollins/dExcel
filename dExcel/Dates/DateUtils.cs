@@ -1,17 +1,95 @@
 ﻿namespace dExcel.Dates;
 
-using System;
-using System.Text.RegularExpressions;
 using ExcelDna.Integration;
 using QLNet;
+using System.Text.RegularExpressions;
+using System;
 
 /// <summary>
 /// A collection of date utility functions.
 /// </summary>
 public static class DateUtils
 {
-    private const string ValidHolidayTitlePattern = @"(?i)(holidays?)|(dates?)|(calendar)(?-i)";
-
+    /// <summary>
+    /// Calculates year fraction, using the Actual/360 day count convention, between two dates.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date.</param>
+    /// <returns>The Actual/360 year fraction.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_Act360",
+        Description = "Calculates year fraction, using the Actual/360 day count convention, between two dates.",
+        Category = "∂Excel: Dates")]
+    public static double Act360(DateTime startDate, DateTime endDate)
+    {
+        Actual360 dayCounter = new();
+        return dayCounter.yearFraction(startDate, endDate);
+    }
+    
+    /// <summary>
+    /// Calculates year fraction, using the Actual/364 day count convention, between two dates.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date.</param>
+    /// <returns>The Actual/364 year fraction.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_Act364",
+        Description = "Calculates year fraction, using the Actual/365 day count convention, between two dates.",
+        Category = "∂Excel: Dates")]
+    public static double Act364(DateTime startDate, DateTime endDate)
+    {
+        Actual364 dayCounter = new();
+        return dayCounter.yearFraction(startDate, endDate);
+    }
+    
+    /// <summary>
+    /// Calculates year fraction, using the Business/252 day count convention, between two dates.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date.</param>
+    /// <returns>The Business/252 year fraction.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_Business252",
+        Description = "Calculates year fraction, using the Business/252 day count convention, between two dates.",
+        Category = "∂Excel: Dates")]
+    public static double Business252(DateTime startDate, DateTime endDate)
+    {
+        Business252 dayCounter = new();
+        return dayCounter.yearFraction(startDate, endDate);
+    }
+    
+    /// <summary>
+    /// Calculates year fraction, using the 30/360 day count convention, between two dates.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date.</param>
+    /// <returns>The 30/360 year fraction.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_Thirty360",
+        Description = "Calculates year fraction, using the 30/360 day count convention, between two dates.",
+        Category = "∂Excel: Dates")]
+    public static double Thirty360(DateTime startDate, DateTime endDate)
+    {
+        Thirty360 dayCounter = new(QLNet.Thirty360.Thirty360Convention.ISDA);
+        return dayCounter.yearFraction(startDate, endDate);
+    }
+    
+    /// <summary>
+    /// Calculates year fraction, using the Actual/365 day count convention, between two dates.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date.</param>
+    /// <returns>The Actual/365 year fraction.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_Act365",
+        Description = "Calculates year fraction, using the Actual/365 day count convention, between two dates.",
+        Category = "∂Excel: Dates")]
+    public static double Act365(DateTime startDate, DateTime endDate)
+    {
+        Actual365Fixed dayCounter = new();
+        return dayCounter.yearFraction(startDate, endDate);
+    }
+    
     /// <summary>
     /// Calculates the next business day using the 'following' convention.
     /// </summary>
@@ -42,7 +120,7 @@ public static class DateUtils
         }
         else
         {
-            result = ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
         }
 
         if (result.calendar is null)
@@ -83,7 +161,7 @@ public static class DateUtils
         }
         else
         {
-            result = ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
         }
 
         if (result.calendar is null)
@@ -124,7 +202,7 @@ public static class DateUtils
         }
         else
         {
-            result = ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
         }
 
         if (result.calendar is null)
@@ -181,34 +259,6 @@ public static class DateUtils
 
         return (DateTime) calendar.advance((Date) date, new Period(tenor),
             (BusinessDayConvention) businessDayConvention);
-    }
-
-    /// <summary>
-    /// Used to parse a range of Excel dates to a custom QLNet calendar.
-    /// </summary>
-    /// <param name="holidaysOrCalendars">Holiday range.</param>
-    /// <param name="calendar">Calendar.</param>
-    /// <returns>A custom QLNet calendar.</returns>
-    /// <exception cref="ArgumentException">Thrown for invalid dates in <param name="holidaysOrCalendars"></param>.</exception>
-    private static (Calendar? calendar, string errorMessage) ParseHolidays(object[,] holidaysOrCalendars,
-        Calendar calendar)
-    {
-        foreach (object holiday in holidaysOrCalendars)
-        {
-            if (double.TryParse(holiday.ToString(), out double holidayValue))
-            {
-                calendar.addHoliday(DateTime.FromOADate(holidayValue));
-            }
-            else
-            {
-                if (!Regex.IsMatch(holiday.ToString() ?? string.Empty, ValidHolidayTitlePattern))
-                {
-                    throw new ArgumentException($"{CommonUtils.DExcelErrorPrefix} Invalid date '{holiday}'.");
-                }
-            }
-        }
-
-        return (calendar, "");
     }
 
     /// <summary>
@@ -355,8 +405,7 @@ public static class DateUtils
         Category = "∂Excel: Dates")]
     public static object[,] GetListOfCalendars()
     {
-        object[,] calendars = new object[34, 4]
-        {
+        object[,] calendars = {
             {"Variant 1", "Variant 2", "Variant 3", "Variant 4"},
             {"ARS", "Argentina", "", ""},
             {"AUD", "Australia", "", ""},
@@ -456,6 +505,11 @@ public static class DateUtils
         return output;
     }
 
+    /// <summary>
+    /// Parses a comma-delimited list of calendars e.g., 'EUR,USD,ZAR', and creates a joint calendar.
+    /// </summary>
+    /// <param name="calendarsToParse">String of comma separated calendars e.g., 'EUR,USD,ZAR'.</param>
+    /// <returns>A tuple consisting of the joint calendar and a possible error message.</returns>
     private static (Calendar? calendar, string errorMessage) ParseJointCalendar(string? calendarsToParse)
     {
         IEnumerable<string>? calendars = calendarsToParse?.Split(',').Select(x => x.Trim());
@@ -495,6 +549,11 @@ public static class DateUtils
         return (null, CommonUtils.DExcelErrorMessage("No valid calendars found."));
     }
 
+    /// <summary>
+    /// Parses a string containing either a single or multiple calendars e.g., 'ZAR' or 'EUR,USD,ZAR'.
+    /// </summary>
+    /// <param name="calendarsToParse">The calendar string to parse e.g., 'ZAR' or 'EUR,USD,ZAR'.</param>
+    /// <returns>A tuple containing the relevant calendar object and a possible error message.</returns>
     private static (Calendar? calendar, string errorMessage) ParseCalendars(string? calendarsToParse)
     {
         if (calendarsToParse != null && calendarsToParse.Contains(','))

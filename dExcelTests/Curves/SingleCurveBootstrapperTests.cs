@@ -13,7 +13,7 @@ public class SingleCurveBootstrapperTests
     {
         object[,] curveParameters =
         {
-            {"Curve Parameters", ""},
+            {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"RateIndexName", "JIBAR"},
             {"RateIndexTenor", "3m"},
@@ -46,7 +46,7 @@ public class SingleCurveBootstrapperTests
 
         object[,] curveParameters =
         {
-            {"Curve Parameters", ""},
+            {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
             {"RateIndexName", "JIBAR"},
@@ -71,7 +71,7 @@ public class SingleCurveBootstrapperTests
                 instruments);
         
         YieldTermStructure curve = 
-            (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve.Object"];
+            (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["CurveUtils.Object"];
         
         const double tolerance = 0.01; 
         
@@ -101,7 +101,7 @@ public class SingleCurveBootstrapperTests
         
         object[,] curveParameters =
         {
-            {"Curve Parameters", ""},
+            {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
             {"RateIndexName", "JIBAR"},
@@ -128,7 +128,7 @@ public class SingleCurveBootstrapperTests
         object[] instruments = {depositInstruments, fraInstruments};
         Actual365Fixed dayCounter = new();
         string handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
-        YieldTermStructure curve = (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve.Object"];
+        YieldTermStructure curve = (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["CurveUtils.Object"];
         const double tolerance = 0.01; 
         
         Assert.AreEqual(1.0, curve.discount(baseDate));
@@ -162,7 +162,7 @@ public class SingleCurveBootstrapperTests
 
         object[,] curveParameters =
         {
-            {"Curve Parameters", ""},
+            {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
             {"RateIndexName", "JIBAR"},
@@ -199,7 +199,7 @@ public class SingleCurveBootstrapperTests
         string handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
         
         YieldTermStructure curve = 
-            (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["Curve.Object"];
+            (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["CurveUtils.Object"];
         const double tolerance = 0.01; 
         
         Assert.AreEqual(1.0, curve.discount(baseDate));
