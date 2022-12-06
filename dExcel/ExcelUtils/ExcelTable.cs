@@ -1,12 +1,11 @@
 ﻿namespace dExcel.ExcelUtils;
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using Dates;
 using ExcelDna.Integration;
 using QLNet;
-
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 /// <summary>
 /// A class for manipulating dExcel type tables in Excel.
 /// </summary>
@@ -153,7 +152,7 @@ public static class ExcelTable
         if (typeof(T) == typeof(BusinessDayConvention))
         {
             (BusinessDayConvention? businessDayConvention, string errorMessage) =
-                DateUtils.ParseBusinessDayConvention(table[rowIndex, columnIndex].ToString() ?? string.Empty);
+                DateParserUtils.ParseBusinessDayConvention(table[rowIndex, columnIndex].ToString() ?? string.Empty);
 
             if (businessDayConvention != null)
             {

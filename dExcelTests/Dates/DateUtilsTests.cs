@@ -22,7 +22,7 @@ public sealed class DateUtilsTests
     [TestCaseSource(nameof(FolDayTestCaseData))]
     public object FolDayTest(DateTime unadjusted)
     {
-        object[,] holidays = { { new DateTime(2022, 01, 03).ToOADate() } };
+        object[,] holidays = { { "Holidays" }, { new DateTime(2022, 01, 03).ToOADate() } };
         return DateUtils.FolDay(unadjusted, holidays);
     }
     
@@ -42,17 +42,17 @@ public sealed class DateUtilsTests
     [TestCaseSource(nameof(ModFolDayTestCaseData))]
     public object ModFolDayTest(DateTime unadjusted)
     {
-        object[,] holidays = { { new DateTime(2022, 01, 03).ToOADate() } };
+        object[,] holidays = { { "Holidays" }, { new DateTime(2022, 01, 03).ToOADate() } };
         return DateUtils.ModFolDay(unadjusted, holidays);
     }
     
     [Test]
     public void ModFolDayInvalidHolidaysTest()
     {
-        object[,] holidays = { { "Invalid" } };
+        object[,] holidays = { {"Holidays"}, { "Invalid" } };
         Assert.Throws<ArgumentException>(
             () => DateUtils.ModFolDay(new DateTime(2022, 01, 01), holidays),
-            $"{CommonUtils.DExcelErrorPrefix} Invalid date 'Invalid'.");
+            $"{CommonUtils.DExcelErrorPrefix} Invalid date: 'Invalid'");
     }
     
     public static IEnumerable<TestCaseData> PrevDayTestCaseData()
@@ -69,7 +69,7 @@ public sealed class DateUtilsTests
     [TestCaseSource(nameof(PrevDayTestCaseData))]
     public object PrevDayTest(DateTime unadjusted)
     {
-        object[,] holidays = { { new DateTime(2022, 01, 03).ToOADate() } };
+        object[,] holidays = { { "Holidays" }, { new DateTime(2022, 01, 03).ToOADate() } };
         return DateUtils.PrevDay(unadjusted, holidays);
     }
 
@@ -90,7 +90,7 @@ public sealed class DateUtilsTests
     public void TestAddTenorToDateWithInvalidCalendar()
     {
         object actual = DateUtils.AddTenorToDate(new DateTime(2022, 01, 01), "3m", "Invalid", "ModFol");
-        const string expected = $"{CommonUtils.DExcelErrorPrefix} Invalid/unsupported calendar 'Invalid'.";
+        const string expected = $"{CommonUtils.DExcelErrorPrefix} Unsupported calendar: 'Invalid'";
         Assert.AreEqual(expected, actual);
     }
     
@@ -98,7 +98,7 @@ public sealed class DateUtilsTests
     public void TestAddTenorToDateWithInvalidBusinessDayConvention()
     {
         object actual = DateUtils.AddTenorToDate(new DateTime(2022, 01, 01), "3m", "ZAR", "Invalid");
-        const string expected = $"{CommonUtils.DExcelErrorPrefix} Invalid/unsupported business day convention 'Invalid'.";
+        const string expected = $"{CommonUtils.DExcelErrorPrefix} Unsupported business day convention: 'Invalid'";
         Assert.AreEqual(expected, actual);
     }
     
@@ -134,7 +134,7 @@ public sealed class DateUtilsTests
     [TestCaseSource(nameof(BusinessDayConventionTestData))]
     public BusinessDayConvention? TestParseBusinessDayConvention(string businessDayConventionToParse)
     {
-        return DateUtils.ParseBusinessDayConvention(businessDayConventionToParse).businessDayConvention;
+        return DateParserUtils.ParseBusinessDayConvention(businessDayConventionToParse).businessDayConvention;
     }
 
     [Test]
@@ -252,6 +252,6 @@ public sealed class DateUtilsTests
     [TestCaseSource(nameof(CalendarTestData))]
     public Calendar? TestParseCalendar(string? calendarToParse)
     {
-        return DateUtils.ParseSingleCalendar(calendarToParse).calendar;
+        return DateParserUtils.ParseCalendars(calendarToParse).calendar;
     }
 }

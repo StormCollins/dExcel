@@ -84,7 +84,7 @@ public class ExcelTableTests
     public void GetRowHeadersTest()
     {
         Assert.AreEqual(
-            expected: new List<string> {"CURVE NAME", "INTERPOLATION", "INSTRUMENTS", "", "", "BASE DATE"}, 
+            expected: new List<string> {"CURVEUTILS NAME", "INTERPOLATION", "INSTRUMENTS", "", "", "BASE DATE"}, 
             actual: ExcelTable.GetRowHeaders(_parameterTable));
     }
     

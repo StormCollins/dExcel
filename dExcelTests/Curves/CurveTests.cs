@@ -12,7 +12,7 @@ public class CurveTests
     {
         { "Parameter", "Value" },
         { "DayCountConvention", "Actual365" },
-        { "Interpolation", "LogLinear" },
+        { "Interpolation", "Exponential" },
     };
 
     private static readonly object[,] DatesRange =
@@ -40,7 +40,7 @@ public class CurveTests
     [TestCase]
     public void TestZarGetZeroRates()
     {
-        var dates = new object[,]
+        object[,] dates = 
         {
             { new DateTime(2022, 02, 01).ToOADate() },
             { new DateTime(2022, 03, 01).ToOADate() },
@@ -49,9 +49,10 @@ public class CurveTests
             { new DateTime(2025, 12, 31).ToOADate() },
         };
 
-        var zeroRates = CurveUtils.GetZeroRates(Handle, dates);
+        object[,] zeroRates = CurveUtils.GetZeroRates(Handle, dates);
         
-        // The "actual" figures can be found in the sheet "Curves" of the workbook "Testing.xlsm".
+        // The derivation of the "actual" figures can be found in the sheet "Curves" of the workbook
+        // "dexcel-testing.xlsm".
         Assert.AreEqual(0.118335, (double)zeroRates[0, 0], 0.00001);
         Assert.AreEqual(0.124983, (double)zeroRates[1, 0], 0.00001);
         Assert.AreEqual(0.123529, (double)zeroRates[2, 0], 0.00001);
@@ -62,7 +63,7 @@ public class CurveTests
     [TestCase]
     public void TestZarGetDiscountFactors()
     {
-        var interpolationDates = new object[] { new DateTime(2022, 01, 15).ToOADate() };
+        object[] interpolationDates = new object[] { new DateTime(2022, 01, 15).ToOADate() };
         object[,] dfs = CurveUtils.GetDiscountFactors(Handle, interpolationDates);
 
         double expectedDf =

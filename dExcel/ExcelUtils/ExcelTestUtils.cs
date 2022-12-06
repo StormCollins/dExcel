@@ -1,8 +1,8 @@
 ﻿namespace dExcel.ExcelUtils;
 
-using System;
 using ExcelDna.Integration;
 using static String;
+using System;
 
 /// <summary>
 /// A collection of utilities for performing basic fuzzy logic on tests/checks in Excel.
@@ -38,9 +38,9 @@ public static class ExcelTestUtils
     /// <returns>True if the input is valid, false otherwise.</returns>
     private static bool AreInputsValid(object x)
     {
-        foreach (var excelErrorValue in ExcelErrorValues)
+        foreach (string excelErrorValue in ExcelErrorValues)
         {
-            if (String.Equals(x.ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(x.ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }

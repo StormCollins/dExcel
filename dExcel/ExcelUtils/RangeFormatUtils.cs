@@ -1,8 +1,8 @@
 ﻿namespace dExcel.ExcelUtils;
 
+using Excel = Microsoft.Office.Interop.Excel;
 using ExcelDna.Integration;
 using static Microsoft.Office.Interop.Excel.XlRgbColor;
-using Excel = Microsoft.Office.Interop.Excel;
 
 /// <summary>
 /// Used to specify the orientation of a table.
@@ -267,9 +267,9 @@ public static class RangeFormatUtils
     /// <summary>
     /// Sets standard sheet wide formatting.
     /// </summary>
-    public static void SetSheetWideFormatting()
+    private static void SetSheetWideFormatting()
     {
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         xlApp.ActiveWindow.DisplayGridlines = false;
         ((Excel.Worksheet)xlApp.ActiveSheet).DisplayPageBreaks = false;
     }
@@ -286,9 +286,9 @@ public static class RangeFormatUtils
     public static void SetVerticallyAlignedTableFormatting(bool hasTwoHeaderRows)
     {
         SetSheetWideFormatting();
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         ((Excel.Range)xlApp.Selection).CurrentRegion.Select();
-        var entireRange = (Excel.Range)xlApp.Selection;
+        Excel.Range? entireRange = (Excel.Range)xlApp.Selection;
         entireRange.Font.Name = "Calibri Light";
         entireRange.Font.Size = 10;
 
@@ -296,13 +296,13 @@ public static class RangeFormatUtils
 
         if (hasTwoHeaderRows)
         {
-            var columnHeaders = entireRange.Rows[2];
+            Excel.Range columnHeaders = (Excel.Range)entireRange.Rows[2];
             SetSecondaryTitleRangeFormatting(columnHeaders);
             SetTableContentFormatting(entireRange.Rows[$"3:{entireRange.Rows.Count}"], columnHeaders, TableOrientation.Vertical);
         }
         else
         {
-            var columnHeaders = entireRange.Rows[1];
+            Excel.Range columnHeaders = (Excel.Range)entireRange.Rows[1];
             SetTableContentFormatting(entireRange.Rows[$"2:{entireRange.Rows.Count}"], columnHeaders, TableOrientation.Vertical);
         }
     }
@@ -319,24 +319,23 @@ public static class RangeFormatUtils
     public static void SetHorizontallyAlignedTableFormatting(bool hasTwoHeaderColumns)
     {
         SetSheetWideFormatting();
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         ((Excel.Range)xlApp.Selection).CurrentRegion.Select();
-        var entireRange = (Excel.Range)xlApp.Selection;
+        Excel.Range? entireRange = (Excel.Range)xlApp.Selection;
         entireRange.Font.Name = "Calibri Light";
         entireRange.Font.Size = 10;
-
 
         if (hasTwoHeaderColumns)
         {
             SetPrimaryTitleRangeFormatting(entireRange.Columns[1], TableOrientation.Horizontal);
-            var rowHeaders = entireRange.Columns[2];
+            Excel.Range? rowHeaders = (Excel.Range)entireRange.Columns[2];
             SetSecondaryTitleRangeFormatting(rowHeaders);
             SetTableContentFormatting(entireRange.Columns[$"{GetColumnLetter(3)}:{GetColumnLetter(entireRange.Columns.Count)}"], rowHeaders, TableOrientation.Horizontal);
         }
         else
         {
             SetPrimaryTitleRangeFormatting(entireRange.Columns[1], TableOrientation.Horizontal, false, false);
-            var rowHeaders = entireRange.Columns[1];
+            Excel.Range? rowHeaders = (Excel.Range)entireRange.Columns[1];
             SetTableContentFormatting(entireRange.Columns[$"{GetColumnLetter(2)}:{GetColumnLetter(entireRange.Columns.Count)}"], rowHeaders, TableOrientation.Horizontal);
         }
     }
@@ -356,7 +355,7 @@ public static class RangeFormatUtils
         SetSheetWideFormatting();
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         ((Excel.Range)xlApp.Selection).CurrentRegion.Select();
-        var entireRange = (Excel.Range)xlApp.Selection;
+        Excel.Range? entireRange = (Excel.Range)xlApp.Selection;
         entireRange.Font.Name = "Calibri Light";
         entireRange.Font.Size = 10;
 
@@ -437,7 +436,7 @@ public static class RangeFormatUtils
         contentRange.NumberFormat = "#,##0.00";
 
         // Set out border format.
-        foreach (var index in BoundaryBorderIndices)
+        foreach (Excel.XlBordersIndex index in BoundaryBorderIndices)
         {
             contentRange.Borders[index].Color = rgbBlack;
             contentRange.Borders[index].LineStyle = Excel.XlLineStyle.xlContinuous;
@@ -445,15 +444,14 @@ public static class RangeFormatUtils
         }
 
         // Set inner border format.
-        foreach (var index in InteriorBorderIndices)
+        foreach (Excel.XlBordersIndex index in InteriorBorderIndices)
         {
             contentRange.Borders[index].Color = rgbBlack;
             contentRange.Borders[index].LineStyle = Excel.XlLineStyle.xlContinuous;
             contentRange.Borders[index].Weight = Excel.XlBorderWeight.xlHairline;
         }
 
-        var numericalAndDateFormats =
-            new Dictionary<string[], string>
+        Dictionary<string[], string> numericalAndDateFormats = new()
             {
                     { new[] { "(EUR" }, "[$€-x-euro2]#,##0.00" },
                     { new[] { "(GBP" }, "[$£-en-GB]#,##0.00" },
@@ -479,9 +477,6 @@ public static class RangeFormatUtils
         var totalsRow = GetTotalsRow(contentRange);
         SetTotalsRowFormatting(totalsRow?.range);
     }
-
-
-
 
 
     // Not Reviewed 
@@ -520,7 +515,6 @@ public static class RangeFormatUtils
         };
 
 
-
     /// <summary>
     /// Gets the equivalent column letter for a column number e.g. A = 1, B = 2, etc.
     /// </summary>
@@ -528,10 +522,10 @@ public static class RangeFormatUtils
     /// <returns>The column letter.</returns>
     private static string GetColumnLetter(int columnNumber)
     {
-        var columnName = "";
+        string columnName = "";
         while (columnNumber > 0)
         {
-            var modulo = (columnNumber - 1) % 26;
+            int modulo = (columnNumber - 1) % 26;
             columnName = Convert.ToChar('A' + modulo) + columnName;
             columnNumber = (columnNumber - modulo) / 26;
         }
@@ -542,7 +536,7 @@ public static class RangeFormatUtils
               
     private static (Excel.Range? range, int? row)? GetTotalsRow(Excel.Range? range)
     {
-        var lastRow = range?.Rows.Count;
+        int? lastRow = range?.Rows.Count;
         foreach (Excel.Range cell in ((Excel.Range)range?.Rows[lastRow]!).Cells)
         {
             if (cell.Formula.ToString().ToUpper().Contains("SUM"))
@@ -575,8 +569,6 @@ public static class RangeFormatUtils
                 verticalCellAlignment: VerticalCellContentAlignment.Center);
         }
     }
-
-
 
    
     private static void SetBorders(Excel.Range? range, bool includeInteriorBorders = true, bool clearBorders = false)
@@ -684,5 +676,4 @@ public static class RangeFormatUtils
         warningFormatCondition.Borders.TintAndShade = 0;
         warningFormatCondition.Borders.Weight = Excel.XlBorderWeight.xlThin;
     }
-
 }
