@@ -10,6 +10,24 @@
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
+ 
+  <PropertyGroup>
+	<ExcelDnaCreate32BitAddIn Condition="'$(ExcelDnaCreate32BitAddIn)' == ''">false</ExcelDnaCreate32BitAddIn>
+	<ExcelDnaCreate64BitAddIn Condition="'$(ExcelDnaCreate64BitAddIn)' == ''">true</ExcelDnaCreate64BitAddIn>
+
+	<!--
+  Define the suffix used for each platform-specific file e.g. MyAddIn64.dna
+-->
+	<ExcelDna32BitAddInSuffix Condition="'$(ExcelDna32BitAddInSuffix)' == ''"></ExcelDna32BitAddInSuffix>
+	<ExcelDna64BitAddInSuffix Condition="'$(ExcelDna64BitAddInSuffix)' == ''">64</ExcelDna64BitAddInSuffix>
+	<RunExcelDnaPack Condition="'$(RunExcelDnaPack)' == ''">false</RunExcelDnaPack>
+
+	<!--
+  Suffix used for packed .xll files e.g. MyAddIn-packed.xll
+-->
+	<ExcelDnaPackXllSuffix Condition="'$(ExcelDnaPackXllSuffix)' == ''">-packed</ExcelDnaPackXllSuffix>
+
+  </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\Icons\calculate-range-small-blue.ico" />
