@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using FuzzySharp;
 using ExcelUtils;
+using Microsoft.VisualBasic.ApplicationServices;
 
 [ComVisible(true)]
 public class RibbonController : ExcelRibbon
@@ -470,5 +471,57 @@ public class RibbonController : ExcelRibbon
         SendKeys.SendWait(breakIt + "asterix" + "{TAB}" + "asterix" + "~%{F11}");
         xlApp.Application.ScreenUpdating = true;
         wb.Activate();
+    }
+
+    public void FixEMSLinks(IRibbonControl ribbonControl)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Workbook xlActiveWorkbook = xlApp.ActiveWorkbook;
+
+        int numberOfOpenWorkbooks = xlApp.Workbooks.Count;
+        List<string> xlOpenWorkbooks = new();
+        for (int i = 1; i <= numberOfOpenWorkbooks; i++)
+        {
+            xlOpenWorkbooks.Add(xlApp.Workbooks[i].Name);
+        }
+
+        foreach (Excel.Worksheet xlWorksheet in xlActiveWorkbook.Worksheets)
+        {
+            Excel.Range xlUsedRange = xlWorksheet.UsedRange;
+
+            foreach (string xlOpenWorkbook in xlOpenWorkbooks)
+            {
+
+                if (xlOpenWorkbook != xlActiveWorkbook.Name)
+                {
+                    Excel.Range workbookFind = ExcelFind(xlOpenWorkbook);
+
+                    while (workbookFind is not null)
+                    {
+                        string filePath = Regex.Match(xlWorksheet.Range[workbookFind.Address].Formula2, @"(?<==')[^\[]+").Value;
+
+                        xlUsedRange.Replace2(What: filePath,
+                                             Replacement: "",
+                                             LookAt: Excel.XlLookAt.xlPart,
+                                             SearchOrder: Excel.XlSearchOrder.xlByRows,
+                                             MatchCase: true,
+                                             SearchFormat: false,
+                                             ReplaceFormat: false,
+                                             FormulaVersion: Excel.XlFormulaVersion.xlReplaceFormula2);
+
+                        workbookFind = ExcelFind(xlOpenWorkbook);
+                    }
+                }
+            }
+
+            Excel.Range ExcelFind(string stringToFind)
+                => xlUsedRange.Find(What: "\\[" + stringToFind + "]",
+                                    LookIn: Excel.XlFindLookIn.xlFormulas2,
+                                    LookAt: Excel.XlLookAt.xlPart,
+                                    SearchOrder: Excel.XlSearchOrder.xlByRows,
+                                    SearchDirection: Excel.XlSearchDirection.xlNext,
+                                    MatchCase: true,
+                                    SearchFormat: false);
+        }
     }
 }
