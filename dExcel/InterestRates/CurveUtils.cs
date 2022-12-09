@@ -244,7 +244,7 @@ public static class CurveUtils
         YieldTermStructure? curve = GetCurveObject(handle);
         if (curve is null)
         {
-            return CommonUtils.DExcelErrorMessage($"Curve with handle {handle} not found. Trying refreshing it.")
+            return CommonUtils.DExcelErrorMessage($"Curve with handle {handle} not found. Trying refreshing it.");
         }
 
         List<Date> dates = new();

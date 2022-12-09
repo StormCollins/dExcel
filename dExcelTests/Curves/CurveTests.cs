@@ -49,7 +49,7 @@ public class CurveTests
             { new DateTime(2025, 12, 31).ToOADate() },
         };
 
-        object[,] zeroRates = CurveUtils.GetZeroRates(Handle, dates);
+        object[,] zeroRates = (object[,])CurveUtils.GetZeroRates(Handle, dates);
         
         // The derivation of the "actual" figures can be found in the sheet "Curves" of the workbook
         // "dexcel-testing.xlsm".
