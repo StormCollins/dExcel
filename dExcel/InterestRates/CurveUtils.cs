@@ -226,7 +226,7 @@ public static class CurveUtils
         Description = "Gets the zero rate(s) from a curve object for a given set of date(s).",
         Category = "∂Excel: Interest Rates",
         HelpTopic = "https://wiki.fsa-aks.deloitte.co.za/doku.php?id=valuations:methodology:curves_and_bootstrapping:interest_rate_calculations")]
-    public static object[,] GetZeroRates(
+    public static object GetZeroRates(
         [ExcelArgument(
             Name = "Handle",
             Description = "The 'handle' or name used to store & retrieve the curve.")]
@@ -242,6 +242,11 @@ public static class CurveUtils
             string compoundingConvention = "NACC")
     {
         YieldTermStructure? curve = GetCurveObject(handle);
+        if (curve is null)
+        {
+            return CommonUtils.DExcelErrorMessage($"Curve with handle {handle} not found. Trying refreshing it.")
+        }
+
         List<Date> dates = new();
         DayCounter dayCountConvention = GetCurveDayCountConvention(handle);
 
