@@ -14,19 +14,11 @@
   <PropertyGroup>
 	<ExcelDnaCreate32BitAddIn Condition="'$(ExcelDnaCreate32BitAddIn)' == ''">false</ExcelDnaCreate32BitAddIn>
 	<ExcelDnaCreate64BitAddIn Condition="'$(ExcelDnaCreate64BitAddIn)' == ''">true</ExcelDnaCreate64BitAddIn>
-
-	<!--
-  Define the suffix used for each platform-specific file e.g. MyAddIn64.dna
--->
 	<ExcelDna32BitAddInSuffix Condition="'$(ExcelDna32BitAddInSuffix)' == ''"></ExcelDna32BitAddInSuffix>
 	<ExcelDna64BitAddInSuffix Condition="'$(ExcelDna64BitAddInSuffix)' == ''">64</ExcelDna64BitAddInSuffix>
 	<RunExcelDnaPack Condition="'$(RunExcelDnaPack)' == ''">false</RunExcelDnaPack>
-
-	<!--
-  Suffix used for packed .xll files e.g. MyAddIn-packed.xll
--->
+	<ExcelDnaPackCompressResources>false</ExcelDnaPackCompressResources>
 	<ExcelDnaPackXllSuffix Condition="'$(ExcelDnaPackXllSuffix)' == ''">-packed</ExcelDnaPackXllSuffix>
-
   </PropertyGroup>
 
   <ItemGroup>
@@ -258,6 +250,7 @@
   <ItemGroup>
     <PackageReference Include="ExcelDna.AddIn" Version="1.6.1-beta1" />
     <PackageReference Include="ExcelDna.Integration" Version="1.6.1-beta1" />
+    <PackageReference Include="ExcelDna.IntelliSense" Version="1.6.1-beta1" />
     <PackageReference Include="ExcelDna.Registration" Version="1.6.1-beta1" />
     <PackageReference Include="fuzzysharp" Version="2.0.2" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.603" />

@@ -1,6 +1,7 @@
 #- ""
 stages:
     - build
+    - test
 
 build:
     stage: build
@@ -16,3 +17,9 @@ build:
         expire_in: 1 day
     tags:
         - windows
+
+test:
+    stage: test
+    script:
+        - pwd
+        - dotnet test dExcelTests/dExcelTests.csproj
