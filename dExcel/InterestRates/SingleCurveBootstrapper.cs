@@ -3,6 +3,7 @@
 using ExcelDna.Integration;
 using ExcelUtils;
 using QLNet;
+using Utilities;
 
 public static class SingleCurveBootstrapper
 {

@@ -2,7 +2,7 @@
 
 using QLNet;
 using System.Text.RegularExpressions;
-
+using Utilities;
 
 public static class DateParserUtils
 {
@@ -108,13 +108,14 @@ public static class DateParserUtils
             "TWD" or "TAIWAN" => new Taiwan(),
             "UAH" or "UKRAINE" => new Ukraine(),
             "USD" or "USA" or "UNITED STATES" or "UNITED STATES OF AMERICA" => new UnitedStates(),
+            "WEEKENDSONLY" => new WeekendsOnly(),
             "ZAR" or "SOUTH AFRICA" => new SouthAfrica(),
             _ => null,
         };
 
         return calendar is not null
             ? (calendar, "")
-            : (null, CommonUtils.DExcelErrorMessage($"Unsupported calendar: '{calendarToParse}'"));
+            : (null, CommonUtils.UnsupportedCalendarMessage(calendarToParse ?? ""));
     }
 
     /// <summary>

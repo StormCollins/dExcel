@@ -3,6 +3,7 @@
 using ExcelUtils;
 using ExcelDna.Integration;
 using QLNet;
+using Utilities;
 
 public static class CurveUtils
 {
@@ -200,8 +201,8 @@ public static class CurveUtils
             return CommonUtils.DExcelErrorMessage($"Invalid compounding convention: {compoundingConvention}");
         }
 
-        List<DateTime> startDates = ArrayUtils.ConvertExcelRangeToList<DateTime>(startDatesRange, 0);
-        List<DateTime> endDates = ArrayUtils.ConvertExcelRangeToList<DateTime>(endDatesRange, 0);
+        List<DateTime> startDates = ExcelArrayUtils.ConvertExcelRangeToList<DateTime>(startDatesRange);
+        List<DateTime> endDates = ExcelArrayUtils.ConvertExcelRangeToList<DateTime>(endDatesRange);
         DayCounter dayCountConvention = GetCurveDayCountConvention(handle);
 
         object[,] forwardRates = new object[startDates.Count, 1];

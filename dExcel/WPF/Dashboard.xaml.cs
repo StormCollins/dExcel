@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using ExcelDna.Integration;
-
+using Utilities;
 
 /// <summary>
 /// Interaction logic for Dashboard.xaml
@@ -48,7 +48,7 @@ public partial class Dashboard : Window
         
         Closing += Dashboard_Closing;
 
-        if (NetworkUtils.GetConnectionStatus())
+        if (NetworkUtils.GetVpnConnectionStatus())
         {
             _connectionStatus = true;
             ConnectionStatus.Source = new BitmapImage(new Uri(xllPath + "/resources/icons/connection-status-green.ico"));
@@ -132,10 +132,10 @@ public partial class Dashboard : Window
     private void ConnectionStatusChangedCallback(object sender, EventArgs e)
     {
         var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-        if (NetworkUtils.GetConnectionStatus() != _connectionStatus)
+        if (NetworkUtils.GetVpnConnectionStatus() != _connectionStatus)
         {
             _connectionStatus = !_connectionStatus;
-            if (NetworkUtils.GetConnectionStatus())
+            if (NetworkUtils.GetVpnConnectionStatus())
             {
                 Dispatcher.Invoke(() =>
                 {

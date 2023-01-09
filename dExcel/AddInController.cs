@@ -8,6 +8,7 @@ using System.Security.Principal;
 using ExcelDna.Integration;
 using ExcelDna.Registration;
 using Excel = Microsoft.Office.Interop.Excel;
+using Utilities;
 
 public class AddInController : IExcelAddIn
 {
@@ -38,7 +39,7 @@ public class AddInController : IExcelAddIn
             .ProcessParameterConversions(paramConversionConfig)
             .RegisterFunctions();
 
-        if (NetworkUtils.GetConnectionStatus())
+        if (NetworkUtils.GetVpnConnectionStatus())
         {
             WindowsIdentity identity = WindowsIdentity.GetCurrent();
             string userName = identity.Name.Split('\\')[1];

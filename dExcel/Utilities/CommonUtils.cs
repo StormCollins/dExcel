@@ -1,4 +1,4 @@
-﻿namespace dExcel;
+﻿namespace dExcel.Utilities;
 
 using ExcelDna.Integration;
 
@@ -22,4 +22,12 @@ public static class CommonUtils
     /// <param name="message">The error message.</param>
     /// <returns>∂Excel error message with ∂Excel prefix.</returns>
     public static string DExcelErrorMessage(string message) => $"{DExcelErrorPrefix} {message}";
+
+    /// <summary>
+    /// Returns an error message that the calendar is invalid. 
+    /// </summary>
+    /// <param name="invalidCalendar">The invalid calendar in question.</param>
+    /// <returns>An error message that the calendar is invalid.</returns>
+    public static string UnsupportedCalendarMessage(string invalidCalendar) =>
+        DExcelErrorMessage($"Unsupported calendar: '{invalidCalendar}'");
 }

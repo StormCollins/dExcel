@@ -3,6 +3,7 @@
 using ExcelDna.Integration;
 using QLNet;
 using System;
+using Utilities;
 
 /// <summary>
 /// A collection of date utility functions.
@@ -40,20 +41,28 @@ public static class DateUtils
         Actual364 dayCounter = new();
         return dayCounter.yearFraction(startDate, endDate);
     }
-    
+
     /// <summary>
     /// Calculates year fraction, using the Business/252 day count convention, between two dates.
     /// </summary>
     /// <param name="startDate">Start date.</param>
     /// <param name="endDate">End date.</param>
-    /// <returns>The Business/252 year fraction.</returns>
+    /// <param name="calendarsToParse">The calendars to use for the business dates.</param>
+    /// <returns>The year fraction between the two dates.</returns>
     [ExcelFunction(
         Name = "d.Dates_Business252",
         Description = "Calculates year fraction, using the Business/252 day count convention, between two dates.",
         Category = "∂Excel: Dates")]
-    public static double Business252(DateTime startDate, DateTime endDate)
+    public static object Business252(DateTime startDate, DateTime endDate, string calendarsToParse)
     {
-        Business252 dayCounter = new();
+        (Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsToParse);
+        if (calendar is null)
+        {
+            return errorMessage;
+        }
+        
+        Business252 dayCounter = new(calendar);
+        
         return dayCounter.yearFraction(startDate, endDate);
     }
     
@@ -124,7 +133,7 @@ public static class DateUtils
 
         if (result.calendar is null)
         {
-            return new object[,] {{result.errorMessage}};
+            return result.errorMessage;
         }
 
         return (DateTime) result.calendar?.adjust(date);
@@ -364,6 +373,7 @@ public static class DateUtils
             {"TWD", "Taiwan", "", ""},
             {"UAH", "Ukraine", "", ""},
             {"USD", "USA", "United States", "United States of America"},
+            {"WEEKENDSONLY", "", "", ""},
             {"ZAR", "South Africa", "", ""},
         };
         
@@ -479,7 +489,7 @@ public static class DateUtils
 
         if (ruleToParse.ToUpper()!= "BACKWARD" && ruleToParse.ToUpper() != "FORWARD" && ruleToParse.ToUpper() != "IMM") 
         {
-            return new object[,] {{ CommonUtils.DExcelErrorMessage($"Invalid rule specified: {ruleToParse}") }};
+            return new object[,] {{ CommonUtils.DExcelErrorMessage($"Unsupported rule specified: '{ruleToParse}'") }};
         }
 
         DateGeneration.Rule rule = ruleToParse.ToUpper() switch
@@ -522,5 +532,26 @@ public static class DateUtils
     public static string GetWeekday(DateTime date)
     {
         return date.DayOfWeek.ToString();
+    }
+    
+    /// <summary>
+    /// Checks if the given date, for the given calendar, is a business day.
+    /// </summary>
+    /// <param name="date">Date to check.</param>
+    /// <param name="calendarsToParse">The calendar(s).</param>
+    /// <returns>True, if the given date is a business day, otherwise false.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_IsBusinessDay",
+        Description = "Checks if the given date, for the given calendar, is a business day.",
+        Category = "∂Excel: Dates")]
+    public static object IsBusinessDay(DateTime date, string calendarsToParse)
+    {
+        (Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsToParse); 
+        if (calendar is null)
+        {
+            return errorMessage;
+        }
+       
+        return calendar.isBusinessDay(date);
     }
 } 

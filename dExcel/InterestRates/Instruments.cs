@@ -5,13 +5,15 @@ namespace dExcel.InterestRates;
 using System;
 using mnd = MathNet.Numerics.Distributions;
 using ExcelDna.Integration;
+using QLNet;
+using Utilities;
 
 public static class Instruments
 {
     [ExcelFunction(
        Name = "d.IR_Black",
        Description = "Black option pricer." +
-                 "\nShould be used to price options on: futures, forwards, and zero coupon bonds." +
+                 "\nShould be used to price options on: Interest rate futures and FRAs" +
                  "\nTo price swaptions multiply by the relevant annuity factor." +
                  "\nDeprecates AQS function: 'Black'",
        Category = "∂Excel: Interest Rates")]
@@ -19,32 +21,33 @@ public static class Instruments
     public static object Black(
         [ExcelArgument(Name = "Forward Rate", Description = "Forward rate.")]
         double forwardRate,
-        [ExcelArgument(Name = "Risk free rate - NACC", Description = "Risk free rate. Only required for discounting.")]
+        [ExcelArgument(Name = "Risk free rate(NACC)", Description = "Risk free rate. Only required for discounting.")]
         double rate,
         [ExcelArgument(Name = "Strike", Description = "Strike.")]
         double strike,
-        [ExcelArgument(Name = "Vol", Description = "Vol.")]
+        [ExcelArgument(Name = "Vol", Description = "Volatility.")]
         double vol,
         [ExcelArgument(Name = "Option Maturity", Description = "Option maturity.")]
         double optionMaturity,
-        [ExcelArgument(Name = "OptionType", Description = "Call or Put - input c or p.")]
+        [ExcelArgument(Name = "OptionType", Description = "Call/C or Put/P.")]
         string optionType)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif 
         int sign = 0;
-        if (optionType.ToUpper() == "C" || optionType.ToUpper() == "CALL")
+        switch (optionType.ToUpper())
         {
-            sign = 1;
-        }
-        else if (optionType.ToUpper() == "P" || optionType.ToUpper() == "PUT")
-        {
-            sign = -1;
-        }
-        else
-        {
-            return CommonUtils.DExcelErrorMessage("Invalid option type.");
+            case "C":
+            case "CALL":
+                sign = 1;
+                break;
+            case "P":
+            case "PUT":
+                sign = -1;
+                break;
+            default:
+                return CommonUtils.DExcelErrorMessage("Invalid option type.");
         }
 
         double d1 = (Math.Log(forwardRate / strike) + Math.Pow(vol, 2) * optionMaturity / 2) / (vol * Math.Sqrt(optionMaturity));
@@ -57,7 +60,7 @@ public static class Instruments
         
         return sign * Math.Exp(-rate * optionMaturity) * (forwardRate * mnd.Normal.CDF(0, 1, sign * d1) - strike * mnd.Normal.CDF(0, 1, sign * d2));            
     }
-    
+
     [ExcelFunction(
         Name = "d.IR_Bachelier",
         Description = "Bachelier option pricer on spot or futures/forwards." +

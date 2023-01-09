@@ -2,13 +2,14 @@
 
 using dExcel;
 using dExcel.Dates;
+using dExcel.Utilities;
 using NUnit.Framework;
 using QLNet;
 
 [TestFixture]
 public sealed class DateUtilsTests
 {
-    public static IEnumerable<TestCaseData> FolDayTestCaseData()
+    public static IEnumerable<TestCaseData> FolDayHolidaysTestCaseData()
     {
         yield return new TestCaseData(new DateTime(2022, 01, 01))
             .Returns(new DateTime(2022, 01, 04));
@@ -19,14 +20,29 @@ public sealed class DateUtilsTests
     }
     
     [Test]
-    [TestCaseSource(nameof(FolDayTestCaseData))]
-    public object FolDayTest(DateTime unadjusted)
+    [TestCaseSource(nameof(FolDayHolidaysTestCaseData))]
+    public object FolDayUsingHolidaysTest(DateTime unadjustedDate)
     {
         object[,] holidays = { { "Holidays" }, { new DateTime(2022, 01, 03).ToOADate() } };
-        return DateUtils.FolDay(unadjusted, holidays);
+        return DateUtils.FolDay(unadjustedDate, holidays);
+    }
+
+    public static IEnumerable<TestCaseData> FolDayCalendarsTestData()
+    {
+        yield return new TestCaseData(new DateTime(2022, 06, 16), new object[,] {{"ZAR"}})
+            .Returns(new DateTime(2022, 06, 17));
+        yield return new TestCaseData(new DateTime(2022, 06, 17), new object[,] {{"WRE"}})
+            .Returns(CommonUtils.UnsupportedCalendarMessage("WRE"));
     }
     
-    public static IEnumerable<TestCaseData> ModFolDayTestCaseData()
+    [Test]
+    [TestCaseSource(nameof(FolDayCalendarsTestData))]
+    public object FolDayUsingCalendarsTest(DateTime unadjustedDate, object[,] calendars)
+    {
+        return DateUtils.FolDay(unadjustedDate, calendars);
+    }
+
+    public static IEnumerable<TestCaseData> ModFolDayHolidaysTestCaseData()
     {
         yield return new TestCaseData(new DateTime(2022, 01, 01))
             .Returns(new DateTime(2022, 01, 04));
@@ -39,11 +55,26 @@ public sealed class DateUtilsTests
     }
     
     [Test]
-    [TestCaseSource(nameof(ModFolDayTestCaseData))]
+    [TestCaseSource(nameof(ModFolDayHolidaysTestCaseData))]
     public object ModFolDayTest(DateTime unadjusted)
     {
         object[,] holidays = { { "Holidays" }, { new DateTime(2022, 01, 03).ToOADate() } };
         return DateUtils.ModFolDay(unadjusted, holidays);
+    }
+
+    public static IEnumerable<TestCaseData> ModFolDayCalendarsTestData()
+    {
+        yield return new TestCaseData(new DateTime(2022, 12, 31), new object[,] {{"ZAR"}})
+            .Returns(new DateTime(2022, 12, 30));
+        yield return new TestCaseData(new DateTime(2022, 12, 31), new object[,] {{"WRE"}})
+            .Returns(CommonUtils.UnsupportedCalendarMessage("WRE"));
+    }
+
+    [Test]
+    [TestCaseSource(nameof(ModFolDayCalendarsTestData))]
+    public object ModFolDayUsingCalendarsTest(DateTime unadjustedDate, object[,] calendars)
+    {
+        return DateUtils.ModFolDay(unadjustedDate, calendars);
     }
     
     [Test]
@@ -55,7 +86,7 @@ public sealed class DateUtilsTests
             $"{CommonUtils.DExcelErrorPrefix} Invalid date: 'Invalid'");
     }
     
-    public static IEnumerable<TestCaseData> PrevDayTestCaseData()
+    public static IEnumerable<TestCaseData> PrevDayHolidaysTestCaseData()
     {
         yield return new TestCaseData(new DateTime(2022, 01, 01))
             .Returns(new DateTime(2021, 12, 31));
@@ -66,13 +97,28 @@ public sealed class DateUtilsTests
     }
 
     [Test]
-    [TestCaseSource(nameof(PrevDayTestCaseData))]
+    [TestCaseSource(nameof(PrevDayHolidaysTestCaseData))]
     public object PrevDayTest(DateTime unadjusted)
     {
         object[,] holidays = { { "Holidays" }, { new DateTime(2022, 01, 03).ToOADate() } };
         return DateUtils.PrevDay(unadjusted, holidays);
     }
 
+    public static IEnumerable<TestCaseData> PrevDayCalendarsTestCaseData()
+    {
+        yield return new TestCaseData(new DateTime(2022, 06, 16), new object[,] {{"ZAR"}})
+            .Returns(new DateTime(2022, 06, 15));
+        yield return new TestCaseData(new DateTime(2022, 06, 16), new object[,] {{"WRE"}})
+            .Returns(CommonUtils.UnsupportedCalendarMessage("WRE"));
+    }
+
+    [Test]
+    [TestCaseSource(nameof(PrevDayCalendarsTestCaseData))]
+    public object PrevDayUsingCalendarsTest(DateTime unadjustedDate, object[,] calendars)
+    {
+        return DateUtils.PrevDay(unadjustedDate, calendars);     
+    }
+    
     public static IEnumerable<TestCaseData> AddTenorToDateTestCaseData()
     {
         yield return new TestCaseData(new DateTime(2022, 01, 04), "3m", "ZAR", "MODFOL")
@@ -81,7 +127,7 @@ public sealed class DateUtilsTests
 
     [Test]
     [TestCaseSource(nameof(AddTenorToDateTestCaseData))]
-    public object TestAddTenorToDate(DateTime date, string tenor, string? userCalendar, string userBusinessDayConvention)
+    public object AddTenorToDateTest(DateTime date, string tenor, string? userCalendar, string userBusinessDayConvention)
     {
         return DateUtils.AddTenorToDate(date, tenor, userCalendar, userBusinessDayConvention);
     }
@@ -90,7 +136,7 @@ public sealed class DateUtilsTests
     public void TestAddTenorToDateWithInvalidCalendar()
     {
         object actual = DateUtils.AddTenorToDate(new DateTime(2022, 01, 01), "3m", "Invalid", "ModFol");
-        const string expected = $"{CommonUtils.DExcelErrorPrefix} Unsupported calendar: 'Invalid'";
+        string expected = CommonUtils.UnsupportedCalendarMessage("Invalid");
         Assert.AreEqual(expected, actual);
     }
     
@@ -173,85 +219,220 @@ public sealed class DateUtilsTests
     {
         return DateUtils.ParseDayCountConvention(dayCountConventionToParse);
     }
-    
-    public static IEnumerable<TestCaseData> CalendarTestData()
+
+    [Test]
+    public void Act360Test()
     {
-        yield return new TestCaseData("ARS").Returns(new Argentina());
-        yield return new TestCaseData("Argentina").Returns(new Argentina()); 
-        yield return new TestCaseData("AUD").Returns(new Australia());
-        yield return new TestCaseData("Australia").Returns(new Australia());
-        yield return new TestCaseData("BWP").Returns(new Botswana());
-        yield return new TestCaseData("Botswana").Returns(new Botswana());
-        yield return new TestCaseData("BRL").Returns(new Brazil());
-        yield return new TestCaseData("Brazil").Returns(new Brazil());
-        yield return new TestCaseData("CAD").Returns(new Canada());
-        yield return new TestCaseData("Canada").Returns(new Canada());
-        yield return new TestCaseData("CHF").Returns(new Switzerland());
-        yield return new TestCaseData("Switzerland").Returns(new Switzerland());
-        yield return new TestCaseData("CNH").Returns(new China());
-        yield return new TestCaseData("CNY").Returns(new China());
-        yield return new TestCaseData("China").Returns(new China());
-        yield return new TestCaseData("CZK").Returns(new CzechRepublic());
-        yield return new TestCaseData("Czech Republic").Returns(new CzechRepublic());
-        yield return new TestCaseData("DKK").Returns(new Denmark());
-        yield return new TestCaseData("Denmark").Returns(new Denmark());
-        yield return new TestCaseData("EUR").Returns(new TARGET());
-        yield return new TestCaseData("GBP").Returns(new UnitedKingdom());
-        yield return new TestCaseData("UK").Returns(new UnitedKingdom());
-        yield return new TestCaseData("United Kingdom").Returns(new UnitedKingdom());
-        yield return new TestCaseData("Germany").Returns(new Germany());
-        yield return new TestCaseData("HKD").Returns(new HongKong());
-        yield return new TestCaseData("Hong Kong").Returns(new HongKong());
-        yield return new TestCaseData("HUF").Returns(new Hungary());
-        yield return new TestCaseData("Hungary").Returns(new Hungary());
-        yield return new TestCaseData("INR").Returns(new India());
-        yield return new TestCaseData("India").Returns(new India());
-        yield return new TestCaseData("ILS").Returns(new Israel());
-        yield return new TestCaseData("Israel").Returns(new Israel());
-        yield return new TestCaseData("Italy").Returns(new Italy());
-        yield return new TestCaseData("JPY").Returns(new Japan());
-        yield return new TestCaseData("Japan").Returns(new Japan());
-        yield return new TestCaseData("KRW").Returns(new SouthKorea());
-        yield return new TestCaseData("South Korea").Returns(new SouthKorea());
-        yield return new TestCaseData("MXN").Returns(new Mexico());
-        yield return new TestCaseData("Mexico").Returns(new Mexico());
-        yield return new TestCaseData("NOK").Returns(new Norway());
-        yield return new TestCaseData("Norway").Returns(new Norway());
-        yield return new TestCaseData("NZD").Returns(new NewZealand());
-        yield return new TestCaseData("New Zealand").Returns(new NewZealand());
-        yield return new TestCaseData("PLN").Returns(new Poland());
-        yield return new TestCaseData("Poland").Returns(new Poland());
-        yield return new TestCaseData("RON").Returns(new Romania());
-        yield return new TestCaseData("Romania").Returns(new Romania());
-        yield return new TestCaseData("Russia").Returns(new Russia());
-        yield return new TestCaseData("SAR").Returns(new SaudiArabia());
-        yield return new TestCaseData("Saudi Arabia").Returns(new SaudiArabia());
-        yield return new TestCaseData("SGD").Returns(new Singapore());
-        yield return new TestCaseData("Singapore").Returns(new Singapore());
-        yield return new TestCaseData("SKK").Returns(new Sweden());
-        yield return new TestCaseData("Sweden").Returns(new Sweden());
-        yield return new TestCaseData("Slovakia").Returns(new Slovakia());
-        yield return new TestCaseData("THB").Returns(new Thailand());
-        yield return new TestCaseData("Thailand").Returns(new Thailand());
-        yield return new TestCaseData("TRY").Returns(new Turkey());
-        yield return new TestCaseData("Turkey").Returns(new Turkey());
-        yield return new TestCaseData("TWD").Returns(new Taiwan());
-        yield return new TestCaseData("Taiwan").Returns(new Taiwan());
-        yield return new TestCaseData("UAH").Returns(new Ukraine());
-        yield return new TestCaseData("Ukraine").Returns(new Ukraine());
-        yield return new TestCaseData("USD").Returns(new UnitedStates());
-        yield return new TestCaseData("USA").Returns(new UnitedStates());
-        yield return new TestCaseData("United States").Returns(new UnitedStates());
-        yield return new TestCaseData("United States of America").Returns(new UnitedStates());
-        yield return new TestCaseData("ZAR").Returns(new SouthAfrica());
-        yield return new TestCaseData("South Africa").Returns(new SouthAfrica());
-        yield return new TestCaseData("Invalid").Returns(null);
+        DateTime d1 = new(2022, 01, 01);
+        DateTime d2 = new(2022, 04, 01);
+        Assert.AreEqual(d2.Subtract(d1).Days / 360.0, DateUtils.Act360(d1, d2)); 
     }
 
     [Test]
-    [TestCaseSource(nameof(CalendarTestData))]
-    public Calendar? TestParseCalendar(string? calendarToParse)
+    public void Act364Test()
     {
-        return DateParserUtils.ParseCalendars(calendarToParse).calendar;
+        DateTime d1 = new(2022, 01, 01);
+        DateTime d2 = new(2022, 04, 01);
+        Assert.AreEqual(d2.Subtract(d1).Days / 364.0, DateUtils.Act364(d1, d2)); 
+    }
+
+    [Test]
+    public void Act365Test()
+    {
+        DateTime d1 = new(2022, 01, 01);
+        DateTime d2 = new(2022, 04, 01);
+        Assert.AreEqual(d2.Subtract(d1).Days / 365.0, DateUtils.Act365(d1, d2)); 
+    }
+
+    [Test]
+    public void Business252Test()
+    {
+        DateTime d1 = new(2022, 01, 01);
+        DateTime d2 = new(2022, 04, 01);
+        SouthAfrica southAfrica = new();
+        Assert.AreEqual(southAfrica.businessDaysBetween(d1, d2) / 252.0, DateUtils.Business252(d1, d2, "ZAR")); 
+    }
+
+    [Test]
+    public void UnsupportedCalendarBusiness252Test()
+    {
+        DateTime d1 = new(2022, 01, 01);
+        DateTime d2 = new(2022, 04, 01);
+        Assert.AreEqual(CommonUtils.UnsupportedCalendarMessage("WRE"), DateUtils.Business252(d1, d2, "WRE"));
+    }
+    
+    public static IEnumerable<TestCaseData> WeekDaysTestData()
+    {
+        yield return new TestCaseData(new DateTime(2022, 01, 01)).Returns("Saturday");
+        yield return new TestCaseData(new DateTime(2022, 01, 02)).Returns("Sunday");
+        yield return new TestCaseData(new DateTime(2022, 01, 03)).Returns("Monday");
+        yield return new TestCaseData(new DateTime(2022, 01, 04)).Returns("Tuesday");
+        yield return new TestCaseData(new DateTime(2022, 01, 05)).Returns("Wednesday");
+        yield return new TestCaseData(new DateTime(2022, 01, 06)).Returns("Thursday");
+        yield return new TestCaseData(new DateTime(2022, 01, 07)).Returns("Friday");
+    }
+
+    [Test]
+    [TestCaseSource(nameof(WeekDaysTestData))]
+    public string TestParseWeekDay(DateTime date)
+    {
+        return DateUtils.GetWeekday(date);
+    }
+
+    public static IEnumerable<TestCaseData> IsBusinessDayTestCaseData()
+    {
+        yield return new TestCaseData(new DateTime(2022, 01, 01), "ZAR").Returns(false); 
+        yield return new TestCaseData(new DateTime(2022, 01, 03), "ZAR").Returns(true); 
+        yield return new TestCaseData(new DateTime(2022, 06, 16), "ZAR").Returns(false); 
+        yield return new TestCaseData(new DateTime(2022, 06, 17), "ZAR").Returns(true); 
+        yield return new TestCaseData(new DateTime(2022, 06, 17), "WRE")
+            .Returns(CommonUtils.UnsupportedCalendarMessage("WRE"));
+    }
+
+    [Test]
+    [TestCaseSource(nameof(IsBusinessDayTestCaseData))]
+    public object IsBusinessDayTest(DateTime date, string calendars)
+    {
+        return DateUtils.IsBusinessDay(date, calendars); 
+    }
+
+    [Test]
+    public void TestGetListOfCalendars()
+    {
+        object[,] expectedCalendars = DateUtils.GetListOfCalendars(); 
+        object[,] actualCalendars = {
+            {"Variant 1", "Variant 2", "Variant 3", "Variant 4"},
+            {"ARS", "Argentina", "", ""},
+            {"AUD", "Australia", "", ""},
+            {"BWP", "Botswana", "", ""},
+            {"BRL", "Brazil", "", ""},
+            {"CAD", "Canada", "", ""},
+            {"CHF", "Switzerland", "", ""},
+            {"CNH", "China", "", ""},
+            {"CZK", "Czech Republic", "", ""},
+            {"DKK", "Denmark", "", ""},
+            {"EUR", "Euro", "", ""},
+            {"GBP", "Great Britain", "", ""},
+            {"Germany", "", "", ""},
+            {"HUF", "Hungary", "", ""},
+            {"INR", "India", "", ""},
+            {"ILS", "Israel", "", ""},
+            {"Italy", "", "", ""},
+            {"JPY", "Japan", "", ""},
+            {"KRW", "South Korea", "", ""},
+            {"MXN", "Mexico", "", ""},
+            {"NOK", "Norway", "", ""},
+            {"NZD", "New Zealand", "", ""},
+            {"PLN", "Poland", "", ""},
+            {"RON", "Romania", "", ""},
+            {"RUB", "Russia", "", ""},
+            {"SGD", "Singapore", "", ""},
+            {"SKK", "Sweden", "", ""},
+            {"SLOVAKIA", "", "", ""},
+            {"THB", "Thailand", "", ""},
+            {"TRY", "Turkey", "", ""},
+            {"TWD", "Taiwan", "", ""},
+            {"UAH", "Ukraine", "", ""},
+            {"USD", "USA", "United States", "United States of America"},
+            {"WEEKENDSONLY", "", "", ""},
+            {"ZAR", "South Africa", "", ""},
+        };
+
+        Assert.AreEqual(expectedCalendars, actualCalendars);
+    }
+
+    [Test]
+    public void GetListOfHolidaysTest()
+    {
+        object[,] expectedHolidays = DateUtils.GetListOfHolidays(new DateTime(2022, 01, 01), new DateTime(2022, 04, 01), "ZAR");
+        object[,] actualHolidays = {{new DateTime(2022, 03, 21)}};
+        Assert.AreEqual(expectedHolidays, actualHolidays);
+    }
+
+    [Test]
+    public void GetListOfHolidaysThatAreEmptyTest()
+    {
+        object[,] expectedHolidays = DateUtils.GetListOfHolidays(new DateTime(2022, 01, 01), new DateTime(2022, 03, 01), "ZAR");
+        object[,] actualHolidays = {{ }};
+        Assert.AreEqual(expectedHolidays, actualHolidays);
+    }
+
+    [Test]
+    public void GetListOfHolidaysInvalidCalendarTest()
+    {
+        object[,] expectedHolidays =
+            DateUtils.GetListOfHolidays(new DateTime(2022, 01, 01), new DateTime(2022, 03, 01), "WRE");
+        object[,] actualHolidays = {{ CommonUtils.UnsupportedCalendarMessage("WRE") }};
+        Assert.AreEqual(expectedHolidays, actualHolidays);
+    }
+
+    [Test]
+    public void GenerateScheduleTest()
+    {
+        object[,] actualSchedule = 
+            DateUtils.GenerateSchedule(
+                startDate: new DateTime(2022, 03, 31), 
+                endDate: new DateTime(2022, 12, 31), 
+                frequency: "3m",
+                calendarsToParse: "ZAR", 
+                businessDayConventionToParse: "MODFOL",
+                ruleToParse: "Backward");
+
+        object[,] expectedSchedule =
+        {
+            { new DateTime(2022, 03, 31) },
+            { new DateTime(2022, 06, 30) },
+            { new DateTime(2022, 09, 30) },
+            { new DateTime(2022, 12, 30) },
+        };
+
+        Assert.AreEqual(expectedSchedule, actualSchedule);
+    }
+
+    [Test]
+    public void GenerateScheduleUnsupportedCalendarTest()
+    {
+        object[,] actualSchedule =
+            DateUtils.GenerateSchedule(
+                startDate: new DateTime(2022, 03, 31),
+                endDate: new DateTime(2022, 12, 31),
+                frequency: "3m",
+                calendarsToParse: "WRE",
+                businessDayConventionToParse: "MODFOL",
+                ruleToParse: "Backward");
+
+        Assert.AreEqual(actualSchedule, new object[,] {{CommonUtils.UnsupportedCalendarMessage("WRE")}});
+    }
+
+    [Test]
+    public void GenerateScheduleUnsupportedDayCountConventionTest()
+    {
+        object[,] actualSchedule =
+            DateUtils.GenerateSchedule(
+                startDate: new DateTime(2022, 03, 31),
+                endDate: new DateTime(2022, 12, 31),
+                frequency: "3m",
+                calendarsToParse: "ZAR",
+                businessDayConventionToParse: "SOMECONVENTION",
+                ruleToParse: "Backward");
+
+        Assert.AreEqual(
+            expected: actualSchedule, 
+            actual: new object[,] {{CommonUtils.DExcelErrorMessage($"Unsupported business day convention: 'SOMECONVENTION'")}});
+    }
+
+    [Test]
+    public void GenerateScheduleUnsupportedRuleTest()
+    {
+        object[,] actualSchedule =
+            DateUtils.GenerateSchedule(
+                startDate: new DateTime(2022, 03, 31),
+                endDate: new DateTime(2022, 12, 31),
+                frequency: "3m",
+                calendarsToParse: "ZAR",
+                businessDayConventionToParse: "MODFOL",
+                ruleToParse: "SomeRule");
+
+        Assert.AreEqual(new object[,] {{ CommonUtils.DExcelErrorMessage("Unsupported rule specified: 'SomeRule'") }}, actualSchedule);
     }
 }

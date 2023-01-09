@@ -3,19 +3,19 @@
 /// <summary>
 /// This class provides a set of utility methods for between Excel ranges and native enumerable, C# types.
 /// </summary>
-public static class ArrayUtils
+public static class ExcelArrayUtils
 {
     /// <summary>
     /// Converts an Excel range, either a single column or row, it does not handle 2D ranges, to a list.
     /// </summary>
     /// <param name="range">The Excel range to convert.</param>
-    /// <param name="dimension">The dimension to traverse</param>
     /// <typeparam name="T">The type to convert the range to.</typeparam>
     /// <returns>A list of values contained in the Excel range.</returns>
-    public static List<T> ConvertExcelRangeToList<T>(object[,] range, int dimension)
+    public static List<T> ConvertExcelRangeToList<T>(object[,] range)
     {
         List<T> output = new();
 
+        int dimension = range.GetLength(0) > range.GetLength(1) ? 0 : 1;
         if (typeof(T) == typeof(DateTime))
         {
             for (int i = 0; i < range.GetLength(dimension); i++)

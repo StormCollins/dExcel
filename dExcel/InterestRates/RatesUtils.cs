@@ -1,6 +1,7 @@
 ﻿namespace dExcel.InterestRates;
 
 using ExcelDna.Integration;
+using Utilities;
 
 public static class RatesUtils
 {

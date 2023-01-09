@@ -1,11 +1,14 @@
 ﻿namespace dExcel.ExcelUtils;
 
-using Dates;
-using ExcelDna.Integration;
-using QLNet;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Dates;
+using ExcelDna.Integration;
+using QLNet;
+using Utilities;
+
 /// <summary>
 /// A class for manipulating dExcel type tables in Excel.
 /// </summary>
@@ -158,8 +161,9 @@ public static class ExcelTable
             {
                 return (T)Convert.ChangeType(businessDayConvention, typeof(T));
             }
-            
-            return default;
+
+            throw new ArgumentException(
+                CommonUtils.DExcelErrorMessage($"Invalid Business Day Convention: {table[rowIndex, columnIndex]}"));
         }
 
         if (typeof(T) == typeof(DayCounter))
@@ -169,10 +173,29 @@ public static class ExcelTable
             
             if (dayCountConvention != null)
             {
-                return (T)Convert.ChangeType(dayCountConvention, typeof(T));
+                if (dayCountConvention.GetType() == typeof(Business252))
+                {
+                    return (T)Convert.ChangeType(dayCountConvention, typeof(Business252)); 
+                }
+                
+                if (dayCountConvention.GetType() == typeof(Actual360))
+                {
+                    return (T)Convert.ChangeType(dayCountConvention, typeof(Actual360)); 
+                }
+
+                if (dayCountConvention.GetType() == typeof(Actual365Fixed))
+                {
+                    return (T)Convert.ChangeType(dayCountConvention, typeof(Actual365Fixed));
+                }
+
+                if (dayCountConvention.GetType() == typeof(ActualActual))
+                {
+                    return (T)Convert.ChangeType(dayCountConvention, typeof(ActualActual));
+                }
             }
 
-            return default;
+            throw new ArgumentException(
+                CommonUtils.DExcelErrorMessage($"Invalid Day Count Convention: {table[rowIndex, columnIndex]}"));
         }
 
         return (T)Convert.ChangeType(table[rowIndex, columnIndex], typeof(T));

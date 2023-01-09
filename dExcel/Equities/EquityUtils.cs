@@ -1,6 +1,7 @@
 ﻿namespace dExcel.Equities;
 
 using ExcelDna.Integration;
+using Utilities;
 using mnd = MathNet.Numerics.Distributions;
 using mns = MathNet.Numerics.Statistics;
 

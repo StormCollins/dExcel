@@ -56,11 +56,11 @@ public static class ExcelTestUtils
     /// <returns>True if the inputs are valid, false otherwise.</returns>
     private static bool AreInputsValid(object[] x)
     {
-        for (int i = 0; i < x.Length; i++)
+        foreach (object t in x)
         {
             foreach (string excelErrorValue in ExcelErrorValues)
             {
-                if (string.Equals(x[i].ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(t.ToString(), excelErrorValue, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
@@ -107,13 +107,9 @@ public static class ExcelTestUtils
         Description = "Returns 'OK' if two values are equal, otherwise it returns 'ERROR'.",
         Category = "∂Excel: Test")]
     public static string Equal(
-        [ExcelArgument(
-            Name = "a",
-            Description = "Input a")]
+        [ExcelArgument(Name = "a", Description = "Input a")]
         object a,
-        [ExcelArgument(
-            Name = "b",
-            Description = "Input b")]
+        [ExcelArgument(Name = "b", Description = "Input b")]
         object b,
         [ExcelArgument(
             Name = "(Optional)Tolerance",
@@ -153,9 +149,7 @@ public static class ExcelTestUtils
         Description = "Returns 'OK' if input is true, otherwise returns 'ERROR'.",
         Category = "∂Excel: Test")]
     public static object IsTrue(
-        [ExcelArgument(
-            Name = "x",
-            Description = "Boolean input.")]
+        [ExcelArgument(Name = "x", Description = "Boolean input.")]
         object x)
     {
         if (!AreInputsValid(x))
@@ -175,11 +169,7 @@ public static class ExcelTestUtils
         Name = "d.TestUtils_IsFalse",
         Description = "Returns 'Okay' if parameter is false, otherwise returns 'Error'.",
         Category = "∂Excel: Test")]
-    public static object IsFalse(
-        [ExcelArgument(
-            Name = "x",
-            Description = "Boolean input.")]
-        object x)
+    public static object IsFalse([ExcelArgument(Name = "x", Description = "Boolean input.")]object x)
     {
         if (!AreInputsValid(x))
         {
@@ -200,13 +190,9 @@ public static class ExcelTestUtils
         Description = "Returns 'OK' if input 'a' is strictly greater than input 'b', otherwise 'ERROR'.",
         Category = "∂Excel: Test")]
     public static string GreaterThan(
-        [ExcelArgument(
-            Name = "a",
-            Description = "Input a")]
+        [ExcelArgument(Name = "a", Description = "Input a")]
         object a,
-        [ExcelArgument(
-            Name = "b",
-            Description = "Input b")]
+        [ExcelArgument(Name = "b", Description = "Input b")]
         object b)
     {
         if (!AreInputsValid(a) || !AreInputsValid(b))
@@ -227,14 +213,9 @@ public static class ExcelTestUtils
         Name = "d.TestUtils_LessThan",
         Description = "Returns 'OK' if input 'a' is strictly less than input 'b', otherwise it returns 'ERROR'.",
         Category = "∂Excel: Test")]
-    public static string LessThan(
-        [ExcelArgument(
-            Name = "a",
-            Description = "Input a")]
+    public static string LessThan([ExcelArgument(Name = "a", Description = "Input a")]
         object a,
-        [ExcelArgument(
-            Name = "b",
-            Description = "Input b")]
+        [ExcelArgument(Name = "b", Description = "Input b")]
         object b)
     {
         if (!AreInputsValid(a) || !AreInputsValid(b))
@@ -262,9 +243,7 @@ public static class ExcelTestUtils
         "\ni.e. 'ERROR' > 'WARNING' > 'OK' it can be seen as checking that there are only 'OK's.",
         Category = "∂Excel: Test")]
     public static string And(
-        [ExcelArgument(
-            Name = "Range",
-            Description = "Input range.")]
+        [ExcelArgument(Name = "Range", Description = "Input range.")]
         params object[] xRange)
     {
         object[] resultArray = new object[xRange.Length];
@@ -361,9 +340,7 @@ public static class ExcelTestUtils
         Description = "Returns 'OK' if input is 'ERROR', 'ERROR' if 'OK' and 'WARNING' otherwise.",
         Category = "∂Excel: Test")]
     public static object Not(
-        [ExcelArgument(
-            Name = "Range",
-            Description = "Input range.")]
+        [ExcelArgument(Name = "Range", Description = "Input range.")]
         object[,] x)
     {
         object[,] output = new object[x.GetLength(0), x.GetLength(1)];
@@ -423,9 +400,7 @@ public static class ExcelTestUtils
         "\ni.e. 'OK' > 'WARNING' > 'ERROR' it can be seen as finding ANY 'OK's.",
         Category = "∂Excel: Test")]
     public static string Or(
-        [ExcelArgument(
-            Name = "Range",
-            Description = "Input range.")]
+        [ExcelArgument(Name = "Range", Description = "Input range.")]
         params object[] xRange)
     {
         object[] resultArray = new object[xRange.Length];

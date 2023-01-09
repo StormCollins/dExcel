@@ -2,6 +2,7 @@
 
 using System;
 using ExcelDna.Integration;
+using Utilities;
 using mnd = MathNet.Numerics.Distributions;
 
 public static class DerivativeUtils

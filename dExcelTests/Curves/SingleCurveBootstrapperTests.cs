@@ -2,6 +2,7 @@
 
 using dExcel;
 using dExcel.Curves;
+using dExcel.Utilities;
 using NUnit.Framework;
 using QLNet;
 

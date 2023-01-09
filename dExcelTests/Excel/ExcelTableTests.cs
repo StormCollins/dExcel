@@ -2,6 +2,7 @@
 
 using dExcel.ExcelUtils;
 using NUnit.Framework;
+using QLNet;
 
 [TestFixture]
 public class ExcelTableTests
@@ -16,6 +17,14 @@ public class ExcelTableTests
         { "", "FRAs" },
         { "", "Interest Rate Swaps" },
         { "Base Date", "2022-06-01" },
+        { "ValidBusinessDayConvention", "ModifiedFollowing"},
+        { "InvalidBusinessDayConvention", "Invalid"},
+        { "Bus252DayCountConvention", "Bus252"},
+        { "Act360DayCountConvention", "Act360"},
+        { "Act364DayCountConvention", "Act364"},
+        { "Act365DayCountConvention", "Act365"},
+        { "ActActDayCountConvention", "ActAct"},
+        { "InvalidDayCountConvention", "Invalid"},
     };
 
     private readonly object[,] _discountFactorsTable =
@@ -76,7 +85,23 @@ public class ExcelTableTests
     public void GetColumnStringTest()
     {
         Assert.AreEqual(
-            expected: new List<string> {"CurveUtils Name", "Interpolation", "Instruments", "", "", "Base Date"},
+            expected: new List<string>
+            {
+                "CurveUtils Name", 
+                "Interpolation", 
+                "Instruments", 
+                "", 
+                "", 
+                "Base Date", 
+                "ValidBusinessDayConvention", 
+                "InvalidBusinessDayConvention",
+                "Bus252DayCountConvention", 
+                "Act360DayCountConvention", 
+                "Act364DayCountConvention",
+                "Act365DayCountConvention", 
+                "ActActDayCountConvention", 
+                "InvalidDayCountConvention",
+            },
             actual: ExcelTable.GetColumn<string>(_parameterTable, "Parameter", 1));
     }
 
@@ -84,12 +109,27 @@ public class ExcelTableTests
     public void GetRowHeadersTest()
     {
         Assert.AreEqual(
-            expected: new List<string> {"CURVEUTILS NAME", "INTERPOLATION", "INSTRUMENTS", "", "", "BASE DATE"}, 
+            expected: new List<string>
+            {
+                "CURVEUTILS NAME", 
+                "INTERPOLATION", 
+                "INSTRUMENTS", 
+                "", 
+                "", 
+                "BASE DATE", 
+                "VALIDBUSINESSDAYCONVENTION", 
+                "INVALIDBUSINESSDAYCONVENTION",
+                "BUS252DAYCOUNTCONVENTION", 
+                "ACT360DAYCOUNTCONVENTION",
+                "ACT364DAYCOUNTCONVENTION",
+                "ACT365DAYCOUNTCONVENTION",
+                "ACTACTDAYCOUNTCONVENTION",
+                "INVALIDDAYCOUNTCONVENTION",
+            }, 
             actual: ExcelTable.GetRowHeaders(_parameterTable));
     }
     
-    // ------------------------------------------------------------------------------
-    // LookUp Single Value
+    #region Lookup single value
     [Test]
     public void LookUpTableValueDateTest()
     {
@@ -122,8 +162,45 @@ public class ExcelTableTests
             actual: ExcelTable.GetTableValue<string>(_parameterTable, "NotThere", "Interpolation")); 
     }
 
-    // --------------------------------------------------------------------------
-    // LookUp Values
+    [Test]
+    public void LookUpBusinessDayConventionTest()
+    {
+        Assert.AreEqual(
+            expected: BusinessDayConvention.ModifiedFollowing,
+            actual: ExcelTable.GetTableValue<BusinessDayConvention>(_parameterTable, "Value", "ValidBusinessDayConvention")); 
+    }
+
+    [Test]
+    public void LookUpInvalidBusinessDayConventionTest()
+    {
+        Assert.Throws<ArgumentException>(() => 
+            ExcelTable.GetTableValue<BusinessDayConvention>(_parameterTable, "Value", "InvalidBusinessDayConvention"));
+    }
+
+    public static IEnumerable<TestCaseData> LookUpDayCountConventionTestCaseData()
+    {
+        yield return new TestCaseData("Bus252DayCountConvention").Returns(new Business252());
+        yield return new TestCaseData("Act360DayCountConvention").Returns(new Actual360());
+        yield return new TestCaseData("Act365DayCountConvention").Returns(new Actual365Fixed());
+        yield return new TestCaseData("ActActDayCountConvention").Returns(new ActualActual());
+    }
+
+    [Test]
+    [TestCaseSource(nameof(LookUpDayCountConventionTestCaseData))]
+    public DayCounter? LookUpDayCountConventionTest(string label)
+    {
+        return ExcelTable.GetTableValue<DayCounter>(_parameterTable, "Value", label);
+    }
+
+    [Test]
+    public void LookUpInvalidDayCountConventionTest()
+    {
+        Assert.Throws<ArgumentException>(() => 
+            ExcelTable.GetTableValue<DayCounter>(_parameterTable, "Value", "InvalidDayCountConvention"));
+    }
+    #endregion 
+
+    #region Lookup multiple values
     [Test]
     public void LookUpMultiplyMappedTableValuesTest()
     {
@@ -148,4 +225,5 @@ public class ExcelTableTests
             expected: null,
             actual: ExcelTable.LookUpTableValues<string>(_parameterTable, "NotThere", "Instruments"));
     }
+    #endregion 
 }
