@@ -1,4 +1,4 @@
-﻿namespace dExcelTests.Excel;
+﻿namespace dExcelTests.ExcelUtilsTests;
 
 using dExcel.ExcelUtils;
 using NUnit.Framework;

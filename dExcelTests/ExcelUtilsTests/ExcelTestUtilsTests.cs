@@ -1,8 +1,8 @@
-﻿namespace dExcelTests.Excel;
+﻿namespace dExcelTests.ExcelUtilsTests;
 
-using NUnit.Framework;
 using dExcel.ExcelUtils;
 using ExcelDna.Integration;
+using NUnit.Framework;
 
 [TestFixture]
 public class ExcelTestUtilsTests
