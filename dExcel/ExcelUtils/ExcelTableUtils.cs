@@ -1,6 +1,5 @@
 ﻿namespace dExcel.ExcelUtils;
 
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -18,7 +17,7 @@ using Utilities;
 /// Value 1         | Value 2         | ... | Value n
 /// ...
 /// </remarks>
-public static class ExcelTable
+public static class ExcelTableUtils
 {
     /// <summary>
     /// Gets the table label.

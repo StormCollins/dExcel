@@ -48,13 +48,13 @@ public class ExcelTableTests
     [Test]
     public void GetTableLabelTest()
     {
-        Assert.AreEqual("Example Table", ExcelTable.GetTableLabel(_parameterTable));
+        Assert.AreEqual("Example Table", ExcelTableUtils.GetTableLabel(_parameterTable));
     }
 
     [Test]
     public void GetColumnTitlesTest()
     {
-        Assert.AreEqual(new List<string> {"PARAMETER", "VALUE"}, ExcelTable.GetColumnHeaders(_parameterTable));
+        Assert.AreEqual(new List<string> {"PARAMETER", "VALUE"}, ExcelTableUtils.GetColumnHeaders(_parameterTable));
     }
 
     [Test]
@@ -62,7 +62,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: new List<DateTime> { new(2022, 06, 01), new(2022, 07, 01), new(2022, 08, 01) },
-            actual: ExcelTable.GetColumn<DateTime>(_discountFactorsTable, "Dates", 1));
+            actual: ExcelTableUtils.GetColumn<DateTime>(_discountFactorsTable, "Dates", 1));
     }
     
     [Test]
@@ -70,7 +70,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: new List<double> { 1.000, 0.999, 0.998 },
-            actual: ExcelTable.GetColumn<double>(_discountFactorsTable, "Discount Factors", 1));
+            actual: ExcelTableUtils.GetColumn<double>(_discountFactorsTable, "Discount Factors", 1));
     }
     
     [Test]
@@ -78,7 +78,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: new List<double> { 1, 2, 3 },
-            actual: ExcelTable.GetColumn<int>(_primeTable, "Position", 1));
+            actual: ExcelTableUtils.GetColumn<int>(_primeTable, "Position", 1));
     }
 
     [Test]
@@ -102,7 +102,7 @@ public class ExcelTableTests
                 "ActActDayCountConvention", 
                 "InvalidDayCountConvention",
             },
-            actual: ExcelTable.GetColumn<string>(_parameterTable, "Parameter", 1));
+            actual: ExcelTableUtils.GetColumn<string>(_parameterTable, "Parameter", 1));
     }
 
     [Test]
@@ -126,7 +126,7 @@ public class ExcelTableTests
                 "ACTACTDAYCOUNTCONVENTION",
                 "INVALIDDAYCOUNTCONVENTION",
             }, 
-            actual: ExcelTable.GetRowHeaders(_parameterTable));
+            actual: ExcelTableUtils.GetRowHeaders(_parameterTable));
     }
     
     #region Lookup single value
@@ -135,7 +135,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: 0.999,
-            actual: ExcelTable.GetTableValue<double>(_discountFactorsTable, "Discount Factors", "44743")); 
+            actual: ExcelTableUtils.GetTableValue<double>(_discountFactorsTable, "Discount Factors", "44743")); 
     }
 
     [Test]
@@ -143,7 +143,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: 3,
-            actual: ExcelTable.GetTableValue<int>(_primeTable, "Primes", "2")); 
+            actual: ExcelTableUtils.GetTableValue<int>(_primeTable, "Primes", "2")); 
     }
     
     [Test]
@@ -151,7 +151,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: "LogLinear",
-            actual: ExcelTable.GetTableValue<string>(_parameterTable, "Value", "Interpolation")); 
+            actual: ExcelTableUtils.GetTableValue<string>(_parameterTable, "Value", "Interpolation")); 
     }
     
     [Test]
@@ -159,7 +159,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: null,
-            actual: ExcelTable.GetTableValue<string>(_parameterTable, "NotThere", "Interpolation")); 
+            actual: ExcelTableUtils.GetTableValue<string>(_parameterTable, "NotThere", "Interpolation")); 
     }
 
     [Test]
@@ -167,14 +167,14 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: BusinessDayConvention.ModifiedFollowing,
-            actual: ExcelTable.GetTableValue<BusinessDayConvention>(_parameterTable, "Value", "ValidBusinessDayConvention")); 
+            actual: ExcelTableUtils.GetTableValue<BusinessDayConvention>(_parameterTable, "Value", "ValidBusinessDayConvention")); 
     }
 
     [Test]
     public void LookUpInvalidBusinessDayConventionTest()
     {
         Assert.Throws<ArgumentException>(() => 
-            ExcelTable.GetTableValue<BusinessDayConvention>(_parameterTable, "Value", "InvalidBusinessDayConvention"));
+            ExcelTableUtils.GetTableValue<BusinessDayConvention>(_parameterTable, "Value", "InvalidBusinessDayConvention"));
     }
 
     public static IEnumerable<TestCaseData> LookUpDayCountConventionTestCaseData()
@@ -189,14 +189,14 @@ public class ExcelTableTests
     [TestCaseSource(nameof(LookUpDayCountConventionTestCaseData))]
     public DayCounter? LookUpDayCountConventionTest(string label)
     {
-        return ExcelTable.GetTableValue<DayCounter>(_parameterTable, "Value", label);
+        return ExcelTableUtils.GetTableValue<DayCounter>(_parameterTable, "Value", label);
     }
 
     [Test]
     public void LookUpInvalidDayCountConventionTest()
     {
         Assert.Throws<ArgumentException>(() => 
-            ExcelTable.GetTableValue<DayCounter>(_parameterTable, "Value", "InvalidDayCountConvention"));
+            ExcelTableUtils.GetTableValue<DayCounter>(_parameterTable, "Value", "InvalidDayCountConvention"));
     }
     #endregion 
 
@@ -207,7 +207,7 @@ public class ExcelTableTests
         // Here we test one value in the 'Parameter' column mapping to multiple values in the 'Value' column.
         Assert.AreEqual(
             expected: new List<string> {"Deposits", "FRAs", "Interest Rate Swaps"},
-            actual: ExcelTable.LookUpTableValues<string>(_parameterTable, "Value", "Instruments"));
+            actual: ExcelTableUtils.LookUpTableValues<string>(_parameterTable, "Value", "Instruments"));
     }
     
     [Test]
@@ -215,7 +215,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: null,
-            actual: ExcelTable.LookUpTableValues<string>(_parameterTable, "Value", "NotThere"));
+            actual: ExcelTableUtils.LookUpTableValues<string>(_parameterTable, "Value", "NotThere"));
     }
 
     [Test]
@@ -223,7 +223,7 @@ public class ExcelTableTests
     {
         Assert.AreEqual(
             expected: null,
-            actual: ExcelTable.LookUpTableValues<string>(_parameterTable, "NotThere", "Instruments"));
+            actual: ExcelTableUtils.LookUpTableValues<string>(_parameterTable, "NotThere", "Instruments"));
     }
     #endregion 
 }

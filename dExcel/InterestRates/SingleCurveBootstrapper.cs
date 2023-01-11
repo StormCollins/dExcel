@@ -18,7 +18,7 @@ public static class SingleCurveBootstrapper
         object[,]? customRateIndex = null, 
         params object[] instrumentGroups)
     {
-        DateTime baseDate = ExcelTable.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", 1);
+        DateTime baseDate = ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", 1);
         if (baseDate == default)
         {
             return $"{CommonUtils.DExcelErrorPrefix} Base date missing from curve parameters.";
@@ -26,13 +26,13 @@ public static class SingleCurveBootstrapper
         
         Settings.setEvaluationDate(baseDate);
 
-        string? rateIndexName = ExcelTable.GetTableValue<string>(curveParameters, "Value", "RateIndexName");
+        string? rateIndexName = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexName");
         if (rateIndexName is null && customRateIndex is null)
         {
             return $"{CommonUtils.DExcelErrorPrefix} Rate index missing from curve parameters (and no custom rate index provided).";
         }
 
-        string? indexTenor = ExcelTable.GetTableValue<string>(curveParameters, "Value", "RateIndexTenor");
+        string? indexTenor = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexTenor");
         if (indexTenor is null && customRateIndex is null && rateIndexName != "FEDFUND")
         {
             return $"{CommonUtils.DExcelErrorPrefix} Please provide a rate index tenor in the curve parameters.";
@@ -84,12 +84,12 @@ public static class SingleCurveBootstrapper
             object[,] instruments = (object[,])instrumentGroup;
 
             // TODO: Make this case insensitive.
-            string? instrumentType = ExcelTable.GetTableLabel(instruments);
-            List<string>? tenors = ExcelTable.GetColumn<string>(instruments, "Tenors");
-            List<string>? fraTenors = ExcelTable.GetColumn<string>(instruments, "FraTenors");
-            List<DateTime>? endDates = ExcelTable.GetColumn<DateTime>(instruments, "EndDates");
-            List<double>? rates = ExcelTable.GetColumn<double>(instruments, "Rates");
-            List<bool>? includeInstruments = ExcelTable.GetColumn<bool>(instruments, "Include");
+            string? instrumentType = ExcelTableUtils.GetTableLabel(instruments);
+            List<string>? tenors = ExcelTableUtils.GetColumn<string>(instruments, "Tenors");
+            List<string>? fraTenors = ExcelTableUtils.GetColumn<string>(instruments, "FraTenors");
+            List<DateTime>? endDates = ExcelTableUtils.GetColumn<DateTime>(instruments, "EndDates");
+            List<double>? rates = ExcelTableUtils.GetColumn<double>(instruments, "Rates");
+            List<bool>? includeInstruments = ExcelTableUtils.GetColumn<bool>(instruments, "Include");
 
             if (includeInstruments is null)
             {

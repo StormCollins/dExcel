@@ -47,17 +47,35 @@ public static class DateParserUtils
         object[,] holidaysOrCalendars, 
         Calendar calendar)
     {
-        foreach (object holiday in holidaysOrCalendars)
+        // There is a single column of holidays.
+        if (holidaysOrCalendars.GetLength(1) == 1)
         {
-            if (double.TryParse(holiday.ToString(), out double holidayValue))
+            foreach (object holiday in holidaysOrCalendars)
             {
-                calendar.addHoliday(DateTime.FromOADate(holidayValue));
-            }
-            else
-            {
-                if (!Regex.IsMatch(holiday.ToString() ?? string.Empty, ValidHolidayTitlePattern))
+                if (double.TryParse(holiday.ToString(), out double holidayValue))
                 {
-                    throw new ArgumentException(CommonUtils.DExcelErrorMessage($"Invalid date: '{holiday}'"));
+                    calendar.addHoliday(DateTime.FromOADate(holidayValue));
+                }
+                else
+                {
+                    if (!Regex.IsMatch(holiday.ToString() ?? string.Empty, ValidHolidayTitlePattern))
+                    {
+                        throw new ArgumentException(CommonUtils.DExcelErrorMessage($"Invalid date: '{holiday}'"));
+                    }
+                }
+            }
+        }
+        // There are multiple columns of holidays, each with a column header specified by a specific currency/country.
+        else
+        {
+            for (int j = 0; j < holidaysOrCalendars.GetLength(1); j++)
+            {
+                for (int i = 0; i < holidaysOrCalendars.GetLength(0); i++)
+                {
+                    if (double.TryParse(holidaysOrCalendars[i, j].ToString(), out double holidayValue))
+                    {
+                        calendar.addHoliday(DateTime.FromOADate(holidayValue));
+                    }
                 }
             }
         }

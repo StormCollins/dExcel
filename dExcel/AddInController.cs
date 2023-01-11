@@ -12,8 +12,6 @@ using Utilities;
 
 public class AddInController : IExcelAddIn
 {
-    Excel.Application xlapp = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
-    
     public void AutoClose()
     {
         
@@ -48,25 +46,34 @@ public class AddInController : IExcelAddIn
             string? firstName = user.Properties["givenName"].Value?.ToString();
             string? surname = user.Properties["sn"].Value?.ToString();
             
-            SQLiteConnection connection =
-                new(
-                    @"URI=file:\\\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\dExcelUsageStats\dexcel_usage_stats.sqlite");
-            connection.Open();
+            // TODO: Add warning if the user is not connected to the DB.
+            try
+            {
+                SQLiteConnection connection =
+                    new(
+                        @"URI=file:\\\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\dExcelUsageStats\dexcel_usage_stats.sqlite");
 
-            using SQLiteCommand writeCommand = new(connection);
-            writeCommand.CommandText =
-                $@"INSERT INTO users(username, firstname, surname, date_created, active)
+                connection.Open();
+
+                using SQLiteCommand writeCommand = new(connection);
+                writeCommand.CommandText =
+                    $@"INSERT INTO users(username, firstname, surname, date_created, active)
                SELECT '{userName}', '{firstName}', '{surname}', DATETIME('NOW', 'localtime'), TRUE
                WHERE NOT EXISTS (SELECT * FROM users WHERE username='{userName}');";
 
-            writeCommand.ExecuteNonQuery();
-            string dexcelVersion = DebugUtils.GetAssemblyVersion();
-            writeCommand.CommandText =
-                $@"INSERT INTO dexcel_usage(username, version, date_logged)
+                writeCommand.ExecuteNonQuery();
+                string dexcelVersion = DebugUtils.GetAssemblyVersion();
+                writeCommand.CommandText =
+                    $@"INSERT INTO dexcel_usage(username, version, date_logged)
                SELECT '{userName}', '{DebugUtils.GetAssemblyVersion()}', DATETIME('NOW', 'localtime')
                WHERE NOT EXISTS (SELECT * FROM dexcel_usage WHERE username='{userName}' AND version='{dexcelVersion}' AND DATE(date_logged)=DATE('NOW', 'localtime'));";
 
-            writeCommand.ExecuteNonQuery();
+                writeCommand.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message, "dExcel Error");
+            }
         }
     }
 }

@@ -22,10 +22,10 @@ public static class CurveBootstrapper
         {
             object[,] instruments = (object[,])instrumentGroup;
 
-            List<string>? tenors = ExcelTable.GetColumn<string>(instruments, "Tenors");
-            List<string>? rateIndices = ExcelTable.GetColumn<string>(instruments, "RateIndex");
-            List<double>? rates = ExcelTable.GetColumn<double>(instruments, "Rates");
-            List<bool>? include = ExcelTable.GetColumn<bool>(instruments, "Include");
+            List<string>? tenors = ExcelTableUtils.GetColumn<string>(instruments, "Tenors");
+            List<string>? rateIndices = ExcelTableUtils.GetColumn<string>(instruments, "RateIndex");
+            List<double>? rates = ExcelTableUtils.GetColumn<double>(instruments, "Rates");
+            List<bool>? include = ExcelTableUtils.GetColumn<bool>(instruments, "Include");
             string index = rateIndices?[0];
             
             rateIndex =
@@ -36,7 +36,7 @@ public static class CurveBootstrapper
                     "USD-LIBOR" => new USDLibor(new Period("3m")),
                 };
 
-            string? instrumentType = ExcelTable.GetTableLabel(instruments);
+            string? instrumentType = ExcelTableUtils.GetTableLabel(instruments);
 
             if (string.Compare(instrumentType, "Deposits", StringComparison.InvariantCultureIgnoreCase) == 0)
             {

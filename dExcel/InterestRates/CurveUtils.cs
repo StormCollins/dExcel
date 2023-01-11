@@ -78,7 +78,7 @@ public static class CurveUtils
             discountFactors.Add((double)discountFactorsRange[i, 0]);
         }
 
-        string? dayCountConventionParameter = ExcelTable.GetTableValue<string>(curveParameters, "Value", "DayCountConvention", 0);
+        string? dayCountConventionParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "DayCountConvention", 0);
         
         if (dayCountConventionParameter == null)
         {
@@ -101,7 +101,7 @@ public static class CurveUtils
             return CommonUtils.DExcelErrorMessage($"Invalid 'DayCountConvention': {dayCountConventionParameter}");
         }
 
-        string? interpolationParameter = ExcelTable.GetTableValue<string>(curveParameters, "Value", "Interpolation", 0);
+        string? interpolationParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Interpolation", 0);
 
         if (interpolationParameter == null)
         {
@@ -125,7 +125,7 @@ public static class CurveUtils
             return CommonUtils.DExcelErrorMessage($"Invalid 'interpolation' method: {interpolationParameter}");
         }
 
-        string? calendarsParameter = ExcelTable.GetTableValue<string>(curveParameters, "Value", "Calendars");
+        string? calendarsParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Calendars");
         IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
         Type interpolationType = typeof(InterpolatedDiscountCurve<>).MakeGenericType(interpolation.GetType());
         object? termStructure= Activator.CreateInstance(interpolationType, dates, discountFactors, dayCountConvention, interpolation);
