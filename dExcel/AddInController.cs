@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Security.Principal;
 using ExcelDna.Integration;
 using ExcelDna.Registration;
-using Excel = Microsoft.Office.Interop.Excel;
 using Utilities;
 
 public class AddInController : IExcelAddIn
@@ -46,7 +45,6 @@ public class AddInController : IExcelAddIn
             string? firstName = user.Properties["givenName"].Value?.ToString();
             string? surname = user.Properties["sn"].Value?.ToString();
             
-            // TODO: Add warning if the user is not connected to the DB.
             try
             {
                 SQLiteConnection connection =

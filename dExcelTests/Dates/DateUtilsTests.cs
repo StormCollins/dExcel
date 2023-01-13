@@ -27,6 +27,20 @@ public sealed class DateUtilsTests
         return DateUtils.FolDay(unadjustedDate, holidays);
     }
 
+    [Test]
+    public void FolDayUsingMultipleHolidayListsTest()
+    {
+        object[,] holidays =
+        {
+            { "NGN", "TZS" }, 
+            { new DateTime(2023, 02, 11).ToOADate(), new DateTime(2023, 02, 12).ToOADate() },
+            { new DateTime(2023, 03, 12).ToOADate(), string.Empty },
+        };
+        
+        object x = DateUtils.FolDay(new DateTime(2023, 01, 11), holidays);
+        object y = DateUtils.FolDay(new DateTime(2023, 01, 11), holidays);
+    }
+    
     public static IEnumerable<TestCaseData> FolDayCalendarsTestData()
     {
         yield return new TestCaseData(new DateTime(2022, 06, 16), new object[,] {{"ZAR"}})
