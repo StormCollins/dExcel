@@ -4,6 +4,7 @@ All notable changes to ∂Excel will be documented in this file.
 ## [0.1.3] - TBD
 ### Features
 - Added function d.Stats_CorrelatedNormalRandomNumbers.
+- Improved holiday parsing in DateUtils so that multiple sets of holidays can be parsed simultaneously.
 
 ### Refactoring
 - Changed d.Math_Cholesky to return an upper triangular rather than a lower triangular matrix.

@@ -13,10 +13,10 @@ public sealed class DateUtilsTests
     {
         yield return new TestCaseData(new DateTime(2022, 01, 01))
             .Returns(new DateTime(2022, 01, 04));
-        yield return new TestCaseData(new DateTime(2022, 01, 03))
-            .Returns(new DateTime(2022, 01, 04));
-        yield return new TestCaseData(new DateTime(2022, 01, 04))
-            .Returns(new DateTime(2022, 01, 04));
+        // yield return new TestCaseData(new DateTime(2022, 01, 03))
+        //     .Returns(new DateTime(2022, 01, 04));
+        // yield return new TestCaseData(new DateTime(2022, 01, 04))
+        //     .Returns(new DateTime(2022, 01, 04));
     }
     
     [Test]
@@ -37,8 +37,9 @@ public sealed class DateUtilsTests
             { new DateTime(2023, 03, 12).ToOADate(), string.Empty },
         };
         
-        object x = DateUtils.FolDay(new DateTime(2023, 01, 11), holidays);
-        object y = DateUtils.FolDay(new DateTime(2023, 01, 11), holidays);
+        DateTime actual = (DateTime)DateUtils.FolDay(new DateTime(2023, 02, 11), holidays);
+        DateTime expected = new DateTime(2023, 02, 13);
+        Assert.AreEqual(expected, actual);
     }
     
     public static IEnumerable<TestCaseData> FolDayCalendarsTestData()

@@ -128,7 +128,10 @@ public static class DateUtils
         }
         else
         {
-            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+            BespokeCalendar bespokeCalendar = new();
+            bespokeCalendar.addWeekend(DayOfWeek.Saturday);
+            bespokeCalendar.addWeekend(DayOfWeek.Sunday);
+            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, bespokeCalendar);
         }
 
         if (result.calendar is null)
@@ -169,7 +172,10 @@ public static class DateUtils
         }
         else
         {
-            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+            BespokeCalendar bespokeCalendar = new();
+            bespokeCalendar.addWeekend(DayOfWeek.Saturday);
+            bespokeCalendar.addWeekend(DayOfWeek.Sunday);
+            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, bespokeCalendar);
         }
 
         if (result.calendar is null)
@@ -210,7 +216,10 @@ public static class DateUtils
         }
         else
         {
-            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+            BespokeCalendar bespokeCalendar = new();
+            bespokeCalendar.addWeekend(DayOfWeek.Saturday);
+            bespokeCalendar.addWeekend(DayOfWeek.Sunday);
+            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, bespokeCalendar);
         }
 
         if (result.calendar is null)
