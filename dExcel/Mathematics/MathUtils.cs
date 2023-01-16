@@ -145,6 +145,11 @@ public static class MathUtils
         List<double> xValues = ExcelArrayUtils.ConvertExcelRangeToList<double>(xRange);
         List<double> yValues = ExcelArrayUtils.ConvertExcelRangeToList<double>(yRange);
 
+        if (xValues.Distinct().Count() != xValues.Count)
+        {
+            return CommonUtils.DExcelErrorMessage("Duplicate values in x-values range.");
+        }
+        
         if (xValues.Count != yValues.Count)
         {
             return CommonUtils.DExcelErrorMessage("Dimensions of x and y ranges don't match.");
