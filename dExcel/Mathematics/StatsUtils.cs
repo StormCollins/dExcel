@@ -102,13 +102,13 @@ public static class StatsUtils
     [ExcelArgument(
         Name = "(Optional)Row Count",
         Description = "The number of rows of random numbers to output.")]
-        int rowCount = 1,
+        int rowCount = 0,
     [ExcelArgument(
         Name = "(Optional)Column Count",
         Description = "The number of columns of random numbers to output.")]
-        int columnCount = 1)
+        int columnCount = 0)
     {
-        if (ExcelDnaUtil.Application is not null)
+        if (ExcelDnaUtil.Application is not null && rowCount == 0 && columnCount == 0)
         {
             ExcelReference? caller = XlCall.Excel(XlCall.xlfCaller) as ExcelReference;
             rowCount = caller.RowLast - caller.RowFirst + 1;
