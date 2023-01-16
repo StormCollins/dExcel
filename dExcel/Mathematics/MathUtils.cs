@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Numerics;
 using ExcelDna.Integration;
+using ExcelUtils;
 using Utilities;
 using mni = MathNet.Numerics.Interpolation;
 
@@ -106,8 +107,8 @@ public static class MathUtils
     /// <summary>
     /// Performs linear, exponential, or flat interpolation on a range for a single given point.
     /// </summary>
-    /// <param name="xValues">Independent variable.</param>
-    /// <param name="yValues">Dependent variable.</param>
+    /// <param name="xRange">Independent variable.</param>
+    /// <param name="yRange">Dependent variable.</param>
     /// <param name="xi">Value for which to interpolate.</param>
     /// <param name="method">Method of interpolation: 'linear', 'exponential', 'flat'</param>
     /// <returns>Interpolated y-value.</returns>
@@ -118,9 +119,9 @@ public static class MathUtils
         Category = "∂Excel: Mathematics")]
     public static object Interpolate(
         [ExcelArgument(Name = "X-values", Description = "Independent variable.")]
-        object[,] xValues,
+        object[,] xRange,
         [ExcelArgument(Name = "Y-values", Description = "Dependent variable.")]
-        object[,] yValues,
+        object[,] yRange,
         [ExcelArgument(Name = "Xi", Description = "Value for which to interpolate.")]
         double xi,
         [ExcelArgument(
@@ -131,85 +132,60 @@ public static class MathUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        // If xValues or yValues is a row, then transpose so that a column is supplied.
-        object[,] Transpose(object[,] matrix)
+        if (xRange.GetLength(0) > 1 && xRange.GetLength(1) > 1)
         {
-            int matrixRows = matrix.GetLength(0);
-            int matrixCols = matrix.GetLength(1);
+            return CommonUtils.DExcelErrorMessage("x-value range has too many dimensions.");
+        }
+        
+        if (yRange.GetLength(0) > 1 && yRange.GetLength(1) > 1)
+        {
+            return CommonUtils.DExcelErrorMessage("y-value range has too many dimensions.");
+        }
+        
+        List<double> xValues = ExcelArrayUtils.ConvertExcelRangeToList<double>(xRange);
+        List<double> yValues = ExcelArrayUtils.ConvertExcelRangeToList<double>(yRange);
 
-            object[,] matrixTransposed = new object[matrixCols, matrixRows];
+        if (xValues.Count != yValues.Count)
+        {
+            return CommonUtils.DExcelErrorMessage("Dimensions of x and y ranges don't match.");
+        }
+       
+        mni.IInterpolation? interpolator = null;
 
-            for (int i = 0; i < matrixRows; i++)
-            {
-                for (int j = 0; j < matrixCols; j++)
-                {
-                    matrixTransposed[j, i] = matrix[i, j];
-                }
-            }
-
-            return matrixTransposed;
+        switch (method.ToUpper())
+        {
+            case "LINEAR":
+                interpolator = mni.LinearSpline.Interpolate(xValues, yValues);
+                return interpolator.Interpolate(xi);
+            case "EXPONENTIAL":
+                return ExponentialInterpolation();
+            case "FLAT":
+                interpolator = mni.StepInterpolation.Interpolate(xValues, yValues);
+                return interpolator.Interpolate(xi);
+            default:
+                return CommonUtils.DExcelErrorMessage($"Unsupported interpolation: '{method}'");
         }
 
-        if (xValues.GetLength(1) > xValues.GetLength(0))
+        // Log-linear interpolation fails for negative y-values therefore we move to the complex plane here then 
+        // back to real numbers.
+        double ExponentialInterpolation()
         {
-            xValues = Transpose(xValues);
-        }
+            int lowerXIndex = xValues.IndexOf(xValues.Where(x => x <= xi).Max());
+            int upperXIndex = xValues.IndexOf(xValues.Where(x => x >= xi).Min());
 
-        if (yValues.GetLength(1) > yValues.GetLength(0))
-        {
-            yValues = Transpose(yValues);
-        }
-
-        if ((xValues.GetLength(0) == yValues.GetLength(0)) && (xValues.GetLength(1)==1) && (yValues.GetLength(1) == 1))
-        {
-            int rowCount = Math.Max(xValues.GetLength(0), yValues.GetLength(0));
-            double[] x = new double[rowCount];
-            double[] y = new double[rowCount];
-            for (int i = 0; i < rowCount; i++)
+            if (lowerXIndex == upperXIndex)
             {
-                x[i] = (double)xValues[i, 0];
-                y[i] = (double)yValues[i, 0];
-            }
-            
-            mni.IInterpolation? interpolator = null;
-
-            switch (method.ToUpper())
-            {
-                case "LINEAR":
-                    interpolator = mni.LinearSpline.Interpolate(x, y);
-                    return interpolator.Interpolate(xi);
-                case "EXPONENTIAL":
-                    return ExponentialInterpolation();
-                case "FLAT":
-                    interpolator = mni.StepInterpolation.Interpolate(x, y);
-                    return interpolator.Interpolate(xi);
-                default:
-                    return CommonUtils.DExcelErrorMessage($"Unsupported interpolation: '{method}'");
+                return yValues[lowerXIndex];
             }
 
-            // Log-linear interpolation fails for negative y-values therefore we move to the complex plane here then 
-            // back to real numbers.
-            double ExponentialInterpolation()
-            {
-                int index0 = Array.IndexOf(x, x.Where(element => element <= xi).Max());
-                int index1 = Array.IndexOf(x, x.Where(element => element >= xi).Min());
-
-                if (index0 == index1)
-                {
-                    return y[index0];
-                }
-
-                Complex xiComplex = xi;
-                Complex x0Complex = x[index0];
-                Complex x1Complex = x[index1];
-                Complex y0Complex = y[index0];
-                Complex y1Complex = y[index1];
-                Complex yi = (Complex.Log(y1Complex) - Complex.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + Complex.Log(y0Complex);
-                Complex outputY = Complex.Exp(yi);
-                return outputY.Real;
-            }
-        }
-
-        return CommonUtils.DExcelErrorMessage("Row dimensions do not match or there is more than one column in x or y.");
+            Complex xiComplex = xi;
+            Complex x0Complex = xValues[lowerXIndex];
+            Complex x1Complex = xValues[upperXIndex];
+            Complex y0Complex = yValues[lowerXIndex];
+            Complex y1Complex = yValues[upperXIndex];
+            Complex yi = (Complex.Log(y1Complex) - Complex.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + Complex.Log(y0Complex);
+            Complex outputY = Complex.Exp(yi);
+            return outputY.Real;
+        }   
     }
 }

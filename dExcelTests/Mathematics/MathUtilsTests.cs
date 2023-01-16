@@ -1,6 +1,5 @@
 ﻿namespace dExcelTests.Mathematics;
 
-using dExcel;
 using NUnit.Framework;
 using dExcel.Mathematics;
 using dExcel.Utilities;
@@ -14,7 +13,7 @@ public class MathUtilsTests
         object[,] xValues = { { 1.0 }, { 2.0 }, { 3.0 }, { 4.0 } };
         object[,] yValues = { { 2.0 }, { 4.0 }, { 6.0 }, { 8.0 } };
         double actual = (double)MathUtils.Interpolate(xValues, yValues, 1.5, "linear");
-        double expected = 3;
+        const double expected = 3;
         Assert.AreEqual(expected, actual);
     }
     
@@ -24,7 +23,7 @@ public class MathUtilsTests
         object[,] xValues = { { 1.0, 2.0, 3.0, 4.0 } };
         object[,] yValues = { { 2.0, 4.0, 6.0, 8.0 } };
         double actual = (double)MathUtils.Interpolate(xValues, yValues, 1.5, "linear");
-        double expected = 3;
+        const double expected = 3;
         Assert.AreEqual(expected, actual);
     }
 
@@ -44,7 +43,7 @@ public class MathUtilsTests
         object[,] xValues = { { 1.0, 2.0, 3.0, 4.0 } };
         object[,] yValues = { { 2.0, 4.0, 6.0, 8.0 } };
         double actual = (double)MathUtils.Interpolate(xValues, yValues, 2, "exponential");
-        double expected = 4.0;
+        const double expected = 4.0;
         Assert.AreEqual(expected, actual);
     }
 
@@ -54,7 +53,7 @@ public class MathUtilsTests
         object[,] xValues = { { 1.0, 2.0, 3.0, 4.0 } };
         object[,] yValues = { { 2.0, 4.0, 6.0, 8.0 } };
         double actual = (double)MathUtils.Interpolate(xValues, yValues, 1.5, "flat");
-        double expected = 2.0;
+        const double expected = 2.0;
         Assert.AreEqual(expected, actual);
     }
 
@@ -74,11 +73,30 @@ public class MathUtilsTests
         object[,] xValues = { { 1.0 }, { 2.0 }, { 3.0 }, { 4.0 }, { 5.0 }};
         object[,] yValues = { { 2.0 }, { 4.0 }, { 6.0 }, { 8.0 } };
         string? actual = MathUtils.Interpolate(xValues, yValues, 1.5, "linear").ToString();
-        string expected =
-            CommonUtils.DExcelErrorMessage("Row dimensions do not match or there is more than one column in x or y.");
+        string expected = CommonUtils.DExcelErrorMessage("Dimensions of x and y ranges don't match.");
         Assert.AreEqual(expected, actual);
     }
 
+    [Test]
+    public void TooManyXValueRangeDimensionsTest()
+    {
+        object[,] xValues = { { 1.0, 5.0 }, { 2.0, 6.0 }, { 3.0, 7.0 }, { 4.0, 8.0 }};
+        object[,] yValues = { { 2.0 }, { 4.0 }, { 6.0 }, { 8.0 } };
+        string? actual = MathUtils.Interpolate(xValues, yValues, 1.5, "linear").ToString();
+        string expected = CommonUtils.DExcelErrorMessage("x-value range has too many dimensions.");
+        Assert.AreEqual(expected, actual);
+    }
+    
+    [Test]
+    public void TooManyYValueRangeDimensionsTest()
+    {
+        object[,] xValues = { { 1.0 }, { 2.0 }, { 3.0 }, { 4.0 }};
+        object[,] yValues = { { 2.0, 9.0 }, { 4.0, 10.0 }, { 6.0, 11.0 }, { 8.0, 12.0 } };
+        string? actual = MathUtils.Interpolate(xValues, yValues, 1.5, "linear").ToString();
+        string expected = CommonUtils.DExcelErrorMessage("y-value range has too many dimensions.");
+        Assert.AreEqual(expected, actual);
+    }
+    
     [Test]
     public void BilinearInterpolateTest()
     {
