@@ -1,11 +1,11 @@
 ﻿namespace dExcelTests.Mathematics;
 
-using dExcel;
 using dExcel.Mathematics;
 using dExcel.Utilities;
 using mnd = MathNet.Numerics.Distributions;
 using mnla = MathNet.Numerics.LinearAlgebra;
 using mnr = MathNet.Numerics.Random;
+using mns = MathNet.Numerics.Statistics;
 using NUnit.Framework;
 
 [TestFixture]
@@ -116,8 +116,44 @@ public class StatsUtilsTests
    [Test]
    public void NormalRandomNumbersTest()
    {
-      double[,] actual = (double[,])StatsUtils.NormalRandomNumbers(999);
+      double[,] actual = (double[,])StatsUtils.NormalRandomNumbers(999, 1, 1);
       double[,] expected = {{ 0.85392973639129077 }};
+      Assert.AreEqual(expected, actual);
+   }
+
+   [Test]
+   public void CorrelatedRandomNumbersTest()
+   {
+      double[,] correlationMatrix = {{ 1.0, 0.5 }, { 0.5, 1.0 }};
+      double[,] correlatedRandomNumbers = (double[,])StatsUtils.CorrelatedNormalRandomNumbers(999, 100_000, correlationMatrix);
+      double[] randomNumberSet1 = new double[correlatedRandomNumbers.GetLength(0)];
+      double[] randomNumberSet2 = new double[correlatedRandomNumbers.GetLength(0)];
+      for (int i = 0; i < correlatedRandomNumbers.GetLength(0); i++)
+      {
+         randomNumberSet1[i] = correlatedRandomNumbers[i, 0];     
+         randomNumberSet2[i] = correlatedRandomNumbers[i, 1];
+      } 
+      
+      double actualCorrelation = mns.Correlation.Pearson(randomNumberSet1, randomNumberSet2); 
+      const double expectedCorrelation = 0.5;
+      Assert.AreEqual(expectedCorrelation, actualCorrelation, 0.01);
+   }
+
+   [Test]
+   public void NonSquareMatrixForCorrelatedNormalRandomNumbersTest()
+   {
+      double[,] correlationMatrix = {{ 1.0, 0.5, 0.1 }, { 0.1, 1.0, 1.0 }};
+      string actual = StatsUtils.CorrelatedNormalRandomNumbers(999, 100_000, correlationMatrix).ToString();
+      string expected = CommonUtils.DExcelErrorMessage("Matrix is not square.");
+      Assert.AreEqual(expected, actual);
+   }
+
+   [Test]
+   public void DiagonalCorrelationNotOneForCorrelatedNormalRandomNumbersTest()
+   {
+      double[,] correlationMatrix = {{ 1.0, 0.5 }, { 0.5, 2.0 }};
+      string actual = StatsUtils.CorrelatedNormalRandomNumbers(999, 100_000, correlationMatrix).ToString();
+      string expected = CommonUtils.DExcelErrorMessage("Diagonal elements of the correlation matrix must be 1.");
       Assert.AreEqual(expected, actual);
    }
 }

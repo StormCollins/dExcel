@@ -39,6 +39,17 @@ public static class StatsUtils
             return CommonUtils.DExcelErrorMessage("Matrix is not symmetric.");
         }
 
+        for (int i = 0; i < range.GetLength(0); i++)
+        {
+            for (int j = 0; j < range.GetLength(1); j++)
+            {
+                if (i == j && Math.Abs(range[i, j] - 1.0) > 0.0001)
+                {
+                    return CommonUtils.DExcelErrorMessage("Diagonal elements of the correlation matrix must be 1.");
+                }
+            }
+        } 
+        
         try
         {
             return matrix.Cholesky().Factor.Transpose().ToArray();
@@ -130,8 +141,44 @@ public static class StatsUtils
         return results;
     }
 
-    // public static object CorrelatedNormalRandomNumbers(int rowCount, double[,] correlationMatrix)
-    // {
-    //      
-    // }
+    /// <summary>
+    /// Returns a set of correlated, normal random numbers.
+    /// </summary>
+    /// <param name="seed">Seed for the random number generator.</param>
+    /// <param name="correlatedSetCount">The number of sets of correlated random numbers to generate.
+    /// e.g., If this is 'm' and the size of the correlation matrix is 'n x n' then the number of random numbers
+    /// generated will be 'mn'.</param>
+    /// <param name="correlationMatrixRange">Correlation matrix of the random numbers.</param>
+    /// <returns>A set of correlated, normal random numbers.</returns>
+    [ExcelFunction(
+        Name = "d.Stats_CorrelatedNormalRandomNumbers",
+        Description = "Returns a set of correlated, normal random numbers.",
+        Category = "∂Excel: Stats")]
+    public static object CorrelatedNormalRandomNumbers(
+        [ExcelArgument(
+            Name = "Seed",
+            Description = "Seed for the random number generator.")]
+        int seed,
+        [ExcelArgument(
+            Name = "Correlated Set Count",
+            Description = "The number of sets of correlated random numbers to generate.\n" +
+                          "e.g., If this is 'm' and the size of the correlation matrix is 'n x n' then the number of random" +
+                          "numbers generated will be 'mn'.")]
+        int correlatedSetCount,
+        [ExcelArgument(
+            Name = "Correlation Matrix", 
+            Description = "Correlation matrix of the random numbers.")]
+        double[,] correlationMatrixRange)
+    {
+        mnl.Matrix<double> randomNumbers = mnl.CreateMatrix.DenseOfArray((double[,])NormalRandomNumbers(seed, correlatedSetCount, correlationMatrixRange.GetLength(0)));
+        object choleskyResults =  Cholesky(correlationMatrixRange);
+        if (choleskyResults.GetType() == typeof(string))
+        {
+            return choleskyResults as string;
+        }
+        
+        mnl.Matrix<double> choleskyMatrix = mnl.CreateMatrix.DenseOfArray((double[,])choleskyResults);
+        mnl.Matrix<double> results = randomNumbers * choleskyMatrix;
+        return results.ToArray();
+    }
 }
