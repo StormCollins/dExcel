@@ -69,7 +69,7 @@ public class StatsUtilsTests
       };
       
       string? actual = StatsUtils.Cholesky(correlationMatrix).ToString();
-      string expected = CommonUtils.DExcelErrorMessage("Matrix is not positive-definite.");
+      string expected = CommonUtils.DExcelErrorMessage("Diagonal elements of the correlation matrix must be 1.");
       Assert.AreEqual(expected, actual);
    }
 

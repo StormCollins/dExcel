@@ -30,4 +30,50 @@ public static class CommonUtils
     /// <returns>An error message that the calendar is invalid.</returns>
     public static string UnsupportedCalendarMessage(string invalidCalendar) =>
         DExcelErrorMessage($"Unsupported calendar: '{invalidCalendar}'");
+
+    /// <summary>
+    /// Returns the sign for a given option type.
+    /// </summary>
+    /// <param name="direction">Option type: 'Call'/'C' or 'Put'/'P'.</param>
+    /// <returns>A tuple with the sign as the first item where the sign is +1 for 'Call'/'C' or -1 for 'Put'/'P'.
+    /// The second item in the tuple is the error message which is null if the sign is not null.</returns>
+    public static (int? sign, string? errorMessage) GetSignOfOptionType(string direction)
+    {
+        switch (direction.ToUpper())
+        {
+            case "C":
+            case "CALL":
+                return (1, null);
+            case "P":
+            case "PUT":
+                return (-1, null);
+            default:
+                return (null, DExcelErrorMessage($"Invalid option type: '{direction}'"));
+        }
+    }
+    
+    /// <summary>
+    /// Returns the sign for a given direction (Long/Short i.e., Buy/Sell).
+    /// </summary>
+    /// <param name="direction">Direction: 'Long'/'L'/'Buy'/'B' or 'Short'/'S'/'Sell'.</param>
+    /// <returns>A tuple with the sign as the first item where the sign is +1 for 'Long'/'L'/'Buy'/'B' and -1 for
+    /// 'Short'/'S'/'Sell'.
+    /// The second item in the tuple is the error message which is null if the sign is not null.</returns>
+    public static (int? sign, string? errorMessage) GetSignOfDirection(string direction)
+    {
+        switch (direction.ToUpper())
+        {
+            case "B":
+            case "BUY":
+            case "L":
+            case "LONG":
+                return (1, null);
+            case "S":
+            case "SELL":
+            case "SHORT":    
+                return (-1, null);
+            default:
+                return (null, DExcelErrorMessage($"Invalid direction: '{direction}'"));
+        }
+    }
 }
