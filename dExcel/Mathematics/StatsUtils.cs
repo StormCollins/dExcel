@@ -7,6 +7,9 @@ using mnl = MathNet.Numerics.LinearAlgebra;
 using mnr = MathNet.Numerics.Random;
 using mns = MathNet.Numerics.Statistics;
 
+/// <summary>
+/// A collection of statistical utility functions.
+/// </summary>
 public static class StatsUtils
 {
     /// <summary>
@@ -122,13 +125,15 @@ public static class StatsUtils
         if (ExcelDnaUtil.Application is not null && rowCount == 0 && columnCount == 0)
         {
             ExcelReference? caller = XlCall.Excel(XlCall.xlfCaller) as ExcelReference;
-            rowCount = caller.RowLast - caller.RowFirst + 1;
-            columnCount = caller.ColumnLast - caller.ColumnFirst + 1;
+            if (caller != null)
+            {
+                rowCount = caller.RowLast - caller.RowFirst + 1;
+                columnCount = caller.ColumnLast - caller.ColumnFirst + 1;
+            }
         }
 
         double[,] results = new double[rowCount, columnCount];
-        mnr.MersenneTwister random = new();
-        random = new mnr.MersenneTwister(Convert.ToInt32(seed));
+        mnr.MersenneTwister random = new(Convert.ToInt32(seed));
         
         for (int j = 0; j < columnCount; j++)
         {
@@ -172,9 +177,9 @@ public static class StatsUtils
     {
         mnl.Matrix<double> randomNumbers = mnl.CreateMatrix.DenseOfArray((double[,])NormalRandomNumbers(seed, correlatedSetCount, correlationMatrixRange.GetLength(0)));
         object choleskyResults =  Cholesky(correlationMatrixRange);
-        if (choleskyResults.GetType() == typeof(string))
+        if (choleskyResults is string errorMessage)
         {
-            return choleskyResults as string;
+            return errorMessage;
         }
         
         mnl.Matrix<double> choleskyMatrix = mnl.CreateMatrix.DenseOfArray((double[,])choleskyResults);
