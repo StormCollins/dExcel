@@ -27,7 +27,7 @@ public static class Pricers
        Name = "d.FX_GarmanKohlhagenFXOptionPricer",
        Description = "Garman-Kohlhagen pricer for an option on FX spot.",
        Category = "∂Excel: Equities")]
-    public static object BlackScholesSpotOptionPricer(
+    public static object GarmanKohlhagenSpotOptionPricer(
         [ExcelArgument(Name = "X₀", Description = "Initial FX spot price.")]
         double spotPrice,
         [ExcelArgument(Name = "K", Description = "Strike.")]

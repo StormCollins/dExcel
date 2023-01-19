@@ -4,7 +4,6 @@ using dExcel.Equities;
 using dExcel.Utilities;
 using NUnit.Framework;
 using mnd = MathNet.Numerics.Distributions;
-using QLNet;
 
 [TestFixture]
 public class PricersTests
@@ -131,7 +130,7 @@ public class PricersTests
          const double vol = 0.2;
          const double optionMaturity = 0.5;
 
-         string actual = 
+         string? actual = 
              Pricers.BlackScholesSpotOptionPricer(
                  spotPrice: initialSpot, 
                  strike: strike, 
@@ -156,7 +155,7 @@ public class PricersTests
          const double vol = 0.2;
          const double optionMaturity = 0.5;
 
-         string actual = 
+         string? actual = 
              Pricers.BlackScholesSpotOptionPricer(
                  spotPrice: initialSpot, 
                  strike: strike, 
@@ -181,7 +180,7 @@ public class PricersTests
          const double vol = 0.2;
          const double optionMaturity = 0.5;
 
-         string actual = 
+         string? actual = 
              Pricers.BlackScholesSpotOptionPricer(
                  spotPrice: initialSpot, 
                  strike: strike, 
@@ -206,7 +205,7 @@ public class PricersTests
          const double vol = -0.2;
          const double optionMaturity = 0.5;
 
-         string actual = 
+         string? actual = 
              Pricers.BlackScholesSpotOptionPricer(
                  spotPrice: initialSpot, 
                  strike: strike, 
@@ -231,7 +230,7 @@ public class PricersTests
          const double vol = 0.2;
          const double optionMaturity = 0.5;
 
-         string actual = 
+         string? actual = 
              Pricers.BlackScholesSpotOptionPricer(
                  spotPrice: initialSpot, 
                  strike: strike, 
