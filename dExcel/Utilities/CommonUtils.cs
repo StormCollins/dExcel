@@ -1,5 +1,6 @@
 ﻿namespace dExcel.Utilities;
 
+using System.Diagnostics.CodeAnalysis;
 using ExcelDna.Integration;
 
 public static class CommonUtils
@@ -32,34 +33,48 @@ public static class CommonUtils
         DExcelErrorMessage($"Unsupported calendar: '{invalidCalendar}'");
 
     /// <summary>
-    /// Returns the sign for a given option type.
+    /// The sign, +1 for 'Call'/'C' or -1 for 'Put'/'P', if it can parse the option type.
     /// </summary>
-    /// <param name="direction">Option type: 'Call'/'C' or 'Put'/'P'.</param>
-    /// <returns>A tuple with the sign as the first item where the sign is +1 for 'Call'/'C' or -1 for 'Put'/'P'.
-    /// The second item in the tuple is the error message which is null if the sign is not null.</returns>
-    public static (int? sign, string? errorMessage) GetSignOfOptionType(string direction)
+    /// <param name="optionType">Option type: 'Call'/'C' or 'Put'/'P'.</param>
+    /// <param name="sign">The sign, +1 for 'Call'/'C' or -1 for 'Put'/'P', if it can parse the option type.</param>
+    /// <param name="errorMessage">The error message if it cannot parse the option type.</param>
+    /// <returns>Returns TRUE if the option type is valid i.e., 'Call'/'C' or 'Put'/'P'. Otherwise FALSE.</returns>
+    public static bool TryParseOptionTypeToSign(
+        string optionType, 
+        [NotNullWhen(true)]out int? sign, 
+        [NotNullWhen(false)]out string? errorMessage)
     {
-        switch (direction.ToUpper())
+        switch (optionType.ToUpper())
         {
             case "C":
             case "CALL":
-                return (1, null);
+                sign = 1;
+                errorMessage = null;
+                return true;
             case "P":
             case "PUT":
-                return (-1, null);
+                sign = -1;
+                errorMessage = null;
+                return true;
             default:
-                return (null, DExcelErrorMessage($"Invalid option type: '{direction}'"));
+                sign = null;
+                errorMessage = DExcelErrorMessage($"Invalid option type: '{optionType}'");
+                return false;
         }
     }
-    
+
     /// <summary>
     /// Returns the sign for a given direction (Long/Short i.e., Buy/Sell).
     /// </summary>
     /// <param name="direction">Direction: 'Long'/'L'/'Buy'/'B' or 'Short'/'S'/'Sell'.</param>
-    /// <returns>A tuple with the sign as the first item where the sign is +1 for 'Long'/'L'/'Buy'/'B' and -1 for
-    /// 'Short'/'S'/'Sell'.
-    /// The second item in the tuple is the error message which is null if the sign is not null.</returns>
-    public static (int? sign, string? errorMessage) GetSignOfDirection(string direction)
+    /// <param name="sign">The sign, +1 for 'Long'/'L'/'Buy'/'B' and -1 for 'Short'/'S'/'Sell', if it can parse the
+    /// direction.</param>
+    /// <param name="errorMessage">The error message if it cannot parse the direction.</param>
+    /// <returns>Returns TRUE if the direction is valid i.e., 'Long'/'L'/'Buy'/'B' or 'Short'/'S'/'Sell'.</returns>
+    public static bool TryParseDirectionToSign(
+        string direction, 
+        [NotNullWhen(true)]out int? sign, 
+        [NotNullWhen(false)]out string? errorMessage)
     {
         switch (direction.ToUpper())
         {
@@ -67,13 +82,19 @@ public static class CommonUtils
             case "BUY":
             case "L":
             case "LONG":
-                return (1, null);
+                sign = 1;
+                errorMessage = null;
+                return true;
             case "S":
             case "SELL":
             case "SHORT":    
-                return (-1, null);
+                sign = -1;
+                errorMessage = null;
+                return true;
             default:
-                return (null, DExcelErrorMessage($"Invalid direction: '{direction}'"));
+                sign = null;
+                errorMessage = DExcelErrorMessage($"Invalid direction: '{direction}'");
+                return false;
         }
     }
 }

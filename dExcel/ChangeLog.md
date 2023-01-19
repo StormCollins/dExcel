@@ -6,12 +6,13 @@ All notable changes to ∂Excel will be documented in this file.
 - Added function ``d.Stats_CorrelatedNormalRandomNumbers``.
 - Improved holiday parsing in DateUtils so that multiple sets of holidays can be parsed simultaneously.
 - Added function ``d.IR_BlackForwardOptionPricer``.
+- ``d.Dates_FolDay``, ``d.Dates_ModFolDay``, ``d.Dates_PrevDay`` et. al. can parse multiple lists of holidays i.e., a 2D list of holidays.
 
 ### Refactoring
 - Changed ``d.Math_Cholesky`` to return an upper triangular rather than a lower triangular matrix.
 
 ### Bugs
-- Fixed issue where ``d.Dates_Fol``, ``d.Dates_ModFol``, ``d.Dates_Prev`` calendars was not updating correctly.
+- Fixed issue where ``d.Dates_Fol``, ``d.Dates_ModFol``, ``d.Dates_PrevDay`` calendars was not updating correctly.
 
 ## [0.1.2] - 2022-12-12
 ### Features
