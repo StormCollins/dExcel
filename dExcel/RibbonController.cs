@@ -151,7 +151,7 @@ public class RibbonController : ExcelRibbon
                         string sheetName = currentCell.Worksheet.Name;
                         string cellContent = currentCell.Value2;
                         currentCell.Name = $"{sheetName}.Title.{cellContent}";
-                        headings[currentCell.Value2] = currentCell.Name;
+                        headings[currentCell.Value2] = ((Excel.Name)currentCell.Name).NameLocal;
                     }
                     catch (Exception)
                     {
@@ -179,8 +179,8 @@ public class RibbonController : ExcelRibbon
             try
             {
                 string matchedHeading = Process.ExtractTop(searchText, headings.Keys).First(x => x.Score > 90).Value;
-                ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(selectedRange.Rows[i], "",
-                    headings[matchedHeading]);
+                ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(selectedRange.Rows[i], "", headings[matchedHeading]);
+                //xlApp.Selection.Hyperlinks[1].SubAddress = headings[matchedHeading];
             }
             catch (Exception)
             {
