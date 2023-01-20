@@ -255,10 +255,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ExcelDna.AddIn" Version="1.6.1-beta2" />
-    <PackageReference Include="ExcelDna.Integration" Version="1.6.1-beta2" />
-    <PackageReference Include="ExcelDna.IntelliSense" Version="1.6.1-beta2" />
-    <PackageReference Include="ExcelDna.Registration" Version="1.6.1-beta2" />
+    <PackageReference Include="ExcelDna.AddIn" Version="1.6.1-beta1" />
+    <PackageReference Include="ExcelDna.Integration" Version="1.6.1-beta1" />
+    <PackageReference Include="ExcelDna.IntelliSense" Version="1.6.1-beta1" />
+    <PackageReference Include="ExcelDna.Registration" Version="1.6.1-beta1" />
     <PackageReference Include="fuzzysharp" Version="2.0.2" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.603" />
     <PackageReference Include="MaterialDesignThemes" Version="4.6.1" />
