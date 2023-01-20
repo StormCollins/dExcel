@@ -1,0 +1,506 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "dExcel/0.1.2": {
+        "dependencies": {
+          "ExcelDna.AddIn": "1.6.1-beta2",
+          "ExcelDna.Integration": "1.6.1-beta2",
+          "ExcelDna.IntelliSense": "1.6.1-beta2",
+          "ExcelDna.Registration": "1.6.1-beta2",
+          "LiveChartsCore.SkiaSharpView.WPF": "2.0.0-beta.603",
+          "MaterialDesignThemes": "4.6.1",
+          "QLNet": "1.12.1-preview.28",
+          "System.Data.SQLite.Core": "1.0.117",
+          "dExcelWpf": "1.0.0",
+          "FuzzySharp": "2.0.2",
+          "MathNet.Numerics": "5.0.0"
+        },
+        "runtime": {
+          "dExcel.dll": {}
+        }
+      },
+      "ExcelDna.AddIn/1.6.1-beta2": {
+        "dependencies": {
+          "ExcelDna.Integration": "1.6.1-beta2"
+        }
+      },
+      "ExcelDna.Integration/1.6.1-beta2": {
+        "runtime": {
+          "lib/net6.0-windows7.0/ExcelDna.Integration.dll": {
+            "assemblyVersion": "1.1.0.0",
+            "fileVersion": "1.6.1.8"
+          }
+        }
+      },
+      "ExcelDna.IntelliSense/1.6.1-beta2": {
+        "dependencies": {
+          "ExcelDna.Integration": "1.6.1-beta2"
+        },
+        "runtime": {
+          "lib/net6.0-windows7.0/ExcelDna.IntelliSense.dll": {
+            "assemblyVersion": "1.1.0.0",
+            "fileVersion": "1.6.1.8"
+          }
+        }
+      },
+      "ExcelDna.Registration/1.6.1-beta2": {
+        "dependencies": {
+          "ExcelDna.Integration": "1.6.1-beta2"
+        },
+        "runtime": {
+          "lib/net6.0-windows7.0/ExcelDna.Registration.dll": {
+            "assemblyVersion": "1.1.0.0",
+            "fileVersion": "1.6.1.8"
+          }
+        }
+      },
+      "FuzzySharp/2.0.2": {
+        "runtime": {
+          "lib/netcoreapp2.1/FuzzySharp.dll": {
+            "assemblyVersion": "1.0.4.0",
+            "fileVersion": "1.0.4.0"
+          }
+        }
+      },
+      "HarfBuzzSharp/2.8.2.3": {
+        "dependencies": {
+          "HarfBuzzSharp.NativeAssets.Win32": "2.8.2.3",
+          "HarfBuzzSharp.NativeAssets.macOS": "2.8.2.3"
+        },
+        "runtime": {
+          "lib/net6.0/HarfBuzzSharp.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "2.8.2.3"
+          }
+        }
+      },
+      "HarfBuzzSharp.NativeAssets.macOS/2.8.2.3": {
+        "runtimeTargets": {
+          "runtimes/osx/native/libHarfBuzzSharp.dylib": {
+            "rid": "osx",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "HarfBuzzSharp.NativeAssets.Win32/2.8.2.3": {
+        "runtimeTargets": {
+          "runtimes/win-arm64/native/libHarfBuzzSharp.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libHarfBuzzSharp.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libHarfBuzzSharp.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "LiveChartsCore/2.0.0-beta.603": {
+        "runtime": {
+          "lib/net6.0/LiveChartsCore.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "LiveChartsCore.SkiaSharpView/2.0.0-beta.603": {
+        "dependencies": {
+          "LiveChartsCore": "2.0.0-beta.603",
+          "SkiaSharp": "2.88.3",
+          "SkiaSharp.HarfBuzz": "2.88.3"
+        },
+        "runtime": {
+          "lib/net6.0/LiveChartsCore.SkiaSharpView.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "LiveChartsCore.SkiaSharpView.WPF/2.0.0-beta.603": {
+        "dependencies": {
+          "LiveChartsCore.SkiaSharpView": "2.0.0-beta.603",
+          "SkiaSharp.Views.WPF": "2.88.3"
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/LiveChartsCore.SkiaSharpView.WPF.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "MaterialDesignColors/2.0.9": {
+        "runtime": {
+          "lib/net6.0/MaterialDesignColors.dll": {
+            "assemblyVersion": "2.0.9.0",
+            "fileVersion": "2.0.9.0"
+          }
+        }
+      },
+      "MaterialDesignThemes/4.6.1": {
+        "dependencies": {
+          "MaterialDesignColors": "2.0.9"
+        },
+        "runtime": {
+          "lib/net6.0/MaterialDesignThemes.Wpf.dll": {
+            "assemblyVersion": "4.6.1.0",
+            "fileVersion": "4.6.1.0"
+          }
+        }
+      },
+      "MathNet.Numerics/5.0.0": {
+        "runtime": {
+          "lib/net6.0/MathNet.Numerics.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.0.0"
+          }
+        }
+      },
+      "Microsoft.NETCore.Platforms/2.0.0": {},
+      "Microsoft.Win32.SystemEvents/4.5.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "2.0.0"
+        }
+      },
+      "QLNet/1.12.1-preview.28": {
+        "runtime": {
+          "lib/net6.0/QLNet.dll": {
+            "assemblyVersion": "1.12.1.0",
+            "fileVersion": "1.12.1.0"
+          }
+        }
+      },
+      "SkiaSharp/2.88.3": {
+        "dependencies": {
+          "SkiaSharp.NativeAssets.Win32": "2.88.3",
+          "SkiaSharp.NativeAssets.macOS": "2.88.3"
+        },
+        "runtime": {
+          "lib/net6.0/SkiaSharp.dll": {
+            "assemblyVersion": "2.88.0.0",
+            "fileVersion": "2.88.3.0"
+          }
+        }
+      },
+      "SkiaSharp.HarfBuzz/2.88.3": {
+        "dependencies": {
+          "HarfBuzzSharp": "2.8.2.3",
+          "SkiaSharp": "2.88.3"
+        },
+        "runtime": {
+          "lib/net6.0/SkiaSharp.HarfBuzz.dll": {
+            "assemblyVersion": "2.88.0.0",
+            "fileVersion": "2.88.3.0"
+          }
+        }
+      },
+      "SkiaSharp.NativeAssets.macOS/2.88.3": {
+        "runtimeTargets": {
+          "runtimes/osx/native/libSkiaSharp.dylib": {
+            "rid": "osx",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "SkiaSharp.NativeAssets.Win32/2.88.3": {
+        "runtimeTargets": {
+          "runtimes/win-arm64/native/libSkiaSharp.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libSkiaSharp.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libSkiaSharp.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "SkiaSharp.Views.Desktop.Common/2.88.3": {
+        "dependencies": {
+          "SkiaSharp": "2.88.3",
+          "System.Drawing.Common": "4.5.1"
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/SkiaSharp.Views.Desktop.Common.dll": {
+            "assemblyVersion": "2.88.0.0",
+            "fileVersion": "2.88.3.0"
+          }
+        }
+      },
+      "SkiaSharp.Views.WPF/2.88.3": {
+        "dependencies": {
+          "SkiaSharp": "2.88.3",
+          "SkiaSharp.Views.Desktop.Common": "2.88.3"
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/SkiaSharp.Views.WPF.dll": {
+            "assemblyVersion": "2.88.0.0",
+            "fileVersion": "2.88.3.0"
+          }
+        }
+      },
+      "Stub.System.Data.SQLite.Core.NetStandard/1.0.117": {
+        "runtime": {
+          "lib/netstandard2.1/System.Data.SQLite.dll": {
+            "assemblyVersion": "1.0.117.0",
+            "fileVersion": "1.0.117.0"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/linux-x64/native/SQLite.Interop.dll": {
+            "rid": "linux-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/osx-x64/native/SQLite.Interop.dll": {
+            "rid": "osx-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/SQLite.Interop.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "1.0.117.0"
+          },
+          "runtimes/win-x86/native/SQLite.Interop.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "1.0.117.0"
+          }
+        }
+      },
+      "System.Data.SQLite.Core/1.0.117": {
+        "dependencies": {
+          "Stub.System.Data.SQLite.Core.NetStandard": "1.0.117"
+        }
+      },
+      "System.Drawing.Common/4.5.1": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "2.0.0",
+          "Microsoft.Win32.SystemEvents": "4.5.0"
+        }
+      },
+      "dExcelWpf/1.0.0": {
+        "dependencies": {
+          "MaterialDesignColors": "2.0.9",
+          "MaterialDesignThemes": "4.6.1"
+        },
+        "runtime": {
+          "dExcelWpf.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "dExcel/0.1.2": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ExcelDna.AddIn/1.6.1-beta2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Sb/6Oxy//FT5aX8yXB67KjQukxE5r2UDSihW7jg/IIN+3Dqw29x2P6798QAUwJFH+sH9dy6wXBYI8siFftdv5g==",
+      "path": "exceldna.addin/1.6.1-beta2",
+      "hashPath": "exceldna.addin.1.6.1-beta2.nupkg.sha512"
+    },
+    "ExcelDna.Integration/1.6.1-beta2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-6MuEuaCjR3UxV/4nd8vCo7qUXah4ID5F8crXxS8KrXkU9EtgmRcNSx6GlnPxtc+c6lmdvNPEFIvTZeNhr5Qcmg==",
+      "path": "exceldna.integration/1.6.1-beta2",
+      "hashPath": "exceldna.integration.1.6.1-beta2.nupkg.sha512"
+    },
+    "ExcelDna.IntelliSense/1.6.1-beta2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-tnQjgURLtFXUnGu02pD66ObfAk8p8LUlBH/8w85s/qaVZoJscCWjOwHwvB2gHrpETmEQup+XrUr8jK6w34uiPQ==",
+      "path": "exceldna.intellisense/1.6.1-beta2",
+      "hashPath": "exceldna.intellisense.1.6.1-beta2.nupkg.sha512"
+    },
+    "ExcelDna.Registration/1.6.1-beta2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-mikcHhIpawhtckxmEfx89Sdg7QYs7N4rZBopAbkbCqMkglKCZNiwkwCFyPiSo2NnWp3LRcfmXVpbzr+7cUHHXQ==",
+      "path": "exceldna.registration/1.6.1-beta2",
+      "hashPath": "exceldna.registration.1.6.1-beta2.nupkg.sha512"
+    },
+    "FuzzySharp/2.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-sBKqWxw3g//peYxDZ8JipRlyPbIyBtgzqBVA5GqwHVeqtIrw75maGXAllztf+1aJhchD+drcQIgf2mFho8ZV8A==",
+      "path": "fuzzysharp/2.0.2",
+      "hashPath": "fuzzysharp.2.0.2.nupkg.sha512"
+    },
+    "HarfBuzzSharp/2.8.2.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-8MwXm9J4dXHuTdzPo29nHgDbt4+6P+RrPrH/qrxcERf29cpLlFbjvP3eFPwHmdUrl4KL2SHEZi2ZuQ5ndeIL1w==",
+      "path": "harfbuzzsharp/2.8.2.3",
+      "hashPath": "harfbuzzsharp.2.8.2.3.nupkg.sha512"
+    },
+    "HarfBuzzSharp.NativeAssets.macOS/2.8.2.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-uwz9pB3hMuxzI/bSkjVrsOJH7Wo1L+0Md5ZmEMDM/j7xDHtR9d3mfg/CfxhMIcTiUC4JgX49FZK0y2ojgu1dww==",
+      "path": "harfbuzzsharp.nativeassets.macos/2.8.2.3",
+      "hashPath": "harfbuzzsharp.nativeassets.macos.2.8.2.3.nupkg.sha512"
+    },
+    "HarfBuzzSharp.NativeAssets.Win32/2.8.2.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Wo6QpE4+a+PFVdfIBoLkLr4wq2uC0m9TZC8FAfy4ZnLsUc10WL0Egk9EBHHhDCeokNOXDse5YtvuTYtS/rbHfg==",
+      "path": "harfbuzzsharp.nativeassets.win32/2.8.2.3",
+      "hashPath": "harfbuzzsharp.nativeassets.win32.2.8.2.3.nupkg.sha512"
+    },
+    "LiveChartsCore/2.0.0-beta.603": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Yjjlz94iyp3SBcirrAu8WxI2w7QH1O3F5gMak5sP0u7CgYpQOTWaBrZoQKDRazk6lc3aFD31bCqeAPZthNQmKA==",
+      "path": "livechartscore/2.0.0-beta.603",
+      "hashPath": "livechartscore.2.0.0-beta.603.nupkg.sha512"
+    },
+    "LiveChartsCore.SkiaSharpView/2.0.0-beta.603": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3a3goHJFui00R6SSCpeBUlEUegtXQd9D1XJbzrJGocJWf5DVvAkHbjl4G5iyH0ZSP5hPI5niTz1iczYDQkBBWg==",
+      "path": "livechartscore.skiasharpview/2.0.0-beta.603",
+      "hashPath": "livechartscore.skiasharpview.2.0.0-beta.603.nupkg.sha512"
+    },
+    "LiveChartsCore.SkiaSharpView.WPF/2.0.0-beta.603": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-pfDFX723cdaoe8ApHaVnERB3MmSZLtPtgko5aef97BPx55zgdiCilto5iGao1VlcssdEMethHctVV5shXIGQ2g==",
+      "path": "livechartscore.skiasharpview.wpf/2.0.0-beta.603",
+      "hashPath": "livechartscore.skiasharpview.wpf.2.0.0-beta.603.nupkg.sha512"
+    },
+    "MaterialDesignColors/2.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-b4tdvxPZUCKCpxeCNFnF/+2Hug2cd+/SUGYCt+RXRRrobFYZkZQsIjlbsTGy5Hup9yPMMxqFSEXGRIxCm2JZUA==",
+      "path": "materialdesigncolors/2.0.9",
+      "hashPath": "materialdesigncolors.2.0.9.nupkg.sha512"
+    },
+    "MaterialDesignThemes/4.6.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Yx3RxIqkwoe1rYxoUZ2iH1YdCly+dA8YAQJ5uknsUVhyVd1rgiXEn6fmtsovGaqKRZwUXGHnh4w7kRagxa8TCg==",
+      "path": "materialdesignthemes/4.6.1",
+      "hashPath": "materialdesignthemes.4.6.1.nupkg.sha512"
+    },
+    "MathNet.Numerics/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-pg1W2VwaEQMAiTpGK840hZgzavnqjlCMTVSbtVCXVyT+7AX4mc1o89SPv4TBlAjhgCOo9c1Y+jZ5m3ti2YgGgA==",
+      "path": "mathnet.numerics/5.0.0",
+      "hashPath": "mathnet.numerics.5.0.0.nupkg.sha512"
+    },
+    "Microsoft.NETCore.Platforms/2.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-VdLJOCXhZaEMY7Hm2GKiULmn7IEPFE4XC5LPSfBVCUIA8YLZVh846gtfBJalsPQF2PlzdD7ecX7DZEulJ402ZQ==",
+      "path": "microsoft.netcore.platforms/2.0.0",
+      "hashPath": "microsoft.netcore.platforms.2.0.0.nupkg.sha512"
+    },
+    "Microsoft.Win32.SystemEvents/4.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LuI1oG+24TUj1ZRQQjM5Ew73BKnZE5NZ/7eAdh1o8ST5dPhUnJvIkiIn2re3MwnkRy6ELRnvEbBxHP8uALKhJw==",
+      "path": "microsoft.win32.systemevents/4.5.0",
+      "hashPath": "microsoft.win32.systemevents.4.5.0.nupkg.sha512"
+    },
+    "QLNet/1.12.1-preview.28": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-bXR6HT0B5dBSzC94g1qHduBrooWzA2SFC+H2oh28Zyy/GdQX2kbGrVl7/Eg2OPaq9xhiZ6owRT87wo6ZtrMPDA==",
+      "path": "qlnet/1.12.1-preview.28",
+      "hashPath": "qlnet.1.12.1-preview.28.nupkg.sha512"
+    },
+    "SkiaSharp/2.88.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GG8X3EdfwyBfwjl639UIiOVOKEdeoqDgYrz0P1MUCnefXt9cofN+AK8YB/v1+5cLMr03ieWCQdDmPqnFIzSxZw==",
+      "path": "skiasharp/2.88.3",
+      "hashPath": "skiasharp.2.88.3.nupkg.sha512"
+    },
+    "SkiaSharp.HarfBuzz/2.88.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-hH6v4ltTb34eqn5tx1qLSAN7O+ppZCV5DnZw0FR7RwxXYqCeQYbBNgsaPyrZ1nkvtCDD1pH79taeO6SvqG+IAg==",
+      "path": "skiasharp.harfbuzz/2.88.3",
+      "hashPath": "skiasharp.harfbuzz.2.88.3.nupkg.sha512"
+    },
+    "SkiaSharp.NativeAssets.macOS/2.88.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-CEbWAXMGFkPV3S1snBKK7jEG3+xud/9kmSAhu0BEUKKtlMdxx+Qal0U9bntQREM9QpqP5xLWZooodi8IlV8MEg==",
+      "path": "skiasharp.nativeassets.macos/2.88.3",
+      "hashPath": "skiasharp.nativeassets.macos.2.88.3.nupkg.sha512"
+    },
+    "SkiaSharp.NativeAssets.Win32/2.88.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-MU4ASL8VAbTv5vSw1PoiWjjjpjtGhWtFYuJnrN4sNHFCePb2ohQij9JhSdqLLxk7RpRtWPdV93fbA53Pt+J0yw==",
+      "path": "skiasharp.nativeassets.win32/2.88.3",
+      "hashPath": "skiasharp.nativeassets.win32.2.88.3.nupkg.sha512"
+    },
+    "SkiaSharp.Views.Desktop.Common/2.88.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Bo1KAmb16IFvZecfIUZqGpyZ718+dJqfGAMWKNOWFENkO67qGYVAs4P0qYytaTQsgpH2Q0OVSkGJPz3tJhP0QA==",
+      "path": "skiasharp.views.desktop.common/2.88.3",
+      "hashPath": "skiasharp.views.desktop.common.2.88.3.nupkg.sha512"
+    },
+    "SkiaSharp.Views.WPF/2.88.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ykXY0yWns9KQkSJJCgc2J/QGarXHbW85KvL3rQw3WAegEu82sil4D+1TQL7V7cLYH6Zn9862oiDZ++cuKAU5tw==",
+      "path": "skiasharp.views.wpf/2.88.3",
+      "hashPath": "skiasharp.views.wpf.2.88.3.nupkg.sha512"
+    },
+    "Stub.System.Data.SQLite.Core.NetStandard/1.0.117": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-x1zzPC/A4MmiKGDLoxLE6O5KLu7Kz7dyzhPQzlqYFTFcXmXAtM7hNNWpGw5yLEz833AnGbd/kxoitXArgR4YyA==",
+      "path": "stub.system.data.sqlite.core.netstandard/1.0.117",
+      "hashPath": "stub.system.data.sqlite.core.netstandard.1.0.117.nupkg.sha512"
+    },
+    "System.Data.SQLite.Core/1.0.117": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-lGfOhA3QQod9XhdWYqLgNgbgq5uZnVG6DtnhDAdPisbLpTTgZBNbeGnp+GWt8C+3EyaqBYTGJWXcxHlHKwo05A==",
+      "path": "system.data.sqlite.core/1.0.117",
+      "hashPath": "system.data.sqlite.core.1.0.117.nupkg.sha512"
+    },
+    "System.Drawing.Common/4.5.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GiyeGi/v4xYDz1vCNFwFvhz9k1XddOG7VD3jxRqzRBCbTHji+s3HxxbxtoymuK4OadEpgotI8zQ5+GEEH9sUEQ==",
+      "path": "system.drawing.common/4.5.1",
+      "hashPath": "system.drawing.common.4.5.1.nupkg.sha512"
+    },
+    "dExcelWpf/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

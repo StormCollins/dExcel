@@ -14,6 +14,9 @@ using System.Text;
 using System.Windows.Threading;
 using WPF;
 
+/// <summary>
+/// Used to control the actions and behaviour of the ribbon of the add-in.
+/// </summary>
 [ComVisible(true)]
 public class RibbonController : ExcelRibbon
 {
@@ -90,7 +93,7 @@ public class RibbonController : ExcelRibbon
         string? functionName = null;
         Thread thread = new(() =>
         {
-            var functionSearch = new FunctionSearch();
+            FunctionSearch functionSearch = new();
             functionSearch.Show();
             functionSearch.Closed += (sender2, e2) => functionSearch.Dispatcher.InvokeShutdown();
             Dispatcher.Run();
@@ -102,7 +105,7 @@ public class RibbonController : ExcelRibbon
         thread.Join();
         if (functionName != null)
         {
-            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
             ((Excel.Range)xlApp.Selection).Formula = $"={functionName}()";
             ((Excel.Range)xlApp.Selection).FunctionWizard();
         }
@@ -145,7 +148,10 @@ public class RibbonController : ExcelRibbon
                 {
                     try
                     {
-                        headings[currentCell.Value2] = currentCell.Address;
+                        string sheetName = currentCell.Worksheet.Name;
+                        string cellContent = currentCell.Value2;
+                        currentCell.Name = $"{sheetName}.Title.{cellContent}";
+                        headings[currentCell.Value2] = currentCell.Name;
                     }
                     catch (Exception)
                     {
@@ -199,6 +205,7 @@ public class RibbonController : ExcelRibbon
             alert.Show();
         }
     }
+    
     public void CreateLinksToHeadingsInOtherSheets(IRibbonControl control)
     {
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;

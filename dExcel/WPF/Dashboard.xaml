@@ -328,7 +328,8 @@
           Content="Run Tests"
           Grid.Row="3"
           Grid.Column="0"
-          Grid.ColumnSpan="3"/>
+          Grid.ColumnSpan="3"
+          Click="RunTests_Click"/>
       </Grid>
     </materialDesign:Card>
     

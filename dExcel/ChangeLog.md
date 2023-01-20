@@ -1,8 +1,10 @@
 # Changelog
 All notable changes to ∂Excel will be documented in this file.
 
-## [0.1.3] - 2023-01-19 
+## [0.1.3] - 2023-01-20 
 ### Features
+- Enabled ExcelDnaIntelliSense.
+- Added day count convention functions (e.g., ``d.Dates_Act365`` etc.).
 - Added function ``d.Stats_CorrelatedNormalRandomNumbers``.
 - Improved holiday parsing in DateUtils so that multiple sets of holidays can be parsed simultaneously.
 - Added function ``d.IR_BlackForwardOptionPricer``.
@@ -13,12 +15,7 @@ All notable changes to ∂Excel will be documented in this file.
 - Changed ``d.Math_Cholesky`` to return an upper triangular rather than a lower triangular matrix.
 
 ### Bugs
-- Fixed issue where ``d.Dates_Fol``, ``d.Dates_ModFol``, ``d.Dates_PrevDay`` calendars was not updating correctly.
-
-## [0.1.2] - 2022-12-12
-### Features
-- Enabled ExcelDnaIntelliSense.
-- Added day count convention functions (e.g., ``d.Dates_Act365`` etc.).
+- Fixed issue where ``d.Dates_FolDay``, ``d.Dates_ModFolDay``, ``d.Dates_PrevDay`` calendars was not updating correctly.
 
 ## [0.1.1] - 2022-11-25
 ### Features

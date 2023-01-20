@@ -211,4 +211,9 @@ public partial class Dashboard : Window
         this.DashBoardAction = "OpenTestingWorkbook";
         this.Close();
     }
+
+    private void RunTests_Click(object sender, RoutedEventArgs e)
+    {
+        
+    }
 }

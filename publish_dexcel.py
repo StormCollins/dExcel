@@ -8,6 +8,7 @@ import zipfile
 
 
 def zipdir(path, ziph):
+    
     for root, dirs, files in os.walk(path):
         for file in files:
             ziph.write(os.path.join(root, file),
@@ -25,10 +26,10 @@ try:
     tree = ET.parse(dexcel_project_file_path)
     version_number: str = tree.getroot().find('PropertyGroup').find('Version').text
 
-    print('-----------------------------------------------------------')
-    print('Publishing dExcel version {version_number} to Shared Drive.')
-    print('-----------------------------------------------------------')
-    print('Checking connection to VPN...')
+    print(f'-----------------------------------------------------------')
+    print(f'Publishing dExcel version {version_number} to Shared Drive.')
+    print(f'-----------------------------------------------------------')
+    print(f'Checking connection to VPN...')
     data = socket.gethostbyname_ex(PING_HOST)
 
     print('Deleting unnecessary, local files in release build folder...')

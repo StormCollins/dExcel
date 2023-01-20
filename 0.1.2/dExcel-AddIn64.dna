@@ -1,0 +1,283 @@
+<?xml version='1.0' encoding='utf-8'?>
+<DnaLibrary Name='dExcel Add-In' RuntimeVersion='v4.0' xmlns='http://schemas.excel-dna.net/addin/2020/07/dnalibrary'>
+  <ExternalLibrary Path='dExcel.dll' ExplicitExports='false' ExplicitRegistration='true' LoadFromBytes='true' Pack='true' IncludePdb='false'/>
+  <Reference Path="ExcelDna.Registration.dll" Pack="true" />
+  <Reference Path='FuzzySharp.dll' Pack='true'/>
+  <Reference Path='MaterialDesignColors.dll' Pack='true'/>
+  <Reference Path='MaterialDesignThemes.Wpf.dll' Pack='true'/>
+  <Reference Path='MSCORLIB.dll' Pack='true'/>
+  <Reference Path='QLNet.dll' Pack='true'/>
+  <Reference Path='System.ComponentModel.Primitives.dll' Pack='true'/>
+<!--  <Reference Path='System.Drawing.Common.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Drawing.Primitives.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Security.Cryptography.Algorithms.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Security.Cryptography.Primitives.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Security.Principal.Windows.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Threading.Tasks.Parallel.dll' Pack='true'/>-->
+<!--  <Reference Path='System.Windows.Forms.Primitives.dll' Pack='true'/>-->
+	
+	<CustomUI>
+	<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui' onLoad='LoadRibbon'>
+	  <ribbon>
+		<tabs>
+		  <tab id='tabdExcel' label='∂Excel' insertAfterMso='TabHome'>
+			<group id='grpdExcel' label='∂Excel'>
+			  <button
+				id='btndExcelDashboard'
+				label='Dashboard'
+				getImage='GetImage'
+				onAction='OpenDashboard'
+				size='large'
+				tag='dExcel-ribbon.ico'/>
+			</group>
+			<group id='grpUtilities' label='Utilities'>
+			  <button
+				id='btnOpenAudit'
+				label='Open Audit'
+				getImage='GetImage'
+				onAction='OpenAuditFile'
+				tag='open-audit-small-blue.ico'/>
+			  <button
+				id='btnWrapUpAudit'
+				label='Wrap Up Audit'
+				getImage='GetImage'
+				onAction='WrapUpAudit'
+				tag='wrap-up-audit-small-blue.ico'/>
+			  <button
+				id='btnFixEMSLinks'
+				label='Fix EMS Links'
+				getImage='GetImage'
+				tag='fix-links-small-blue.ico'/>
+			  <button
+				id='btnCalculateRange'
+				label='Calculate Range'
+				getImage='GetImage'
+				onAction='CalculateRange'
+				screentip='Select a range and click this button to recalculate it.'
+				tag='calculate-range-small-blue.ico'/>
+			  <button
+				id='btnManagePasswords'
+				label='Manage Passwords'
+				getImage='GetImage'
+				enabled='false'
+				size='large'
+				tag='manage-passwords-large-blue.ico'/>
+			  <splitButton id='btnWorkbookLinks' size='large'>
+				  <button
+					id='btnCreateLinkToSheet'
+					getImage='GetImage'
+					label='Workbook Links'
+					onAction='CreateLinkToSheet'
+					tag='workbook_link_blue.ico'/>
+				  <menu id='menuWorkbookLinks'>
+					<button 
+				      id='btnCreateLinkToSheet2'
+				      label='Create Link to Sheet'
+					  onAction='CreateLinkToSheet'
+					  screentip='Creates a link to cell A1 in the sheet with the same name as the selected cell.'/>
+					<button 
+				      id='btnCreateLinksToHeadings'
+				      label='Create Link(s) to Heading(s) in Sheet'
+					  onAction='CreateLinksToHeadingsInCurrentSheet'
+					  screentip='Creates link(s) to cell(s) with a heading style.'/>
+					<button
+					  id='btnCreateLinksToHeadingsInOtherSheet'
+					  label='Create Link(s) to Heading(s) in Other Sheet'
+					  onAction='CreateLinksToHeadingsInOtherSheets'
+					  screentip='Creates link(s) to cell(s) with a heading style in sheets other than the current one.'/>
+				  </menu>		
+			  </splitButton>
+			  <splitButton id='btnFormatPainter' size='large'>
+				<button
+			      id='btnFormatTable'
+				  getImage='GetImage'
+				  label='Format Painter'
+				  onAction='FormatTable'
+				  tag='format-painter-large-blue.ico'/>
+				<menu id='menuFormatMenu'>
+				  <button
+					id='btnLoadDeloitteTheme'
+					label='Load Deloitte Theme'
+					onAction='LoadDeloitteTheme'
+					screentip='Loads and applies the Deloitte Excel theme.'/>
+				  <menuSeparator id='TestUtilsMenuSeparator'/>
+				  <button
+					id='btnApplyTestUtilsFormatting'
+					label='Apply Test Utils Formatting'
+					onAction='ApplyTestUtilsFormatting'
+					screentip='Applies the ∂Excel conditional formatting for OK, ERROR, and Warning.'/>
+				  <button
+					id='btnApplyDateFormatting'
+					label='Apply Date Formatting'
+					onAction='SetIso8601DateFormatting'
+					screentip='Applies the ISO-8601 formatting to a date i.e., yyyy-MM-dd.'/>
+				  <menuSeparator id='HeaderMenuSeparator'/>
+				  <button
+					id='btnApplyPrimaryHeaderFormatting'
+					label='Apply Primary Header Formatting'
+					onAction='ApplyPrimaryHeaderFormatting'
+					screentip='Applies the ∂Excel primary header formatting i.e. white font on black background.'/>
+				  <button
+					id='btnApplySecondaryHeaderFormatting'
+					label='Apply Secondary Header Formatting'
+					onAction='ApplySecondaryHeaderFormatting'
+					screentip='Applies the ∂Excel secondary header formatting i.e. white font on green background.'/>
+			      <button
+					id='btnClearTableFormatting'
+					label='Clear Table Formatting'
+					onAction='ClearTableFormatting'
+					screentip='Clears the formatting from a ∂Excel formatted table.'/>
+				</menu>
+			  </splitButton>
+			  <button
+				id='btnViewChart'
+				label='View object chart'
+				getImage='GetImage'
+				onAction='ViewObjectChart'
+				screentip='Opens a chart displaying the contents of an object e.g., an interest rate curve.'
+				size='large'
+				tag='chart-blue.ico'/>
+			</group>
+			<group id='grpFunctionLibrary' label='Function Library'>
+			  <dynamicMenu
+				id='Date'
+				label='Dates'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='dates-large-green.ico'/>
+			  <dynamicMenu
+				id='Math'
+				label='Mathematics'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='mathematics-large-green.ico'/>
+			  <dynamicMenu
+				id='Stats'
+				label='Stats'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='stats-large-green.ico'/>
+			  <separator id='separatorAssetClassFunctions'/>
+			  <dynamicMenu
+				id='Credit'
+				label='Credit'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='credit-green.ico'/>
+			  <dynamicMenu
+			    id='Commodities'
+			    label='Commodities'
+			    getContent='GetFunctionContent'
+			    getImage='GetImage'
+			    size='large'
+			    tag='commodities-green.ico'/>
+			  <dynamicMenu
+				id='Equities'
+				label='Equities'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='equities-large-green.ico'/>
+			  <dynamicMenu
+				id='FX'
+				label='FX'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='fx-green.ico'/>
+			  <dynamicMenu
+				id='InterestRates'
+				label='Interest Rates'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='interest-rates-large-green.ico'/>
+			  <separator id='separatorOtherFunctions'/>
+			  <dynamicMenu
+				id='Other'
+				label='Other'
+				getContent='GetFunctionContent'
+				getImage='GetImage'
+				size='large'
+				tag='other-green.ico'/>
+			  <separator id='separatorFunctionSearch'/>
+			  <button
+				id='FunctionSearch'
+				label='Function Search'
+				getImage='GetImage'
+				onAction='OpenFunctionSearch'
+				size='large'
+				tag='function-search-large-green.ico'/>
+		    </group>
+			<group id='grpExcelTemplates' label='Excel Templates'>
+			  <button
+				id='btnCommodities_Templates'
+				label='Commodities'
+				getImage='GetImage'
+				enabled='false'
+				size='large'
+				supertip='This feature is still under development.'
+				tag='commodities-large-blue.ico'/>
+			  <button 
+				id='btnCredit_Templates' 
+				label='Credit' 
+				getImage='GetImage' 
+				enabled='false'
+				size='large' 
+				supertip='This feature is still under development.'
+				tag='credit-large-blue.ico'/>
+			  <button 
+				id='btnEquities_Templates'
+				label='Equities'
+				getImage='GetImage'
+				enabled='false'
+				size='large'
+				supertip='This feature is still under development.'
+				tag='equities-large-blue.ico'/>
+			  <button
+				id='btnFX_Templates'
+				label='FX'
+				getImage='GetImage'
+				enabled='false'
+				size='large'
+				supertip='This feature is still under development.'
+				tag='fx-large-blue.ico'/>
+			  <button
+				id='btnInterest_Rates_Templates'
+				label='Interest Rates'
+				getImage='GetImage'
+				enabled='false'
+				size='large'
+				supertip='This feature is still under development.'
+				tag='interest-rates-large-blue.ico'/>
+			  <separator id='separatorTemplateSearch'/>
+			  <button
+				id='TemplateSearch'
+				label='Template Search'
+				getImage='GetImage'
+				enabled='false'
+				onAction='OpenTemplateSearch'
+				size='large'
+				supertip='This feature is still under development.'
+				tag='template-search-large-blue.ico'/>
+			</group>
+			<group id='grpMarketData' label='Market Data'>
+			  <button
+				id='btnMarketData'
+				label='Database'
+				getImage='GetImage'
+				enabled='false'
+				size='large'
+				supertip='This feature is still under development.'
+				tag='database-connected-large-green.ico'/>	  
+			</group>
+		  </tab>
+		</tabs>
+	  </ribbon>
+	</customUI>
+  </CustomUI>
+</DnaLibrary>
