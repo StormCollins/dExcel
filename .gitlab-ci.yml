@@ -23,3 +23,5 @@ test:
     script:
         - pwd
         - dotnet test dExcelTests/dExcelTests.csproj
+    tags:
+        - windows
