@@ -76,7 +76,7 @@ public static class CurveBootstrapper
                 {
                     if (include[i])
                     {
-                        var x = new SwapRateHelper(
+                        SwapRateHelper x = new(
                             rate: new Handle<Quote>(new SimpleQuote(rates[i])),
                             tenor: new Period(tenors[i]),
                             calendar: rateIndex.fixingCalendar(),

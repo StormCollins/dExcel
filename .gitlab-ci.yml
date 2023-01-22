@@ -22,6 +22,7 @@ test:
     stage: test
     script:
         - pwd
-        - dotnet test dExcelTests/dExcelTests.csproj
+        - "mkdir CoverageResults" 
+        - "& 'C:\\GitLab-Runner\\packages\\opencover\\4.7.1221\\tools\\OpenCover.Console.exe' -target:'C:\\GitLab-Runner\\packages\\nunit.consolerunner\\3.16.0\\tools\\nunit3-console.exe' -targetargs:'dExcelTests\\bin\\Release\\net6.0-windows\\dExcelTests.dll' -targetdir:'CoverageResults' -output:'CoverageResults\\results.xmsl'"
     tags:
         - windows
