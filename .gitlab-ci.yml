@@ -9,8 +9,10 @@ build:
         - pwd
         - "& 'C:\\Nuget\\nuget.exe' restore dExcel.sln -OutputDirectory C:\\GitLab-Runner\\packages"
         - "& 'C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\msbuild.exe' -t:restore,build dExcel.sln -p:RestorePackagesPath='C:\\gitlab-runner\\packages' -p:RestorePackagesConfig=true /property:Configuration=Release"
-        - "mkdir publish"
-        - "cp dExcel/bin/Release/net6.0-windows/*.* publish"
+        - "mkdir publish/dExcel"
+        - "cp dExcel/bin/Release/net6.0-windows/*.* publish/dExcel"
+        - "mkdir publish/dExcelTests"
+        - "cp dExcelTests/bin/Release/net6.0-windows/*.* publish/dExcelTests"
     artifacts:
         paths:
         - publish/*.*
@@ -23,6 +25,16 @@ test:
     script:
         - pwd
         - "mkdir publish\\CoverageResults" 
-        - "& 'C:\\GitLab-Runner\\packages\\opencover\\4.7.1221\\tools\\OpenCover.Console.exe' -target:'C:\\GitLab-Runner\\packages\\nunit.consolerunner\\3.16.0\\tools\\nunit3-console.exe' -targetargs:'dExcelTests\\bin\\Release\\net6.0-windows\\dExcelTests.dll' -targetdir:'publish\\CoverageResults' -output:'publish\\CoverageResults\\results.xml'"
+        - "& 'C:\\GitLab-Runner\\packages\\opencover\\4.7.1221\\tools\\OpenCover.Console.exe' -target:'C:\\GitLab-Runner\\packages\\nunit.consolerunner\\3.16.0\\tools\\nunit3-console.exe' -targetargs:'publish\\dExcelTests\\dExcelTests.dll' -targetdir:'publish\\CoverageResults' -output:'publish\\CoverageResults\\results.xml'"
+        - "& 'C:\\GitLab-Runner\\packages\\reportgenerator\\5.1.15\\tools\\net6.0\\ReportGenerator.exe' -reports:'publish\\CoverageResults\\results.xml' -targetdir:'publish\\CoverageResults\\Report'"
+        - C:\\Python\\Python311\python.exe Tools\\get_coverage_stats.py
+    # artifacts:
+    #   reports:
+    #        coverage_report:
+    #            coverage_format: opencover
+    #            path: publish\\CoverageResults\\results.xml
+    coverage: 
+    dependencies:
+        - build
     tags:
         - windows
