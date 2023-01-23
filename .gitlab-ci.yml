@@ -22,7 +22,7 @@ test:
     stage: test
     script:
         - pwd
-        - "mkdir CoverageResults" 
-        - "& 'C:\\GitLab-Runner\\packages\\opencover\\4.7.1221\\tools\\OpenCover.Console.exe' -target:'C:\\GitLab-Runner\\packages\\nunit.consolerunner\\3.16.0\\tools\\nunit3-console.exe' -targetargs:'dExcelTests\\bin\\Release\\net6.0-windows\\dExcelTests.dll' -targetdir:'CoverageResults' -output:'CoverageResults\\results.xmsl'"
+        - "mkdir publish\\CoverageResults" 
+        - "& 'C:\\GitLab-Runner\\packages\\opencover\\4.7.1221\\tools\\OpenCover.Console.exe' -target:'C:\\GitLab-Runner\\packages\\nunit.consolerunner\\3.16.0\\tools\\nunit3-console.exe' -targetargs:'dExcelTests\\bin\\Release\\net6.0-windows\\dExcelTests.dll' -targetdir:'publish\\CoverageResults' -output:'publish\\CoverageResults\\results.xml'"
     tags:
         - windows
