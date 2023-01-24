@@ -34,7 +34,7 @@ test:
             coverage_report:
                 coverage_format: html
                 path: publish\\CoverageResults\\Report\index.html
-    expire_in: 1 day
+        expire_in: 1 day
     coverage:  /^Sequence Coverage:\s*\d+.\d+/
     dependencies:
         - build
