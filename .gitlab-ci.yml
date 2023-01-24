@@ -33,7 +33,7 @@ test:
         reports:
             coverage_report:
                 coverage_format: cobertura
-                path: publish\\CoverageResults\\Report\\results.xml
+                path: publish\\CoverageResults\\results.xml
         expire_in: 1 day
     coverage:  /^Sequence Coverage:\s*\d+.\d+/
     dependencies:
