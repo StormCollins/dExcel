@@ -32,8 +32,8 @@ test:
     artifacts:
         reports:
             coverage_report:
-                coverage_format: html
-                path: publish\\CoverageResults\\Report\index.html
+                coverage_format: cobertura
+                path: publish\\CoverageResults\\Report\\results.xml
         expire_in: 1 day
     coverage:  /^Sequence Coverage:\s*\d+.\d+/
     dependencies:
