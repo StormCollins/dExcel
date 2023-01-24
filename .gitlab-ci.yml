@@ -30,6 +30,10 @@ test:
         - "& 'C:\\GitLab-Runner\\packages\\reportgenerator\\5.1.15\\tools\\net6.0\\ReportGenerator.exe' -reports:'publish\\CoverageResults\\results.xml' -targetdir:'publish\\CoverageResults\\Report' -reporttypes:'Html_Dark'"
         - C:\\Python\\Python311\python.exe Tools\\get_coverage_stats.py
     artifacts:
+        paths:
+            - publish/dExcel/*.*
+            - publish/dExcelTests/*.*
+            - publish/CoverageResults/Report/*.*
         reports:
             coverage_report:
                 coverage_format: cobertura
