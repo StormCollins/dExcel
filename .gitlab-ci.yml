@@ -47,7 +47,7 @@ pages:
   dependencies:
     - test
   script:
-    - mv publis/CoverageResults/Report public/
+    - mv publish/CoverageResults/Report public/
   artifacts:
     paths:
       - public
