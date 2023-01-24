@@ -41,15 +41,3 @@ test:
     tags:
         - windows
 
-pages:
-  stage: deploy
-  dependencies:
-    - test
-  script:
-    - mv publish/CoverageResults/Report public/
-  artifacts:
-    paths:
-      - public
-    expire_in: 2 days
-  tags: 
-    - windows
