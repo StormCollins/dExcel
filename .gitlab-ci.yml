@@ -2,6 +2,7 @@
 stages:
     - build
     - test
+    - deploy
 
 build:
     stage: build
@@ -40,3 +41,16 @@ test:
         - build
     tags:
         - windows
+
+pages:
+  stage: deploy
+  dependencies:
+    - test
+  script:
+    - mv publis/CoverageResults/Report public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 2 days
+  tags: 
+    - windows
