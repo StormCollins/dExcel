@@ -34,7 +34,7 @@ test:
     #        coverage_report:
     #            coverage_format: opencover
     #            path: publish\\CoverageResults\\results.xml
-    coverage:  /^Sequence Coverage:\s*\d+.\d+\%/
+    coverage:  /^Sequence Coverage:\s*\d+.\d+/
     dependencies:
         - build
     tags:
