@@ -26,7 +26,7 @@ test:
     script:
         - pwd
         - "mkdir publish\\CoverageResults" 
-        - "& 'C:\\GitLab-Runner\\packages\\opencover\\4.7.1221\\tools\\OpenCover.Console.exe' -target:'C:\\GitLab-Runner\\packages\\nunit.consolerunner\\3.16.0\\tools\\nunit3-console.exe' -targetargs:'publish\\dExcelTests\\dExcelTests.dll' -targetdir:'publish\\CoverageResults' -output:'publish\\CoverageResults\\results.xml'"
+        - "& 'C:\\GitLab-Runner\\packages\\opencover\\4.7.1221\\tools\\OpenCover.Console.exe' -target:'C:\\GitLab-Runner\\packages\\nunit.consolerunner\\3.16.0\\tools\\nunit3-console.exe' -targetargs:'publish\\dExcelTests\\dExcelTests.dll' -output:'publish\\CoverageResults\\results.xml'"
         - "& 'C:\\GitLab-Runner\\packages\\reportgenerator\\5.1.15\\tools\\net6.0\\ReportGenerator.exe' -reports:'publish\\CoverageResults\\results.xml' -targetdir:'publish\\CoverageResults\\Report'"
         - C:\\Python\\Python311\python.exe Tools\\get_coverage_stats.py
     # artifacts:
