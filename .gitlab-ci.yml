@@ -15,7 +15,8 @@ build:
         - "cp dExcelTests/bin/Release/net6.0-windows/*.* publish/dExcelTests"
     artifacts:
         paths:
-        - publish/*.*
+        - publish/dExcel/*.*
+        - publish/dExcelTests/*.*
         expire_in: 1 day
     tags:
         - windows
