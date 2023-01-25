@@ -1,12 +1,17 @@
-import re
+from bs4 import BeautifulSoup
+from lxml import etree
+import os
 
-f = open(r'publish\CoverageResults\results.xml', 'r')
-lines = f.readlines()
+print(f'Current Working Directory: {os.getcwd()}')
+print('')
+print(f'Files/folders in current directory:')
+for file in os.scandir('publish/CoverageResults/Report'):
+    print(file)
 
-if not re.match('.+Summary.+', lines[2]):
-    print(f'Line 2 of results.xml no longer contains the coverage session summary. ' +
-          f'Update {__file__}.')
-else:
-    print(lines[2])
-    sequence_coverage = re.findall(r'(?<=sequenceCoverage=")\d+\.\d+', lines[2])[0]
-    print(f'Sequence Coverage: {sequence_coverage}')
+print('')
+report_path: str = r'publish\CoverageResults\Report\index.html'
+f = open(report_path, 'r')
+page = ''.join(f.readlines())
+soup = BeautifulSoup(page, features='lxml')
+dom = etree.HTML(str(soup))
+print(f'Coverage: {dom.xpath(r"//html/body/div[1]/div/div[1]/div[2]/div[2]/div[1]/text()")[0]}')
