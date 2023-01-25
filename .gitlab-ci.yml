@@ -40,7 +40,7 @@ test:
                 coverage_format: cobertura
                 path: publish\\CoverageResults\\results.xml
         expire_in: 1 day
-    coverage:  /^Coverage:\s*\d+(.\d+)?/
+    coverage:  /^Coverage:\s*\d+/
     dependencies:
         - build
     tags:
