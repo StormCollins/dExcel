@@ -24,6 +24,8 @@ build:
 
 test:
     stage: test
+    variables:
+      min_acceptable: 40
     script:
         - pwd
         - "mkdir publish\\CoverageResults" 
