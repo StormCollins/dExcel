@@ -6,7 +6,6 @@ using dExcel.FX;
 [TestFixture]
 public class FxUtilsTests
 {
-    
     [Test]
     [TestCase(10.0, 10.0, 0.1, 0.1, 0.25, 1.0, "CALL")]
     [TestCase(15.0, 10.0, 0.1, 0.1, 0.25, 1.0, "CALL")]
