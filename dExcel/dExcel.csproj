@@ -216,6 +216,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <None Remove="Resources\Icons\chart-blue.ico" />
+    <COMReference Include="VBIDE">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>3</VersionMinor>
+      <VersionMajor>5</VersionMajor>
+      <Guid>0002e157-0000-0000-c000-000000000046</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+      <Private>True</Private>
+    </COMReference>
     <EmbeddedResource Include="Resources\Icons\chart-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -231,7 +241,6 @@
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.603" />
     <PackageReference Include="MaterialDesignThemes" Version="4.6.1" />
     <PackageReference Include="mathnet.numerics" Version="5.0.0" />
-    <PackageReference Include="NetOfficeFw.VBIDE" Version="1.9.2-preview52" />
     <PackageReference Include="QLNet" Version="1.12.1-preview.28" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
   </ItemGroup>

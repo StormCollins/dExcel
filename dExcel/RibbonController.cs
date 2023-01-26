@@ -498,87 +498,87 @@ public class RibbonController : ExcelRibbon
         }
     }
 
-    // /// <summary>
-    // /// This wraps up an audit Excel file by:
-    // ///     <list type="number">
-    // ///         <item> Deleting all review notes.</item>
-    // ///         <item> Hiding the row and column headings.</item>
-    // ///         <item> Hiding formulae.</item>
-    // ///         <item> Hiding range names. </item>
-    // ///         <item> Locking and password protecting cells.</item>
-    // ///         <item> Removing Matlab ExcelLink references.</item>
-    // ///         <item> Password protecting VBA code.</item>
-    // ///     </list>
-    // /// </summary>
-    // /// <param name="control">The ribbon control.</param>
-    // public void WrapUpAudit(IRibbonControl control)
-    // {
-    //     Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
-    //
-    //     // Delete review notes.
-    //     // It is unclear where the workbook WPExcel.xls is located but EMS users seem to have access to it.
-    //     xlApp.Application.Run("WPEXCEL.XLS!DPWPReviewNotesDeleteAll");
-    //
-    //     foreach (Excel.Worksheet worksheet in xlApp.ActiveWorkbook.Worksheets)
-    //     {
-    //         worksheet.Activate();
-    //         int lastRowOfUsedRange = worksheet.UsedRange.Rows.Count;
-    //         int lastColumnOfUsedRange = worksheet.UsedRange.Columns.Count;
-    //         xlApp.ActiveWindow.DisplayHeadings = false;
-    //         
-    //         if (!worksheet.ProtectContents)
-    //         {
-    //             worksheet.UsedRange.Cells.FormulaHidden = true;
-    //             worksheet.UsedRange.Cells.Locked = true;
-    //             worksheet.Protect("asterix");
-    //         }
-    //     }
-    //
-    //     // Remove Matlab references.
-    //     // TODO: This can be deprecated when we no longer use Matlab and ExcelLink.
-    //     Excel.Workbook wb = xlApp.ActiveWorkbook;
-    //     // foreach (VBIDE.Reference reference in wb.VBProject.References)
-    //     // {
-    //     //     if (reference.Name.Contains("ExcelLink", StringComparison.CurrentCultureIgnoreCase) ||
-    //     //         reference.Name.Contains("SpreadsheetLink", StringComparison.CurrentCultureIgnoreCase))
-    //     //     {
-    //     //         wb.VBProject.References.Remove(reference);
-    //     //     }
-    //     // }
-    //
-    //     // foreach (VBIDE.VBComponent component in wb.VBProject.VBComponents)
-    //     // {
-    //     //    VBIDE.CodeModule codeModule = component.CodeModule;
-    //     //     
-    //     //     for (int i = 1; i < codeModule.CountOfLines; i++)
-    //     //     {
-    //     //         string line = codeModule.Lines[i, 1];
-    //     //         if (line.Contains("#Const oExcelLink = 1"))
-    //     //         {
-    //     //             codeModule.ReplaceLine(i, line.Replace("#Const oExcelLink = 1", "#Const oExcelLink = 0"));
-    //     //         }
-    //     //     }
-    //     }
-    //
-    //     // Password protect the VBA code.
-    //     // TODO: See if this can be simplified.
-    //     // xlApp.Application.ScreenUpdating = false;
-    //     //
-    //     // string breakIt = "%{F11}%TE+{TAB}{RIGHT}%V{+}{TAB}";
-    //     // foreach (VBIDE.Window window in wb.VBProject.VBE.Windows)
-    //     // {
-    //     //     if (window.Caption.Contains('('))
-    //     //     {
-    //     //         window.Close();
-    //     //     }
-    //     // }
-    //     // wb.Activate();
-    //     //
-    //     // xlApp.Application.OnKey("%{F11}");
-    //     // SendKeys.SendWait(breakIt + "asterix" + "{TAB}" + "asterix" + "~%{F11}");
-    //     // xlApp.Application.ScreenUpdating = true;
-    //     // wb.Activate();
-    // }
+    /// <summary>
+    /// This wraps up an audit Excel file by:
+    ///     <list type="number">
+    ///         <item> Deleting all review notes.</item>
+    ///         <item> Hiding the row and column headings.</item>
+    ///         <item> Hiding formulae.</item>
+    ///         <item> Hiding range names. </item>
+    ///         <item> Locking and password protecting cells.</item>
+    ///         <item> Removing Matlab ExcelLink references.</item>
+    ///         <item> Password protecting VBA code.</item>
+    ///     </list>
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void WrapUpAudit(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+    
+        // Delete review notes.
+        // It is unclear where the workbook WPExcel.xls is located but EMS users seem to have access to it.
+        xlApp.Application.Run("WPEXCEL.XLS!DPWPReviewNotesDeleteAll");
+    
+        foreach (Excel.Worksheet worksheet in xlApp.ActiveWorkbook.Worksheets)
+        {
+            worksheet.Activate();
+            int lastRowOfUsedRange = worksheet.UsedRange.Rows.Count;
+            int lastColumnOfUsedRange = worksheet.UsedRange.Columns.Count;
+            xlApp.ActiveWindow.DisplayHeadings = false;
+            
+            if (!worksheet.ProtectContents)
+            {
+                worksheet.UsedRange.Cells.FormulaHidden = true;
+                worksheet.UsedRange.Cells.Locked = true;
+                worksheet.Protect("asterix");
+            }
+        }
+    
+        // Remove Matlab references.
+        // TODO: This can be deprecated when we no longer use Matlab and ExcelLink.
+        Excel.Workbook wb = xlApp.ActiveWorkbook;
+        foreach (VBIDE.Reference reference in wb.VBProject.References)
+        {
+            if (reference.Name.Contains("ExcelLink", StringComparison.CurrentCultureIgnoreCase) ||
+                reference.Name.Contains("SpreadsheetLink", StringComparison.CurrentCultureIgnoreCase))
+            {
+                wb.VBProject.References.Remove((Microsoft.Vbe.Interop.Reference)reference);
+            }
+        }
+
+        foreach (VBIDE.VBComponent component in wb.VBProject.VBComponents)
+        {
+            VBIDE.CodeModule codeModule = component.CodeModule;
+
+            for (int i = 1; i < codeModule.CountOfLines; i++)
+            {
+                string line = codeModule.Lines[i, 1];
+                if (line.Contains("#Const oExcelLink = 1"))
+                {
+                    codeModule.ReplaceLine(i, line.Replace("#Const oExcelLink = 1", "#Const oExcelLink = 0"));
+                }
+            }
+        }
+
+    // Password protect the VBA code.
+    // TODO: See if this can be simplified.
+    xlApp.Application.ScreenUpdating = false;
+    
+     string breakIt = "%{F11}%TE+{TAB}{RIGHT}%V{+}{TAB}";
+     foreach (VBIDE.Window window in wb.VBProject.VBE.Windows)
+     {
+         if (window.Caption.Contains('('))
+         {
+             window.Close();
+         }
+     }
+    wb.Activate();
+         
+          xlApp.Application.OnKey("%{F11}");
+          SendKeys.SendWait(breakIt + "asterix" + "{TAB}" + "asterix" + "~%{F11}");
+          xlApp.Application.ScreenUpdating = true;
+          wb.Activate();
+    }
 
     public void ViewObjectChart(IRibbonControl control)
     {
