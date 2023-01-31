@@ -12,7 +12,8 @@
         Height="550"
         Width="1000"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        Background="{DynamicResource MaterialDesignPaper}">
+        Background="{DynamicResource MaterialDesignPaper}"
+        KeyDown="FunctionSearch_OnKeyDown">
   <Window.Resources>
     <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"></ResourceDictionary>
   </Window.Resources>

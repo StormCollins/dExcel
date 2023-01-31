@@ -3,10 +3,12 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
 using FuzzySharp;
 using FuzzySharp.Extractor;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace dExcel.WPF;
 
@@ -151,5 +153,19 @@ public partial class FunctionSearch : Window
     {
         this.FunctionName = ((FunctionMatch)SearchResults.SelectedItem).Name;
         this.Close();
+    }
+
+    /// <summary>
+    /// Processes keyboard events on the main form.
+    /// </summary>
+    /// <param name="sender">Sender.</param>
+    /// <param name="e">Key event args.</param>
+    /// <exception cref="NotImplementedException"></exception>
+    private void FunctionSearch_OnKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            this.Close();
+        }
     }
 }
