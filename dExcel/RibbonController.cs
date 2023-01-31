@@ -73,7 +73,7 @@ public class RibbonController : ExcelRibbon
         thread.Start();
         thread.Join();
 
-        if (string.Compare(dashBoardAction, "OpenTestingWorkbook", StringComparison.OrdinalIgnoreCase) == 0)
+        if (string.Compare(dashBoardAction, "OpenTestingWorkbook", true) == 0)
         {
             Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
 #if DEBUG
@@ -315,7 +315,7 @@ public class RibbonController : ExcelRibbon
                 .Where(y => y.GetCustomAttributes(typeof(ExcelFunctionAttribute), false).Length > 0)
                 .Where(z => z.GetCustomAttribute(typeof(ExcelFunctionAttribute)) is ExcelFunctionAttribute);
 
-        MethodInfo[] methodInfos = methods as MethodInfo[] ?? methods.ToArray();
+        var methodInfos = methods as MethodInfo[] ?? methods.ToArray();
         return methodInfos.Select((t, i)
                 => (ExcelFunctionAttribute)methodInfos
                     .ElementAt(i)
@@ -331,12 +331,12 @@ public class RibbonController : ExcelRibbon
         List<string> methodIds = _excelFunctionCategoriesToRibbonLabels[control.Id.ToUpper()];
         IEnumerable<(string name, string description, string category)> methods = GetCategoryMethods(methodIds);
         string content = "";
-        content += "<menu xmlns=\"https://schemas.microsoft.com/office/2006/01/customui\">";
+        content += $"<menu xmlns=\"http://schemas.microsoft.com/office/2006/01/customui\">";
         string currentSubcategory = "";
-        foreach ((string name, string _, string _) in methods)
+        foreach (var (name, _, _) in methods)
         {
-            string previousSubcategory = currentSubcategory;
-            currentSubcategory = 
+            var previousSubcategory = currentSubcategory;
+            currentSubcategory =
                 Regex.Match(name, @"(?<=d\.)[^_]+", RegexOptions.Compiled | RegexOptions.IgnoreCase).Value;
 
             if (previousSubcategory != "" && previousSubcategory != currentSubcategory)
@@ -356,9 +356,13 @@ public class RibbonController : ExcelRibbon
         return content;
     }
 
+
+
     public string GetTemplateContent(IRibbonControl control)
     {
-        const string path = @"\\ZAJNB010\FSA Valuations\FSA Valuations\Model Validation";
+        string path = @"\\ZAJNB010\FSA Valuations\FSA Valuations\Model Validation";
+        var content = "";
+
         return path;
     }
 
@@ -393,7 +397,7 @@ public class RibbonController : ExcelRibbon
 #else
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         xlApp.ActiveWorkbook.ApplyTheme(
-                @"C:\GitLab\dExcelTools\Releases\Current\Resources\Workbooks\Deloitte_Brand_Theme.thmx");
+                @"C:\GitLab\dExcelTools\Releases\Current\Deloitte_Brand_Theme.thmx");
 #endif
     }
 
