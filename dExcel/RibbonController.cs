@@ -94,6 +94,7 @@ public class RibbonController : ExcelRibbon
         Thread thread = new(() =>
         {
             FunctionSearch functionSearch = new();
+            functionSearch.SearchTerm.Focus();
             functionSearch.Show();
             functionSearch.Closed += (sender2, e2) => functionSearch.Dispatcher.InvokeShutdown();
             Dispatcher.Run();

@@ -64,16 +64,32 @@
       Grid.ColumnSpan="6">
       <StackPanel
         VerticalAlignment="Center">
+        <!-- <StackPanel> -->
+        <!--   <CheckBox -->
+        <!--     x:Name="MaterialDesignFilledTextBoxTextCountComboBox" -->
+        <!--     Content="View Text Input Count" /> -->
+        <!--   <TextBox -->
+        <!--     VerticalAlignment="Top" -->
+        <!--     materialDesign:HintAssist.Hint="This is a limited text area" -->
+        <!--     materialDesign:TextFieldAssist.CharacterCounterVisibility="{Binding Path=IsChecked, ElementName=MaterialDesignFilledTextBoxTextCountComboBox, Converter={StaticResource BooleanToVisibilityConverter}}" -->
+        <!--     MaxLength="40" -->
+        <!--     Style="{StaticResource MaterialDesignFilledTextBox}" -->
+        <!--     TextWrapping="Wrap" /> -->
+        <!-- </StackPanel> -->
       <TextBox
         Name="SearchTerm"
         materialDesign:HintAssist.Hint="Search Term"
-        materialDesign:HintAssist.IsFloating="True"
+        materialDesign:HintAssist.IsFloating="False"
+        materialDesign:TextFieldAssist.HasClearButton="True" 
+        materialDesign:TextFieldAssist.LeadingIcon="Search" 
+        materialDesign:TextFieldAssist.HasLeadingIcon="True" 
         Margin="0 0 0 10"
         Padding="0 0 0 0"
         TextChanged="SearchTerm_TextChanged"
         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
         HorizontalAlignment="Center"
         HorizontalContentAlignment="Center"
+        MinWidth="120"
         VerticalAlignment="Center">
         <TextBox.Resources>
           <Style TargetType="{x:Type materialDesign:SmartHint}">

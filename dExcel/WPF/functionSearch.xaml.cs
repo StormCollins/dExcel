@@ -36,7 +36,7 @@ public partial class FunctionSearch : Window
         ["DT_VOLATILITY"] = "d.Equity_Volatility",
         ["BS"] = "d.Equity_BlackScholes",
         // Interest Rates
-        ["BLACK"] = "d.IR_Black",
+        ["BLACK"] = "d.IR_BlackForwardOptionPricer",
         ["Disc2ForwardRate"] = "d.IR_DiscountFactorsToForwardRate",
         ["INTCONVERT"] = "d.IR_ConvertInterestRate",
     };
