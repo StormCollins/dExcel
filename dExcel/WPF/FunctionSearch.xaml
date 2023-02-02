@@ -64,18 +64,6 @@
       Grid.ColumnSpan="6">
       <StackPanel
         VerticalAlignment="Center">
-        <!-- <StackPanel> -->
-        <!--   <CheckBox -->
-        <!--     x:Name="MaterialDesignFilledTextBoxTextCountComboBox" -->
-        <!--     Content="View Text Input Count" /> -->
-        <!--   <TextBox -->
-        <!--     VerticalAlignment="Top" -->
-        <!--     materialDesign:HintAssist.Hint="This is a limited text area" -->
-        <!--     materialDesign:TextFieldAssist.CharacterCounterVisibility="{Binding Path=IsChecked, ElementName=MaterialDesignFilledTextBoxTextCountComboBox, Converter={StaticResource BooleanToVisibilityConverter}}" -->
-        <!--     MaxLength="40" -->
-        <!--     Style="{StaticResource MaterialDesignFilledTextBox}" -->
-        <!--     TextWrapping="Wrap" /> -->
-        <!-- </StackPanel> -->
       <TextBox
         Name="SearchTerm"
         materialDesign:HintAssist.Hint="Search Term"
@@ -121,6 +109,7 @@
             AutoGenerateColumns="False"
             IsReadOnly="True"
             HeadersVisibility="Column"
+            HorizontalAlignment="Stretch"
             SelectionChanged="SearchResults_SelectionChanged">
           <DataGrid.ColumnHeaderStyle>
             <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
