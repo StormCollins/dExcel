@@ -1,4 +1,7 @@
-﻿namespace dExcel.WPF;
+﻿using System.Windows.Input;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+
+namespace dExcel.WPF;
 
 using System.Diagnostics;
 using System.IO;
@@ -215,5 +218,18 @@ public partial class Dashboard : Window
     private void RunTests_Click(object sender, RoutedEventArgs e)
     {
         
+    }
+
+    /// <summary>
+    /// Processes keyboard events on the main form.
+    /// </summary>
+    /// <param name="sender">Sender.</param>
+    /// <param name="e">Key event args.</param>
+    private void Dashboard_OnKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            this.Close();
+        }
     }
 }

@@ -13,7 +13,8 @@
         Width="1000"
         Icon="pack://application:,,,/dExcel;component/resources/icons/dExcel.ico"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        Background="{DynamicResource MaterialDesignPaper}">
+        Background="{DynamicResource MaterialDesignPaper}"
+        KeyDown="Dashboard_OnKeyDown">
   <Window.Resources>
     <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"/>
   </Window.Resources>
