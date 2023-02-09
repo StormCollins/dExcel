@@ -34,10 +34,10 @@ public partial class FunctionSearch : Window
         ["RANDN"] = "d.Stats_NormalRandomNumbers",
         // Equities
         ["DT_VOLATILITY"] = "d.Equity_Volatility",
-        ["BS"] = "d.Equity_BlackScholes",
+        ["BS"] = "d.Equity_BlackScholesSpotOptionPricer",
         // Interest Rates
         ["BLACK"] = "d.IR_BlackForwardOptionPricer",
-        ["Disc2ForwardRate"] = "d.IR_DiscountFactorsToForwardRate",
+        ["DISC2FORWARDRATE"] = "d.IR_DiscountFactorsToForwardRate",
         ["INTCONVERT"] = "d.IR_ConvertInterestRate",
     };
 
