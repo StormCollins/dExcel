@@ -271,6 +271,7 @@ public class RibbonController : ExcelRibbon
     {
         List<string> methodIds = _excelFunctionCategoriesToRibbonLabels[control.Id.ToUpper()];
         IEnumerable<(string name, string description, string category)> methods = GetCategoryMethods(methodIds);
+        methods = methods.OrderBy(x => x.name);
         string content = "";
         content += $"<menu xmlns=\"http://schemas.microsoft.com/office/2006/01/customui\">";
         string currentSubcategory = "";
