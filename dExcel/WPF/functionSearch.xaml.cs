@@ -163,6 +163,7 @@ public partial class FunctionSearch : Window
     /// <exception cref="NotImplementedException"></exception>
     private void FunctionSearch_OnKeyDown(object sender, KeyEventArgs e)
     {
+<<<<<<< HEAD
         switch (e.Key)
         {
             case Key.Escape:
@@ -172,6 +173,11 @@ public partial class FunctionSearch : Window
                 this.SearchResults.Focus();
                 this.SearchResults.SelectedItem = this.SearchResults.Items[0];
                 break;
+=======
+        if (e.Key == Key.Escape)
+        {
+            this.Close();
+>>>>>>> b2d64016efef182e409aef583b7a9de91df59c4c
         }
     }
 }
