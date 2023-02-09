@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿namespace dExcel.WPF;
+
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
@@ -9,8 +11,6 @@ using ExcelDna.Integration;
 using FuzzySharp;
 using FuzzySharp.Extractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-
-namespace dExcel.WPF;
 
 /// <summary>
 /// Interaction logic for FunctionSearch.xaml

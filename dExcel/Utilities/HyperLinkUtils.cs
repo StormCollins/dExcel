@@ -3,10 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using WPF;
 using ExcelDna.Integration;
 using Excel = Microsoft.Office.Interop.Excel;
 using FuzzySharp;
+using WPF;
 
 
 /// <summary>
@@ -23,8 +23,14 @@ public static class HyperLinkUtils
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         Excel.Range usedRange = xlApp.ActiveSheet.UsedRange;
         Dictionary<string, string> headings = new();
-        List<char> invalidCharacters = new List<char> {' ', ':'};
+        List<char> invalidCharacters 
+            = new()
+            {
+                ' ', ':', ',', ';', '(', ')', '[', ']', '{', '}', '<', '>', '*', '?', '!', '\'', '”', '-', '+', '|', '\\', '/'
+            };
 
+        List<string> generalExceptions = new();
+        
         for (int i = 1; i < usedRange.Rows.Count + 1; i++)
         {
             for (int j = 1; j < usedRange.Columns.Count + 1; j++)
@@ -46,9 +52,10 @@ public static class HyperLinkUtils
                             headings[currentCell.Value2] = ((Excel.Name)currentCell.Name).NameLocal;
                         }
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                    }
+                        generalExceptions.Add(e.Message);
+                    } 
                 }
             }
         }
@@ -80,6 +87,15 @@ public static class HyperLinkUtils
             }
         }
 
+        string generalExceptionsMessage = "";
+        if (generalExceptions.Count > 0)
+        {
+            generalExceptionsMessage =
+                "\n\nThe following general exceptions were encountered." +
+                "\nPlease report these to the developer(s): \n  • " +
+                string.Join("\n  • ", generalExceptions);
+        }
+        
         if (failedHyperlinks.Count > 0)
         {
             Alert alert = new()
@@ -90,8 +106,10 @@ public static class HyperLinkUtils
                 },
                 AlertBody =
                 {
-                    Text = "The following headings could not be found in this sheet: \n  • " +
-                           string.Join("\n  • ", failedHyperlinks)
+                    Text = 
+                        "The following headings could not be found in this sheet: \n  • " +
+                        string.Join("\n  • ", failedHyperlinks) +
+                        generalExceptionsMessage
                 },
             };
 
