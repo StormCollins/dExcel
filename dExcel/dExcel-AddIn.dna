@@ -62,14 +62,14 @@
 				enabled='false'
 				size='large'
 				tag='manage-passwords-large-blue.ico'/>
-			  <splitButton id='btnWorkbookLinks' size='large'>
+			  <splitButton id='btnWorkbookHyperlinks' size='large'>
 				  <button
 					id='btnCreateLinkToSheet'
 					getImage='GetImage'
-					label='Workbook Links'
+					label='Workbook Hyperlinks'
 					onAction='CreateLinkToSheet'
 					tag='workbook_link_blue.ico'/>
-				  <menu id='menuWorkbookLinks'>
+				  <menu id='menuWorkbookHyperlinks'>
 					<button 
 				      id='btnCreateLinkToSheet2'
 				      label='Create Link to Sheet'
@@ -77,9 +77,9 @@
 					  screentip='Creates a link to cell A1 in the sheet with the same name as the selected cell.'/>
 					<button 
 				      id='btnCreateLinksToHeadings'
-				      label='Create Link(s) to Heading(s) in Sheet'
-					  onAction='CreateLinksToHeadingsInCurrentSheet'
-					  screentip='Creates link(s) to cell(s) with a heading style.'/>
+				      label='Create Hyperlink(s) to Heading(s) in Current Sheet'
+					  onAction='CreateHyperlinksToHeadingsInCurrentSheet'
+					  screentip='Creates hyperlink(s) to cell(s) with a heading style.'/>
 					<button
 					  id='btnCreateLinksToHeadingsInOtherSheet'
 					  label='Create Link(s) to Heading(s) in Other Sheet'

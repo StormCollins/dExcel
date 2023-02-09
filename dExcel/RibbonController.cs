@@ -1,17 +1,18 @@
 ﻿namespace dExcel;
 
-using Excel = Microsoft.Office.Interop.Excel;
-using ExcelDna.Integration.CustomUI;
-using ExcelDna.Integration;
-using ExcelUtils;
-using FuzzySharp;
-using SkiaSharp;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Windows.Threading;
+using Excel = Microsoft.Office.Interop.Excel;
+using ExcelDna.Integration.CustomUI;
+using ExcelDna.Integration;
+using ExcelUtils;
+using FuzzySharp;
+using SkiaSharp;
+using Utilities;
 using WPF;
 
 /// <summary>
@@ -133,78 +134,17 @@ public class RibbonController : ExcelRibbon
         ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", $"'{matchedSheet}'!A1");
     }
 
-    public void CreateLinksToHeadingsInCurrentSheet(IRibbonControl control)
+    /// <summary>
+    /// Creates a hyperlink in the selected cell to a cell with the same content but which also has a heading style.
+    /// For example, if the selected cell has the content "Test" and there is another cell, styled as a heading, also with
+    /// the content "Test", then this function will create a link in the selected cell to the heading cell.
+    ///
+    /// Note this function can handle multiple cells as well.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void CreateHyperlinksToHeadingsInCurrentSheet(IRibbonControl control)
     {
-        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
-        Excel.Range usedRange = xlApp.ActiveSheet.UsedRange;
-        Dictionary<string, string> headings = new();
-
-        for (int i = 1; i < usedRange.Rows.Count + 1; i++)
-        {
-            for (int j = 1; j < usedRange.Columns.Count + 1; j++)
-            {
-                Excel.Range currentCell = usedRange.Cells[i, j];
-                string style = ((Excel.Style)currentCell.Style).Value.ToUpper();
-                if (style.Contains("HEADING"))
-                {
-                    try
-                    {
-                        string sheetName = currentCell.Worksheet.Name;
-                        string cellContent = currentCell.Value2;
-                        currentCell.Name = $"{sheetName}.Title.{cellContent}";
-                        headings[currentCell.Value2] = ((Excel.Name)currentCell.Name).NameLocal;
-                    }
-                    catch (Exception)
-                    {
-                    }
-                }
-            }
-        }
-
-        Excel.Range selectedRange = (Excel.Range)xlApp.Selection;
-        List<string> failedHyperlinks = new();
-
-        for (int i = 1; i < selectedRange.Rows.Count + 1; i++)
-        {
-            string searchText = "";
-            for (int j = 1; j < selectedRange.Columns.Count + 1; j++)
-            {
-                Excel.Range currentCell = selectedRange.Rows[i].Columns[j];
-                if (currentCell.Value2 != null && currentCell.Value2?.ToString() != "" &&
-                    currentCell.Value2?.ToString() != ExcelEmpty.Value.ToString())
-                {
-                    searchText = selectedRange.Rows[i].Columns[j].Value2;
-                }
-            }
-
-            try
-            {
-                string matchedHeading = Process.ExtractTop(searchText, headings.Keys).First(x => x.Score > 90).Value;
-                ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(selectedRange.Rows[i], "", headings[matchedHeading]);
-                //xlApp.Selection.Hyperlinks[1].SubAddress = headings[matchedHeading];
-            }
-            catch (Exception)
-            {
-                failedHyperlinks.Add(searchText);
-            }
-        }
-
-        if (failedHyperlinks.Count > 0)
-        {
-            Alert alert = new()
-            {
-                AlertCaption =
-                {
-                    Text = "Warning: Section Headings Not Found"
-                },
-                AlertBody =
-                {
-                    Text = "The following headings could not be found: \n  •" + string.Join("\n  • ", failedHyperlinks)
-                },
-            };
-
-            alert.Show();
-        }
+        HyperLinkUtils.CreateHyperlinkToHeadingInSheet();
     }
     
     public void CreateLinksToHeadingsInOtherSheets(IRibbonControl control)
