@@ -491,14 +491,13 @@ public class RibbonController : ExcelRibbon
 
             foreach (string xlOpenWorkbook in xlOpenWorkbooks)
             {
-
                 if (xlOpenWorkbook != xlActiveWorkbook.Name)
                 {
                     Excel.Range workbookFind = ExcelFind(xlOpenWorkbook);
 
                     while (workbookFind is not null)
                     {
-                        string filePath = Regex.Match(xlWorksheet.Range[workbookFind.Address].Formula2, @"(?<==')[^\[]+").Value;
+                        string filePath = Regex.Match(xlWorksheet.Range[workbookFind.Address].Formula2, @"(?<==')(.+)\\").Value;
 
                         xlUsedRange.Replace2(What: filePath,
                                              Replacement: "",
@@ -515,13 +514,28 @@ public class RibbonController : ExcelRibbon
             }
 
             Excel.Range ExcelFind(string stringToFind)
-                => xlUsedRange.Find(What: "\\[" + stringToFind + "]",
-                                    LookIn: Excel.XlFindLookIn.xlFormulas2,
-                                    LookAt: Excel.XlLookAt.xlPart,
-                                    SearchOrder: Excel.XlSearchOrder.xlByRows,
-                                    SearchDirection: Excel.XlSearchDirection.xlNext,
-                                    MatchCase: true,
-                                    SearchFormat: false);
+            {
+                Excel.Range rangeFind = xlUsedRange.Find(What: "\\[" + stringToFind + "]",
+                                                         LookIn: Excel.XlFindLookIn.xlFormulas2,
+                                                         LookAt: Excel.XlLookAt.xlPart,
+                                                         SearchOrder: Excel.XlSearchOrder.xlByRows,
+                                                         SearchDirection: Excel.XlSearchDirection.xlNext,
+                                                         MatchCase: true,
+                                                         SearchFormat: false);
+
+                if (rangeFind is null)
+                {
+                    rangeFind = xlUsedRange.Find(What: "\\" + stringToFind,
+                                                 LookIn: Excel.XlFindLookIn.xlFormulas2,
+                                                 LookAt: Excel.XlLookAt.xlPart,
+                                                 SearchOrder: Excel.XlSearchOrder.xlByRows,
+                                                 SearchDirection: Excel.XlSearchDirection.xlNext,
+                                                 MatchCase: true,
+                                                 SearchFormat: false);
+                }
+
+                return rangeFind;
+            }
         }
     }
 }
