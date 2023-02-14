@@ -5,6 +5,9 @@ using ExcelDna.Integration;
 using QLNet;
 using Utilities;
 
+/// <summary>
+/// A collection of utility functions for dealing with interest rate curves.
+/// </summary>
 public static class CurveUtils
 {
     public static CurveDetails GetCurveDetails(string handle)
@@ -32,7 +35,7 @@ public static class CurveUtils
     /// <param name="handle">The handle for the relevant curve object.</param>
     /// <returns>Returns the interpolation object e.g. LogLinear.</returns>   
     private static IInterpolationFactory GetInterpolation(string handle)
-        => ((CurveDetails)DataObjectController.GetDataObject(handle)).Interpolation;
+        => ((CurveDetails)DataObjectController.GetDataObject(handle)).DiscountFactorInterpolation;
 
     /// <summary>
     /// Creates a QLNet YieldTermStructure curve object which is stored in the DataObjectController.
@@ -67,7 +70,7 @@ public static class CurveUtils
         if (datesRange.GetLength(0) != discountFactorsRange.GetLength(0))
         {
             return CommonUtils.DExcelErrorMessage("Dates and discount factors have incompatible sizes: " +
-                $"({datesRange.GetLength(0)} != {discountFactorsRange.GetLength(0)}).");
+                $"({datesRange.GetLength(0)} ≠ {discountFactorsRange.GetLength(0)}).");
         }
 
         List<Date>? dates = new();
@@ -79,7 +82,6 @@ public static class CurveUtils
         }
 
         string? dayCountConventionParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "DayCountConvention", 0);
-        
         if (dayCountConventionParameter == null)
         {
             return CommonUtils.DExcelErrorMessage("'DayCountConvention' not set in parameters.");
@@ -98,11 +100,10 @@ public static class CurveUtils
 
         if (dayCountConvention == null)
         {
-            return CommonUtils.DExcelErrorMessage($"Invalid 'DayCountConvention': {dayCountConventionParameter}");
+            return CommonUtils.DExcelErrorMessage($"Invalid DayCountConvention: '{dayCountConventionParameter}'");
         }
 
         string? interpolationParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Interpolation", 0);
-
         if (interpolationParameter == null)
         {
             return CommonUtils.DExcelErrorMessage("'Interpolation' not set in parameters.");
@@ -128,7 +129,7 @@ public static class CurveUtils
         string? calendarsParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Calendars");
         IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
         Type interpolationType = typeof(InterpolatedDiscountCurve<>).MakeGenericType(interpolation.GetType());
-        object? termStructure= Activator.CreateInstance(interpolationType, dates, discountFactors, dayCountConvention, interpolation);
+        object? termStructure = Activator.CreateInstance(interpolationType, dates, discountFactors, dayCountConvention, interpolation);
         CurveDetails curveDetails = new(termStructure, dayCountConvention, interpolation, dates, discountFactors);
         return DataObjectController.Add(handle, curveDetails);
     }

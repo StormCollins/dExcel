@@ -1,15 +1,14 @@
-﻿using System.Windows.Input;
-using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-
-namespace dExcel.WPF;
+﻿namespace dExcel.WPF;
 
 using System.Diagnostics;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ExcelDna.Integration;
 using Utilities;
 

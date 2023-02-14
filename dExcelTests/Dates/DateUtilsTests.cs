@@ -13,10 +13,6 @@ public sealed class DateUtilsTests
     {
         yield return new TestCaseData(new DateTime(2022, 01, 01))
             .Returns(new DateTime(2022, 01, 04));
-        // yield return new TestCaseData(new DateTime(2022, 01, 03))
-        //     .Returns(new DateTime(2022, 01, 04));
-        // yield return new TestCaseData(new DateTime(2022, 01, 04))
-        //     .Returns(new DateTime(2022, 01, 04));
     }
     
     [Test]

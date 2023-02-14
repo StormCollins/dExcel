@@ -1,10 +1,13 @@
-﻿namespace dExcel.Curves;
+﻿namespace dExcel.InterestRates;
 
-using ExcelDna.Integration;
 using ExcelUtils;
-using QLNet;
 using Utilities;
+using ExcelDna.Integration;
+using QLNet;
 
+/// <summary>
+/// A class for bootstrapping single curves e.g., the ZAR swap curve or USD OIS swap curve.
+/// </summary>
 public static class SingleCurveBootstrapper
 {
     [ExcelFunction(
@@ -18,28 +21,33 @@ public static class SingleCurveBootstrapper
         object[,]? customRateIndex = null, 
         params object[] instrumentGroups)
     {
-        DateTime baseDate = ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", 1);
+        DateTime baseDate = ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", 0);
         if (baseDate == default)
         {
-            return $"{CommonUtils.DExcelErrorPrefix} Base date missing from curve parameters.";
+            return CommonUtils.DExcelErrorMessage($"Curve parameter missing: '{nameof(baseDate).ToUpper()}'.");
         }
         
         Settings.setEvaluationDate(baseDate);
 
-        string? rateIndexName = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexName");
+        string? rateIndexName = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexName", 0);
         if (rateIndexName is null && customRateIndex is null)
         {
-            return $"{CommonUtils.DExcelErrorPrefix} Rate index missing from curve parameters (and no custom rate index provided).";
+            return CommonUtils.DExcelErrorMessage("Rate index missing from curve parameters (and no custom rate index provided).");
         }
 
-        string? indexTenor = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexTenor");
+        string? indexTenor = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexTenor", 0);
         if (indexTenor is null && customRateIndex is null && rateIndexName != "FEDFUND")
         {
-            return $"{CommonUtils.DExcelErrorPrefix} Please provide a rate index tenor in the curve parameters.";
+            return CommonUtils.DExcelErrorMessage("Please provide a rate index tenor in the curve parameters.");
+        }
+
+        string? interpolationParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Interpolation", 0);
+        if (interpolationParameter == null)
+        {
+            return CommonUtils.DExcelErrorMessage("'Interpolation' not set in parameters.");
         }
 
         IborIndex? rateIndex = null;
-
         if (rateIndexName is not null)
         {
             rateIndex =
@@ -74,7 +82,7 @@ public static class SingleCurveBootstrapper
 
         if (rateIndex is null)
         {
-            return $"{CommonUtils.DExcelErrorPrefix} Unsupported rate index: {rateIndexName}";
+            return CommonUtils.DExcelErrorMessage("Unsupported rate index: {rateIndexName}");
         }
 
         List<RateHelper> rateHelpers = new();
@@ -104,12 +112,12 @@ public static class SingleCurveBootstrapper
                 {
                     if (rates is null)
                     {
-                        return $"{CommonUtils.DExcelErrorPrefix} Deposit rates missing.";
+                        return CommonUtils.DExcelErrorMessage("Deposit rates missing.");
                     }
 
                     if (tenors is null)
                     {
-                        return $"{CommonUtils.DExcelErrorPrefix} Deposit tenors missing";
+                        return CommonUtils.DExcelErrorMessage("Deposit tenors missing");
                     }
                     
                     if (includeInstruments[i])
@@ -117,7 +125,7 @@ public static class SingleCurveBootstrapper
                         rateHelpers.Add(
                             item: new DepositRateHelper(
                             rate: rates[i],
-                            tenor: new Period(tenors?[i]),
+                            tenor: new Period(tenors[i]),
                             fixingDays: rateIndex.fixingDays(),
                             calendar: rateIndex.fixingCalendar(),
                             convention: rateIndex.businessDayConvention(),
@@ -134,18 +142,18 @@ public static class SingleCurveBootstrapper
                     {
                         if (fraTenors is null)
                         {
-                            return $"{CommonUtils.DExcelErrorPrefix} FRA tenors missing.";
+                            return CommonUtils.DExcelErrorMessage("FRA tenors missing.");
                         }
 
                         if (rates is null)
                         {
-                            return $"{CommonUtils.DExcelErrorPrefix} FRA rates missing.";
+                            return CommonUtils.DExcelErrorMessage("FRA rates missing.");
                         }
                         
                         rateHelpers.Add(
                             item: new FraRateHelper(
-                            rate: new Handle<Quote>(new SimpleQuote(rates?[i])),
-                            periodToStart: new Period(fraTenors?[i]),
+                            rate: new Handle<Quote>(new SimpleQuote(rates[i])),
+                            periodToStart: new Period(fraTenors[i]),
                             iborIndex: rateIndex));
                     }
                 }
@@ -156,20 +164,20 @@ public static class SingleCurveBootstrapper
                 {
                     if (rates is null)
                     {
-                        return $"{CommonUtils.DExcelErrorPrefix} Swap rates missing.";
+                        return CommonUtils.DExcelErrorMessage("Swap rates missing.");
                     }
 
                     if (tenors is null)
                     {
-                        return $"{CommonUtils.DExcelErrorPrefix} Swap tenors missing";
+                        return CommonUtils.DExcelErrorMessage("Swap tenors missing");
                     }
                     
                     if (includeInstruments[i])
                     {
                         rateHelpers.Add(
                             item: new SwapRateHelper(
-                            rate: new Handle<Quote>(new SimpleQuote(rates?[i])),
-                            tenor: new Period(tenors?[i]),
+                            rate: new Handle<Quote>(new SimpleQuote(rates[i])),
+                            tenor: new Period(tenors[i]),
                             calendar: rateIndex.fixingCalendar(),
                             fixedFrequency: Frequency.Quarterly,
                             fixedConvention: rateIndex.businessDayConvention(),
@@ -203,14 +211,20 @@ public static class SingleCurveBootstrapper
                jumps: new List<Handle<Quote>>(),
                jumpDates: new List<Date>(),
                accuracy: 1.0e-20);
-        
-        Dictionary<string, object> curveDetails = new()
-        {
-            // TODO: Add instruments used in bootstrapping.
-            // TODO: Get out anchor dates.
-            ["CurveUtils.Object"] = termStructure,
-        };
-        
+
+        IInterpolationFactory? interpolation =
+           interpolationParameter.ToUpper() switch
+           {
+               "BACKWARDFLAT" => new BackwardFlat(),
+               "CUBIC" => new Cubic(),
+               "FORWARDFLAT" => new ForwardFlat(),
+               "LINEAR" => new Linear(),
+               "LOGCUBIC" => new LogCubic(),
+               "EXPONENTIAL" => new LogLinear(),
+               _ => null,
+           };
+         
+        CurveDetails curveDetails = new(termStructure, rateIndex.dayCounter(), interpolation, new List<Date>(), new List<double>());
         return DataObjectController.Add(handle, curveDetails);
     }
 }

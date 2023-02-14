@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using ExcelDna.Integration;
+using QLNet;
 
 public static class CommonUtils
 {
@@ -96,5 +97,38 @@ public static class CommonUtils
                 errorMessage = DExcelErrorMessage($"Invalid direction: '{direction}'");
                 return false;
         }
+    }
+
+    /// <summary>
+    /// Tries to parse the day count convention of the input string to an out parameter.  
+    /// </summary>
+    /// <param name="dayCountConventionParameter">The input string to parse.</param>
+    /// <param name="dayCountConvention">The output day count convention.</param>
+    /// <param name="errorMessage">The error message (if any).</param>
+    /// <returns>True it can parse the string to a day count convention, else false.</returns>
+    public static bool TryParseDayCountConvention(
+        string dayCountConventionParameter, 
+        [NotNullWhen(true)]out DayCounter? dayCountConvention,
+        [NotNullWhen(false)]out string? errorMessage)
+    {
+        dayCountConvention =
+            dayCountConventionParameter.ToUpper() switch
+            {
+                "ACT360" or "ACTUAL360" => new Actual360(),
+                "ACT365" or "ACTUAL365" => new Actual365Fixed(),
+                "ACTACT" or "ACTUALACTUAL" => new ActualActual(),
+                "BUSINESS252" => new Business252(),
+                "30360" or "THIRTY360" => new Thirty360(Thirty360.Thirty360Convention.BondBasis, null),
+                _ => null,
+            };
+
+        if (dayCountConvention == null)
+        {
+            errorMessage = DExcelErrorMessage($"Invalid DayCountConvention: '{dayCountConventionParameter}'");
+            return false;
+        }
+       
+        errorMessage = null;
+        return true;
     }
 }

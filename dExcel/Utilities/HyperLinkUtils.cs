@@ -14,6 +14,9 @@ using WPF;
 /// </summary>
 public static class HyperLinkUtils
 {
+    /// <summary>
+    /// Creates a hyperlink from the selected cell to a cell with the same content but styled as a heading.
+    /// </summary>
     [ExcelFunction(
         Name = "d.HyperlinkUtils_CreateHyperlinkToHeadingInSheet",
         Description = "Creates a hyperlink from the selected cell to a cell with the same content but styled as a heading.",

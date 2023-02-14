@@ -35,9 +35,9 @@ public partial class CurvePlotter: Window
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         CurveDetails curveDetails = CurveUtils.GetCurveDetails(xlApp.Selection.Value2);
         ObservableCollection<DateTimePoint> values = new();
-        for (int i = 0; i < curveDetails.Dates?.Count; i++)
+        for (int i = 0; i < curveDetails.DiscountFactorDates?.Count; i++)
         {
-            values.Add(new DateTimePoint(curveDetails.Dates[i].ToDateTime(), curveDetails.DiscountFactors?[i]));
+            values.Add(new DateTimePoint(curveDetails.DiscountFactorDates[i].ToDateTime(), curveDetails.DiscountFactors?[i]));
         }
         
         ChartArea.Series = new ObservableCollection<ISeries>
