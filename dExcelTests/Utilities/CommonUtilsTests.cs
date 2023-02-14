@@ -14,9 +14,9 @@ public class CommonUtilsTests
     [TestCase("ACT360")]
     [TestCase("Actual360")]
     [TestCase("ACTUAL360")]
-    public void TryParseDayCountConventionForActual360Test(string conventionToParse)
+    public void TryParseDayCountConventionForActual360Test(string dayCountConventionToParse)
     {
-        bool actual = CommonUtils.TryParseDayCountConvention(conventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
+        bool actual = CommonUtils.TryParseDayCountConvention(dayCountConventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
         Assert.IsTrue(actual);
         Assert.AreEqual(new Actual360(), actualDayCountConvention);
         Assert.AreEqual(null, errorMessage);
@@ -29,9 +29,9 @@ public class CommonUtilsTests
     [TestCase("ACT365")]
     [TestCase("Actual365")]
     [TestCase("ACTUAL365")]
-    public void TryParseDayCountConventionForActual365Test(string conventionToParse)
+    public void TryParseDayCountConventionForActual365Test(string dayCountConventionToParse)
     {
-        bool actual = CommonUtils.TryParseDayCountConvention(conventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
+        bool actual = CommonUtils.TryParseDayCountConvention(dayCountConventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
         Assert.IsTrue(actual);
         Assert.AreEqual(new Actual365Fixed(), actualDayCountConvention);
         Assert.AreEqual(null, errorMessage);
@@ -44,9 +44,9 @@ public class CommonUtilsTests
     [TestCase("ActAct")]
     [TestCase("ActualActual")]
     [TestCase("ACTUALACTUAL")]
-    public void TryParseDayCountConventionForActualActualTest(string conventionToParse)
+    public void TryParseDayCountConventionForActualActualTest(string dayCountConventionToParse)
     {
-        bool actual = CommonUtils.TryParseDayCountConvention(conventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
+        bool actual = CommonUtils.TryParseDayCountConvention(dayCountConventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
         Assert.IsTrue(actual);
         Assert.AreEqual(new ActualActual(), actualDayCountConvention);
         Assert.AreEqual(null, errorMessage);
@@ -57,9 +57,9 @@ public class CommonUtilsTests
     [Test]
     [TestCase("Business252")]
     [TestCase("BUSINESS252")]
-    public void TryParseDayCountConventionForBusiness252Test(string conventionToParse)
+    public void TryParseDayCountConventionForBusiness252Test(string dayCountConventionToParse)
     {
-        bool actual = CommonUtils.TryParseDayCountConvention(conventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
+        bool actual = CommonUtils.TryParseDayCountConvention(dayCountConventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
         Assert.IsTrue(actual);
         Assert.AreEqual(new Business252(), actualDayCountConvention);
         Assert.AreEqual(null, errorMessage);
@@ -71,9 +71,9 @@ public class CommonUtilsTests
     [TestCase("30360")]
     [TestCase("Thirty360")]
     [TestCase("THIRTY360")]
-    public void TryParseDayCountConvention30360Test(string conventionToParse)
+    public void TryParseDayCountConvention30360Test(string dayCountConventionToParse)
     {
-        bool actual = CommonUtils.TryParseDayCountConvention(conventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
+        bool actual = CommonUtils.TryParseDayCountConvention(dayCountConventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
         Assert.IsTrue(actual);
         Assert.AreEqual(new Thirty360(Thirty360.Thirty360Convention.BondBasis), actualDayCountConvention);
         Assert.AreEqual(null, errorMessage);

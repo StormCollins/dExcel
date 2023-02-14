@@ -7,8 +7,8 @@ using QLNet;
 public static class CommonUtils
 {
     /// <summary>
-    /// Returns a message stating that the user is currently in the function wizard dialog in Excel rather than pre-computing values.
-    /// Used when pre-computing values is expensive and the user is entering inputs one at a time.
+    /// Returns a message stating that the user is currently in the function wizard dialog in Excel rather than
+    /// pre-computing values. Used when pre-computing values is expensive and the user is entering inputs one at a time.
     /// </summary>
     /// <returns>'In a function wizard.'</returns>
     public static string InFunctionWizard() => ExcelDnaUtil.IsInFunctionWizard() ? "In function wizard." : "";
@@ -26,12 +26,12 @@ public static class CommonUtils
     public static string DExcelErrorMessage(string message) => $"{DExcelErrorPrefix} {message}";
 
     /// <summary>
-    /// Returns an error message that the calendar is invalid. 
+    /// Returns an error message that the calendar is unsupported. 
     /// </summary>
-    /// <param name="invalidCalendar">The invalid calendar in question.</param>
-    /// <returns>An error message that the calendar is invalid.</returns>
-    public static string UnsupportedCalendarMessage(string invalidCalendar) =>
-        DExcelErrorMessage($"Unsupported calendar: '{invalidCalendar}'");
+    /// <param name="unsupportedCalendar">The unsupported calendar in question.</param>
+    /// <returns>An error message that the calendar is unsupported.</returns>
+    public static string UnsupportedCalendarMessage(string unsupportedCalendar) =>
+        DExcelErrorMessage($"Unsupported calendar: '{unsupportedCalendar}'");
 
     /// <summary>
     /// The sign, +1 for 'Call'/'C' or -1 for 'Put'/'P', if it can parse the option type.
@@ -100,19 +100,21 @@ public static class CommonUtils
     }
 
     /// <summary>
-    /// Tries to parse the day count convention of the input string to an out parameter.  
+    /// Tries to parse the day count convention of the input string to the <see cref="dayCountConventionToParse"/> out
+    /// parameter. If it cannot parse the day count convention it returns false and populates the
+    /// <see cref="errorMessage"/> out parameter.
     /// </summary>
-    /// <param name="dayCountConventionParameter">The input string to parse.</param>
+    /// <param name="dayCountConventionToParse">The input string to parse.</param>
     /// <param name="dayCountConvention">The output day count convention.</param>
     /// <param name="errorMessage">The error message (if any).</param>
     /// <returns>True it can parse the string to a day count convention, else false.</returns>
     public static bool TryParseDayCountConvention(
-        string dayCountConventionParameter, 
+        string dayCountConventionToParse, 
         [NotNullWhen(true)]out DayCounter? dayCountConvention,
         [NotNullWhen(false)]out string? errorMessage)
     {
         dayCountConvention =
-            dayCountConventionParameter.ToUpper() switch
+            dayCountConventionToParse.ToUpper() switch
             {
                 "ACT360" or "ACTUAL360" => new Actual360(),
                 "ACT365" or "ACTUAL365" => new Actual365Fixed(),
@@ -124,7 +126,7 @@ public static class CommonUtils
 
         if (dayCountConvention == null)
         {
-            errorMessage = DExcelErrorMessage($"Invalid DayCountConvention: '{dayCountConventionParameter}'");
+            errorMessage = DExcelErrorMessage($"Invalid DayCountConvention: '{dayCountConventionToParse}'");
             return false;
         }
        
