@@ -13,15 +13,43 @@ public class CommonUtilsTests
     [TestCase("Put", true, -1, null)]
     [TestCase("PUT", true, -1, null)]
     [TestCase("Invalid", false, null, "#∂Excel Error: Invalid option type: 'Invalid'")]
-    public void TryParseOptionTypeToSign_Test(string optionType, bool expectedResult, int? expectedSign, string? expectedErrorMessage)
+    public void TryParseOptionTypeToSign_Test(
+        string optionType, 
+        bool expectedResult, 
+        int? expectedSign, 
+        string? expectedErrorMessage)
     {
         bool actualResult = 
             CommonUtils.TryParseOptionTypeToSign(optionType, out int? actualSign, out string? actualErrorMessage);
+        
         Assert.AreEqual(expectedResult, actualResult);
         Assert.AreEqual(expectedSign, actualSign);
         Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
     }
-    
+
+    [Test]
+    [TestCase("Buy", true, 1, null)]
+    [TestCase("BUY", true, 1, null)]
+    [TestCase("Long", true, 1, null)]
+    [TestCase("LONG", true, 1, null)]
+    [TestCase("Sell", true, -1, null)]
+    [TestCase("SELL", true, -1, null)]
+    [TestCase("Short", true, -1, null)]
+    [TestCase("SHORT", true, -1, null)]
+    [TestCase("Invalid", false, null, "#∂Excel Error: Invalid direction: 'Invalid'")]
+    public void TryParseDirectionToSign_Test(
+        string direction, 
+        bool expectedResult, 
+        int? expectedSign, 
+        string? expectedErrorMessage)
+    {
+        bool actualResult = 
+            CommonUtils.TryParseDirectionToSign(direction, out int? actualSign, out string? actualErrorMessage);
+        
+        Assert.AreEqual(expectedResult, actualResult);
+        Assert.AreEqual(expectedSign, actualSign);
+        Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
+    }
     
     // Since we have to test the "out" parameters as well, there doesn't seem to be an elegant, easily readable way to
     // do this, other than just testing each case in turn.
