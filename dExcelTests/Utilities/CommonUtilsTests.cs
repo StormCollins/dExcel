@@ -50,87 +50,69 @@ public class CommonUtilsTests
         Assert.AreEqual(expectedSign, actualSign);
         Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
     }
-    
-    // Since we have to test the "out" parameters as well, there doesn't seem to be an elegant, easily readable way to
-    // do this, other than just testing each case in turn.
-    [Test]
-    [TestCase("Act360")]
-    [TestCase("ACT360")]
-    [TestCase("Actual360")]
-    [TestCase("ACTUAL360")]
-    public void TryParseDayCountConvention_Actual360Test(string dayCountConventionToParse)
+
+    public static IEnumerable<TestCaseData> TryParseDayCountConvention_TestData()
     {
-        bool actual = CommonUtils.TryParseDayCountConvention(dayCountConventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
-        Assert.IsTrue(actual);
-        Assert.AreEqual(new Actual360(), actualDayCountConvention);
-        Assert.AreEqual(null, errorMessage);
+        yield return new TestCaseData("Act360", true, new Actual360(), null);     
+        yield return new TestCaseData("ACT360", true, new Actual360(), null);     
+        yield return new TestCaseData("Actual360", true, new Actual360(), null);     
+        yield return new TestCaseData("ACTUAL360", true, new Actual360(), null);     
+        yield return new TestCaseData("Act365", true, new Actual365Fixed(), null);
+        yield return new TestCaseData("ACT365", true, new Actual365Fixed(), null);
+        yield return new TestCaseData("ActAct", true, new ActualActual(), null);
+        yield return new TestCaseData("ACTACT", true, new ActualActual(), null);
+        yield return new TestCaseData("Business252", true, new Business252(), null);
+        yield return new TestCaseData("BUSINESS252", true, new Business252(), null);
+        yield return new TestCaseData("30360", true, new Thirty360(Thirty360.Thirty360Convention.BondBasis), null);
+        yield return new TestCaseData("Thirty360", true, new Thirty360(Thirty360.Thirty360Convention.BondBasis), null);
+        yield return new TestCaseData("Invalid", false, null, "#∂Excel Error: Invalid DayCountConvention: 'Invalid'");
     }
     
-    // Since we have to test the "out" parameters as well, there doesn't seem to be an elegant, easily readable way to
-    // do this, other than just testing each case in turn.
     [Test]
-    [TestCase("Act365")]
-    [TestCase("ACT365")]
-    [TestCase("Actual365")]
-    [TestCase("ACTUAL365")]
-    public void TryParseDayCountConvention_Actual365Test(string dayCountConventionToParse)
+    [TestCaseSource(nameof(TryParseDayCountConvention_TestData))]
+    public void TryParseDayCountConventionTest(
+        string dayCountConventionToParse, 
+        bool expectedResult, 
+        DayCounter? expectedDayCountConvention, 
+        string? expectedErrorMessage)
     {
-        bool actual = CommonUtils.TryParseDayCountConvention(dayCountConventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
-        Assert.IsTrue(actual);
-        Assert.AreEqual(new Actual365Fixed(), actualDayCountConvention);
-        Assert.AreEqual(null, errorMessage);
+        bool actualResult = 
+            CommonUtils.TryParseDayCountConvention(
+                dayCountConventionToParse: dayCountConventionToParse, 
+                dayCountConvention: out DayCounter? actualDayCountConvention, 
+                errorMessage: out string? actualErrorMessage); 
+        
+        Assert.AreEqual(expectedResult, actualResult);
+        Assert.AreEqual(expectedDayCountConvention, actualDayCountConvention);
+        Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
     }
     
-    // Since we have to test the "out" parameters as well, there doesn't seem to be an elegant, easily readable way to
-    // do this, other than just testing each case in turn.
-    [Test]
-    [TestCase("ActAct")]
-    [TestCase("ActAct")]
-    [TestCase("ActualActual")]
-    [TestCase("ACTUALACTUAL")]
-    public void TryParseDayCountConvention_ActualActualTest(string dayCountConventionToParse)
+    public static IEnumerable<TestCaseData> TryParseInterpolation_TestData()
     {
-        bool actual = CommonUtils.TryParseDayCountConvention(dayCountConventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
-        Assert.IsTrue(actual);
-        Assert.AreEqual(new ActualActual(), actualDayCountConvention);
-        Assert.AreEqual(null, errorMessage);
+        yield return new TestCaseData("BACKWARDFLAT", true, new BackwardFlat(), null);
+        yield return new TestCaseData("CUBIC", true, new Cubic(), null);
+        yield return new TestCaseData("FORWARDFLAT", true, new ForwardFlat(), null);
+        yield return new TestCaseData("LINEAR", true, new Linear(), null);
+        yield return new TestCaseData("LOGCUBIC", true, new LogCubic(), null);
+        yield return new TestCaseData("EXPONENTIAL", true, new LogLinear(), null);
+        yield return new TestCaseData("Invalid", false, null, "#∂Excel Error: Invalid DayCountConvention: 'Invalid'");
     }
     
-    // Since we have to test the "out" parameters as well, there doesn't seem to be an elegant, easily readable way to
-    // do this, other than just testing each case in turn.
     [Test]
-    [TestCase("Business252")]
-    [TestCase("BUSINESS252")]
-    public void TryParseDayCountConvention_Business252Test(string dayCountConventionToParse)
+    [TestCaseSource(nameof(TryParseInterpolation_TestData))]
+    public void TryParseInterpolation_Test(
+        string interpolationType, 
+        bool expectedResult, 
+        IInterpolationFactory? expectedInterpolation, 
+        string? expectedErrorMessage)
     {
-        bool actual = CommonUtils.TryParseDayCountConvention(dayCountConventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
-        Assert.IsTrue(actual);
-        Assert.AreEqual(new Business252(), actualDayCountConvention);
-        Assert.AreEqual(null, errorMessage);
-    }
-    
-    // Since we have to test the "out" parameters as well, there doesn't seem to be an elegant, easily readable way to
-    // do this, other than just testing each case in turn.
-    [Test]
-    [TestCase("30360")]
-    [TestCase("Thirty360")]
-    [TestCase("THIRTY360")]
-    public void TryParseDayCountConvention_30360Test(string dayCountConventionToParse)
-    {
-        bool actual = CommonUtils.TryParseDayCountConvention(dayCountConventionToParse, out DayCounter? actualDayCountConvention, out string? errorMessage); 
-        Assert.IsTrue(actual);
-        Assert.AreEqual(new Thirty360(Thirty360.Thirty360Convention.BondBasis), actualDayCountConvention);
-        Assert.AreEqual(null, errorMessage);
-    }
-    
-    // Since we have to test the "out" parameters as well, there doesn't seem to be an elegant, easily readable way to
-    // do this, other than just testing each case in turn.
-    [Test]
-    public void TryParseDayCountConvention_ErrorMessageTest()
-    {
-        bool actual = CommonUtils.TryParseDayCountConvention("Invalid", out DayCounter? actualDayCountConvention, out string? errorMessage); 
-        Assert.IsFalse(actual);
-        Assert.AreEqual(null, actualDayCountConvention);
-        Assert.AreEqual(CommonUtils.DExcelErrorMessage("Invalid DayCountConvention: 'Invalid'"), errorMessage);
+        bool actualResult = CommonUtils.TryInterpolation(
+            interpolationToParse: interpolationType,
+            interpolation: out IInterpolationFactory? actualInterpolation, 
+            errorMessage: out string? actualErrorMessage);  
+        
+        Assert.AreEqual(expectedResult, actualResult);
+        Assert.AreEqual(expectedInterpolation?.GetType(), actualInterpolation?.GetType());
+        Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
     }
 }

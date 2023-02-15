@@ -133,4 +133,40 @@ public static class CommonUtils
         errorMessage = null;
         return true;
     }
+    
+    /// <summary>
+    /// Tries to parse the day count convention of the input string to the <see cref="dayCountConventionToParse"/> out
+    /// parameter. If it cannot parse the day count convention it returns false and populates the
+    /// <see cref="errorMessage"/> out parameter.
+    /// </summary>
+    /// <param name="dayCountConventionToParse">The input string to parse.</param>
+    /// <param name="dayCountConvention">The output day count convention.</param>
+    /// <param name="errorMessage">The error message (if any).</param>
+    /// <returns>True it can parse the string to a day count convention, else false.</returns>
+    public static bool TryInterpolation(
+        string interpolationToParse, 
+        [NotNullWhen(true)]out IInterpolationFactory? interpolation,
+        [NotNullWhen(false)]out string? errorMessage)
+    {
+        interpolation =
+            interpolationToParse.ToUpper() switch
+            {
+                "BACKWARDFLAT" => new BackwardFlat(),
+                "CUBIC" => new Cubic(),
+                "FORWARDFLAT" => new ForwardFlat(),
+                "LINEAR" => new Linear(),
+                "LOGCUBIC" => new LogCubic(),
+                "EXPONENTIAL" => new LogLinear(),
+                _ => null,
+            };
+
+        if (interpolation == null)
+        {
+            errorMessage = DExcelErrorMessage($"Invalid DayCountConvention: '{interpolationToParse}'");
+            return false;
+        }
+       
+        errorMessage = null;
+        return true;
+    }
 }

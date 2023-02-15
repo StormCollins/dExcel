@@ -84,23 +84,15 @@ public static class CurveUtils
         string? dayCountConventionParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "DayCountConvention", 0);
         if (dayCountConventionParameter == null)
         {
-            return CommonUtils.DExcelErrorMessage("'DayCountConvention' not set in parameters.");
+            return CommonUtils.DExcelErrorMessage("Parameter not set: 'DayCountConvention'");
         }
 
-        DayCounter? dayCountConvention =
-            dayCountConventionParameter.ToUpper() switch
-            {
-                "ACT360" or "ACTUAL360" => new Actual360(),
-                "ACT365" or "ACTUAL365" => new Actual365Fixed(),
-                "ACTACT" or "ACTUALACTUAL" => new ActualActual(),
-                "BUSINESS252" => new Business252(),
-                "30360" or "THIRTY360" => new Thirty360(Thirty360.Thirty360Convention.BondBasis, null),
-                _ => null,
-            };
-
-        if (dayCountConvention == null)
+        if (!CommonUtils.TryParseDayCountConvention(
+                dayCountConventionToParse: dayCountConventionParameter, 
+                dayCountConvention: out DayCounter? dayCountConvention,
+                errorMessage: out string? dayCountConventionErrorMessage))
         {
-            return CommonUtils.DExcelErrorMessage($"Invalid DayCountConvention: '{dayCountConventionParameter}'");
+            return dayCountConventionErrorMessage;
         }
 
         string? interpolationParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Interpolation", 0);
