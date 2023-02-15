@@ -26,6 +26,14 @@ public static class CommonUtils
     public static string DExcelErrorMessage(string message) => $"{DExcelErrorPrefix} {message}";
 
     /// <summary>
+    /// Returns a ∂Excel specific error message if a curve parameter is missing.
+    /// </summary>
+    /// <param name="message">The error message.</param>
+    /// <returns>∂Excel error message with ∂Excel prefix as well as the curve parameter is missing.</returns>
+    public static string CurveParameterMissingErrorMessage(string missingCurveParameter) => 
+        DExcelErrorMessage($"Curve parameter missing: '{missingCurveParameter}'.");
+    
+    /// <summary>
     /// Returns an error message that the calendar is unsupported. 
     /// </summary>
     /// <param name="unsupportedCalendar">The unsupported calendar in question.</param>

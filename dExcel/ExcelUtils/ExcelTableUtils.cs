@@ -103,7 +103,45 @@ public static class ExcelTableUtils
             return column;
         }
     }
-
+    
+    /// <summary>
+    /// Gets a column from an Excel table given the zero-based column index.
+    /// </summary>
+    /// <param name="table">The input range.</param>
+    /// <param name="columnHeader">The zero-based column index.</param>
+    /// <typeparam name="T">The type to cast the column to e.g. "string" or "double".</typeparam>
+    /// <returns>The table column.</returns>
+    public static List<T>? GetColumn<T>(object[,] table, int columnIndex = 0)
+    {
+        if (typeof(T) == typeof(DateTime))
+        {
+            List<T> column =
+                Enumerable
+                    .Range(0, table.GetLength(0))
+                    .Select(i => DateTime.FromOADate(int.Parse(table[i, columnIndex].ToString() ?? string.Empty)))
+                    .Cast<T>()
+                    .ToList();
+            
+            return column;
+        }
+        else
+        {
+            List<T> column =
+                Enumerable
+                    .Range(0, table.GetLength(0))
+                    .Select(i => (T)Convert.ChangeType(table[i, columnIndex], typeof(T)))
+                    .ToList();
+            
+            return column;
+        }
+    }
+    
+    public static int GetRowIndex(object[,] table, string elementName, int columnIndex = 0)
+    {
+        List<string> column = GetColumn<string>(table, columnIndex);
+        return column.IndexOf(elementName);
+    }
+        
     /// <summary>
     /// Gets the list of row headers of a table.
     /// </summary>

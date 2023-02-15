@@ -20,7 +20,7 @@ public class CurveDetails
     /// <summary>
     /// The interpolation style of the curve used to interpolate discount factors.
     /// </summary>
-    public IInterpolationFactory DiscountFactorInterpolation { get; } 
+    public string DiscountFactorInterpolation { get; } 
     
     /// <summary>
     /// The node dates of the discount factors.
@@ -43,7 +43,7 @@ public class CurveDetails
     public CurveDetails(
         object? termStructure,
         DayCounter dayCountConvention,
-        IInterpolationFactory interpolation,
+        string interpolation,
         IEnumerable<Date>? discountFactorDates,
         IEnumerable<double>? discountFactors)
     {

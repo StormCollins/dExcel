@@ -36,6 +36,13 @@ public class ExcelTableTests
         { 44774, 0.998 },
     };
 
+    private readonly object[,] _discountFactorsWithoutHeadersTable =
+    {
+        { 44713, 1.000 },
+        { 44743, 0.999 },
+        { 44774, 0.998 },
+    };
+    
     private readonly object[,] _primeTable =
     {
         { "Prime Numbers", "" },
@@ -44,21 +51,21 @@ public class ExcelTableTests
         { 2, 3 },
         { 3, 5 },
     };
-    
+   
     [Test]
-    public void GetTableLabelTest()
+    public void GetTableLabel_Test()
     {
         Assert.AreEqual("Example Table", ExcelTableUtils.GetTableLabel(_parameterTable));
     }
 
     [Test]
-    public void GetColumnTitlesTest()
+    public void GetColumnHeaders_Test()
     {
         Assert.AreEqual(new List<string> {"PARAMETER", "VALUE"}, ExcelTableUtils.GetColumnHeaders(_parameterTable));
     }
 
     [Test]
-    public void GetColumnDateTest()
+    public void GetColumn_DateTimeTest()
     {
         Assert.AreEqual(
             expected: new List<DateTime> { new(2022, 06, 01), new(2022, 07, 01), new(2022, 08, 01) },
@@ -66,7 +73,7 @@ public class ExcelTableTests
     }
     
     [Test]
-    public void GetColumnDoubleTest()
+    public void GetColumn_DoubleTest()
     {
         Assert.AreEqual(
             expected: new List<double> { 1.000, 0.999, 0.998 },
@@ -74,7 +81,7 @@ public class ExcelTableTests
     }
     
     [Test]
-    public void GetColumnIntTest()
+    public void GetColumn_IntTest()
     {
         Assert.AreEqual(
             expected: new List<double> { 1, 2, 3 },
@@ -82,7 +89,7 @@ public class ExcelTableTests
     }
 
     [Test]
-    public void GetColumnStringTest()
+    public void GetColumn_StringTest()
     {
         Assert.AreEqual(
             expected: new List<string>
@@ -106,7 +113,51 @@ public class ExcelTableTests
     }
 
     [Test]
-    public void GetRowHeadersTest()
+    public void GetColumn_ByColumnIndexTest()
+    {
+        List<string> expected =
+            new()
+            {
+                "Example Table",
+                "Parameter",
+                "CurveUtils Name",
+                "Interpolation",
+                "Instruments",
+                "",
+                "",
+                "Base Date",
+                "ValidBusinessDayConvention",
+                "InvalidBusinessDayConvention",
+                "Bus252DayCountConvention",
+                "Act360DayCountConvention",
+                "Act364DayCountConvention",
+                "Act365DayCountConvention",
+                "ActActDayCountConvention",
+                "InvalidDayCountConvention",
+            };
+        
+        List<string>? actual = ExcelTableUtils.GetColumn<string>(_parameterTable, 0); 
+        
+        Assert.AreEqual(expected, actual);
+    }
+
+    [Test]
+    public void GetColumn_ByColumnIndexAsDateTimeTest()
+    {
+        List<DateTime> expected =
+            new()
+            {
+                DateTime.FromOADate(44713),
+                DateTime.FromOADate(44743),
+                DateTime.FromOADate(44774),
+            };
+        
+        List<DateTime>? actual = ExcelTableUtils.GetColumn<DateTime>(_discountFactorsWithoutHeadersTable, 0); 
+        Assert.AreEqual(expected, actual);
+    }
+    
+    [Test]
+    public void GetRowHeaders_Test()
     {
         Assert.AreEqual(
             expected: new List<string>

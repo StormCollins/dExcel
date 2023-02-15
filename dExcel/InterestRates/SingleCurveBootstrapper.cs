@@ -10,41 +10,66 @@ using Utilities;
 /// </summary>
 public static class SingleCurveBootstrapper
 {
+    /// <summary>
+    /// Bootstraps a single curve i.e., this is not a multi-curve bootstrapper.
+    /// Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR.
+    /// </summary>
+    /// <param name="handle"></param>
+    /// <param name="curveParameters"></param>
+    /// <param name="customRateIndex"></param>
+    /// <param name="instrumentGroups"></param>
+    /// <returns></returns>
     [ExcelFunction(
         Name = "d.Curve_SingleCurveBootstrap",
         Description = "Bootstraps a single curve i.e., this is not a multi-curve bootstrapper.\n" +
                       "Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR",
         Category = "∂Excel: Interest Rates")]
     public static string Bootstrap(
+        [ExcelArgument(
+            Name = "Handle", 
+            Description = 
+                "The 'handle' or name used to refer to the object in memory.\n" + 
+                "Each curve must have a a unique handle.")]
         string handle, 
+        [ExcelArgument(
+            Name = "Curve Parameters", 
+            Description = "The curves parameters: 'BaseDate', 'RateIndexName', 'RateIndexTenor', 'Interpolation'.")]
         object[,] curveParameters, 
+        [ExcelArgument(
+            Name = "(Optional)Custom Rate Index",
+            Description = 
+                "Only populate this parameter if you have not supplied a 'RateIndexName' in the curve parameters.")]
         object[,]? customRateIndex = null, 
+        [ExcelArgument(
+            Name = "Instrument Groups",
+            Description = "The instrument groups used to bootstrap the curve e.g., 'Deposits', 'FRAs', 'Swaps'.")]
         params object[] instrumentGroups)
     {
-        DateTime baseDate = ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", 1);
+        int columnHeaderIndex = ExcelTableUtils.GetRowIndex(curveParameters, "Parameter");
+        DateTime baseDate = ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", columnHeaderIndex);
         if (baseDate == default)
         {
-            return CommonUtils.DExcelErrorMessage($"Curve parameter missing: '{nameof(baseDate).ToUpper()}'.");
+            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseDate).ToUpper());
         }
         
         Settings.setEvaluationDate(baseDate);
 
-        string? rateIndexName = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexName", 0);
+        string? rateIndexName = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexName", columnHeaderIndex);
         if (rateIndexName is null && customRateIndex is null)
         {
-            return CommonUtils.DExcelErrorMessage("Rate index missing from curve parameters (and no custom rate index provided).");
+            return CommonUtils.CurveParameterMissingErrorMessage(nameof(rateIndexName).ToUpper());
         }
 
-        string? indexTenor = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexTenor", 0);
-        if (indexTenor is null && customRateIndex is null && rateIndexName != "FEDFUND")
+        string? rateIndexTenor = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexTenor", columnHeaderIndex);
+        if (rateIndexTenor is null && customRateIndex is null && rateIndexName != "FEDFUND")
         {
-            return CommonUtils.DExcelErrorMessage("Please provide a rate index tenor in the curve parameters.");
+            return CommonUtils.CurveParameterMissingErrorMessage(nameof(rateIndexTenor).ToUpper());
         }
 
-        string? interpolationParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Interpolation", 0);
-        if (interpolationParameter == null)
+        string? interpolation = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Interpolation", columnHeaderIndex);
+        if (interpolation == null)
         {
-            return CommonUtils.DExcelErrorMessage("'Interpolation' not set in parameters.");
+            return CommonUtils.CurveParameterMissingErrorMessage(nameof(rateIndexTenor).ToUpper());
         }
 
         IborIndex? rateIndex = null;
@@ -53,10 +78,10 @@ public static class SingleCurveBootstrapper
             rateIndex =
                 rateIndexName switch
                 {
-                    "EURIBOR" => new Euribor(new Period(indexTenor)),
+                    "EURIBOR" => new Euribor(new Period(rateIndexTenor)),
                     "FEDFUND" => new FedFunds(),
-                    "JIBAR" => new Jibar(new Period(indexTenor)),
-                    "USD-LIBOR" => new USDLibor(new Period(indexTenor)),
+                    "JIBAR" => new Jibar(new Period(rateIndexTenor)),
+                    "USD-LIBOR" => new USDLibor(new Period(rateIndexTenor)),
                     _ => null,
                 };
         }
@@ -82,7 +107,7 @@ public static class SingleCurveBootstrapper
 
         if (rateIndex is null)
         {
-            return CommonUtils.DExcelErrorMessage("Unsupported rate index: {rateIndexName}");
+            return CommonUtils.DExcelErrorMessage($"Unsupported rate index: {rateIndexName}");
         }
 
         List<RateHelper> rateHelpers = new();
@@ -201,33 +226,77 @@ public static class SingleCurveBootstrapper
             }
         }
 
-        if (!CommonUtils.TryParseInterpolation(
-                interpolationMethodToParse: interpolationParameter,
-                interpolation: out IInterpolationFactory? interpolation,
-                errorMessage: out string? interpolationErrorMessage))
+        YieldTermStructure termStructure;
+        if (string.Compare(interpolation, "BackwardFlat", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
-            return interpolationErrorMessage;
+            termStructure =
+                new PiecewiseYieldCurve<Discount, BackwardFlat>(
+                   referenceDate: new Date(baseDate),
+                   instruments: rateHelpers,
+                   dayCounter: rateIndex.dayCounter(),
+                   jumps: new List<Handle<Quote>>(),
+                   jumpDates: new List<Date>(),
+                   accuracy: 1.0e-20);
         }
-        
-        Type interpolationType = typeof(PiecewiseYieldCurve).MakeGenericType(typeof(Discount), interpolation.GetType());
-        object? termStructure = 
-            Activator.CreateInstance(
-                interpolationType, 
-                new Date(baseDate), 
-                rateHelpers, 
-                rateIndex.dayCounter(), 
-                new List<Handle<Quote>>(), 
-                new List<Date>(), 
-                1.0e-20);
-        
-        // YieldTermStructure termStructure =
-        //     new PiecewiseYieldCurve<Discount, LogLinear>(
-        //        referenceDate: new Date(baseDate),
-        //        instruments: rateHelpers,
-        //        dayCounter: rateIndex.dayCounter(),
-        //        jumps: new List<Handle<Quote>>(),
-        //        jumpDates: new List<Date>(),
-        //        accuracy: 1.0e-20);
+        else if (string.Compare(interpolation, "Cubic", StringComparison.InvariantCultureIgnoreCase) == 0)
+        {
+            termStructure =
+                new PiecewiseYieldCurve<Discount, Cubic>(
+                   referenceDate: new Date(baseDate),
+                   instruments: rateHelpers,
+                   dayCounter: rateIndex.dayCounter(),
+                   jumps: new List<Handle<Quote>>(),
+                   jumpDates: new List<Date>(),
+                   accuracy: 1.0e-20);
+        }
+        else if (string.Compare(interpolation, "Exponential", StringComparison.InvariantCultureIgnoreCase) == 0)
+        {
+            termStructure =
+                new PiecewiseYieldCurve<Discount, LogLinear>(
+                   referenceDate: new Date(baseDate),
+                   instruments: rateHelpers,
+                   dayCounter: rateIndex.dayCounter(),
+                   jumps: new List<Handle<Quote>>(),
+                   jumpDates: new List<Date>(),
+                   accuracy: 1.0e-20);
+        }
+        else if (string.Compare(interpolation, "ForwardFlat", StringComparison.InvariantCultureIgnoreCase) == 0)
+        {
+            termStructure =
+                new PiecewiseYieldCurve<Discount, ForwardFlat>(
+                   referenceDate: new Date(baseDate),
+                   instruments: rateHelpers,
+                   dayCounter: rateIndex.dayCounter(),
+                   jumps: new List<Handle<Quote>>(),
+                   jumpDates: new List<Date>(),
+                   accuracy: 1.0e-20);
+        }
+        else if (string.Compare(interpolation, "Linear", StringComparison.InvariantCultureIgnoreCase) == 0)
+        {
+            termStructure =
+                new PiecewiseYieldCurve<Discount, Linear>(
+                   referenceDate: new Date(baseDate),
+                   instruments: rateHelpers,
+                   dayCounter: rateIndex.dayCounter(),
+                   jumps: new List<Handle<Quote>>(),
+                   jumpDates: new List<Date>(),
+                   accuracy: 1.0e-20);
+        }
+        else if (string.Compare(interpolation, "LogCubic", StringComparison.InvariantCultureIgnoreCase) == 0)
+        {
+            termStructure =
+                new PiecewiseYieldCurve<Discount, LogCubic>(
+                   referenceDate: new Date(baseDate),
+                   instruments: rateHelpers,
+                   dayCounter: rateIndex.dayCounter(),
+                   jumps: new List<Handle<Quote>>(),
+                   jumpDates: new List<Date>(),
+                   accuracy: 1.0e-20);
+        }
+        else
+        {
+            return CommonUtils.DExcelErrorMessage($"Unknown interpolation method: '{interpolation}'");  
+        }
          
         CurveDetails curveDetails = new(termStructure, rateIndex.dayCounter(), interpolation, new List<Date>(), new List<double>());
         return DataObjectController.Add(handle, curveDetails);

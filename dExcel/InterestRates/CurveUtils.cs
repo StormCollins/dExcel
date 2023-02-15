@@ -34,7 +34,7 @@ public static class CurveUtils
     /// </summary>
     /// <param name="handle">The handle for the relevant curve object.</param>
     /// <returns>Returns the interpolation object e.g. LogLinear.</returns>   
-    private static IInterpolationFactory GetInterpolation(string handle)
+    private static string GetInterpolation(string handle)
         => ((CurveDetails)DataObjectController.GetDataObject(handle)).DiscountFactorInterpolation;
 
     /// <summary>
@@ -113,7 +113,7 @@ public static class CurveUtils
         IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
         Type interpolationType = typeof(InterpolatedDiscountCurve<>).MakeGenericType(interpolation.GetType());
         object? termStructure = Activator.CreateInstance(interpolationType, dates, discountFactors, dayCountConvention, interpolation);
-        CurveDetails curveDetails = new(termStructure, dayCountConvention, interpolation, dates, discountFactors);
+        CurveDetails curveDetails = new(termStructure, dayCountConvention, interpolationParameter, dates, discountFactors);
         return DataObjectController.Add(handle, curveDetails);
     }
 
