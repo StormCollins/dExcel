@@ -135,21 +135,19 @@ public static class CommonUtils
     }
     
     /// <summary>
-    /// Tries to parse the day count convention of the input string to the <see cref="dayCountConventionToParse"/> out
-    /// parameter. If it cannot parse the day count convention it returns false and populates the
-    /// <see cref="errorMessage"/> out parameter.
+    /// Tries to parse the interpolation method of the input string to the <see cref="interpolation"/> out parameter.
+    /// If it cannot parse the interpolation method it returns false and populates the <see cref="errorMessage"/> out
+    /// parameter.
     /// </summary>
-    /// <param name="dayCountConventionToParse">The input string to parse.</param>
-    /// <param name="dayCountConvention">The output day count convention.</param>
     /// <param name="errorMessage">The error message (if any).</param>
-    /// <returns>True it can parse the string to a day count convention, else false.</returns>
-    public static bool TryInterpolation(
-        string interpolationToParse, 
+    /// <returns>True if it can parse the string to an interpolation object, else false.</returns>
+    public static bool TryParseInterpolation(
+        string interpolationMethodToParse, 
         [NotNullWhen(true)]out IInterpolationFactory? interpolation,
         [NotNullWhen(false)]out string? errorMessage)
     {
         interpolation =
-            interpolationToParse.ToUpper() switch
+            interpolationMethodToParse.ToUpper() switch
             {
                 "BACKWARDFLAT" => new BackwardFlat(),
                 "CUBIC" => new Cubic(),
@@ -162,11 +160,45 @@ public static class CommonUtils
 
         if (interpolation == null)
         {
-            errorMessage = DExcelErrorMessage($"Invalid DayCountConvention: '{interpolationToParse}'");
+            errorMessage = DExcelErrorMessage($"Invalid interpolation method: '{interpolationMethodToParse}'");
             return false;
         }
        
         errorMessage = null;
         return true;
     }
+    
+     /// <summary>
+     /// Tries to parse the compounding convention of the input string to the <see cref="interpolation"/> out parameter.
+     /// If it cannot parse the compounding convention it returns false and populates the <see cref="errorMessage"/> out
+     /// parameter.
+     /// </summary>
+     /// <param name="errorMessage">The error message (if any).</param>
+     /// <returns>True if it can parse the string to a compounding convention, else false.</returns>
+     public static bool TryParseCompoundingConvention(
+         string compoundingConventionToParse, 
+         [NotNullWhen(true)]out (Compounding compoudng, Frequency frequency)? compoundingConvention,
+         [NotNullWhen(false)]out string? errorMessage)
+     {
+            compoundingConvention = 
+                compoundingConventionToParse.ToUpper() switch
+                {
+                    "SIMPLE" => (Compounding.Simple, Frequency.Once),
+                    "NACM" => (Compounding.Compounded, Frequency.Monthly),
+                    "NACQ" => (Compounding.Compounded, Frequency.Quarterly),
+                    "NACS" => (Compounding.Compounded, Frequency.Semiannual),
+                    "NACA" => (Compounding.Compounded, Frequency.Annual),
+                    "NACC" => (Compounding.Continuous, Frequency.NoFrequency),
+                    _ => null,
+                };
+ 
+         if (compoundingConvention == null)
+         {
+             errorMessage = DExcelErrorMessage($"Invalid compounding convention: '{compoundingConventionToParse}'");
+             return false;
+         }
+        
+         errorMessage = null;
+         return true;
+     }
 }

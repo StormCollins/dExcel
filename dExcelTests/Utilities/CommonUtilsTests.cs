@@ -95,7 +95,7 @@ public class CommonUtilsTests
         yield return new TestCaseData("LINEAR", true, new Linear(), null);
         yield return new TestCaseData("LOGCUBIC", true, new LogCubic(), null);
         yield return new TestCaseData("EXPONENTIAL", true, new LogLinear(), null);
-        yield return new TestCaseData("Invalid", false, null, "#∂Excel Error: Invalid DayCountConvention: 'Invalid'");
+        yield return new TestCaseData("Invalid", false, null, "#∂Excel Error: Invalid interpolation method: 'Invalid'");
     }
     
     [Test]
@@ -106,13 +106,42 @@ public class CommonUtilsTests
         IInterpolationFactory? expectedInterpolation, 
         string? expectedErrorMessage)
     {
-        bool actualResult = CommonUtils.TryInterpolation(
-            interpolationToParse: interpolationType,
+        bool actualResult = CommonUtils.TryParseInterpolation(
+            interpolationMethodToParse: interpolationType,
             interpolation: out IInterpolationFactory? actualInterpolation, 
             errorMessage: out string? actualErrorMessage);  
         
         Assert.AreEqual(expectedResult, actualResult);
         Assert.AreEqual(expectedInterpolation?.GetType(), actualInterpolation?.GetType());
+        Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
+    }
+    
+    public static IEnumerable<TestCaseData> TryParseCompoundingConvention_TestData()
+    {
+        yield return new TestCaseData("SIMPLE", true, (Compounding.Simple, Frequency.Once), null);
+        yield return new TestCaseData("NACM", true, (Compounding.Compounded, Frequency.Monthly), null);
+        yield return new TestCaseData("NACQ", true, (Compounding.Compounded, Frequency.Quarterly), null);
+        yield return new TestCaseData("NACS", true, (Compounding.Compounded, Frequency.Semiannual), null);
+        yield return new TestCaseData("NACA", true, (Compounding.Compounded, Frequency.Annual), null);
+        yield return new TestCaseData("NACC", true, (Compounding.Continuous, Frequency.NoFrequency), null);
+        yield return new TestCaseData("Invalid", false, null, "#∂Excel Error: Invalid compounding convention: 'Invalid'");
+    }
+    
+    [Test]
+    [TestCaseSource(nameof(TryParseCompoundingConvention_TestData))]
+    public void TryParseCompoundingConvention_Test(
+        string compoundingConvention, 
+        bool expectedResult, 
+        (Compounding, Frequency)? expectedCompoundingConvention, 
+        string? expectedErrorMessage)
+    {
+        bool actualResult = CommonUtils.TryParseCompoundingConvention(
+            compoundingConventionToParse: compoundingConvention,
+            compoundingConvention: out (Compounding, Frequency)? actualCompoundingConvention, 
+            errorMessage: out string? actualErrorMessage);  
+        
+        Assert.AreEqual(expectedResult, actualResult);
+        Assert.AreEqual(expectedCompoundingConvention?.GetType(), actualCompoundingConvention?.GetType());
         Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
     }
 }

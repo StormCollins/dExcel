@@ -73,11 +73,11 @@ public static class CurveUtils
                 $"({datesRange.GetLength(0)} ≠ {discountFactorsRange.GetLength(0)}).");
         }
 
-        List<Date>? dates = new();
-        List<double>? discountFactors = new();
+        List<Date> dates = new();
+        List<double> discountFactors = new();
         for (int i = 0; i < datesRange.GetLength(0); i++)
         {
-            dates.Add((Date)DateTime.FromOADate((double)datesRange[i, 0]));
+            dates.Add(DateTime.FromOADate((double)datesRange[i, 0]));
             discountFactors.Add((double)discountFactorsRange[i, 0]);
         }
 
@@ -101,21 +101,12 @@ public static class CurveUtils
             return CommonUtils.DExcelErrorMessage("'Interpolation' not set in parameters.");
         }
 
-        IInterpolationFactory? interpolation =
-            interpolationParameter.ToUpper() switch
-            {
-                "BACKWARDFLAT" => new BackwardFlat(),
-                "CUBIC" => new Cubic(),
-                "FORWARDFLAT" => new ForwardFlat(),
-                "LINEAR" => new Linear(),
-                "LOGCUBIC" => new LogCubic(),
-                "EXPONENTIAL" => new LogLinear(),
-                _ => null,
-            };
-
-        if (interpolation == null)
+        if (!CommonUtils.TryParseInterpolation(
+                interpolationMethodToParse: interpolationParameter,
+                interpolation: out IInterpolationFactory? interpolation,
+                errorMessage: out string? interpolationErrorMessage))
         {
-            return CommonUtils.DExcelErrorMessage($"Invalid 'interpolation' method: {interpolationParameter}");
+            return interpolationErrorMessage;
         }
 
         string? calendarsParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Calendars");
