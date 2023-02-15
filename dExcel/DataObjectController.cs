@@ -12,7 +12,7 @@ public static class DataObjectController
 
     public static string Add(string handle, object dataObject)
     {
-        char[] bannedCharacters = { '@', ':' };
+        char[] bannedCharacters = { '@', ':', ',', ';', '\\', '/' };
         if (bannedCharacters.Any(handle.Contains))
         {
             return CommonUtils.DExcelErrorMessage($"Handle may not contain following: {string.Join(", ", bannedCharacters)}");

@@ -1,8 +1,6 @@
 ﻿namespace dExcelTests.InterestRates;
 
-using dExcel;
 using dExcel.InterestRates;
-using dExcel.Utilities;
 using NUnit.Framework;
 using QLNet;
 
@@ -75,7 +73,7 @@ public class SingleCurveBootstrapperTest
                     customRateIndex: null,
                     instrumentGroups: instrumentGroups);
             
-            const string expected = $"{CommonUtils.DExcelErrorPrefix} Base date missing from curve parameters.";
+            const string expected = "#∂Excel Error: Curve parameter missing: 'BASEDATE'.";
             Assert.AreEqual(expected, handle);
         }
         
@@ -109,10 +107,8 @@ public class SingleCurveBootstrapperTest
                     curveParameters, 
                     customRateIndex: null,
                     instruments);
-            
-            YieldTermStructure curve = 
-                (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["CurveUtils.Object"];
-            
+
+            YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
             const double tolerance = 0.01; 
             
             Assert.AreEqual(1.0, curve.discount(baseDate));
@@ -168,7 +164,7 @@ public class SingleCurveBootstrapperTest
             object[] instruments = {depositInstruments, fraInstruments};
             Actual365Fixed dayCounter = new();
             string handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
-            YieldTermStructure curve = (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["CurveUtils.Object"];
+            YieldTermStructure curve = CurveUtils.GetCurveObject(handle);
             const double tolerance = 0.01; 
             
             Assert.AreEqual(1.0, curve.discount(baseDate));
@@ -238,8 +234,7 @@ public class SingleCurveBootstrapperTest
             Actual365Fixed dayCounter = new();
             string handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
             
-            YieldTermStructure curve = 
-                (YieldTermStructure)((Dictionary<string, object>)DataObjectController.GetDataObject(handle))["CurveUtils.Object"];
+            YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
             const double tolerance = 0.01; 
             
             Assert.AreEqual(1.0, curve.discount(baseDate));

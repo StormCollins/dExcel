@@ -1,9 +1,9 @@
 ﻿namespace dExcel.InterestRates;
 
 using ExcelUtils;
-using Utilities;
 using ExcelDna.Integration;
 using QLNet;
+using Utilities;
 
 /// <summary>
 /// A class for bootstrapping single curves e.g., the ZAR swap curve or USD OIS swap curve.
@@ -21,7 +21,7 @@ public static class SingleCurveBootstrapper
         object[,]? customRateIndex = null, 
         params object[] instrumentGroups)
     {
-        DateTime baseDate = ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", 0);
+        DateTime baseDate = ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", 1);
         if (baseDate == default)
         {
             return CommonUtils.DExcelErrorMessage($"Curve parameter missing: '{nameof(baseDate).ToUpper()}'.");
@@ -90,8 +90,6 @@ public static class SingleCurveBootstrapper
         foreach (object instrumentGroup in instrumentGroups)
         {
             object[,] instruments = (object[,])instrumentGroup;
-
-            // TODO: Make this case insensitive.
             string? instrumentType = ExcelTableUtils.GetTableLabel(instruments);
             List<string>? tenors = ExcelTableUtils.GetColumn<string>(instruments, "Tenors");
             List<string>? fraTenors = ExcelTableUtils.GetColumn<string>(instruments, "FraTenors");
@@ -203,26 +201,33 @@ public static class SingleCurveBootstrapper
             }
         }
 
-        YieldTermStructure termStructure =
-            new PiecewiseYieldCurve<Discount, LogLinear>(
-               referenceDate: new Date(baseDate),
-               instruments: rateHelpers,
-               dayCounter: rateIndex.dayCounter(),
-               jumps: new List<Handle<Quote>>(),
-               jumpDates: new List<Date>(),
-               accuracy: 1.0e-20);
-
-        IInterpolationFactory? interpolation =
-           interpolationParameter.ToUpper() switch
-           {
-               "BACKWARDFLAT" => new BackwardFlat(),
-               "CUBIC" => new Cubic(),
-               "FORWARDFLAT" => new ForwardFlat(),
-               "LINEAR" => new Linear(),
-               "LOGCUBIC" => new LogCubic(),
-               "EXPONENTIAL" => new LogLinear(),
-               _ => null,
-           };
+        if (!CommonUtils.TryParseInterpolation(
+                interpolationMethodToParse: interpolationParameter,
+                interpolation: out IInterpolationFactory? interpolation,
+                errorMessage: out string? interpolationErrorMessage))
+        {
+            return interpolationErrorMessage;
+        }
+        
+        Type interpolationType = typeof(PiecewiseYieldCurve).MakeGenericType(typeof(Discount), interpolation.GetType());
+        object? termStructure = 
+            Activator.CreateInstance(
+                interpolationType, 
+                new Date(baseDate), 
+                rateHelpers, 
+                rateIndex.dayCounter(), 
+                new List<Handle<Quote>>(), 
+                new List<Date>(), 
+                1.0e-20);
+        
+        // YieldTermStructure termStructure =
+        //     new PiecewiseYieldCurve<Discount, LogLinear>(
+        //        referenceDate: new Date(baseDate),
+        //        instruments: rateHelpers,
+        //        dayCounter: rateIndex.dayCounter(),
+        //        jumps: new List<Handle<Quote>>(),
+        //        jumpDates: new List<Date>(),
+        //        accuracy: 1.0e-20);
          
         CurveDetails curveDetails = new(termStructure, rateIndex.dayCounter(), interpolation, new List<Date>(), new List<double>());
         return DataObjectController.Add(handle, curveDetails);
