@@ -132,7 +132,7 @@ public static class CurveUtils
         Name = "d.Curve_GetDiscountFactors",
         Description = "Gets the discount factor(s) from a curve object for a given set of date(s).",
         Category = "∂Excel: Interest Rates")]
-    public static object[,] GetDiscountFactors(
+    public static object GetDiscountFactors(
         [ExcelArgument(
             Name = "Handle",
             Description = "The 'handle' or name used to store & retrieve the curve.")]
@@ -156,7 +156,7 @@ public static class CurveUtils
         Name = "d.Curve_GetForwardRates",
         Description = "Gets forward rate from the curve for the given start and end date as well as the compounding convention.",
         Category = "∂Excel: Interest Rates")]
-    public static object GetForwardRate(
+    public static object GetForwardRates(
         string handle, 
         object[,] startDatesRange, 
         object[,] endDatesRange, 

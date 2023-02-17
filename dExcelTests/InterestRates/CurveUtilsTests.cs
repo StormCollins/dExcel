@@ -73,7 +73,7 @@ public class CurveUtilsTests
     public void ZarGetDiscountFactorsTest()
     {
         object[] interpolationDates = { new DateTime(2022, 01, 15).ToOADate() };
-        object[,] dfs = CurveUtils.GetDiscountFactors(Handle, interpolationDates);
+        object[,] dfs = (object[,])CurveUtils.GetDiscountFactors(Handle, interpolationDates);
 
         double expectedDf =
             Math.Exp((Math.Log(0.99) - Math.Log(1.00))

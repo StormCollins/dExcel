@@ -1,6 +1,7 @@
 ﻿namespace dExcelTests.InterestRates;
 
 using dExcel.Dates;
+using dExcel.ExcelUtils;
 using dExcel.InterestRates;
 using NUnit.Framework;
 using QLNet;
@@ -283,34 +284,63 @@ public class SingleCurveBootstrapperTest
         Actual365Fixed dayCounter = new();
         string handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
         YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
-        const double tolerance = 0.0001; 
+        const double tolerance = 0.0001;
+        List<string> tenors = new() {"0m", "1m", "3m", "6m", "9m", "12m", "15m", "18m", "21m", "24m"};
+
+        Dictionary<string, DateTime> dates = tenors.ToDictionary(t => t, t => (DateTime)DateUtils.AddTenorToDate(baseDate, t, "ZAR", "ModFol"));
         
-        DateTime date1M = (DateTime) DateUtils.AddTenorToDate(baseDate, "1m", "ZAR", "ModFol");
-        double discountFactor1M = 1 / (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate, date1M));
-        Assert.AreEqual(discountFactor1M, curve.discount(date1M), tolerance);
+        double discountFactor1M = 1 / (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate, dates["1m"]));
+        Assert.AreEqual(discountFactor1M, curve.discount(dates["1m"]), tolerance);
         
-        DateTime date3M = (DateTime) DateUtils.AddTenorToDate(baseDate, "3m", "ZAR", "ModFol");
-        double discountFactor3M = 1 / (1 + depositRates["3m"] * dayCounter.yearFraction(baseDate, date3M));
-        Assert.AreEqual(discountFactor3M, curve.discount(date3M), tolerance);
+        double discountFactor3M = 1 / (1 + depositRates["3m"] * dayCounter.yearFraction(baseDate, dates["3m"]));
+        Assert.AreEqual(discountFactor3M, curve.discount(dates["3m"]), tolerance);
         
-        DateTime date6M = (DateTime) DateUtils.AddTenorToDate(baseDate, "6m", "ZAR", "ModFol");
-        double discountFactor6M = 1 / (1 + depositRates["6m"] * dayCounter.yearFraction(baseDate, date6M));
-        Assert.AreEqual(discountFactor6M, curve.discount(date6M), tolerance); 
+        double discountFactor6M = 1 / (1 + depositRates["6m"] * dayCounter.yearFraction(baseDate, dates["6m"]));
+        Assert.AreEqual(discountFactor6M, curve.discount(dates["6m"]), tolerance); 
        
-        DateTime date9M = (DateTime) DateUtils.AddTenorToDate(baseDate, "9m", "ZAR", "ModFol");
         double discountFactor9M = 
-            discountFactor6M * 1 / (1 + fraRates["6x9"] * dayCounter.yearFraction(date6M, date9M));
+            discountFactor6M * 1 / (1 + fraRates["6x9"] * dayCounter.yearFraction(dates["6m"], dates["9m"]));
         
-        Assert.AreEqual(discountFactor9M, curve.discount(date9M), tolerance); 
+        Assert.AreEqual(discountFactor9M, curve.discount(dates["9m"]), tolerance); 
         
-        DateTime date12M = (DateTime) DateUtils.AddTenorToDate(baseDate, "12m", "ZAR", "ModFol");
         double discountFactor12M = 
-            discountFactor9M * 1 / (1 + fraRates["9x12"] * dayCounter.yearFraction(date9M, date12M));
+            discountFactor9M * 1 / (1 + fraRates["9x12"] * dayCounter.yearFraction(dates["9m"], dates["12m"]));
+
+        Assert.AreEqual(discountFactor12M, curve.discount(dates["12m"]), tolerance);
+
+        List<DateTime> startDatesRange = dates.Values.ToList().GetRange(0, dates.Count - 1);
+        List<DateTime> endDatesRange = dates.Values.ToList().GetRange(1, dates.Count - 1);
         
-        Assert.AreEqual(discountFactor12M, curve.discount(date12M), tolerance); 
+        List<double> forwardRates = 
+            ExcelArrayUtils.ConvertExcelRangeToList<double>(
+                (object[,])CurveUtils.GetForwardRates(
+                    handle: handle, 
+                    startDatesRange: ExcelArrayUtils.ConvertListToExcelRange(startDatesRange, 0), 
+                    endDatesRange: ExcelArrayUtils.ConvertListToExcelRange(endDatesRange, 0), 
+                    compoundingConventionParameter: "Simple"));
+
+       List<double> discountFactors =
+            ExcelArrayUtils.ConvertExcelRangeToList<double>(
+                (object[,])CurveUtils.GetDiscountFactors(handle, endDatesRange.Cast<object>().ToArray()));
+       
+       List<double> dayCountFractions = 
+           endDatesRange.Zip(startDatesRange, (s, e) => dayCounter.yearFraction(s, e)).ToList();
+       
+       double numerator =
+           forwardRates.Zip(
+                dayCountFractions.Zip(
+                    discountFactors, (t, df) => t * df), 
+            (f, tDf) => f * tDf).Sum(); 
+       
+       double denominator =
+                dayCountFractions.Zip(
+                    discountFactors, (t, df) => t * df).Sum(); 
+       
+       double parSwapRate2Y = numerator / denominator;
+    
+       Assert.AreEqual(swapRates["2y"], parSwapRate2Y, tolerance);
     }
-
-
+    
     [Test]
     public void Bootstrap_BackwardFlatInterpolation_Test()
     {
