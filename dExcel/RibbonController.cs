@@ -549,7 +549,6 @@ public class RibbonController : ExcelRibbon
 
             foreach (string xlOpenWorkbook in xlOpenWorkbooks)
             {
-
                 if (xlOpenWorkbook != xlActiveWorkbook.Name)
                 {
                     Excel.Range workbookFind = ExcelFind(xlOpenWorkbook);
