@@ -308,8 +308,11 @@ public class SingleCurveBootstrapperTest
 
         Assert.AreEqual(discountFactor12M, curve.discount(dates["12m"]), tolerance);
 
-        List<DateTime> startDatesRange = dates.Values.ToList().GetRange(0, dates.Count - 1);
-        List<DateTime> endDatesRange = dates.Values.ToList().GetRange(1, dates.Count - 1);
+        List<double> startDatesRange = 
+            dates.Values.ToList().GetRange(0, dates.Count - 1).Select(d => d.ToOADate()).ToList();
+        
+        List<double> endDatesRange = 
+            dates.Values.ToList().GetRange(1, dates.Count - 1).Select(d => d.ToOADate()).ToList();
         
         List<double> forwardRates = 
             ExcelArrayUtils.ConvertExcelRangeToList<double>(
@@ -324,7 +327,11 @@ public class SingleCurveBootstrapperTest
                 (object[,])CurveUtils.GetDiscountFactors(handle, endDatesRange.Cast<object>().ToArray()));
        
        List<double> dayCountFractions = 
-           endDatesRange.Zip(startDatesRange, (s, e) => dayCounter.yearFraction(s, e)).ToList();
+           endDatesRange
+               .Zip(
+                   startDatesRange, 
+                   (s, e) => dayCounter.yearFraction(DateTime.FromOADate(s), DateTime.FromOADate(e)))
+               .ToList();
        
        double numerator =
            forwardRates.Zip(
