@@ -235,7 +235,7 @@
     <PackageReference Include="ExcelDna.AddIn" Version="1.6.1-beta3" />
     <PackageReference Include="ExcelDna.Integration" Version="1.6.1-beta3" />
     <PackageReference Include="ExcelDna.IntelliSense" Version="1.6.1-beta3" />
-    <PackageReference Include="ExcelDna.Interop" Version="15.0.0" />
+    <PackageReference Include="ExcelDna.Interop" Version="15.0.0-preview3" />
     <PackageReference Include="ExcelDna.Registration" Version="1.6.1-beta3" />
     <PackageReference Include="fuzzysharp" Version="2.0.2" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.701" />
