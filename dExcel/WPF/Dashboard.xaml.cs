@@ -5,10 +5,12 @@ using System.IO;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ExcelDna.Integration;
-
+using Utilities;
 
 /// <summary>
 /// Interaction logic for Dashboard.xaml
@@ -48,7 +50,7 @@ public partial class Dashboard : Window
         
         Closing += Dashboard_Closing;
 
-        if (NetworkUtils.GetConnectionStatus())
+        if (NetworkUtils.GetVpnConnectionStatus())
         {
             _connectionStatus = true;
             ConnectionStatus.Source = new BitmapImage(new Uri(xllPath + "/resources/icons/connection-status-green.ico"));
@@ -132,10 +134,10 @@ public partial class Dashboard : Window
     private void ConnectionStatusChangedCallback(object sender, EventArgs e)
     {
         var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-        if (NetworkUtils.GetConnectionStatus() != _connectionStatus)
+        if (NetworkUtils.GetVpnConnectionStatus() != _connectionStatus)
         {
             _connectionStatus = !_connectionStatus;
-            if (NetworkUtils.GetConnectionStatus())
+            if (NetworkUtils.GetVpnConnectionStatus())
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -210,5 +212,23 @@ public partial class Dashboard : Window
     {
         this.DashBoardAction = "OpenTestingWorkbook";
         this.Close();
+    }
+
+    private void RunTests_Click(object sender, RoutedEventArgs e)
+    {
+        
+    }
+
+    /// <summary>
+    /// Processes keyboard events on the main form.
+    /// </summary>
+    /// <param name="sender">Sender.</param>
+    /// <param name="e">Key event args.</param>
+    private void Dashboard_OnKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            this.Close();
+        }
     }
 }

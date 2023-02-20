@@ -3,9 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using Utilities;
 
 public static class DataObjectController
 {
@@ -13,10 +12,10 @@ public static class DataObjectController
 
     public static string Add(string handle, object dataObject)
     {
-        char[] bannedCharacters = new char[] { '@', ':' };
+        char[] bannedCharacters = { '@', ':', ',', ';', '\\', '/' };
         if (bannedCharacters.Any(handle.Contains))
         {
-            return $"{CommonUtils.DExcelErrorPrefix} Handle may not contain following: {string.Join(", ", bannedCharacters)}";
+            return CommonUtils.DExcelErrorMessage($"Handle may not contain following: {string.Join(", ", bannedCharacters)}");
         }
         if (!DataObjects.ContainsKey(handle))
         {
@@ -29,7 +28,7 @@ public static class DataObjectController
         return $"@@{handle}::{DateTime.Now:HH:mm:ss}";
     }
 
-    public static string CleanHandle(string dirtyTag)
+    private static string CleanHandle(string dirtyTag)
     {
         return Regex.Match(dirtyTag, @"(?<=@@)[^:]+").Value;
     }

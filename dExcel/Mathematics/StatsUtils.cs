@@ -1,19 +1,27 @@
-﻿namespace dExcel;
+﻿namespace dExcel.Mathematics;
 
 using ExcelDna.Integration;
-using ExcelDna.Registration;
-using System.Linq;
-using System.Windows.Media.Media3D;
+using Utilities;
 using mnd = MathNet.Numerics.Distributions;
 using mnl = MathNet.Numerics.LinearAlgebra;
 using mnr = MathNet.Numerics.Random;
 using mns = MathNet.Numerics.Statistics;
 
+/// <summary>
+/// A collection of statistical utility functions.
+/// </summary>
 public static class StatsUtils
 {
+    /// <summary>
+    /// Calculates the Cholesky decomposition of a symmetric positive-definite matrix.
+    /// Note this returns an upper-triangular matrix.
+    /// </summary>
+    /// <param name="range">The range containing the NxN (square) matrix.</param>
+    /// <returns>The Cholesky decomposition of a matrix if valid.</returns>
     [ExcelFunction(
         Name = "d.Stats_Cholesky",
         Description = "Calculates the Cholesky decomposition of a symmetric positive-definite matrix.\n" +
+                      "Note this returns an upper-triangular matrix.\n" +
                       "Deprecates the AQS function: 'Chol'",
         Category = "∂Excel: Stats")]
     public static object Cholesky(
@@ -22,43 +30,56 @@ public static class StatsUtils
             Description = "The range containing the NxN (square) matrix.")]
         double[,] range)
     {
-        var matrix = mnl.CreateMatrix.DenseOfArray(range);
+        mnl.Matrix<double>? matrix = mnl.CreateMatrix.DenseOfArray(range);
 
         if(matrix.RowCount != matrix.ColumnCount)
         {
-            return CommonUtils.DExcelErrorMessage("Matrix supplied is not square.");
+            return CommonUtils.DExcelErrorMessage("Matrix is not square.");
         }
-        else if (matrix.IsSymmetric() == false)
+
+        if (matrix.IsSymmetric() == false)
         {
-            return CommonUtils.DExcelErrorMessage("Matrix supplied is not symmetric.");
+            return CommonUtils.DExcelErrorMessage("Matrix is not symmetric.");
         }
-        else
+
+        for (int i = 0; i < range.GetLength(0); i++)
         {
-            try
+            for (int j = 0; j < range.GetLength(1); j++)
             {
-                return matrix.Cholesky().Factor.ToArray();
+                if (i == j && Math.Abs(range[i, j] - 1.0) > 0.0001)
+                {
+                    return CommonUtils.DExcelErrorMessage("Diagonal elements of the correlation matrix must be 1.");
+                }
             }
-            catch
-            {
-                return CommonUtils.DExcelErrorMessage("Matrix supplied is not positive-definite.");
-            }
-            
-        }
+        } 
         
+        try
+        {
+            return matrix.Cholesky().Factor.Transpose().ToArray();
+        }
+        catch
+        {
+            return CommonUtils.DExcelErrorMessage("Matrix is not positive-definite.");
+        }
     }
 
+    /// <summary>
+    /// Calculates the Pearson correlation matrix.
+    /// </summary>
+    /// <param name="range">The range containing the column-wise data.</param>
+    /// <returns>The Pearson correlation matrix.</returns>
     [ExcelFunction(
         Name = "d.Stats_CorrelationMatrix",
         Description = "Calculates the Pearson correlation matrix.\n" +
                       "Deprecates the AQS function 'Corr'.",
         Category = "∂Excel: Stats")]
-    public static double[,] CorrelationMatrix(
+    public static object CorrelationMatrix(
         [ExcelArgument(
             Name = "Range",
             Description = "The range containing the column-wise data.")]
         double[,] range)
     {
-        var data = new double[range.GetLength(1)][];
+        double[][] data = new double[range.GetLength(1)][];
         for (int j = 0; j < range.GetLength(1); j++)
         {
             data[j] = new double[range.GetLength(0)];
@@ -67,9 +88,20 @@ public static class StatsUtils
                 data[j][i] = range[i, j];
             }
         }
+        
         return mns.Correlation.PearsonMatrix(data).ToArray();
     }
 
+    /// <summary>
+    /// Generates a sequence of standard normal random variates.
+    ///
+    /// The total number of elements returned is given either by the size of the region the user has selected in Excel or
+    /// the optional parameters "rowCount" and "columnCount".
+    /// </summary>
+    /// <param name="seed">Seed</param>
+    /// <param name="rowCount">The number of rows to output.</param>
+    /// <param name="columnCount">The number of columns to output.</param>
+    /// <returns>A region of standard normal random variates.</returns>
     [ExcelFunction(
         Name = "d.Stats_NormalRandomNumbers",
         Description = "Generates a sequence of standard normal random variates.\n" +
@@ -80,31 +112,28 @@ public static class StatsUtils
     [ExcelArgument(
             Name = "Seed",
             Description = "The seed for the random number generator. If left blank, a random seed will be used.")]
-        object seed)
+        int seed,
+    [ExcelArgument(
+        Name = "(Optional)Row Count",
+        Description = "The number of rows of random numbers to output.")]
+        int rowCount = 0,
+    [ExcelArgument(
+        Name = "(Optional)Column Count",
+        Description = "The number of columns of random numbers to output.")]
+        int columnCount = 0)
     {
-        int rowCount = 1;
-        int columnCount = 1;
-        if (ExcelDnaUtil.Application is not null)
+        if (ExcelDnaUtil.Application is not null && rowCount == 0 && columnCount == 0)
         {
-            var caller = XlCall.Excel(XlCall.xlfCaller) as ExcelReference;
-            rowCount = caller.RowLast - caller.RowFirst + 1;
-            columnCount = caller.ColumnLast - caller.ColumnFirst + 1;
-        }
-
-        var results = new double[rowCount, columnCount];
-        var random = new mnr.MersenneTwister();
-
-        if (seed is not ExcelDna.Integration.ExcelMissing)
-        {
-            try
+            ExcelReference? caller = XlCall.Excel(XlCall.xlfCaller) as ExcelReference;
+            if (caller != null)
             {
-                random = new mnr.MersenneTwister(Convert.ToInt32(seed));
-            }
-            catch
-            {
-                return CommonUtils.DExcelErrorMessage("Invalid seed specified.");
+                rowCount = caller.RowLast - caller.RowFirst + 1;
+                columnCount = caller.ColumnLast - caller.ColumnFirst + 1;
             }
         }
+
+        double[,] results = new double[rowCount, columnCount];
+        mnr.MersenneTwister random = new(Convert.ToInt32(seed));
         
         for (int j = 0; j < columnCount; j++)
         {
@@ -115,5 +144,46 @@ public static class StatsUtils
         }
 
         return results;
+    }
+
+    /// <summary>
+    /// Returns a set of correlated, normal random numbers.
+    /// </summary>
+    /// <param name="seed">Seed for the random number generator.</param>
+    /// <param name="correlatedSetCount">The number of sets of correlated random numbers to generate.
+    /// e.g., If this is 'm' and the size of the correlation matrix is 'n x n' then the number of random numbers
+    /// generated will be 'mn'.</param>
+    /// <param name="correlationMatrixRange">Correlation matrix of the random numbers.</param>
+    /// <returns>A set of correlated, normal random numbers.</returns>
+    [ExcelFunction(
+        Name = "d.Stats_CorrelatedNormalRandomNumbers",
+        Description = "Returns a set of correlated, normal random numbers.",
+        Category = "∂Excel: Stats")]
+    public static object CorrelatedNormalRandomNumbers(
+        [ExcelArgument(
+            Name = "Seed",
+            Description = "Seed for the random number generator.")]
+        int seed,
+        [ExcelArgument(
+            Name = "Correlated Set Count",
+            Description = "The number of sets of correlated random numbers to generate.\n" +
+                          "e.g., If this is 'm' and the size of the correlation matrix is 'n x n' then the number of random" +
+                          "numbers generated will be 'mn'.")]
+        int correlatedSetCount,
+        [ExcelArgument(
+            Name = "Correlation Matrix", 
+            Description = "Correlation matrix of the random numbers.")]
+        double[,] correlationMatrixRange)
+    {
+        mnl.Matrix<double> randomNumbers = mnl.CreateMatrix.DenseOfArray((double[,])NormalRandomNumbers(seed, correlatedSetCount, correlationMatrixRange.GetLength(0)));
+        object choleskyResults =  Cholesky(correlationMatrixRange);
+        if (choleskyResults is string errorMessage)
+        {
+            return errorMessage;
+        }
+        
+        mnl.Matrix<double> choleskyMatrix = mnl.CreateMatrix.DenseOfArray((double[,])choleskyResults);
+        mnl.Matrix<double> results = randomNumbers * choleskyMatrix;
+        return results.ToArray();
     }
 }

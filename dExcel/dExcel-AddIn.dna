@@ -60,16 +60,17 @@
 				id='btnManagePasswords'
 				label='Manage Passwords'
 				getImage='GetImage'
+				enabled='false'
 				size='large'
 				tag='manage-passwords-large-blue.ico'/>
-			  <splitButton id='btnWorkbookLinks' size='large'>
+			  <splitButton id='btnWorkbookHyperlinks' size='large'>
 				  <button
 					id='btnCreateLinkToSheet'
 					getImage='GetImage'
-					label='Workbook Links'
+					label='Workbook Hyperlinks'
 					onAction='CreateLinkToSheet'
 					tag='workbook_link_blue.ico'/>
-				  <menu id='menuWorkbookLinks'>
+				  <menu id='menuWorkbookHyperlinks'>
 					<button 
 				      id='btnCreateLinkToSheet2'
 				      label='Create Link to Sheet'
@@ -77,9 +78,14 @@
 					  screentip='Creates a link to cell A1 in the sheet with the same name as the selected cell.'/>
 					<button 
 				      id='btnCreateLinksToHeadings'
-				      label='Create Link(s) to Heading(s) in Sheet'
-					  onAction='CreateLinksToHeadings'
-					  screentip='Creates a link to a cell with a heading style.'/>
+				      label='Create Hyperlink(s) to Heading(s) in Current Sheet'
+					  onAction='CreateHyperlinksToHeadingsInCurrentSheet'
+					  screentip='Creates hyperlink(s) to cell(s) with a heading style.'/>
+					<button
+					  id='btnCreateLinksToHeadingsInOtherSheet'
+					  label='Create Link(s) to Heading(s) in Other Sheet'
+					  onAction='CreateLinksToHeadingsInOtherSheets'
+					  screentip='Creates link(s) to cell(s) with a heading style in sheets other than the current one.'/>
 				  </menu>		
 			  </splitButton>
 			  <splitButton id='btnFormatPainter' size='large'>
@@ -99,8 +105,13 @@
 				  <button
 					id='btnApplyTestUtilsFormatting'
 					label='Apply Test Utils Formatting'
-					onAction='ApplyLogicFormatting'
+					onAction='ApplyTestUtilsFormatting'
 					screentip='Applies the ∂Excel conditional formatting for OK, ERROR, and Warning.'/>
+				  <button
+					id='btnApplyDateFormatting'
+					label='Apply Date Formatting'
+					onAction='SetIso8601DateFormatting'
+					screentip='Applies the ISO-8601 formatting to a date i.e., yyyy-MM-dd.'/>
 				  <menuSeparator id='HeaderMenuSeparator'/>
 				  <button
 					id='btnApplyPrimaryHeaderFormatting'
@@ -119,6 +130,14 @@
 					screentip='Clears the formatting from a ∂Excel formatted table.'/>
 				</menu>
 			  </splitButton>
+			  <button
+				id='btnViewChart'
+				label='View object chart'
+				getImage='GetImage'
+				onAction='ViewObjectChart'
+				screentip='Opens a chart displaying the contents of an object e.g., an interest rate curve.'
+				size='large'
+				tag='chart-blue.ico'/>
 			</group>
 			<group id='grpFunctionLibrary' label='Function Library'>
 			  <dynamicMenu

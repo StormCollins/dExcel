@@ -1,7 +1,7 @@
 ﻿namespace dExcelTests.Currencies;
 
-using NUnit.Framework;
 using dExcel.Currencies;
+using NUnit.Framework;
 using QLNet;
 
 [TestFixture]

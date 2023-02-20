@@ -1,14 +1,16 @@
-﻿using System.Collections.ObjectModel;
+﻿namespace dExcel.WPF;
+
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using ExcelDna.Integration;
 using FuzzySharp;
 using FuzzySharp.Extractor;
-
-namespace dExcel.WPF;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 /// <summary>
 /// Interaction logic for FunctionSearch.xaml
@@ -32,10 +34,10 @@ public partial class FunctionSearch : Window
         ["RANDN"] = "d.Stats_NormalRandomNumbers",
         // Equities
         ["DT_VOLATILITY"] = "d.Equity_Volatility",
-        ["BS"] = "d.Equity_BlackScholes",
+        ["BS"] = "d.Equity_BlackScholesSpotOptionPricer",
         // Interest Rates
-        ["BLACK"] = "d.IR_Black",
-        ["Disc2ForwardRate"] = "d.IR_DiscountFactorsToForwardRate",
+        ["BLACK"] = "d.IR_BlackForwardOptionPricer",
+        ["DISC2FORWARDRATE"] = "d.IR_DiscountFactorsToForwardRate",
         ["INTCONVERT"] = "d.IR_ConvertInterestRate",
     };
 
@@ -84,7 +86,7 @@ public partial class FunctionSearch : Window
             this.Description = functionMatch.description;
         }
 
-        protected void OnPropertyChanged(string name)
+        private void OnPropertyChanged(string name)
         {
             if (this.PropertyChanged != null)
             {
@@ -95,13 +97,13 @@ public partial class FunctionSearch : Window
         public event PropertyChangedEventHandler PropertyChanged;
     }
 
-    public ObservableCollection<FunctionMatch> FunctionMatches { get; set; }
+    private ObservableCollection<FunctionMatch> FunctionMatches { get; set; }
 
-    private readonly List<(string name, string description, string category)> methods = RibbonController.GetExposedMethods().ToList();
+    private readonly List<(string name, string description, string category)> _methods = RibbonController.GetExposedMethods().ToList();
 
     public FunctionSearch()
     {
-        var xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+        string? xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
         InitializeComponent();
         this.Icon = dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dXL-logo-extra-small.ico")); 
         dExcelIcon.Source = new BitmapImage(new Uri(xllPath + @"\resources\icons\dExcel48.png"));
@@ -113,22 +115,22 @@ public partial class FunctionSearch : Window
     {
         Insert.IsEnabled = false;
 
-        if (_aqsTodExcelFunctionMapping.Keys.Contains(SearchTerm.Text.ToUpper()))
+        if (_aqsTodExcelFunctionMapping.ContainsKey(SearchTerm.Text.ToUpper()))
         {
-            (string name, string description, string category) method = methods.First(y => string.Compare(y.name, _aqsTodExcelFunctionMapping[SearchTerm.Text.ToUpper()]) == 0);
-            FunctionMatches = new() { new FunctionMatch(method) };
+            (string name, string description, string category) method = _methods.First(y => string.CompareOrdinal(y.name, _aqsTodExcelFunctionMapping[SearchTerm.Text.ToUpper()]) == 0);
+            FunctionMatches = new ObservableCollection<FunctionMatch> { new(method) };
             SearchResults.ItemsSource = FunctionMatches;
         }
         else
         {
-            IEnumerable<ExtractedResult<string>> matches = Process.ExtractTop(SearchTerm.Text, methods.Select(x => x.name)).Where(y => y.Score >= 65);
-            var extractedResults = matches as ExtractedResult<string>[] ?? matches.ToArray();
+            IEnumerable<ExtractedResult<string>> matches = Process.ExtractTop(SearchTerm.Text, _methods.Select(x => x.name)).Where(y => y.Score >= 65);
+            ExtractedResult<string>[] extractedResults = matches as ExtractedResult<string>[] ?? matches.ToArray();
             if (extractedResults.Any())
             {
-                FunctionMatches = new();
-                foreach (var match in extractedResults)
+                FunctionMatches = new ObservableCollection<FunctionMatch>();
+                foreach (ExtractedResult<string> match in extractedResults)
                 {
-                    var method = methods.First(x => x.name == match.Value);
+                    (string name, string description, string category) method = _methods.First(x => x.name == match.Value);
                     FunctionMatches.Add(new FunctionMatch(method));
                 }
 
@@ -142,14 +144,34 @@ public partial class FunctionSearch : Window
         Insert.IsEnabled = true;
     }
 
-    private void SearchResults_Unselected(object sender, RoutedEventArgs e)
-    {
-        Insert.IsEnabled = false;
-    }
-
+    /// <summary>
+    /// Event called when insert button is clicked. The function is inserted into the spreadsheet and the function wizard is opened.
+    /// </summary>
+    /// <param name="sender">Event sender.</param>
+    /// <param name="e">Event arguments.</param>
     private void Insert_Click(object sender, RoutedEventArgs e)
     {
         this.FunctionName = ((FunctionMatch)SearchResults.SelectedItem).Name;
         this.Close();
+    }
+
+    /// <summary>
+    /// Processes keyboard events on the main form.
+    /// </summary>
+    /// <param name="sender">Sender.</param>
+    /// <param name="e">Key event args.</param>
+    /// <exception cref="NotImplementedException"></exception>
+    private void FunctionSearch_OnKeyDown(object sender, KeyEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Key.Escape:
+                this.Close();
+                break;
+            case Key.Enter when this.SearchResults != null && this.SearchTerm.IsFocused:
+                this.SearchResults.Focus();
+                this.SearchResults.SelectedItem = this.SearchResults.Items[0];
+                break;
+        }
     }
 }

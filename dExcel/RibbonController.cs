@@ -1,34 +1,58 @@
 ﻿namespace dExcel;
 
-using WPF;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using ExcelDna.Integration;
-using ExcelDna.Integration.CustomUI;
-using Excel = Microsoft.Office.Interop.Excel;
 using System.Text.RegularExpressions;
+using System.Text;
 using System.Windows.Threading;
-using FuzzySharp;
+using Excel = Microsoft.Office.Interop.Excel;
+using ExcelDna.Integration.CustomUI;
+using ExcelDna.Integration;
 using ExcelUtils;
-using Microsoft.VisualBasic.ApplicationServices;
+using FuzzySharp;
+using SkiaSharp;
+using Utilities;
+using WPF;
 
+/// <summary>
+/// Used to control the actions and behaviour of the ribbon of the add-in.
+/// </summary>
 [ComVisible(true)]
 public class RibbonController : ExcelRibbon
 {
-    // TODO: Remove blanks.
-
-    public static IRibbonUI RibbonUi;
-
-    public void LoadRibbon(IRibbonUI sender)
+    /// <summary>
+    /// This maps category names, in the ExcelFunction attribute, to the relevant ribbon function drop down menu.
+    ///
+    /// For instance, the function 'd.Equity_BlackScholes' is in the category '∂Excel: Equities' (the '∂Excel: ' part is
+    /// ignored in the mapping). So obviously it is added to the drop down menu for 'Equities'.
+    ///
+    /// This also allows us to map multiple function categories to the same drop down menu e.g., anything involving
+    /// cross currency swaps, 'XCCY', can be mapped to 'InterestRates' and 'FX' simultaneously.
+    /// </summary>
+    private static Dictionary<string, List<string>> _excelFunctionCategoriesToRibbonLabels = new()
     {
-        RibbonUi = sender;
+        ["DATE"] = new List<string> { "Date" },
+        ["MATH"] = new List<string> { "Math" },
+        ["STATS"] = new List<string> { "Stats" },
+        ["CREDIT"] = new List<string> { "Credit" },
+        ["COMMODITIES"] = new List<string> { "Commodities" },
+        ["EQUITIES"] = new List<string> { "Equities" },
+        ["FX"] = new List<string> { "FX", "XCCY"},
+        ["INTERESTRATES"] = new List<string> { "CurveUtils", "HullWhite", "Interest Rates", "XCCY"},
+        ["OTHER"] = new List<string> { "Debug", "Test"},
+    };
+
+    private static IRibbonUI? _ribbonUi;
+    
+    public void LoadRibbon(IRibbonUI? sender)
+    {
+        _ribbonUi = sender;
     }
 
     public object GetImage(IRibbonControl control)
     {
-        var assembly = Assembly.GetExecutingAssembly();
+        Assembly assembly = Assembly.GetExecutingAssembly();
         return new Bitmap(
             assembly.GetManifestResourceStream($"dExcel.Resources.Icons.{control.Tag}") ??
             throw new ArgumentNullException($"Icon {control.Tag} not found in resources."));
@@ -37,9 +61,9 @@ public class RibbonController : ExcelRibbon
     public void OpenDashboard(IRibbonControl control)
     {
         string? dashBoardAction = null;
-        var thread = new Thread(() =>
+        Thread thread = new(() =>
         {
-            var dashboard = Dashboard.Instance;
+            Dashboard dashboard = Dashboard.Instance;
             dashboard.Show();
             dashboard.Closed += (sender2, e2) => dashboard.Dispatcher.InvokeShutdown();
             Dispatcher.Run();
@@ -52,7 +76,7 @@ public class RibbonController : ExcelRibbon
 
         if (string.Compare(dashBoardAction, "OpenTestingWorkbook", true) == 0)
         {
-            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
 #if DEBUG
             Excel.Workbook wb = xlApp.Workbooks.Open(@"C:\GitLab\dExcelTools\dExcel\dExcel\Resources\Workbooks\dexcel-testing.xlsm");
 #else
@@ -68,9 +92,10 @@ public class RibbonController : ExcelRibbon
     public void OpenFunctionSearch(IRibbonControl control)
     {
         string? functionName = null;
-        var thread = new Thread(() =>
+        Thread thread = new(() =>
         {
-            var functionSearch = new FunctionSearch();
+            FunctionSearch functionSearch = new();
+            functionSearch.SearchTerm.Focus();
             functionSearch.Show();
             functionSearch.Closed += (sender2, e2) => functionSearch.Dispatcher.InvokeShutdown();
             Dispatcher.Run();
@@ -82,7 +107,7 @@ public class RibbonController : ExcelRibbon
         thread.Join();
         if (functionName != null)
         {
-            var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+            Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
             ((Excel.Range)xlApp.Selection).Formula = $"={functionName}()";
             ((Excel.Range)xlApp.Selection).FunctionWizard();
         }
@@ -90,7 +115,7 @@ public class RibbonController : ExcelRibbon
 
     public void InsertFunction(IRibbonControl control)
     {
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         ((Excel.Range)xlApp.Selection).Formula = $"={control.Id}()";
         ((Excel.Range)xlApp.Selection).FunctionWizard();
     }
@@ -109,81 +134,107 @@ public class RibbonController : ExcelRibbon
         ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(xlApp.Selection, "", $"'{matchedSheet}'!A1");
     }
 
-    public void CreateLinksToHeadings(IRibbonControl control)
+    /// <summary>
+    /// Creates a hyperlink in the selected cell to a cell with the same content but which also has a heading style.
+    /// For example, if the selected cell has the content "Test" and there is another cell, styled as a heading, also with
+    /// the content "Test", then this function will create a link in the selected cell to the heading cell.
+    ///
+    /// Note this function can handle multiple cells as well.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void CreateHyperlinksToHeadingsInCurrentSheet(IRibbonControl control)
+    {
+        HyperLinkUtils.CreateHyperlinkToHeadingInSheet();
+    }
+    
+    public void CreateLinksToHeadingsInOtherSheets(IRibbonControl control)
     {
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
-        Excel.Range usedRange = xlApp.ActiveSheet.UsedRange;
-        Dictionary<string, string> headings = new();
-
-        for (int i = 1; i < usedRange.Rows.Count + 1; i++)
+        Excel.Workbook wb = xlApp.ActiveWorkbook;
+        foreach (Excel.Worksheet ws in wb.Worksheets)
         {
-            for (int j = 1; j < usedRange.Columns.Count + 1; j++)
+            Excel.Range usedRange = ws.UsedRange;
+            Dictionary<string, List<string>> headings = new();
+
+            for (int i = 1; i < usedRange.Rows.Count + 1; i++)
             {
-                Excel.Range currentCell = usedRange.Cells[i, j];
-                string style = ((Excel.Style)currentCell.Style).Value.ToUpper();
-                if (style.Contains("HEADING"))
+                for (int j = 1; j < usedRange.Columns.Count + 1; j++)
                 {
-                    try
+                    Excel.Range currentCell = usedRange.Cells[i, j];
+                    string style = ((Excel.Style)currentCell.Style).Value.ToUpper();
+                    if (style.Contains("HEADING"))
                     {
-                        headings[currentCell.Value2] = currentCell.Address;
-                    }
-                    catch (Exception)
-                    {
+                        try
+                        {
+                            if (!headings.ContainsKey(currentCell.Value2))
+                            {
+                                headings.Add(currentCell.Value2, new List<string>() {$"'{currentCell.Name}'!{currentCell.Address}"});
+                            }
+                            else
+                            {
+                                headings[currentCell.Value2].Add($"'{currentCell.Name}'!{currentCell.Address}");
+                            }
+                        }
+                        catch (Exception)
+                        {
+                        }
                     }
                 }
             }
-        }
 
-        Excel.Range selectedRange = ((Excel.Range)xlApp.Selection);
-        List<string> failedHyperlinks = new();
+            Excel.Range selectedRange = ((Excel.Range)xlApp.Selection);
+            List<string> failedHyperlinks = new();
 
-        for (int i = 1; i < selectedRange.Rows.Count + 1; i++)
-        {
-            string searchText = "";
-            for (int j = 1; j < selectedRange.Columns.Count + 1; j++)
+            for (int i = 1; i < selectedRange.Rows.Count + 1; i++)
             {
-                Excel.Range currentCell = selectedRange.Rows[i].Columns[j];
-                if (currentCell.Value2 != null && currentCell.Value2?.ToString() != "" &&
-                    currentCell.Value2?.ToString() != ExcelEmpty.Value.ToString())
+                string searchText = "";
+                for (int j = 1; j < selectedRange.Columns.Count + 1; j++)
                 {
-                    searchText = selectedRange.Rows[i].Columns[j].Value2;
+                    Excel.Range currentCell = selectedRange.Rows[i].Columns[j];
+                    if (currentCell.Value2 != null && currentCell.Value2?.ToString() != "" &&
+                        currentCell.Value2?.ToString() != ExcelEmpty.Value.ToString())
+                    {
+                        searchText = selectedRange.Rows[i].Columns[j].Value2;
+                    }
+                }
+
+                try
+                {
+                    string matchedHeading = Process.ExtractTop(searchText, headings.Keys).First(x => x.Score > 90).Value;
+                    ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(selectedRange.Rows[i], "",
+                        headings[matchedHeading]);
+                }
+                catch (Exception)
+                {
+                    failedHyperlinks.Add(searchText);
                 }
             }
 
-            try
+            if (failedHyperlinks.Count > 0)
             {
-                string matchedHeading = Process.ExtractTop(searchText, headings.Keys).First(x => x.Score > 90).Value;
-                ((Excel.Worksheet)xlApp.ActiveSheet).Hyperlinks.Add(selectedRange.Rows[i], "",
-                    headings[matchedHeading]);
-            }
-            catch (Exception)
-            {
-                failedHyperlinks.Add(searchText);
-            }
-        }
-
-        if (failedHyperlinks.Count > 0)
-        {
-            Alert alert = new()
-            {
-                AlertCaption =
+                Alert alert = new()
                 {
-                    Text = "Warning: Section Headings Not Found"
-                },
-                AlertBody =
-                {
-                    Text = "The following headings could not be found: \n  •" + string.Join("\n  • ", failedHyperlinks)
-                },
-            };
+                    AlertCaption =
+                    {
+                        Text = "Warning: Section Headings Not Found"
+                    },
+                    AlertBody =
+                    {
+                        Text = "The following headings could not be found: \n  •" + string.Join("\n  • ", failedHyperlinks)
+                    },
+                };
 
-            alert.Show();
+                alert.Show();
+            }
+
         }
     }
+    
 
     public static IEnumerable<(string name, string description, string category)> 
         GetCategoryMethods(List<string> categoryNames)
     {
-        foreach (var method in GetExposedMethods())
+        foreach ((string name, string description, string category) method in GetExposedMethods())
         {
             foreach (string categoryName in categoryNames)
             {
@@ -197,7 +248,7 @@ public class RibbonController : ExcelRibbon
 
     public static IEnumerable<(string name, string description, string category)> GetExposedMethods()
     {
-        var methods =
+        IEnumerable<MethodInfo> methods =
             Assembly
                 .GetExecutingAssembly()
                 .GetTypes()
@@ -216,30 +267,18 @@ public class RibbonController : ExcelRibbon
                     Category: excelFunctionAttribute.Category));
     }
 
-    public static Dictionary<string, List<string>> RibbonFunctionLabelToMethodCategoryMappings = new()
-    {
-        ["DATE"] = new List<string> { "Date" },
-        ["MATH"] = new List<string> { "Math" },
-        ["STATS"] = new List<string> { "Stats" },
-        ["CREDIT"] = new List<string> { "Credit" },
-        ["COMMODITIES"] = new List<string> { "Commodities" },
-        ["EQUITIES"] = new List<string> { "Equities" },
-        ["FX"] = new List<string> { "FX", "XCCY"},
-        ["INTERESTRATES"] = new List<string> { "Curve", "Interest Rates", "XCCY"},
-        ["OTHER"] = new List<string> { "Debug", "Test"},
-    };
-
     public string GetFunctionContent(IRibbonControl control)
     {
-        List<string> methodIds = RibbonFunctionLabelToMethodCategoryMappings[control.Id.ToUpper()];
+        List<string> methodIds = _excelFunctionCategoriesToRibbonLabels[control.Id.ToUpper()];
         IEnumerable<(string name, string description, string category)> methods = GetCategoryMethods(methodIds);
+        methods = methods.OrderBy(x => x.name);
         string content = "";
         content += $"<menu xmlns=\"http://schemas.microsoft.com/office/2006/01/customui\">";
         string currentSubcategory = "";
         foreach (var (name, _, _) in methods)
         {
             var previousSubcategory = currentSubcategory;
-            currentSubcategory = 
+            currentSubcategory =
                 Regex.Match(name, @"(?<=d\.)[^_]+", RegexOptions.Compiled | RegexOptions.IgnoreCase).Value;
 
             if (previousSubcategory != "" && previousSubcategory != currentSubcategory)
@@ -259,12 +298,24 @@ public class RibbonController : ExcelRibbon
         return content;
     }
 
+
+
     public string GetTemplateContent(IRibbonControl control)
     {
         string path = @"\\ZAJNB010\FSA Valuations\FSA Valuations\Model Validation";
         var content = "";
 
         return path;
+    }
+
+    /// <summary>
+    /// Sets the official ISO-8601 date format in the selected cell i.e., yyyy-MM-dd.
+    /// This is quicker than having to navigate to it via the standard Excel menus.
+    /// </summary>
+    public void SetIso8601DateFormatting(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        ((Excel.Range)xlApp.Selection).NumberFormat = "yyyy-mm-dd;@";
     }
 
     /// <summary>
@@ -340,9 +391,9 @@ public class RibbonController : ExcelRibbon
         ((Excel.Range)xlApp.Selection).Calculate();
     }
 
-    public void ApplyLogicFormatting(IRibbonControl control)
+    public void ApplyTestUtilsFormatting(IRibbonControl control)
     {
-        RangeFormatUtils.SetRangeConditionalLogicFormatting();
+        RangeFormatUtils.SetConditionalTestUtilsFormatting();
     }
 
     public void ApplyPrimaryHeaderFormatting(IRibbonControl control)
@@ -407,11 +458,11 @@ public class RibbonController : ExcelRibbon
     public void WrapUpAudit(IRibbonControl control)
     {
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
-
+    
         // Delete review notes.
         // It is unclear where the workbook WPExcel.xls is located but EMS users seem to have access to it.
         xlApp.Application.Run("WPEXCEL.XLS!DPWPReviewNotesDeleteAll");
-
+    
         foreach (Excel.Worksheet worksheet in xlApp.ActiveWorkbook.Worksheets)
         {
             worksheet.Activate();
@@ -426,7 +477,7 @@ public class RibbonController : ExcelRibbon
                 worksheet.Protect("asterix");
             }
         }
-
+    
         // Remove Matlab references.
         // TODO: This can be deprecated when we no longer use Matlab and ExcelLink.
         Excel.Workbook wb = xlApp.ActiveWorkbook;
@@ -435,14 +486,14 @@ public class RibbonController : ExcelRibbon
             if (reference.Name.Contains("ExcelLink", StringComparison.CurrentCultureIgnoreCase) ||
                 reference.Name.Contains("SpreadsheetLink", StringComparison.CurrentCultureIgnoreCase))
             {
-                wb.VBProject.References.Remove(reference);
+                wb.VBProject.References.Remove((Microsoft.Vbe.Interop.Reference)reference);
             }
         }
 
         foreach (VBIDE.VBComponent component in wb.VBProject.VBComponents)
         {
             VBIDE.CodeModule codeModule = component.CodeModule;
-            
+
             for (int i = 1; i < codeModule.CountOfLines; i++)
             {
                 string line = codeModule.Lines[i, 1];
@@ -453,24 +504,31 @@ public class RibbonController : ExcelRibbon
             }
         }
 
-        // Password protect the VBA code.
-        // TODO: See if this can be simplified.
-        xlApp.Application.ScreenUpdating = false;
+    // Password protect the VBA code.
+    // TODO: See if this can be simplified.
+    xlApp.Application.ScreenUpdating = false;
+    
+     string breakIt = "%{F11}%TE+{TAB}{RIGHT}%V{+}{TAB}";
+     foreach (VBIDE.Window window in wb.VBProject.VBE.Windows)
+     {
+         if (window.Caption.Contains('('))
+         {
+             window.Close();
+         }
+     }
+    wb.Activate();
+         
+          xlApp.Application.OnKey("%{F11}");
+          SendKeys.SendWait(breakIt + "asterix" + "{TAB}" + "asterix" + "~%{F11}");
+          xlApp.Application.ScreenUpdating = true;
+          wb.Activate();
+    }
 
-        string breakIt = "%{F11}%TE+{TAB}{RIGHT}%V{+}{TAB}";
-        foreach (VBIDE.Window window in wb.VBProject.VBE.Windows)
-        {
-            if (window.Caption.Contains('('))
-            {
-                window.Close();
-            }
-        }
-        wb.Activate();
-
-        xlApp.Application.OnKey("%{F11}");
-        SendKeys.SendWait(breakIt + "asterix" + "{TAB}" + "asterix" + "~%{F11}");
-        xlApp.Application.ScreenUpdating = true;
-        wb.Activate();
+    public void ViewObjectChart(IRibbonControl control)
+    {
+        SkiaSharp.Views.WPF.WPFExtensions.ToColor(SKColor.Empty);
+        CurvePlotter curvePlotter = CurvePlotter.Instance;
+        curvePlotter.Show();
     }
 
     public void FixEMSLinks(IRibbonControl ribbonControl)
@@ -498,16 +556,17 @@ public class RibbonController : ExcelRibbon
 
                     while (workbookFind is not null)
                     {
-                        string filePath = Regex.Match(xlWorksheet.Range[workbookFind.Address].Formula2, @"(?<==')[^\[]+").Value;
+                        string filePath = 
+                            Regex.Match(xlWorksheet.Range[workbookFind.Address].Formula, @"(?<==')[^\[]+").Value;
 
-                        xlUsedRange.Replace2(What: filePath,
-                                             Replacement: "",
-                                             LookAt: Excel.XlLookAt.xlPart,
-                                             SearchOrder: Excel.XlSearchOrder.xlByRows,
-                                             MatchCase: true,
-                                             SearchFormat: false,
-                                             ReplaceFormat: false,
-                                             FormulaVersion: Excel.XlFormulaVersion.xlReplaceFormula2);
+                        xlUsedRange.Replace(
+                            What: filePath,
+                            Replacement: "",
+                            LookAt: Excel.XlLookAt.xlPart,
+                            SearchOrder: Excel.XlSearchOrder.xlByRows,
+                            MatchCase: true,
+                            SearchFormat: false,
+                            ReplaceFormat: false);
 
                         workbookFind = ExcelFind(xlOpenWorkbook);
                     }
@@ -515,13 +574,14 @@ public class RibbonController : ExcelRibbon
             }
 
             Excel.Range ExcelFind(string stringToFind)
-                => xlUsedRange.Find(What: "\\[" + stringToFind + "]",
-                                    LookIn: Excel.XlFindLookIn.xlFormulas2,
-                                    LookAt: Excel.XlLookAt.xlPart,
-                                    SearchOrder: Excel.XlSearchOrder.xlByRows,
-                                    SearchDirection: Excel.XlSearchDirection.xlNext,
-                                    MatchCase: true,
-                                    SearchFormat: false);
+                => xlUsedRange.Find(
+                    What: "\\[" + stringToFind + "]",
+                    LookIn: Excel.XlFindLookIn.xlFormulas,
+                    LookAt: Excel.XlLookAt.xlPart,
+                    SearchOrder: Excel.XlSearchOrder.xlByRows,
+                    SearchDirection: Excel.XlSearchDirection.xlNext,
+                    MatchCase: true,
+                    SearchFormat: false);
         }
     }
 }

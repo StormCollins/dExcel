@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using ExcelDna.Integration;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Security.Principal;
 using System.Data.SQLite;
@@ -50,7 +49,17 @@ public partial class MainWindow : Window
     /// The location of the currently installed version of the add-in on the machine.
     /// </summary>
     private const string LocalCurrentReleasePath = @"C:\GitLab\dExcelTools\Releases\Current\";
-    
+
+    /// <summary>
+    /// The location of the ExcelDNAIntelliSense64.xll on the shared drive.
+    /// </summary>
+    private const string RemoteExcelDnaIntelliSensePath = @"C:\GitLab\dExcelTools\ExcelDnaIntellisense";
+
+    /// <summary>
+    /// The location of the XLSTART path where add-ins are loaded from automatically.
+    /// </summary>
+    private const string XlStartPath = @"%appdata%\Microsoft\Excel\XLSTART";
+
     /// <summary>
     /// The dExcel dll name.
     /// </summary>
@@ -202,24 +211,6 @@ public partial class MainWindow : Window
         });
     }
 
-    /// <summary>
-    /// Checks if the current user is an administrator on the current machine.
-    /// </summary>
-    /// <returns>Returns true if the user is an administrator otherwise false.</returns>
-    //private static bool IsAdministrator()
-    //{
-    //    using var identity = WindowsIdentity.GetCurrent();
-    //    var principal = new WindowsPrincipal(identity);
-    //    return principal.IsInRole(WindowsBuiltInRole.Administrator);
-    //}
-
-    //public bool IsAdministrator()
-    //{
-    //    using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
-    //    var principal = new System.Security.Principal.WindowsPrincipal(identity);
-    //    return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
-    //}
-
     private static bool IsAdministrator()
     {
         // https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/security-identifiers-in-windows
@@ -319,7 +310,7 @@ public partial class MainWindow : Window
 
         return null;
     }
-    
+
     /// <summary>
     /// Installation process triggered by clicking the install button.
     /// </summary>
@@ -328,6 +319,21 @@ public partial class MainWindow : Window
     private void Install_Click(object sender, RoutedEventArgs e)
     {
         new Thread(InstallAddIn).Start();
+        new Thread(InstallExcelDnaIntellisense).Start();
+    }
+
+    /// <summary>
+    /// Installs the ExcelDNAIntelliSense64.xll by copying it to %appdata%/Micrsoft/Excel/XLSTART.
+    /// </summary>
+    private void InstallExcelDnaIntellisense()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            this._logger.NewProcess("Installing ExcelDNAIntelliSense");
+            this._logger.OkayText = $"Copying ExcelDNAIntelliSense from [[{RemoteExcelDnaIntelliSensePath}]] to [[{XlStartPath}]].";
+        });
+
+        CopyFilesRecursively(RemoteExcelDnaIntelliSensePath, Environment.ExpandEnvironmentVariables(XlStartPath));
     }
 
     /// <summary>
@@ -435,7 +441,7 @@ public partial class MainWindow : Window
             {
                 Dispatcher.Invoke(() =>
                 {
-                    this._logger.OkayText = $"No orphaned instances of ∂Excel found.";
+                    this._logger.OkayText = "No orphaned instances of ∂Excel found.";
                 });
             }
         }
@@ -494,7 +500,7 @@ public partial class MainWindow : Window
         // Remove previously installed version from C:\GitLab\dExcelTools\Releases\Current.
         Dispatcher.Invoke(() =>
         {
-            this._logger.NewSubProcess($"Updating ∂Excel.");
+            this._logger.NewSubProcess("Updating ∂Excel.");
             this._logger.OkayText = $"Deleting previous ∂Excel version from [[{LocalCurrentReleasePath}]].";
         });
 
@@ -576,10 +582,9 @@ public partial class MainWindow : Window
             // TODO: Check if file exists
             if (!dExcelAdded)
             {
-                Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
                 Excel.AddIn dExcelAddIn =
                     excel.AddIns.Add(@"C:\GitLab\dExcelTools\Releases\Current\dExcel-AddIn64.xll");
-                
+                 
                 dExcelAddIn.Installed = true;
             }
             

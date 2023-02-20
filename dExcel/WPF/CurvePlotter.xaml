@@ -1,0 +1,97 @@
+﻿<Window x:Class="dExcel.WPF.CurvePlotter"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:wpf="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+        mc:Ignorable="d"
+        BorderThickness="5"
+        BorderBrush="{DynamicResource MaterialDesignPaper}"
+        Title="∂Excel Table Formatter"
+        Height="450"
+        Width="600"
+        Icon="pack://application:,,,/dExcel;component/resources/icons/dExcel.ico"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}">
+  <Window.Resources>
+    <ResourceDictionary Source="pack://application:,,,/dExcelWpf;component/dExcelTheme.xaml"/>
+  </Window.Resources>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+
+    <TextBlock
+      Grid.Row="0"
+      Grid.Column="0"
+      Grid.ColumnSpan="5"
+      Style="{StaticResource GreenHeader2}"
+      Text="∂Excel CurveUtils Viewer"/>
+
+    <Image
+      Name="dExcelIcon"
+      HorizontalAlignment="Right"
+      VerticalAlignment="Top"
+      Grid.Row="0"
+      Grid.RowSpan="2"
+      Grid.Column="5"
+      Margin="0 5  5 0"
+      Width="32"
+      Source="pack://application:,,,/dExcel;component/resources/icons/dExcel48.png"/>
+    
+    <materialDesign:Card
+      Grid.Row="1"
+      Grid.RowSpan="8"
+      Grid.Column="0"
+      Grid.ColumnSpan="6">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <wpf:CartesianChart
+          Name="ChartArea"
+          Grid.Row="0"
+          Grid.RowSpan="6"
+          Grid.Column="0"
+          Grid.ColumnSpan="3">
+        </wpf:CartesianChart>
+
+      </Grid>
+    </materialDesign:Card>
+
+    <Button
+      Grid.Row="9"
+      Grid.Column="5"
+      Content="Close" 
+      Click="btnClose_Click"/>
+  </Grid>
+</Window>

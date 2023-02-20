@@ -1,17 +1,103 @@
 ﻿namespace dExcel.Dates;
 
-using System;
-using System.Text.RegularExpressions;
 using ExcelDna.Integration;
 using QLNet;
+using System;
+using Utilities;
 
 /// <summary>
 /// A collection of date utility functions.
 /// </summary>
 public static class DateUtils
 {
-    private const string ValidHolidayTitlePattern = @"(?i)(holidays?)|(dates?)|(calendar)(?-i)";
+    /// <summary>
+    /// Calculates year fraction, using the Actual/360 day count convention, between two dates.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date.</param>
+    /// <returns>The Actual/360 year fraction.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_Act360",
+        Description = "Calculates year fraction, using the Actual/360 day count convention, between two dates.",
+        Category = "∂Excel: Dates")]
+    public static double Act360(DateTime startDate, DateTime endDate)
+    {
+        Actual360 dayCounter = new();
+        return dayCounter.yearFraction(startDate, endDate);
+    }
+    
+    /// <summary>
+    /// Calculates year fraction, using the Actual/364 day count convention, between two dates.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date.</param>
+    /// <returns>The Actual/364 year fraction.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_Act364",
+        Description = "Calculates year fraction, using the Actual/365 day count convention, between two dates.",
+        Category = "∂Excel: Dates")]
+    public static double Act364(DateTime startDate, DateTime endDate)
+    {
+        Actual364 dayCounter = new();
+        return dayCounter.yearFraction(startDate, endDate);
+    }
 
+    /// <summary>
+    /// Calculates year fraction, using the Business/252 day count convention, between two dates.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date.</param>
+    /// <param name="calendarsToParse">The calendars to use for the business dates.</param>
+    /// <returns>The year fraction between the two dates.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_Business252",
+        Description = "Calculates year fraction, using the Business/252 day count convention, between two dates.",
+        Category = "∂Excel: Dates")]
+    public static object Business252(DateTime startDate, DateTime endDate, string calendarsToParse)
+    {
+        (Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsToParse);
+        if (calendar is null)
+        {
+            return errorMessage;
+        }
+        
+        Business252 dayCounter = new(calendar);
+        
+        return dayCounter.yearFraction(startDate, endDate);
+    }
+    
+    /// <summary>
+    /// Calculates year fraction, using the 30/360 day count convention, between two dates.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date.</param>
+    /// <returns>The 30/360 year fraction.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_Thirty360",
+        Description = "Calculates year fraction, using the 30/360 day count convention, between two dates.",
+        Category = "∂Excel: Dates")]
+    public static double Thirty360(DateTime startDate, DateTime endDate)
+    {
+        Thirty360 dayCounter = new(QLNet.Thirty360.Thirty360Convention.ISDA);
+        return dayCounter.yearFraction(startDate, endDate);
+    }
+    
+    /// <summary>
+    /// Calculates year fraction, using the Actual/365 day count convention, between two dates.
+    /// </summary>
+    /// <param name="startDate">Start date.</param>
+    /// <param name="endDate">End date.</param>
+    /// <returns>The Actual/365 year fraction.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_Act365",
+        Description = "Calculates year fraction, using the Actual/365 day count convention, between two dates.",
+        Category = "∂Excel: Dates")]
+    public static double Act365(DateTime startDate, DateTime endDate)
+    {
+        Actual365Fixed dayCounter = new();
+        return dayCounter.yearFraction(startDate, endDate);
+    }
+    
     /// <summary>
     /// Calculates the next business day using the 'following' convention.
     /// </summary>
@@ -38,16 +124,19 @@ public static class DateUtils
         (Calendar? calendar, string errorMessage) result;
         if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
         {
-            result = ParseCalendars(holidaysOrCalendar[0, 0].ToString());
+            result = DateParserUtils.ParseCalendars(holidaysOrCalendar[0, 0].ToString());
         }
         else
         {
-            result = ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+            BespokeCalendar bespokeCalendar = new();
+            bespokeCalendar.addWeekend(DayOfWeek.Saturday);
+            bespokeCalendar.addWeekend(DayOfWeek.Sunday);
+            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, bespokeCalendar);
         }
 
         if (result.calendar is null)
         {
-            return new object[,] {{result.errorMessage}};
+            return result.errorMessage;
         }
 
         return (DateTime) result.calendar?.adjust(date);
@@ -79,11 +168,14 @@ public static class DateUtils
         (Calendar? calendar, string errorMessage) result;
         if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
         {
-            result = ParseCalendars(holidaysOrCalendar[0, 0].ToString());
+            result = DateParserUtils.ParseCalendars(holidaysOrCalendar[0, 0].ToString());
         }
         else
         {
-            result = ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+            BespokeCalendar bespokeCalendar = new();
+            bespokeCalendar.addWeekend(DayOfWeek.Saturday);
+            bespokeCalendar.addWeekend(DayOfWeek.Sunday);
+            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, bespokeCalendar);
         }
 
         if (result.calendar is null)
@@ -120,11 +212,14 @@ public static class DateUtils
         (Calendar? calendar, string errorMessage) result;
         if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
         {
-            result = ParseCalendars(holidaysOrCalendar[0, 0].ToString());
+            result = DateParserUtils.ParseCalendars(holidaysOrCalendar[0, 0].ToString());
         }
         else
         {
-            result = ParseHolidays(holidaysOrCalendar, new WeekendsOnly());
+            BespokeCalendar bespokeCalendar = new();
+            bespokeCalendar.addWeekend(DayOfWeek.Saturday);
+            bespokeCalendar.addWeekend(DayOfWeek.Sunday);
+            result = DateParserUtils.ParseHolidays(holidaysOrCalendar, bespokeCalendar);
         }
 
         if (result.calendar is null)
@@ -159,20 +254,20 @@ public static class DateUtils
             "Calendar to use. Supports single calendars 'EUR', 'USD', 'ZAR' " +
             "and joint calendars e.g., 'USD,ZAR'.")]
         string? userCalendar,
-        [ExcelArgument(Name = "BDC", Description = "Business Day Convention e.g., 'MODFOL'.")]
+        [ExcelArgument(Name = "Business Day Convention", Description = "Business Day Convention e.g., 'MODFOL'.")]
         string userBusinessDayConvention)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        (Calendar? calendar, string calendarErrorMessage) = ParseCalendars(userCalendar);
+        (Calendar? calendar, string calendarErrorMessage) = DateParserUtils.ParseCalendars(userCalendar);
         if (calendar is null)
         {
             return calendarErrorMessage;
         }
 
         (BusinessDayConvention? businessDayConvention, string errorMessage) =
-            ParseBusinessDayConvention(userBusinessDayConvention);
+            DateParserUtils.ParseBusinessDayConvention(userBusinessDayConvention);
 
         if (businessDayConvention is null)
         {
@@ -181,34 +276,6 @@ public static class DateUtils
 
         return (DateTime) calendar.advance((Date) date, new Period(tenor),
             (BusinessDayConvention) businessDayConvention);
-    }
-
-    /// <summary>
-    /// Used to parse a range of Excel dates to a custom QLNet calendar.
-    /// </summary>
-    /// <param name="holidaysOrCalendars">Holiday range.</param>
-    /// <param name="calendar">Calendar.</param>
-    /// <returns>A custom QLNet calendar.</returns>
-    /// <exception cref="ArgumentException">Thrown for invalid dates in <param name="holidaysOrCalendars"></param>.</exception>
-    private static (Calendar? calendar, string errorMessage) ParseHolidays(object[,] holidaysOrCalendars,
-        Calendar calendar)
-    {
-        foreach (object holiday in holidaysOrCalendars)
-        {
-            if (double.TryParse(holiday.ToString(), out double holidayValue))
-            {
-                calendar.addHoliday(DateTime.FromOADate(holidayValue));
-            }
-            else
-            {
-                if (!Regex.IsMatch(holiday.ToString() ?? string.Empty, ValidHolidayTitlePattern))
-                {
-                    throw new ArgumentException($"{CommonUtils.DExcelErrorPrefix} Invalid date '{holiday}'.");
-                }
-            }
-        }
-
-        return (calendar, "");
     }
 
     /// <summary>
@@ -231,28 +298,6 @@ public static class DateUtils
         };
     }
 
-    /// <summary>
-    /// Parses a string to a business day convention in QLNet.
-    /// Users can get available business day conventions from <see cref="GetAvailableBusinessDayConventions"/>.
-    /// </summary>
-    /// <param name="businessDayConventionToParse">Business day convention to parse.</param>
-    /// <returns>QLNet business day convention.</returns>
-    public static (BusinessDayConvention? businessDayConvention, string errorMessage) ParseBusinessDayConvention(
-        string businessDayConventionToParse)
-    {
-        BusinessDayConvention? businessDayConvention = businessDayConventionToParse.ToUpper() switch
-        {
-            "FOL" or "FOLLOWING" => BusinessDayConvention.Following,
-            "MODFOL" or "MODIFIEDFOLLOWING" => BusinessDayConvention.ModifiedFollowing,
-            "MODPREC" or "MODIFIEDPRECEDING" => BusinessDayConvention.ModifiedPreceding,
-            "PREC" or "PRECEDING" => BusinessDayConvention.Preceding,
-            _ => null,
-        };
-
-        return businessDayConvention is null
-            ? (null, CommonUtils.DExcelErrorMessage($"Unknown business day convention: {businessDayConventionToParse}"))
-            : (businessDayConvention, "");
-    }
 
     /// <summary>
     /// Returns the list of available Day Count Conventions so that a user can view them in Excel.
@@ -294,58 +339,6 @@ public static class DateUtils
     }
 
     /// <summary>
-    /// Parses a string as a QLNet calendar.
-    /// </summary>
-    /// <param name="calendarToParse">Calendar to parse.</param>
-    /// <returns>QLNet calendar.</returns>
-    public static (Calendar? calendar, string errorMessage) ParseSingleCalendar(string? calendarToParse)
-    {
-        Calendar? calendar = calendarToParse?.ToUpper() switch
-        {
-            "ARS" or "ARGENTINA" => new Argentina(),
-            "AUD" or "AUSTRALIA" => new Australia(),
-            "BWP" or "BOTSWANA" => new Botswana(),
-            "BRL" or "BRAZIL" => new Brazil(),
-            "CAD" or "CANADA" => new Canada(),
-            "CHF" or "SWITZERLAND" => new Switzerland(),
-            "CNH" or "CNY" or "CHINA" => new China(),
-            "CZK" or "CZECH REPUBLIC" => new CzechRepublic(),
-            "DKK" or "DENMARK" => new Denmark(),
-            "EUR" => new TARGET(),
-            "GBP" or "UK" or "UNITED KINGDOM" => new UnitedKingdom(),
-            "GERMANY" => new Germany(),
-            "HKD" or "HONG KONG" => new HongKong(),
-            "HUF" or "HUNGARY" => new Hungary(),
-            "INR" or "INDIA" => new India(),
-            "ILS" or "ISRAEL" => new Israel(),
-            "ITALY" => new Italy(),
-            "JPY" or "JAPAN" => new Japan(),
-            "KRW" or "SOUTH KOREA" => new SouthKorea(),
-            "MXN" or "MEXICO" => new Mexico(),
-            "NOK" or "NORWAY" => new Norway(),
-            "NZD" or "NEW ZEALAND" => new NewZealand(),
-            "PLN" or "POLAND" => new Poland(),
-            "RON" or "ROMANIA" => new Romania(),
-            "RUB" or "RUSSIA" => new Russia(),
-            "SAR" or "SAUDI ARABIA" => new SaudiArabia(),
-            "SGD" or "SINGAPORE" => new Singapore(),
-            "SKK" or "SWEDEN" => new Sweden(),
-            "SLOVAKIA" => new Slovakia(),
-            "THB" or "THAILAND" => new Thailand(),
-            "TRY" or "TURKEY" => new Turkey(),
-            "TWD" or "TAIWAN" => new Taiwan(),
-            "UAH" or "UKRAINE" => new Ukraine(),
-            "USD" or "USA" or "UNITED STATES" or "UNITED STATES OF AMERICA" => new UnitedStates(),
-            "ZAR" or "SOUTH AFRICA" => new SouthAfrica(),
-            _ => null,
-        };
-
-        return calendar is not null
-            ? (calendar, "")
-            : (null, CommonUtils.DExcelErrorMessage($"Unknown calendar: {calendarToParse}"));
-    }
-
-    /// <summary>
     /// Gets the list of available calendars.
     /// </summary>
     /// <returns>List of available calendars.</returns>
@@ -355,8 +348,7 @@ public static class DateUtils
         Category = "∂Excel: Dates")]
     public static object[,] GetListOfCalendars()
     {
-        object[,] calendars = new object[34, 4]
-        {
+        object[,] calendars = {
             {"Variant 1", "Variant 2", "Variant 3", "Variant 4"},
             {"ARS", "Argentina", "", ""},
             {"AUD", "Australia", "", ""},
@@ -390,12 +382,12 @@ public static class DateUtils
             {"TWD", "Taiwan", "", ""},
             {"UAH", "Ukraine", "", ""},
             {"USD", "USA", "United States", "United States of America"},
+            {"WEEKENDSONLY", "", "", ""},
             {"ZAR", "South Africa", "", ""},
         };
         
         return calendars;
     }
-
 
     /// <summary>
     /// Get a list of holidays between, and including, two dates and excluding weekends. If a holiday falls on a weekend
@@ -424,7 +416,7 @@ public static class DateUtils
             Description = "The single calendar (e.g., 'USD', 'ZAR') or joint calendar (e.g., 'USD,ZAR') to parse.")]
         string calendarsToParse)
     {
-        (Calendar? calendar, string errorMessage) = ParseCalendars(calendarsToParse);
+        (Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsToParse);
         if (calendar is null)
         {
             return new object[,] {{errorMessage}};
@@ -456,55 +448,6 @@ public static class DateUtils
         return output;
     }
 
-    private static (Calendar? calendar, string errorMessage) ParseJointCalendar(string? calendarsToParse)
-    {
-        IEnumerable<string>? calendars = calendarsToParse?.Split(',').Select(x => x.Trim());
-
-        if (calendars != null)
-        {
-            IEnumerable<string> enumerable = calendars as string[] ?? calendars.ToArray();
-            (Calendar? calendar0, string errorMessage0) = ParseSingleCalendar(enumerable.ElementAt(0));
-            (Calendar? calendar1, string errorMessage1) = ParseSingleCalendar(enumerable.ElementAt(1));
-
-            if (calendar0 is null)
-            {
-                return (calendar0, errorMessage0);
-            }
-
-            if (calendar1 is null)
-            {
-                return (calendar1, errorMessage1);
-            }
-
-            JointCalendar jointCalendar = new(calendar0, calendar1);
-
-            for (int i = 2; i < enumerable.Count(); i++)
-            {
-                (Calendar? currentCalendar, string currentErrorMessage) = ParseSingleCalendar(enumerable.ElementAt(i));
-                if (currentCalendar is null)
-                {
-                    return (currentCalendar, currentErrorMessage);
-                }
-
-                jointCalendar = new JointCalendar(jointCalendar, currentCalendar);
-            }
-
-            return (jointCalendar, "");
-        }
-
-        return (null, CommonUtils.DExcelErrorMessage("No valid calendars found."));
-    }
-
-    private static (Calendar? calendar, string errorMessage) ParseCalendars(string? calendarsToParse)
-    {
-        if (calendarsToParse != null && calendarsToParse.Contains(','))
-        {
-            return ParseJointCalendar(calendarsToParse);
-        }
-
-        return ParseSingleCalendar(calendarsToParse);
-    }
-
     /// <summary>
     /// Generates a date schedule. Does not currently support stub periods.
     /// </summary>
@@ -529,7 +472,7 @@ public static class DateUtils
         string frequency,
         [ExcelArgument(Name = "Calendar(s)", Description = "The calendar(s) to parse e.g., 'USD', 'ZAR', 'USD,ZAR' etc.")]
         string calendarsToParse,
-        [ExcelArgument(Name = "BDC", Description = "Business day convention e.g., 'FOL', 'MODFOL', 'PREC' etc.")]
+        [ExcelArgument(Name = "Business Day Convention", Description = "Business day convention e.g., 'FOL', 'MODFOL', 'PREC' etc.")]
         string businessDayConventionToParse,
         [ExcelArgument(
             Name = "Rule", 
@@ -539,14 +482,14 @@ public static class DateUtils
                           "\n'IMM' = IMM dates.")]
         string ruleToParse)
     {
-        (Calendar? calendar, string calendarErrorMessage) = ParseCalendars(calendarsToParse);
+        (Calendar? calendar, string calendarErrorMessage) = DateParserUtils.ParseCalendars(calendarsToParse);
         if (calendar is null)
         {
             return new object[,] {{calendarErrorMessage}};
         }
 
         (BusinessDayConvention? businessDayConvention, string errorMessage) =
-            ParseBusinessDayConvention(businessDayConventionToParse);
+            DateParserUtils.ParseBusinessDayConvention(businessDayConventionToParse);
 
         if (businessDayConvention is null)
         {
@@ -555,7 +498,7 @@ public static class DateUtils
 
         if (ruleToParse.ToUpper()!= "BACKWARD" && ruleToParse.ToUpper() != "FORWARD" && ruleToParse.ToUpper() != "IMM") 
         {
-            return new object[,] {{ CommonUtils.DExcelErrorMessage($"Invalid rule specified: {ruleToParse}") }};
+            return new object[,] {{ CommonUtils.DExcelErrorMessage($"Unsupported rule specified: '{ruleToParse}'") }};
         }
 
         DateGeneration.Rule rule = ruleToParse.ToUpper() switch
@@ -584,5 +527,40 @@ public static class DateUtils
         }
 
         return output;
+    }
+
+    /// <summary>
+    /// Gets the day of week for the given date.
+    /// </summary>
+    /// <param name="date">The date.</param>
+    /// <returns>The day of the week.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_GetWeekday", 
+        Description = "Gets the day of the week for the given date.",
+        Category = "∂Excel: Dates")]
+    public static string GetWeekday(DateTime date)
+    {
+        return date.DayOfWeek.ToString();
+    }
+    
+    /// <summary>
+    /// Checks if the given date, for the given calendar, is a business day.
+    /// </summary>
+    /// <param name="date">Date to check.</param>
+    /// <param name="calendarsToParse">The calendar(s).</param>
+    /// <returns>True, if the given date is a business day, otherwise false.</returns>
+    [ExcelFunction(
+        Name = "d.Dates_IsBusinessDay",
+        Description = "Checks if the given date, for the given calendar, is a business day.",
+        Category = "∂Excel: Dates")]
+    public static object IsBusinessDay(DateTime date, string calendarsToParse)
+    {
+        (Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsToParse); 
+        if (calendar is null)
+        {
+            return errorMessage;
+        }
+       
+        return calendar.isBusinessDay(date);
     }
 } 
