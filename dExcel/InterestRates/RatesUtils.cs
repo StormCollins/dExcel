@@ -62,28 +62,31 @@ public static class RatesUtils
     /// <returns>Interest rate converted to new compounding convention.</returns>
     [ExcelFunction(
        Name = "d.IR_ConvertInterestRate",
-       Description = "Converts an interest rate from one compounding convention to another.\n" +
-                     "Deprecates AQS Function: 'IntConvert'",
+       Description = 
+           "Converts an interest rate from one compounding convention to another.\n" +
+           "Deprecates AQS Function: 'IntConvert'",
        Category = "∂Excel: Interest Rates")]
     public static object ConvertInterestRate(
-        [ExcelArgument(
-                Name = "Rate",
-                Description = "The interest rate to convert.")]
+        [ExcelArgument(Name = "Rate", Description = "The interest rate to convert.")]
         double rate,
         [ExcelArgument(
-                Name = "Rate Tenor",
-                Description = "The tenor of the supplied interest rate to convert, as a fraction of a year.")]
-        double rateTenor,
-        [ExcelArgument(
                 Name = "Old Compounding Convention ",
-                Description = "The compounding convention to convert from.\n" +
-                              "Options:'Simple', 'NACC', 'NACA', 'NACS', 'NACQ', 'NACM'")]
+                Description = 
+                    "The compounding convention to convert from.\n" +
+                    "Options:'Simple', 'NACC', 'NACA', 'NACS', 'NACQ', 'NACM'")]
         string oldCompoundingConvention,
         [ExcelArgument(
                 Name = "New Compounding Convention ",
-                Description = "The compounding convention to convert from.\n" +
-                              "Options: 'Simple', 'NACC', 'NACA', 'NACS', 'NACQ', 'NACM'")]
-        string newCompoundingConvention)
+                Description = 
+                    "The compounding convention to convert from.\n" +
+                    "Options: 'Simple', 'NACC', 'NACA', 'NACS', 'NACQ', 'NACM'")]
+        string newCompoundingConvention,
+        [ExcelArgument(
+                Name = "(Optional)Rate Tenor",
+                Description = 
+                    "The tenor of the supplied interest rate to convert, as a fraction of a year.\n" +
+                    "Note this is only required for calculations involving 'Simple' compounding.")]
+        double rateTenor)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();

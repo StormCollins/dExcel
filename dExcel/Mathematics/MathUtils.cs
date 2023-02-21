@@ -106,6 +106,50 @@ public static class MathUtils
 
     /// <summary>
     /// Performs linear, exponential, or flat interpolation on a range for a single given point.
+    /// However, you need to specify which, zero-based index, column contains the dependent variables.
+    /// </summary>
+    /// <param name="xRange">Independent variable.</param>
+    /// <param name="yRangeColumns">Each column is a set of dependent variables.</param>
+    /// <param name="columnIndex">The zero-based index of the column containing the dependent variables.</param>
+    /// <param name="xi">Value for which to interpolate.</param>
+    /// <param name="method">Method of interpolation: 'linear', 'exponential', 'flat'</param>
+    /// <returns>Interpolated y-value.</returns>
+    [ExcelFunction(
+        Name = "d.Math_InterpolateChosenColumn",
+        Description = "Performs linear, exponential, or flat interpolation on a range for a single given point.\n" +
+                      "However, you need to specify which, zero-based index, column contains the dependent variables.\n" +
+                      "Deprecates AQS functions: 'DT_Interp' and 'DT_Interp1'",
+        Category = "∂Excel: Mathematics")]
+    public static object InterpolateChosenColumn(
+        [ExcelArgument(Name = "X-values", Description = "Independent variable.")]
+        object[,] xRange,
+        [ExcelArgument(Name = "Y-value Columns", Description = "Each column is a set of dependent variables.")]
+        object[,] yRangeColumns,
+        [ExcelArgument(
+            Name = "Column Index", 
+            Description = "The zero-based index of the column containing the dependent variables.")]
+        int columnIndex,
+        [ExcelArgument(Name = "Xi", Description = "Value for which to interpolate.")]
+        double xi,
+        [ExcelArgument(
+            Name = "Method",
+            Description = "Method of interpolation: 'linear', 'exponential', 'flat'")]
+        string method)
+    {
+#if DEBUG
+        CommonUtils.InFunctionWizard();
+#endif
+        List<double> yValues = new();
+        for (int i = 0; i < yRangeColumns.GetLength(0); i++)
+        {
+            yValues.Add(double.Parse(yRangeColumns[i, columnIndex].ToString() ?? string.Empty)); 
+        }
+
+        return Interpolate(xRange, ExcelArrayUtils.ConvertListToExcelRange(yValues, 0), xi, method);
+    }
+    
+        /// <summary>
+    /// Performs linear, exponential, or flat interpolation on a range for a single given point.
     /// </summary>
     /// <param name="xRange">Independent variable.</param>
     /// <param name="yRange">Dependent variable.</param>

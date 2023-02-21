@@ -56,7 +56,7 @@ public class MathUtilsTests
         const double expected = 2.0;
         Assert.AreEqual(expected, actual);
     }
-
+    
     [Test]
     public void DuplicateXValuesTest()
     {
@@ -67,6 +67,16 @@ public class MathUtilsTests
         Assert.AreEqual(expected, actual);
     }
 
+    [Test]
+    public void InterpolateChosenColumn_LinearInterpolationTest()
+    {
+        object[,] xValues = { { 1.0 }, { 2.0 }, { 3.0 }, { 4.0 } };
+        object[,] yValues = { { 2.0, 0.0 }, { 4.0, 2.0 }, { 6.0, 4.0 }, { 8.0, 6.0 } };
+        double actual = (double)MathUtils.InterpolateChosenColumn(xValues, yValues, 0, 1.5, "linear");
+        const double expected = 3;
+        Assert.AreEqual(expected, actual);
+    }
+    
     [Test]
     public void UnsupportedInterpolationTest()
     {

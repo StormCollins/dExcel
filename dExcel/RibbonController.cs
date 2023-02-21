@@ -504,24 +504,24 @@ public class RibbonController : ExcelRibbon
             }
         }
 
-    // Password protect the VBA code.
-    // TODO: See if this can be simplified.
-    xlApp.Application.ScreenUpdating = false;
+        // Password protect the VBA code.
+        // TODO: See if this can be simplified.
+        xlApp.Application.ScreenUpdating = false;
     
-     string breakIt = "%{F11}%TE+{TAB}{RIGHT}%V{+}{TAB}";
-     foreach (VBIDE.Window window in wb.VBProject.VBE.Windows)
-     {
-         if (window.Caption.Contains('('))
-         {
-             window.Close();
-         }
-     }
-    wb.Activate();
+        string breakIt = "%{F11}%TE+{TAB}{RIGHT}%V{+}{TAB}";
+        foreach (VBIDE.Window window in wb.VBProject.VBE.Windows)
+        {
+            if (window.Caption.Contains('('))
+            {
+                window.Close();
+            }
+        }
+        wb.Activate();
          
-          xlApp.Application.OnKey("%{F11}");
-          SendKeys.SendWait(breakIt + "asterix" + "{TAB}" + "asterix" + "~%{F11}");
-          xlApp.Application.ScreenUpdating = true;
-          wb.Activate();
+        xlApp.Application.OnKey("%{F11}");
+        SendKeys.SendWait(breakIt + "asterix" + "{TAB}" + "asterix" + "~%{F11}");
+        xlApp.Application.ScreenUpdating = true;
+        wb.Activate();
     }
 
     public void ViewObjectChart(IRibbonControl control)
