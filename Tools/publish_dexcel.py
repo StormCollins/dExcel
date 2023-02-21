@@ -29,7 +29,7 @@ def zipdir(path, ziph):
                        os.path.relpath(os.path.join(root, file), path))
 
 
-PING_HOST: str = 'gitlab.fsa-aks.deloitte.co.za'  
+PING_HOST: str = 'https://gitlab.fsa-aks.deloitte.co.za'  
 
 try:
     # The path on the local machine where the release build is created.
@@ -40,12 +40,12 @@ try:
     tree = ET.parse(dexcel_project_file_path)
     version_number: str = tree.getroot().find('PropertyGroup').find('Version').text
 
-    print(f'-----------------------------------------------------------')
-    print(f'Publishing dExcel version {version_number} to Shared Drive.')
-    print(f'-----------------------------------------------------------')
-    print(f'Checking connection to VPN...')
+    # print(f'-----------------------------------------------------------')
+    # print(f'Publishing dExcel version {version_number} to Shared Drive.')
+    # print(f'-----------------------------------------------------------')
+    # print(f'Checking connection to VPN...')
 
-    data = socket.gethostbyname(PING_HOST)
+    # data = socket.gethostbyname(PING_HOST)
 
     print('Copy SQLite DLL for stats database...')
     sqlite_dll_source_path: str = os.path.join(release_build_path, r'runtimes\win-x64\native\SQLite.Interop.dll')
@@ -87,11 +87,11 @@ try:
     print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ')
     print()
 
-except socket.error:
-    print('You are not connected to the VPN.')
-    print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ')
-    print('         Failed to Publish dExcel to Shared Drive           ')
-    print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ')
+# except socket.error:
+#     print('You are not connected to the VPN.')
+#     print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ')
+#     print('         Failed to Publish dExcel to Shared Drive           ')
+#     print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ')
 
 except Exception as e:
     print(f'Unhandled exception {e} of type {type(e)} occurred.')

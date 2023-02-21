@@ -83,6 +83,7 @@
 					  screentip='Creates hyperlink(s) to cell(s) with a heading style.'/>
 					<button
 					  id='btnCreateLinksToHeadingsInOtherSheet'
+					  enabled="false"
 					  label='Create Link(s) to Heading(s) in Other Sheet'
 					  onAction='CreateLinksToHeadingsInOtherSheets'
 					  screentip='Creates link(s) to cell(s) with a heading style in sheets other than the current one.'/>
