@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to ∂Excel will be documented in this file.
 
+## [0.1.4] - 2023-02-21
+### Features
+- Added ``d.Math_InterpolateChosenColumn``.
+- Enabled ``Run All Tests`` in ``dexcel-testing.xlsm``.
+- Added tests for ``Hyperlink Utils`` in ``dexcel-testing.xlsm``.
+
+### Bugs
+- Fixed ``Fix EMS Links`` functionality.
+- Fixed single curve bootstrapping.
+- Made ``Rate Tenor`` last parameter in ``d.IR_ConvertInterestRate`` and marked it as optional.
+
 ## [0.1.3] - 2023-01-20 
 ### Features
 - Enabled ExcelDnaIntelliSense.
