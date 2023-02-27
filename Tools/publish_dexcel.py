@@ -94,10 +94,8 @@ def ping(host: str) -> bool:
 
     except socket.error as e:
         error_message()
-        print(f'• Socket error encountered: {Fore.LIGHTRED_EX}{Style.BRIGHT}{e}{Style.RESET_ALL}')
-        print(f'{Fore.YELLOW}{Style.BRIGHT}')
-        print(f'Are you connected to the VPN?', end='')
-        print(f'{Style.RESET_ALL}')
+        print(f' - Socket error encountered: {Fore.LIGHTRED_EX}{Style.BRIGHT}{e}{Style.RESET_ALL}')
+        print_warning(f'Are you connected to the VPN?')
         failed_to_publish_message()
         return False
 

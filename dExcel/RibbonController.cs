@@ -533,54 +533,6 @@ public class RibbonController : ExcelRibbon
 
     public void FixEMSLinks(IRibbonControl ribbonControl)
     {
-        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
-        Excel.Workbook xlActiveWorkbook = xlApp.ActiveWorkbook;
-
-        int numberOfOpenWorkbooks = xlApp.Workbooks.Count;
-        List<string> xlOpenWorkbooks = new();
-        for (int i = 1; i <= numberOfOpenWorkbooks; i++)
-        {
-            xlOpenWorkbooks.Add(xlApp.Workbooks[i].Name);
-        }
-
-        foreach (Excel.Worksheet xlWorksheet in xlActiveWorkbook.Worksheets)
-        {
-            Excel.Range xlUsedRange = xlWorksheet.UsedRange;
-
-            foreach (string xlOpenWorkbook in xlOpenWorkbooks)
-            {
-                if (xlOpenWorkbook != xlActiveWorkbook.Name)
-                {
-                    Excel.Range workbookFind = ExcelFind(xlOpenWorkbook);
-
-                    while (workbookFind is not null)
-                    {
-                        string filePath = 
-                            Regex.Match(xlWorksheet.Range[workbookFind.Address].Formula, @"(?<==')[^\[]+").Value;
-
-                        xlUsedRange.Replace(
-                            What: filePath,
-                            Replacement: "",
-                            LookAt: Excel.XlLookAt.xlPart,
-                            SearchOrder: Excel.XlSearchOrder.xlByRows,
-                            MatchCase: true,
-                            SearchFormat: false,
-                            ReplaceFormat: false);
-
-                        workbookFind = ExcelFind(xlOpenWorkbook);
-                    }
-                }
-            }
-
-            Excel.Range ExcelFind(string stringToFind)
-                => xlUsedRange.Find(
-                    What: "\\[" + stringToFind + "]",
-                    LookIn: Excel.XlFindLookIn.xlFormulas,
-                    LookAt: Excel.XlLookAt.xlPart,
-                    SearchOrder: Excel.XlSearchOrder.xlByRows,
-                    SearchDirection: Excel.XlSearchDirection.xlNext,
-                    MatchCase: true,
-                    SearchFormat: false);
-        }
+        EmsUtils.FixEmsLinks(); 
     }
 }
