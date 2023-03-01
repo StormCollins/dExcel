@@ -76,7 +76,28 @@ public class MathUtilsTests
         const double expected = 3;
         Assert.AreEqual(expected, actual);
     }
-    
+
+    [Test]
+    public void InterpolateChosenColumn_ColumnIndexLessThanZeroErrorTest()
+    {
+        object[,] xValues = { { 1.0 }, { 2.0 }, { 3.0 }, { 4.0 } };
+        object[,] yValues = { { 2.0, 0.0 }, { 4.0, 2.0 }, { 6.0, 4.0 }, { 8.0, 6.0 } };
+        string? actual = MathUtils.InterpolateChosenColumn(xValues, yValues, -1, 1.5, "linear").ToString();
+        string expected = CommonUtils.DExcelErrorMessage("Column index < 0. Must be between 0 and 1.");
+        Assert.AreEqual(expected, actual);
+    }
+
+    [Test]
+    public void InterpolateChosenColumn_ColumnIndexTooHighErrorTest()
+    {
+        object[,] xValues = { { 1.0 }, { 2.0 }, { 3.0 }, { 4.0 } };
+        object[,] yValues = { { 2.0, 0.0 }, { 4.0, 2.0 }, { 6.0, 4.0 }, { 8.0, 6.0 } };
+        string? actual = MathUtils.InterpolateChosenColumn(xValues, yValues, 2, 1.5, "linear").ToString();
+        string expected = CommonUtils.DExcelErrorMessage("Column index ≥ 2. Must be between 0 and 1.");
+        Assert.AreEqual(expected, actual);
+    }
+
+
     [Test]
     public void UnsupportedInterpolationTest()
     {

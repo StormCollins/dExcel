@@ -116,9 +116,10 @@ public static class MathUtils
     /// <returns>Interpolated y-value.</returns>
     [ExcelFunction(
         Name = "d.Math_InterpolateChosenColumn",
-        Description = "Performs linear, exponential, or flat interpolation on a range for a single given point.\n" +
-                      "However, you need to specify which, zero-based index, column contains the dependent variables.\n" +
-                      "Deprecates AQS functions: 'DT_Interp' and 'DT_Interp1'",
+        Description = 
+            "Performs linear, exponential, or flat interpolation on a range for a single given point.\n" +
+            "However, you need to specify which, zero-based index, column contains the dependent variables.\n" +
+            "Deprecates AQS functions: 'DT_Interp' and 'DT_Interp1'",
         Category = "∂Excel: Mathematics")]
     public static object InterpolateChosenColumn(
         [ExcelArgument(Name = "X-values", Description = "Independent variable.")]
@@ -139,6 +140,16 @@ public static class MathUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
+        if (columnIndex < 0)
+        {
+            return CommonUtils.DExcelErrorMessage($"Column index < 0. Must be between 0 and {yRangeColumns.GetLength(1) - 1}.");
+        }
+
+        if (columnIndex >= yRangeColumns.GetLength(1))
+        {   
+            return CommonUtils.DExcelErrorMessage($"Column index ≥ {yRangeColumns.GetLength(1)}. Must be between 0 and {yRangeColumns.GetLength(1) - 1}.");
+        }
+
         List<double> yValues = new();
         for (int i = 0; i < yRangeColumns.GetLength(0); i++)
         {
@@ -158,8 +169,9 @@ public static class MathUtils
     /// <returns>Interpolated y-value.</returns>
     [ExcelFunction(
         Name = "d.Math_Interpolate",
-        Description = "Performs linear, exponential, or flat interpolation on a range for a single given point.\n" +
-                      "Deprecates AQS functions: 'DT_Interp' and 'DT_Interp1'",
+        Description = 
+            "Performs linear, exponential, or flat interpolation on a range for a single given point.\n" +
+            "Deprecates AQS functions: 'DT_Interp' and 'DT_Interp1'",
         Category = "∂Excel: Mathematics")]
     public static object Interpolate(
         [ExcelArgument(Name = "X-values", Description = "Independent variable.")]
