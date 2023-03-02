@@ -113,6 +113,7 @@ public static class CurveBootstrapper
             ["CurveUtils.Object"] = termStructure,
         };
 
-        return DataObjectController.Add(handle, curveDetails);
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return dataObjectController.Add(handle, curveDetails);
     }
 }

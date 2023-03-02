@@ -28,6 +28,7 @@ public static class CreditUtils
         InterpolatedSurvivalProbabilityCurve<LogLinear> curve =
             new(dates, survivalProbabilities, new Actual360());
 
-        return DataObjectController.Add(handle, curve);
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return dataObjectController.Add(handle, curve);
     }
 }

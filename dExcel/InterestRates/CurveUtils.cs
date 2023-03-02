@@ -11,7 +11,10 @@ using Utilities;
 public static class CurveUtils
 {
     public static CurveDetails GetCurveDetails(string handle)
-        => (CurveDetails)DataObjectController.GetDataObject(handle);
+    {
+        DataObjectController controller = DataObjectController.Instance;
+        return (CurveDetails)controller.GetDataObject(handle);
+    }
 
     /// <summary>
     /// Gets the curve object from a given handle which can be used to extract discount factors, zero rates etc.
@@ -19,7 +22,12 @@ public static class CurveUtils
     /// <param name="handle">The handle for the relevant curve object.</param>
     /// <returns>Returns the YieldTermStructure object.</returns>
     public static YieldTermStructure? GetCurveObject(string handle)
-        => ((CurveDetails)DataObjectController.GetDataObject(handle)).TermStructure as YieldTermStructure;
+    {
+        DataObjectController controller = DataObjectController.Instance;
+        YieldTermStructure curve = ((CurveDetails)controller.GetDataObject(handle)).TermStructure as YieldTermStructure;
+        Settings.setEvaluationDate(curve.referenceDate());
+        return curve;
+    }
 
     /// <summary>
     /// Gets the DayCounter object from a given handle which can be used to calculate year fractions.
@@ -27,15 +35,21 @@ public static class CurveUtils
     /// <param name="handle">The handle for the relevant curve object.</param>
     /// <returns>Returns the DayCounter object e.g. Actual365Fixed.</returns>
     private static DayCounter GetCurveDayCountConvention(string handle)
-        => ((CurveDetails)DataObjectController.GetDataObject(handle)).DayCountConvention; 
-    
+    {
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return ((CurveDetails)dataObjectController.GetDataObject(handle)).DayCountConvention; 
+    }
+
     /// <summary>
     /// Gets the interpolation object from a given handle.
     /// </summary>
     /// <param name="handle">The handle for the relevant curve object.</param>
     /// <returns>Returns the interpolation object e.g. LogLinear.</returns>   
     private static string GetInterpolation(string handle)
-        => ((CurveDetails)DataObjectController.GetDataObject(handle)).DiscountFactorInterpolation;
+    {
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return ((CurveDetails)dataObjectController.GetDataObject(handle)).DiscountFactorInterpolation;
+    }
 
     /// <summary>
     /// Creates a QLNet YieldTermStructure curve object which is stored in the DataObjectController.
@@ -114,12 +128,14 @@ public static class CurveUtils
         Type interpolationType = typeof(InterpolatedDiscountCurve<>).MakeGenericType(interpolation.GetType());
         object? termStructure = Activator.CreateInstance(interpolationType, dates, discountFactors, dayCountConvention, interpolation);
         CurveDetails curveDetails = new(termStructure, dayCountConvention, interpolationParameter, dates, discountFactors);
-        return DataObjectController.Add(handle, curveDetails);
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return dataObjectController.Add(handle, curveDetails);
     }
 
     public static InterpolatedDiscountCurve<LogLinear> GetDiscountCurve(string handle)
     {
-        return (InterpolatedDiscountCurve<LogLinear>)DataObjectController.GetDataObject(handle);
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return (InterpolatedDiscountCurve<LogLinear>)dataObjectController.GetDataObject(handle);
     }
 
     /// <summary>
@@ -131,7 +147,8 @@ public static class CurveUtils
     [ExcelFunction(
         Name = "d.Curve_GetDiscountFactors",
         Description = "Gets the discount factor(s) from a curve object for a given set of date(s).",
-        Category = "∂Excel: Interest Rates")]
+        Category = "∂Excel: Interest Rates",
+        IsVolatile = true)]
     public static object GetDiscountFactors(
         [ExcelArgument(
             Name = "Handle",

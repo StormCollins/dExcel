@@ -6,24 +6,44 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Utilities;
 
-public static class DataObjectController
+public sealed class DataObjectController
 {
-    private static readonly Dictionary<string, object> DataObjects = new();
+    private readonly Dictionary<string, object> _dataObjects;
 
-    public static string Add(string handle, object dataObject)
+    private DataObjectController()
+    {
+        _dataObjects = new Dictionary<string, object>();
+    }
+
+    private static DataObjectController _instance = new();
+
+    public static DataObjectController Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new DataObjectController();
+            }
+
+            return _instance;
+        }
+    }
+
+    public string Add(string handle, object dataObject)
     {
         char[] bannedCharacters = { '@', ':', ',', ';', '\\', '/' };
         if (bannedCharacters.Any(handle.Contains))
         {
             return CommonUtils.DExcelErrorMessage($"Handle may not contain following: {string.Join(", ", bannedCharacters)}");
         }
-        if (!DataObjects.ContainsKey(handle))
+        if (!_dataObjects.ContainsKey(handle))
         {
-            DataObjects.Add(handle, dataObject);
+            _dataObjects.Add(handle, dataObject);
         }
         else
         {
-            DataObjects[handle] = dataObject;  
+            _dataObjects[handle] = dataObject;  
         }
         return $"@@{handle}::{DateTime.Now:HH:mm:ss}";
     }
@@ -33,8 +53,8 @@ public static class DataObjectController
         return Regex.Match(dirtyTag, @"(?<=@@)[^:]+").Value;
     }
 
-    public static object GetDataObject(string handle)
+    public object GetDataObject(string handle)
     {
-        return DataObjects[CleanHandle(handle)];
+        return _dataObjects[CleanHandle(handle)];
     }
 }

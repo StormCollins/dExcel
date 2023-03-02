@@ -1,4 +1,6 @@
-﻿namespace dExcel.InterestRates;
+﻿using dExcel.Dates;
+
+namespace dExcel.InterestRates;
 
 using ExcelUtils;
 using ExcelDna.Integration;
@@ -215,12 +217,15 @@ public static class SingleCurveBootstrapper
                 {
                     if (includeInstruments[i])
                     {
+                        // rateHelpers.Add(
+                        //     item: new DatedOISRateHelper(
+                        //     startDate: (DateTime)DateUtils.AddTenorToDate(baseDate, "2d", "USD", "ModFol"), 
+                        //     endDate: endDates?[i],
+                        //     fixedRate: new Handle<Quote>(new SimpleQuote(rates?[i])),
+                        //     overnightIndex: rateIndex as OvernightIndex));
+
                         rateHelpers.Add(
-                            item: new DatedOISRateHelper(
-                            startDate: baseDate, 
-                            endDate: endDates?[i],
-                            fixedRate: new Handle<Quote>(new SimpleQuote(rates?[i])),
-                            overnightIndex: rateIndex as OvernightIndex));
+                            item: new OISRateHelper(2, new Period(tenors?[i]), new Handle<Quote>(new SimpleQuote(rates?[i])), rateIndex as OvernightIndex));
                     }
                 }
             }
@@ -299,6 +304,7 @@ public static class SingleCurveBootstrapper
         }
          
         CurveDetails curveDetails = new(termStructure, rateIndex.dayCounter(), interpolation, new List<Date>(), new List<double>());
-        return DataObjectController.Add(handle, curveDetails);
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return dataObjectController.Add(handle, curveDetails);
     }
 }

@@ -104,7 +104,9 @@ public static class HullWhite
             ["alpha"] = hullWhite.parameters()[0],
             ["sigma"] = hullWhite.parameters()[1],
         };
-        return DataObjectController.Add(parameterHandle, parameters);
+
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return dataObjectController.Add(parameterHandle, parameters);
     }
     
     /// <summary>
@@ -139,7 +141,8 @@ public static class HullWhite
         Category = "∂Excel: Interest Rates")]
     public static object[,] GetHullWhiteParameters(string handle)
     {
-        var parameters = (Dictionary<string, double>)DataObjectController.GetDataObject(handle);
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        var parameters = (Dictionary<string, double>)dataObjectController.GetDataObject(handle);
         object[,] output = new object[3, 2];
         output[0, 0] = "Parameter";
         output[0, 1] = "Value";
