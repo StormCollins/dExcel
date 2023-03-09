@@ -34,7 +34,7 @@ public static class OmicronCurveUtils
             this.value = value;
         }
     }
-
+    
     public static void SerializeOmicronObject()
     {
         OmicronObject omicronObject =
@@ -70,9 +70,13 @@ public static class OmicronCurveUtils
         List<QuoteValue> deserializedObject = JsonConvert.DeserializeObject<List<QuoteValue>>(serializedObject);
          
     }
-    
-    
 
+
+    public static List<QuoteValue> DeserializeOmicronObject(string json)
+    {
+        return null;
+    }
+    
     public static void PullData()
     {
         using HttpClient client = new HttpClient();
@@ -162,6 +166,9 @@ public static class OmicronCurveUtils
                     tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
                     commodity = Enum.Parse<Commodity>(jObject["Commodity"].ToString());
                     return new CommodityOption(delta, option, tenor, commodity);
+                // case "InterestRateSwap":
+                //     RateIndex rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["RateIndex"].ToString()); 
+                //     return new InterestRateSwap(new RateIndex());
             }
             return null;
         }
