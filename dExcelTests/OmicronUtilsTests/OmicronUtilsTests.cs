@@ -9,6 +9,7 @@ public class OmicronUtilsTests
     [Test]
     public void GetDataTest()
     {
-        OmicronCurveUtils.PullData();
+        // OmicronCurveUtils.PullData();
+        OmicronCurveUtils.SerializeOmicronObject();
     }
 }

@@ -1,11 +1,17 @@
-﻿namespace dExcel.OmicronUtils;
+﻿using System.Text.Json;
 
-using System.Collections;
+namespace dExcel.OmicronUtils;
+
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.Json.Serialization;
-using SkiaSharp.HarfBuzz;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
+using Omicron;
+using Omicron.Data.Serialisation;
+using QLNet;
+using JsonConverter = Newtonsoft.Json.JsonConverter;
+using Option = Omicron.Option;
 
 public static class OmicronCurveUtils
 {
@@ -14,6 +20,58 @@ public static class OmicronCurveUtils
     private const int RequisitionId = 1;
 
     private const string Date = "2023-02-14";
+
+    public class OmicronObject
+    {
+        public QuoteType type;
+        public DateTime date;
+        public double value;
+
+        public OmicronObject(QuoteType type, DateTime date, double value)
+        {
+            this.type = type;
+            this.date = date;
+            this.value = value;
+        }
+    }
+
+    public static void SerializeOmicronObject()
+    {
+        OmicronObject omicronObject =
+            new(
+                type: new CommodityOption(25, Option.Put, new Tenor(12, TenorUnit.Month), Commodity.BrentCrudeIce),
+                date: new DateTime(2023, 02, 14),
+                value: 12);
+        
+        string json = JsonConvert.SerializeObject(omicronObject);
+
+        string serializedObject =
+            "[" +
+            "{\"type\":{\"$type\":\"CommodityFuture\",\"Tenor\": {\"amount\":12,\"unit\":\"Month\"},\"Commodity\":\"Ethane\"},\"date\":\"2023-02-14T00:00:00\",\"value\":0.24625}," +
+            "{\"type\":{\"$type\":\"CommodityOption\",\"Delta\":25,\"OptionType\":\"Put\",\"Tenor\":{\"amount\":10,\"unit\":\"Month\"},\"Commodity\":\"BrentCrudeIce\"},\"date\":\"2023-02-14T00:00:00\",\"value\":0.4103 }]";
+
+        string commodityFuture =
+            "{\"type\":{\"$type\":\"CommodityFuture\",\"Tenor\": {\"amount\":12,\"unit\":\"Month\"},\"Commodity\":\"Ethane\"},\"date\":\"2023-02-14T00:00:00\",\"value\":0.24625}";
+
+        var x = commodityFuture[45];
+
+        JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+        {
+            Converters = new List<JsonConverter>
+            {
+                new dExcelQuoteTypeConverter(), 
+                new StringEnumConverter(),
+                new dExcelQuoteValueConverter(),
+            }
+        };
+        
+        QuoteTypeConverter converter = new QuoteTypeConverter();
+        
+        List<QuoteValue> deserializedObject = JsonConvert.DeserializeObject<List<QuoteValue>>(serializedObject);
+         
+    }
+    
+    
 
     public static void PullData()
     {
@@ -33,4 +91,92 @@ public static class OmicronCurveUtils
             Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
         }
     }
+
+    // public class OmicronObjectConverter<T> : JsonConverter<T> 
+    //     where T : OmicronObject
+    // {
+    //     public override void WriteJson(JsonWriter writer, T? value, JsonSerializer serializer)
+    //     {
+    //         throw new NotImplementedException();
+    //     }
+    //
+    //     public override T? ReadJson(JsonReader reader, Type objectType, T? existingValue, bool hasExistingValue, JsonSerializer serializer)
+    //     {
+    //         reader.Read();
+    //         return null;
+    //     }
+    //     
+    //     public override bool CanConvert(Type objectType)
+    //     {
+    //         return typeof(objectType).IsAssignableFrom(typeof(T));
+    //     }
+    // }
+    
+    public abstract class JsonCreationConverter<T> : JsonConverter
+    {
+        protected abstract T Create(Type objectType, JObject jObject);
+  
+        public override bool CanConvert(Type objectType)
+        {
+            return typeof(T) == objectType;
+        }
+  
+        public override object ReadJson(JsonReader reader, Type objectType,
+            object existingValue, JsonSerializer serializer)
+        {
+            try
+            {
+                var jObject = JObject.Load(reader);
+                var target = Create(objectType, jObject);
+                serializer.Populate(jObject.CreateReader(), target);
+                return target;
+            }
+            catch (JsonReaderException)
+            {
+                return null;
+            }
+        }
+  
+        public override void WriteJson(JsonWriter writer, object value,
+            JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
+    } 
+    
+    public class dExcelQuoteTypeConverter : JsonCreationConverter<QuoteType>
+    {
+        protected override QuoteType Create(Type objectType, JObject jObject)
+        {
+            Tenor tenor;
+            Commodity commodity;
+            switch (jObject["$type"].ToString())
+            {
+                case "CommodityFuture":
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    commodity = Enum.Parse<Commodity>(jObject["Commodity"].ToString());
+                    return new CommodityFuture(tenor, commodity);
+                case "CommodityOption":
+                    int delta = jObject["Delta"].ToObject<int>();
+                    Option option = Enum.Parse<Option>(jObject["OptionType"].ToString()); 
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    commodity = Enum.Parse<Commodity>(jObject["Commodity"].ToString());
+                    return new CommodityOption(delta, option, tenor, commodity);
+            }
+            return null;
+        }
+    } 
+    
+    
+    public class dExcelQuoteValueConverter : JsonCreationConverter<QuoteValue>
+    {
+        protected override QuoteValue Create(Type objectType, JObject jObject)
+        {
+            QuoteType quoteType = JsonConvert.DeserializeObject<QuoteType>(jObject["type"].ToString());
+            DateTime date = DateTime.Parse(jObject["date"].ToString());        
+            double value = double.Parse(jObject["value"].ToString());
+            return new QuoteValue(quoteType, date, value); 
+        }
+    } 
+    
 }
