@@ -198,11 +198,6 @@ try:
             print_process(f'Copying {zip_file} {file_size} to shared drive')
             shutil.copy(source_path, target_path)
             ok_message()
-            print(f'{Fore.YELLOW}{Style.BRIGHT}', end='')
-            print(f'-----------------------------------------------------------')
-            print(f'                      Process Complete                     ')
-            print(f'-----------------------------------------------------------')
-            print()
 
 except Exception as e:
     error_message()

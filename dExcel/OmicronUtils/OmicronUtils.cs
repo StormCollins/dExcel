@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace dExcel.OmicronUtils;
+﻿namespace dExcel.OmicronUtils;
 
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -9,11 +7,10 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Omicron;
 using Omicron.Data.Serialisation;
-using QLNet;
 using JsonConverter = Newtonsoft.Json.JsonConverter;
 using Option = Omicron.Option;
 
-public static class OmicronCurveUtils
+public static class OmicronUtils
 {
     private const string OmicronUrl = "https://omicron.fsa-aks.deloitte.co.za";
 
@@ -53,7 +50,7 @@ public static class OmicronCurveUtils
         string commodityFuture =
             "{\"type\":{\"$type\":\"CommodityFuture\",\"Tenor\": {\"amount\":12,\"unit\":\"Month\"},\"Commodity\":\"Ethane\"},\"date\":\"2023-02-14T00:00:00\",\"value\":0.24625}";
 
-        var x = commodityFuture[45];
+        char x = commodityFuture[45];
 
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings
         {
@@ -74,7 +71,19 @@ public static class OmicronCurveUtils
 
     public static List<QuoteValue> DeserializeOmicronObject(string json)
     {
-        return null;
+        JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+        {
+            Converters = new List<JsonConverter>
+            {
+                new dExcelQuoteTypeConverter(), 
+                new StringEnumConverter(),
+                new dExcelQuoteValueConverter(),
+            }
+        };
+        
+        QuoteTypeConverter converter = new QuoteTypeConverter();
+        
+        return JsonConvert.DeserializeObject<List<QuoteValue>>(json);
     }
     
     public static void PullData()
@@ -154,6 +163,7 @@ public static class OmicronCurveUtils
         {
             Tenor tenor;
             Commodity commodity;
+            int delta;
             switch (jObject["$type"].ToString())
             {
                 case "CommodityFuture":
@@ -161,14 +171,29 @@ public static class OmicronCurveUtils
                     commodity = Enum.Parse<Commodity>(jObject["Commodity"].ToString());
                     return new CommodityFuture(tenor, commodity);
                 case "CommodityOption":
-                    int delta = jObject["Delta"].ToObject<int>();
+                    delta = jObject["Delta"].ToObject<int>();
                     Option option = Enum.Parse<Option>(jObject["OptionType"].ToString()); 
                     tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
                     commodity = Enum.Parse<Commodity>(jObject["Commodity"].ToString());
                     return new CommodityOption(delta, option, tenor, commodity);
-                // case "InterestRateSwap":
-                //     RateIndex rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["RateIndex"].ToString()); 
-                //     return new InterestRateSwap(new RateIndex());
+                case "FxOption":
+                    delta = jObject["Delta"].ToObject<int>(); 
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    FxSpot fxSpot = JsonConvert.DeserializeObject<FxSpot>(jObject["ReferenceSpot"].ToString());
+                    
+                case "FxSpot":
+                    Currency numerator = Enum.Parse<Currency>(jObject["Numerator"].ToString());
+                    Currency denominator = Enum.Parse<Currency>(jObject["Denominator"].ToString());
+                    return new FxSpot(numerator, denominator); 
+                case "RateIndex":
+                    string name = jObject["Name"].ToString();
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    return new RateIndex(name, tenor);
+                case "InterestRateSwap":
+                    RateIndex rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["ReferenceIndex"].ToString());
+                    Tenor paymentFrequency = JsonConvert.DeserializeObject<Tenor>(jObject["PaymentFrequency"].ToString());
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    return new InterestRateSwap(rateIndex, paymentFrequency, tenor);
             }
             return null;
         }
