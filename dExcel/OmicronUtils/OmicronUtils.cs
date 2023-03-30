@@ -161,9 +161,11 @@ public static class OmicronUtils
     {
         protected override QuoteType Create(Type objectType, JObject jObject)
         {
-            Tenor tenor;
             Commodity commodity;
+            FxSpot fxSpot;
             int delta;
+            Tenor tenor;
+            
             switch (jObject["$type"].ToString())
             {
                 case "CommodityFuture":
@@ -176,10 +178,14 @@ public static class OmicronUtils
                     tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
                     commodity = Enum.Parse<Commodity>(jObject["Commodity"].ToString());
                     return new CommodityOption(delta, option, tenor, commodity);
+                case "FxForward":
+                    fxSpot = JsonConvert.DeserializeObject<FxSpot>(jObject["FxSpot"].ToString());
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    return new FxForward(fxSpot, tenor);
                 case "FxOption":
                     delta = jObject["Delta"].ToObject<int>(); 
                     tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
-                    FxSpot fxSpot = JsonConvert.DeserializeObject<FxSpot>(jObject["ReferenceSpot"].ToString());
+                    fxSpot = JsonConvert.DeserializeObject<FxSpot>(jObject["ReferenceSpot"].ToString());
                     return new FxOption(delta, tenor, fxSpot);    
                 case "FxSpot":
                     Currency numerator = Enum.Parse<Currency>(jObject["Numerator"].ToString());

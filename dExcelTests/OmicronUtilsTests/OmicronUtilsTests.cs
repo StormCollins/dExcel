@@ -38,6 +38,29 @@ public class OmicronUtilsTests
         }]
         """;
 
+    private const string FxForwardJson =
+        """
+        [{
+            "type":
+            {
+                "$type": "FxForward",
+                "FxSpot":
+                {
+                    "$type": "FxSpot",
+                    "Numerator": "ZAR",
+                    "Denominator": "USD"
+                },
+                "Tenor": 
+                {
+                    "amount": 1,
+                    "unit": "Year"
+                }
+            },
+            "date": "2023-02-14T00:00:00",
+            "value": 0.46585
+        }]
+        """;
+    
     private const string FxOptionJson =
         """
         [{
@@ -92,6 +115,22 @@ public class OmicronUtilsTests
         List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(CommodityOptionJson);
         CommodityOption commodityOption = new(25, Option.Put, new Tenor(10, TenorUnit.Month), Commodity.BrentCrudeIce);
         Assert.AreEqual(quoteValues[0].Type, commodityOption);
+    }
+
+    [Test]
+    public void DeserializeFxForwardTest()
+    {
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(FxForwardJson);
+        FxForward fxForward = new(new FxSpot(Currency.ZAR, Currency.USD), new Tenor(1, TenorUnit.Year));
+        Assert.AreEqual(quoteValues[0].Type, fxForward);
+    }
+
+    [Test]
+    public void DeserializeFxOptionTest()
+    {
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(FxOptionJson);
+        FxOption fxOption = new(10, new Tenor(2, TenorUnit.Year), new FxSpot(Currency.USD, Currency.ZAR));
+        Assert.AreEqual(quoteValues[0].Type, fxOption);
     }
 
     [Test]
