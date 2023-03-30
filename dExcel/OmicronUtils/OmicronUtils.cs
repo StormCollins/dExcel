@@ -165,6 +165,7 @@ public static class OmicronUtils
             FxSpot fxSpot;
             int delta;
             RateIndex rateIndex;
+            RateIndex spreadIndex;
             Tenor tenor;
             
             switch (jObject["$type"].ToString())
@@ -179,6 +180,11 @@ public static class OmicronUtils
                     tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
                     commodity = Enum.Parse<Commodity>(jObject["Commodity"].ToString());
                     return new CommodityOption(delta, option, tenor, commodity);
+                case "FxBasisSwap":
+                    rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["BaseIndex"].ToString());
+                    spreadIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["SpreadIndex"].ToString());
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    return new FxBasisSwap(rateIndex, spreadIndex, tenor);
                 case "FxForward":
                     fxSpot = JsonConvert.DeserializeObject<FxSpot>(jObject["FxSpot"].ToString());
                     tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
@@ -205,6 +211,10 @@ public static class OmicronUtils
                     Tenor paymentFrequency = JsonConvert.DeserializeObject<Tenor>(jObject["PaymentFrequency"].ToString());
                     tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
                     return new InterestRateSwap(rateIndex, paymentFrequency, tenor);
+                case "Ois":
+                    rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["ReferenceIndex"].ToString());
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    return new Ois(new RateIndex("FEDFUND",new Tenor(1, TenorUnit.Day)), new Tenor(10, TenorUnit.Month));
             }
             
             return null;

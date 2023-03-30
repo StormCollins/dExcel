@@ -56,6 +56,31 @@ public class OmicronUtilsTests
             "value": 0.07519999999999999 
         }] 
         """;
+
+    private const string FxBasisSwapJson =
+        """
+        [{
+            "type":
+            {
+                "$type": "FxBasisSwap",
+                "BaseIndex":
+                {
+                    "$type": "RateIndex",
+                    "Name": "JIBAR",
+                    "Tenor": {"amount": 3, "unit": "Month"}
+                },
+                "SpreadIndex":
+                {
+                    "$type": "RateIndex",
+                    "Name": "USD-LIBOR",
+                    "Tenor": {"amount": 3, "unit": "Month"}
+                },
+                "Tenor": { "amount": 12, "unit": "Year"}
+            },
+            "date": "2023-02-14T00:00:00",
+            "value": -0.0025
+        }]
+        """;
     
     private const string FxForwardJson =
         """
@@ -120,6 +145,25 @@ public class OmicronUtilsTests
         }]
         """;
 
+    private const string OisJson =
+        """
+        [{
+            "type":
+            {
+                "$type": "Ois",
+                "ReferenceIndex":
+                {
+                    "$type": "RateIndex",
+                    "Name": "FEDFUND",
+                    "Tenor": {"amount": 1, "unit": "Day"},
+                },
+            "Tenor": {"amount": 10, "unit": "Year"},
+            },
+            "date": "2023-02-14T00:00:00",
+            "value": 0.03489
+        }]
+        """;
+    
     [Test]
     public void DeserializeCommodityFutureTest()
     {
@@ -142,6 +186,18 @@ public class OmicronUtilsTests
         List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(FraJson); 
         Fra fra = new(new Tenor(12, TenorUnit.Month), new RateIndex("JIBAR", new Tenor(3, TenorUnit.Month)));
         Assert.AreEqual(quoteValues[0].Type, fra);
+    }
+
+    [Test]
+    public void DeserializeFxBasisSwapTest()
+    {
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(FxBasisSwapJson); 
+        FxBasisSwap fxBasisSwap = 
+            new(
+                BaseIndex: new RateIndex("JIBAR", new Tenor(3, TenorUnit.Month)), 
+                SpreadIndex: new RateIndex("USD-LIBOR", new Tenor(3, TenorUnit.Month)), 
+                Tenor: new Tenor(12, TenorUnit.Year));
+        Assert.AreEqual(quoteValues[0].Type, fxBasisSwap);
     }
     
     [Test]
@@ -170,5 +226,13 @@ public class OmicronUtilsTests
                 PaymentFrequency: new Tenor(3, TenorUnit.Month), 
                 Tenor: new Tenor(10, TenorUnit.Year)); 
         Assert.AreEqual(quoteValues[0].Type, interestRateSwap);
+    }
+
+    [Test]
+    public void DeserializeOisTest()
+    {
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(OisJson);     
+        Ois ois = new(new RateIndex("FEDFUND", new Tenor(1, TenorUnit.Day)), new Tenor(10, TenorUnit.Year));
+        Assert.AreEqual(quoteValues[0].Type, ois);
     }
 }
