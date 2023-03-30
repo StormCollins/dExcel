@@ -180,7 +180,7 @@ public static class OmicronUtils
                     delta = jObject["Delta"].ToObject<int>(); 
                     tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
                     FxSpot fxSpot = JsonConvert.DeserializeObject<FxSpot>(jObject["ReferenceSpot"].ToString());
-                    
+                    return new FxOption(delta, tenor, fxSpot);    
                 case "FxSpot":
                     Currency numerator = Enum.Parse<Currency>(jObject["Numerator"].ToString());
                     Currency denominator = Enum.Parse<Currency>(jObject["Denominator"].ToString());

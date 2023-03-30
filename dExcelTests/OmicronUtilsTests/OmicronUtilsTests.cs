@@ -3,7 +3,6 @@
 using NUnit.Framework;
 using dExcel.OmicronUtils;
 using Omicron;
-using QLNet;
 using Option = Omicron.Option;
 
 [TestFixture]

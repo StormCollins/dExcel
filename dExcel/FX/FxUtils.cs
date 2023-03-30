@@ -1,5 +1,6 @@
 ﻿namespace dExcel.FX;
 
+using dExcel.ExcelUtils;
 using ExcelDna.Integration;
 using mnd = MathNet.Numerics.Distributions;
 using QLNet;
@@ -11,6 +12,51 @@ public static class FxUtils
     {
         return 0;
     }
+
+    [ExcelFunction(
+        Name = "d.FX_ConvertDeltaToMoneynessVolSurface",
+        Description = "Convert a delta vol surface to a moneyness vol surface.",
+        Category = "∂Excel: FX")]
+    public static object ConvertDeltaToMoneynessVolSurface(
+        object[,] volsRange,
+        object[,] deltasRange,
+        object[,] optionMaturitiesRange,
+        double domesticRate,
+        double foreignRate)
+    {
+        List<double> deltas = ExcelArrayUtils.ConvertExcelRangeToList<double>(deltasRange);
+        List<double> optionMaturities = ExcelArrayUtils.ConvertExcelRangeToList<double>(optionMaturitiesRange);
+        List<(double moneyness, double optionMaturity, double vol)> moneynessSurface = new();
+        List<double> moneynesses = new();
+
+        for (int i = 0; i < optionMaturities.Count; i++)
+        {
+            for (int j = 0; j < deltas.Count; j++)
+            {
+                double moneyness = 
+                    Math.Exp(
+                        deltas[i] * (double)volsRange[i, j] * Math.Sqrt(optionMaturities[i]) -
+                        (domesticRate - foreignRate + 0.5 * (double)volsRange[i, j] * (double)volsRange[i, j]) * optionMaturities[i]);
+
+                moneynesses.Add(Math.Round(moneyness, 3));
+                moneynessSurface.Add((Math.Round(moneyness, 3) , optionMaturities[i], (double)volsRange[i, j]));
+            } 
+        }
+
+        moneynesses.Sort();
+
+        object[,] output = new object[moneynesses.Count + 1, optionMaturities.Count + 1];
+
+        foreach ((double moneyness, double optionMaturity, double vol) in moneynessSurface)
+        {
+            int moneynessIndex = moneynesses.IndexOf(moneyness);
+            int optionMaturityIndex = optionMaturities.IndexOf(optionMaturity);
+            output[optionMaturityIndex, moneynessIndex] = vol;
+        }
+        
+        return output;
+    }
+
 
     /// <summary>
     /// Calculates the delta of an FX option (call or put) using the formula:
