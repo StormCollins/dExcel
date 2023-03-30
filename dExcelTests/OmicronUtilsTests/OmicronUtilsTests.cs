@@ -38,6 +38,25 @@ public class OmicronUtilsTests
         }]
         """;
 
+    private const string FraJson =
+        """
+        [{
+            "type":
+            {
+                "$type": "Fra",
+                "Tenor": {"amount": 12, "unit": "Month"},
+                "ReferenceIndex":
+                {
+                    "$type": "RateIndex",
+                    "Name": "JIBAR",
+                    "Tenor": {"amount": 3, "unit": "Month"}
+                }
+            },
+            "date": "2023-02-14T00:00:00",
+            "value": 0.07519999999999999 
+        }] 
+        """;
+    
     private const string FxForwardJson =
         """
         [{
@@ -60,7 +79,7 @@ public class OmicronUtilsTests
             "value": 0.46585
         }]
         """;
-    
+   
     private const string FxOptionJson =
         """
         [{
@@ -117,6 +136,14 @@ public class OmicronUtilsTests
         Assert.AreEqual(quoteValues[0].Type, commodityOption);
     }
 
+    [Test]
+    public void DeserializeFraForwardTest()
+    {
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(FraJson); 
+        Fra fra = new(new Tenor(12, TenorUnit.Month), new RateIndex("JIBAR", new Tenor(3, TenorUnit.Month)));
+        Assert.AreEqual(quoteValues[0].Type, fra);
+    }
+    
     [Test]
     public void DeserializeFxForwardTest()
     {
