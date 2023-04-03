@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Omicron;
-using Omicron.Data.Serialisation;
 using JsonConverter = Newtonsoft.Json.JsonConverter;
 using Option = Omicron.Option;
 
@@ -32,99 +31,62 @@ public static class OmicronUtils
         }
     }
     
-    public static void SerializeOmicronObject()
-    {
-        OmicronObject omicronObject =
-            new(
-                type: new CommodityOption(25, Option.Put, new Tenor(12, TenorUnit.Month), Commodity.BrentCrudeIce),
-                date: new DateTime(2023, 02, 14),
-                value: 12);
-        
-        string json = JsonConvert.SerializeObject(omicronObject);
-
-        string serializedObject =
-            "[" +
-            "{\"type\":{\"$type\":\"CommodityFuture\",\"Tenor\": {\"amount\":12,\"unit\":\"Month\"},\"Commodity\":\"Ethane\"},\"date\":\"2023-02-14T00:00:00\",\"value\":0.24625}," +
-            "{\"type\":{\"$type\":\"CommodityOption\",\"Delta\":25,\"OptionType\":\"Put\",\"Tenor\":{\"amount\":10,\"unit\":\"Month\"},\"Commodity\":\"BrentCrudeIce\"},\"date\":\"2023-02-14T00:00:00\",\"value\":0.4103 }]";
-
-        string commodityFuture =
-            "{\"type\":{\"$type\":\"CommodityFuture\",\"Tenor\": {\"amount\":12,\"unit\":\"Month\"},\"Commodity\":\"Ethane\"},\"date\":\"2023-02-14T00:00:00\",\"value\":0.24625}";
-
-        char x = commodityFuture[45];
-
-        JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-        {
-            Converters = new List<JsonConverter>
-            {
-                new dExcelQuoteTypeConverter(), 
-                new StringEnumConverter(),
-                new dExcelQuoteValueConverter(),
-            }
-        };
-        
-        QuoteTypeConverter converter = new QuoteTypeConverter();
-        
-        List<QuoteValue> deserializedObject = JsonConvert.DeserializeObject<List<QuoteValue>>(serializedObject);
-         
-    }
-
-
-    public static List<QuoteValue> DeserializeOmicronObject(string json)
+    public static List<QuoteValue>? DeserializeOmicronObjects(string json)
     {
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings
         {
             Converters = new List<JsonConverter>
             {
-                new dExcelQuoteTypeConverter(), 
+                new DExcelQuoteTypeConverter(), 
                 new StringEnumConverter(),
-                new dExcelQuoteValueConverter(),
+                new DExcelQuoteValueConverter(),
             }
         };
-        
-        QuoteTypeConverter converter = new QuoteTypeConverter();
         
         return JsonConvert.DeserializeObject<List<QuoteValue>>(json);
     }
-    
-    public static void PullData()
+
+    public static List<QuoteValue> GetSwapCurveQuotes(
+        string indexName, 
+        List<QuoteValue>? quotes = null, 
+        int? requisitionId = null,
+        string? date = null)
     {
-        using HttpClient client = new HttpClient();
+        quotes ??= GetOmicronRequisitionData(requisitionId, date);
+
+        return 
+            quotes
+                .Where(x => 
+                    (x.Type.GetType() == typeof(RateIndex) && ((RateIndex) x.Type).Name == indexName) ||
+                    (x.Type.GetType() == typeof(Fra) && ((Fra)x.Type).ReferenceIndex.Name == indexName) ||
+                    (x.Type.GetType() == typeof(InterestRateSwap) && 
+                     ((InterestRateSwap)x.Type).ReferenceIndex.Name == indexName) ||
+                    (x.Type.GetType() == typeof(Ois) && ((Ois)x.Type).ReferenceIndex.Name == indexName))
+                .ToList();
+    }
+
+    private static List<QuoteValue>? GetOmicronRequisitionData(int? requisitionId, string? date)
+    {
+        if (requisitionId == null && date == null)
+        {
+            return null;
+        }
+
+        using HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear(); 
         client.BaseAddress = new Uri(OmicronUrl);
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));   
-        HttpResponseMessage response = client.GetAsync(OmicronUrl + "/api/requisition/" + RequisitionId + "/" + Date).Result;
+        HttpResponseMessage response = client.GetAsync(OmicronUrl + "/api/requisition/" + requisitionId + "/" + date).Result;
+        
         if (response.IsSuccessStatusCode)
         {
-            var dataObjects = response.Content.ReadAsStringAsync().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
-            // JsonConverter converter;
-            // JsonConverterFactory jsonConverterFactory = 
+            string jsonQuotes = response.Content.ReadAsStringAsync().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
+            return DeserializeOmicronObjects(jsonQuotes);
         }
-        else
-        {
-            Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
-        }
+
+        return null;
     }
 
-    // public class OmicronObjectConverter<T> : JsonConverter<T> 
-    //     where T : OmicronObject
-    // {
-    //     public override void WriteJson(JsonWriter writer, T? value, JsonSerializer serializer)
-    //     {
-    //         throw new NotImplementedException();
-    //     }
-    //
-    //     public override T? ReadJson(JsonReader reader, Type objectType, T? existingValue, bool hasExistingValue, JsonSerializer serializer)
-    //     {
-    //         reader.Read();
-    //         return null;
-    //     }
-    //     
-    //     public override bool CanConvert(Type objectType)
-    //     {
-    //         return typeof(objectType).IsAssignableFrom(typeof(T));
-    //     }
-    // }
-    
     public abstract class JsonCreationConverter<T> : JsonConverter
     {
         protected abstract T Create(Type objectType, JObject jObject);
@@ -139,8 +101,8 @@ public static class OmicronUtils
         {
             try
             {
-                var jObject = JObject.Load(reader);
-                var target = Create(objectType, jObject);
+                JObject jObject = JObject.Load(reader);
+                T target = Create(objectType, jObject);
                 serializer.Populate(jObject.CreateReader(), target);
                 return target;
             }
@@ -155,82 +117,81 @@ public static class OmicronUtils
         {
             throw new NotImplementedException();
         }
-    } 
-    
-    public class dExcelQuoteTypeConverter : JsonCreationConverter<QuoteType>
+    }
+
+    private class DExcelQuoteTypeConverter : JsonCreationConverter<QuoteType>
     {
         protected override QuoteType Create(Type objectType, JObject jObject)
         {
             Commodity commodity;
-            FxSpot fxSpot;
+            FxSpot? fxSpot;
             int delta;
-            RateIndex rateIndex;
-            RateIndex spreadIndex;
-            Tenor tenor;
+            RateIndex? rateIndex;
+            Tenor? tenor;
             
-            switch (jObject["$type"].ToString())
+            switch (jObject["$type"]?.ToString())
             {
                 case "CommodityFuture":
-                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
-                    commodity = Enum.Parse<Commodity>(jObject["Commodity"].ToString());
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString() ?? string.Empty);
+                    commodity = Enum.Parse<Commodity>(jObject["Commodity"]?.ToString() ?? string.Empty);
                     return new CommodityFuture(tenor, commodity);
                 case "CommodityOption":
                     delta = jObject["Delta"].ToObject<int>();
-                    Option option = Enum.Parse<Option>(jObject["OptionType"].ToString()); 
-                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
-                    commodity = Enum.Parse<Commodity>(jObject["Commodity"].ToString());
+                    Option option = Enum.Parse<Option>(jObject["OptionType"]?.ToString() ?? string.Empty); 
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString() ?? string.Empty);
+                    commodity = Enum.Parse<Commodity>(jObject["Commodity"]?.ToString() ?? string.Empty);
                     return new CommodityOption(delta, option, tenor, commodity);
+                case "Fra":
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString() ?? string.Empty);
+                    rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["ReferenceIndex"]?.ToString() ?? string.Empty);
+                    return new Fra(tenor, rateIndex);
                 case "FxBasisSwap":
-                    rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["BaseIndex"].ToString());
-                    spreadIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["SpreadIndex"].ToString());
-                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["BaseIndex"]?.ToString() ?? string.Empty);
+                    RateIndex? spreadIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["SpreadIndex"]?.ToString() ?? string.Empty);
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString() ?? string.Empty);
                     return new FxBasisSwap(rateIndex, spreadIndex, tenor);
                 case "FxForward":
-                    fxSpot = JsonConvert.DeserializeObject<FxSpot>(jObject["FxSpot"].ToString());
-                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    fxSpot = JsonConvert.DeserializeObject<FxSpot>(jObject["FxSpot"]?.ToString() ?? string.Empty);
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString() ?? string.Empty);
                     return new FxForward(fxSpot, tenor);
                 case "FxOption":
                     delta = jObject["Delta"].ToObject<int>(); 
-                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
-                    fxSpot = JsonConvert.DeserializeObject<FxSpot>(jObject["ReferenceSpot"].ToString());
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString() ?? string.Empty);
+                    fxSpot = JsonConvert.DeserializeObject<FxSpot>(jObject["ReferenceSpot"]?.ToString() ?? string.Empty);
                     return new FxOption(delta, tenor, fxSpot);    
                 case "FxSpot":
-                    Currency numerator = Enum.Parse<Currency>(jObject["Numerator"].ToString());
-                    Currency denominator = Enum.Parse<Currency>(jObject["Denominator"].ToString());
+                    Currency numerator = Enum.Parse<Currency>(jObject["Numerator"]?.ToString() ?? string.Empty);
+                    Currency denominator = Enum.Parse<Currency>(jObject["Denominator"]?.ToString() ?? string.Empty);
                     return new FxSpot(numerator, denominator); 
-                case "Fra":
-                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
-                    rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["ReferenceIndex"].ToString());
-                    return new Fra(tenor, rateIndex);
-                case "RateIndex":
-                    string name = jObject["Name"].ToString();
-                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
-                    return new RateIndex(name, tenor);
                 case "InterestRateSwap":
-                    rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["ReferenceIndex"].ToString());
-                    Tenor paymentFrequency = JsonConvert.DeserializeObject<Tenor>(jObject["PaymentFrequency"].ToString());
-                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["ReferenceIndex"]?.ToString() ?? string.Empty);
+                    Tenor? paymentFrequency = JsonConvert.DeserializeObject<Tenor>(jObject["PaymentFrequency"]?.ToString() ?? string.Empty);
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString() ?? string.Empty);
                     return new InterestRateSwap(rateIndex, paymentFrequency, tenor);
                 case "Ois":
-                    rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["ReferenceIndex"].ToString());
-                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"].ToString());
+                    rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["ReferenceIndex"]?.ToString() ?? string.Empty);
+                    string empty = string.Empty;
+                    if (empty != null)
+                        tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString() ?? empty);
                     return new Ois(new RateIndex("FEDFUND",new Tenor(1, TenorUnit.Day)), new Tenor(10, TenorUnit.Month));
+                case "RateIndex":
+                    string? name = jObject["Name"]?.ToString();
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString() ?? string.Empty);
+                    return new RateIndex(name, tenor);
             }
             
             return null;
         }
-    } 
-    
-    
-    public class dExcelQuoteValueConverter : JsonCreationConverter<QuoteValue>
+    }
+
+    private class DExcelQuoteValueConverter : JsonCreationConverter<QuoteValue>
     {
         protected override QuoteValue Create(Type objectType, JObject jObject)
         {
-            QuoteType quoteType = JsonConvert.DeserializeObject<QuoteType>(jObject["type"].ToString());
-            DateTime date = DateTime.Parse(jObject["date"].ToString());        
-            double value = double.Parse(jObject["value"].ToString());
+            QuoteType? quoteType = JsonConvert.DeserializeObject<QuoteType>(jObject["type"]?.ToString() ?? string.Empty);
+            DateTime date = DateTime.Parse(jObject["date"]?.ToString() ?? string.Empty);        
+            double value = double.Parse(jObject["value"]?.ToString() ?? string.Empty);
             return new QuoteValue(quoteType, date, value); 
         }
     } 
-    
 }

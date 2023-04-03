@@ -167,7 +167,7 @@ public class OmicronUtilsTests
     [Test]
     public void DeserializeCommodityFutureTest()
     {
-        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(CommodityFutureJson);
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObjects(CommodityFutureJson);
         CommodityFuture commodityFuture = new(new Tenor(12, TenorUnit.Month), Commodity.Ethane);
         Assert.AreEqual(quoteValues[0].Type, commodityFuture);
     }
@@ -175,7 +175,7 @@ public class OmicronUtilsTests
     [Test]
     public void DeserializeCommodityOptionTest()
     {
-        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(CommodityOptionJson);
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObjects(CommodityOptionJson);
         CommodityOption commodityOption = new(25, Option.Put, new Tenor(10, TenorUnit.Month), Commodity.BrentCrudeIce);
         Assert.AreEqual(quoteValues[0].Type, commodityOption);
     }
@@ -183,7 +183,7 @@ public class OmicronUtilsTests
     [Test]
     public void DeserializeFraForwardTest()
     {
-        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(FraJson); 
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObjects(FraJson); 
         Fra fra = new(new Tenor(12, TenorUnit.Month), new RateIndex("JIBAR", new Tenor(3, TenorUnit.Month)));
         Assert.AreEqual(quoteValues[0].Type, fra);
     }
@@ -191,7 +191,7 @@ public class OmicronUtilsTests
     [Test]
     public void DeserializeFxBasisSwapTest()
     {
-        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(FxBasisSwapJson); 
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObjects(FxBasisSwapJson); 
         FxBasisSwap fxBasisSwap = 
             new(
                 BaseIndex: new RateIndex("JIBAR", new Tenor(3, TenorUnit.Month)), 
@@ -203,7 +203,7 @@ public class OmicronUtilsTests
     [Test]
     public void DeserializeFxForwardTest()
     {
-        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(FxForwardJson);
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObjects(FxForwardJson);
         FxForward fxForward = new(new FxSpot(Currency.ZAR, Currency.USD), new Tenor(1, TenorUnit.Year));
         Assert.AreEqual(quoteValues[0].Type, fxForward);
     }
@@ -211,7 +211,7 @@ public class OmicronUtilsTests
     [Test]
     public void DeserializeFxOptionTest()
     {
-        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(FxOptionJson);
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObjects(FxOptionJson);
         FxOption fxOption = new(10, new Tenor(2, TenorUnit.Year), new FxSpot(Currency.USD, Currency.ZAR));
         Assert.AreEqual(quoteValues[0].Type, fxOption);
     }
@@ -219,7 +219,7 @@ public class OmicronUtilsTests
     [Test]
     public void DeserializeInterestRateSwapTest()
     {
-        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(InterestRateSwapJson);
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObjects(InterestRateSwapJson);
         InterestRateSwap interestRateSwap = 
             new(
                 ReferenceIndex: new RateIndex("JIBAR", new Tenor(3, TenorUnit.Month)), 
@@ -231,8 +231,36 @@ public class OmicronUtilsTests
     [Test]
     public void DeserializeOisTest()
     {
-        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObject(OisJson);     
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObjects(OisJson);     
         Ois ois = new(new RateIndex("FEDFUND", new Tenor(1, TenorUnit.Day)), new Tenor(10, TenorUnit.Year));
         Assert.AreEqual(quoteValues[0].Type, ois);
+    }
+
+    [Test]
+    public void DeserializeOmicronRequisition1ExampleTest()
+    {
+        string rawJson =
+            File.ReadAllText(
+                @"C:\GitLab\dExcelTools\dExcel\dExcelTests\OmicronUtilsTests\OmicronRequisition1Example.json");
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObjects(rawJson);
+        List<QuoteValue> zarSwapCurveQuotes =
+            quoteValues
+                .Where(x => 
+                    (x.Type.GetType() == typeof(RateIndex) && ((RateIndex)x.Type).Name == "JIBAR") ||
+                    (x.Type.GetType() == typeof(Fra) && ((Fra)x.Type).ReferenceIndex.Name == "JIBAR") ||
+                    (x.Type.GetType() == typeof(InterestRateSwap) && 
+                     ((InterestRateSwap)x.Type).ReferenceIndex.Name == "JIBAR"))
+                .ToList();
+        Assert.AreEqual(zarSwapCurveQuotes.Count, 23);
+    }
+
+    [Test]
+    public void TestGetSwapCurveQuotes()
+    {
+        string rawJson = 
+            File.ReadAllText(@"C:\GitLab\dExcelTools\dExcel\dExcelTests\OmicronUtilsTests\OmicronRequisition1Example.json"); 
+        List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObjects(rawJson);
+        List<QuoteValue> zarSwapCurveQuotes = OmicronUtils.GetSwapCurveQuotes("JIBAR", quoteValues);
+        Assert.AreEqual(zarSwapCurveQuotes.Count, 23);
     }
 }

@@ -1,5 +1,7 @@
 ﻿namespace dExcelTests;
 
+using dExcel.Curves;
+using dExcel.InterestRates;
 using NUnit.Framework;
 using QLNet;
 
@@ -143,5 +145,19 @@ public class CurveBootstrapperTests
         USDLibor libor = new USDLibor(new Period("3m"), forecastCurve);
 
         //DepositRateHelper depositRateHelper = new DepositRateHelper()
+    }
+
+    [Test]
+    public void GetTest()
+    {
+        string something = CurveBootstrapper.Get("Something", "USD-OIS", new DateTime(2023, 3, 28));
+        object[] dates = 
+        {
+            new DateTime(2024, 03, 28).ToOADate(), 
+            new DateTime(2025, 3, 28).ToOADate(), 
+        };
+        
+        var discountFactors = CurveUtils.GetDiscountFactors(something, dates);
+        // Assert.AreEqual("USD-OIS", something);
     }
 }
