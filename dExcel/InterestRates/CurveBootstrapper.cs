@@ -7,6 +7,37 @@ using Omicron;
 using OmicronUtils;
 using QLNet;
 
+public class TenorComparer : Comparer<Tenor>
+{
+    public override int Compare(Tenor x, Tenor y)
+    {
+        if (x.Unit == y.Unit)
+        {
+            return x.Amount.CompareTo(y.Amount);
+        }
+
+        int xAmount = x.Unit switch
+        {
+            TenorUnit.Day => x.Amount,
+            TenorUnit.Week => x.Amount * 7,
+            TenorUnit.Month => x.Amount * 30,
+            TenorUnit.Year => x.Amount * 365,
+            _ => x.Amount,
+        };
+
+        int yAmount = y.Unit switch
+        {
+            TenorUnit.Day => y.Amount,
+            TenorUnit.Week => y.Amount * 7,
+            TenorUnit.Month => y.Amount * 30,
+            TenorUnit.Year => y.Amount * 365,
+            _ => y.Amount,
+        };
+        
+        return xAmount.CompareTo(yAmount);   
+    }
+}
+
 public static class CurveBootstrapper
 {
     [ExcelFunction(
@@ -162,6 +193,7 @@ public static class CurveBootstrapper
         };
 
         List<QuoteValue> deposits = quoteValues.Where(x => x.Type.GetType() == typeof(RateIndex)).ToList();
+        deposits = deposits.OrderBy(x => ((RateIndex)x.Type).Tenor, new TenorComparer()).ToList();
         object[,] depositInstruments = new object[deposits.Count + 2, 4];
         depositInstruments[0, 0] = "Deposits";
         depositInstruments[1, 0] = "Tenors";
@@ -180,6 +212,7 @@ public static class CurveBootstrapper
         }
 
         List<QuoteValue> fras = quoteValues.Where(x => x.Type.GetType() == typeof(Fra)).ToList();
+        fras = fras.OrderBy(x => ((Fra)x.Type).Tenor, new TenorComparer()).ToList();
         object[,] fraInstruments = new object[fras.Count + 2, 4];
         row = 2;
         fraInstruments[0, 0] = "FRAs";
@@ -199,6 +232,7 @@ public static class CurveBootstrapper
         }
 
         List<QuoteValue> swaps = quoteValues.Where(x => x.Type.GetType() == typeof(InterestRateSwap)).ToList();
+        swaps = swaps.OrderBy(x => ((InterestRateSwap)x.Type).Tenor, new TenorComparer()).ToList();
         object[,] swapInstruments = new object[swaps.Count + 2, 4];
         swapInstruments[0, 0] = "Interest Rate Swaps";
         swapInstruments[1, 0] = "Tenors";
@@ -217,6 +251,7 @@ public static class CurveBootstrapper
         }
         
         List<QuoteValue> oiss = quoteValues.Where(x => x.Type.GetType() == typeof(Ois)).ToList();
+        oiss = oiss.OrderBy(x => ((Ois)x.Type).Tenor, new TenorComparer()).ToList();
         object[,] oisInstruments = new object[oiss.Count + 2, 3];
         oisInstruments[0, 0] = "OISs";
         oisInstruments[1, 0] = "Tenors";

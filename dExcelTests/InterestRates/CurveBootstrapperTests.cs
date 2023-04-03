@@ -3,6 +3,7 @@
 using dExcel.Curves;
 using dExcel.InterestRates;
 using NUnit.Framework;
+using Omicron;
 using QLNet;
 
 [TestFixture]
@@ -159,5 +160,11 @@ public class CurveBootstrapperTests
         
         var discountFactors = CurveUtils.GetDiscountFactors(something, dates);
         // Assert.AreEqual("USD-OIS", something);
+        var instruments = CurveUtils.GetInstruments(something);
+        Tenor t1 = new Tenor(3, TenorUnit.Month);
+        Tenor t2 = new Tenor(4, TenorUnit.Year);
+        
     }
+
+  
 }

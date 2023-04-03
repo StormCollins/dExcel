@@ -303,7 +303,7 @@ public static class SingleCurveBootstrapper
             return CommonUtils.DExcelErrorMessage($"Unknown interpolation method: '{interpolation}'");  
         }
          
-        CurveDetails curveDetails = new(termStructure, rateIndex.dayCounter(), interpolation, new List<Date>(), new List<double>());
+        CurveDetails curveDetails = new(termStructure, rateIndex.dayCounter(), interpolation, new List<Date>(), new List<double>(), instrumentGroups);
         DataObjectController dataObjectController = DataObjectController.Instance;
         return dataObjectController.Add(handle, curveDetails);
     }

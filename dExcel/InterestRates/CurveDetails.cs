@@ -31,6 +31,11 @@ public class CurveDetails
     /// The discount factors at the node dates.
     /// </summary>
     public List<double>? DiscountFactors { get; }
+    
+    /// <summary>
+    /// The instrument groups used to bootstrap the curve.
+    /// </summary>
+    public object[] InstrumentGroups { get; }
 
     /// <summary>
     /// 
@@ -45,12 +50,14 @@ public class CurveDetails
         DayCounter dayCountConvention,
         string interpolation,
         IEnumerable<Date>? discountFactorDates,
-        IEnumerable<double>? discountFactors)
+        IEnumerable<double>? discountFactors,
+        params object[] instrumentGroups)
     {
         this.TermStructure = termStructure;
         this.DayCountConvention = dayCountConvention;       
         this.DiscountFactorInterpolation = interpolation;
         this.DiscountFactorDates = discountFactorDates?.ToList();
         this.DiscountFactors = discountFactors?.ToList();
+        this.InstrumentGroups = instrumentGroups;
     }
 }

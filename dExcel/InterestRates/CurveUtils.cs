@@ -271,4 +271,51 @@ public static class CurveUtils
 
         return zeroRates;
     }
+
+    [ExcelFunction(
+        Name = "d.Curve_GetInstruments",
+        Description = "Extracts the instruments used to bootstrap the curve.",
+        Category = "∂Excel: Interest Rates")]
+    public static object GetInstruments(string handle)
+    {
+        CurveDetails curve = GetCurveDetails(handle);
+        List<object> instrumentGroups = curve.InstrumentGroups.ToList();
+        int numberOfRows = 0;
+        int maxColumNumber = 0;
+        foreach (object[,] instrumentGroup in instrumentGroups)
+        {
+            numberOfRows += instrumentGroup.GetLength(0) + 1;
+            maxColumNumber = Math.Max(maxColumNumber, instrumentGroup.GetLength(1));
+        }
+        
+        object[,] output = new object[numberOfRows, maxColumNumber];
+
+        int row = 0;
+        foreach (object[,] instrumentGroup in instrumentGroups)
+        {
+            for (int i = 0; i < instrumentGroup.GetLength(0); i++)
+            {
+                for (int j = 0; j < instrumentGroup.GetLength(1); j++)
+                {
+                    output[row, j] = instrumentGroup[i, j] ?? "";
+                }
+
+                for (int j = instrumentGroup.GetLength(1); j < maxColumNumber; j++)
+                {
+                    output[row, j] = "";
+                }
+                
+                row++;
+            }
+
+            for (int j = 0; j < maxColumNumber; j++)
+            {
+                output[row, j] = "";
+            }
+            
+            row++;
+        }
+        
+        return output; 
+    }
 }
