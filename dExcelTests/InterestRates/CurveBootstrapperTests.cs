@@ -8,44 +8,79 @@ using NUnit.Framework;
 using QLNet;
 
 [TestFixture]
-public class SingleCurveBootstrapperTest
+public class CurveBootstrapperTest
 {
     [Test]
-    public void BootstrapTest()
+    public void Bootstrap_FlatZarSwapCurve_Test()
     {
+       DateTime baseDate = new DateTime(2022, 06, 22); 
+        
         object[,] curveParameters = 
         {
             {"Parameter", "Value"},
-            {"BaseDate", 44713},
+            {"BaseDate", baseDate.ToOADate()},
             {"RateIndexName", "JIBAR"},
+            {"RateIndexTenor", "3m"},
             {"Interpolation", "Exponential"},
         };
 
         object[,] deposits =
         {
+            {"Deposits", "", ""},
             {"Tenors", "Rates", "Include"},
-            {"1m", "10%", "TRUE"},
-            {"2m", "10%", "TRUE"},
-            {"3m", "10%", "TRUE"},
+            {"1m", 0.1, "TRUE"},
+            {"2m", 0.1, "TRUE"},
+            {"3m", 0.1, "TRUE"},
         };
 
         object[,] fras =
         {
+            {"FRAs", "", ""},
             {"FraTenors", "Rates", "Include"},
-            {"3x6", "10%", "TRUE"},
-            {"6x9", "10%", "TRUE"},
-            {"9x12", "10%", "TRUE"},
+            {"3x6", 0.1, "TRUE"},
+            {"6x9", 0.1, "TRUE"},
+            {"9x12", 0.1, "TRUE"},
         };
 
         object[,] swaps =
         {
+            {"Interest Rate Swaps", "", ""},
             {"Tenors", "Rates", "Include"},
-            {"2y", "10%", "TRUE"},
-            {"3y", "10%", "TRUE"},
+            {"2y", 0.1, "TRUE"},
+            {"3y", 0.1, "TRUE"},
         };
         
         object[] instruments = {deposits, fras, swaps};
-        string handle = SingleCurveBootstrapper.Bootstrap("ZAR-Swap", curveParameters, null, instruments);
+        string handle = CurveBootstrapper.Bootstrap("FlatZarSwapCurve", curveParameters, null, instruments);
+        object[,] dates =
+        {
+            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "1m", "ZAR", "ModFol")).ToOADate()},
+            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "2m", "ZAR", "ModFol")).ToOADate()},
+            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "3m", "ZAR", "ModFol")).ToOADate()},
+        };
+        
+        object[,] zeroRates = (object[,])CurveUtils.GetZeroRates(handle, dates, "Simple"); 
+        Assert.AreEqual(0.1, (double)zeroRates[0, 0], 1e-10);
+        Assert.AreEqual(0.1, (double)zeroRates[1, 0], 1e-10);
+        Assert.AreEqual(0.1, (double)zeroRates[2, 0], 1e-10);
+        object[,] startDates =
+        {
+            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "3m", "ZAR", "ModFol")).ToOADate()},
+            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "6m", "ZAR", "ModFol")).ToOADate()},
+            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "9m", "ZAR", "ModFol")).ToOADate()},
+        };
+        
+        object[,] endDates =
+        {
+            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "6m", "ZAR", "ModFol")).ToOADate()},
+            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "9m", "ZAR", "ModFol")).ToOADate()},
+            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "12m", "ZAR", "ModFol")).ToOADate()},
+        };
+        
+        object[,] forwardRates = (object[,]) CurveUtils.GetForwardRates(handle, startDates, endDates, "Simple");
+        Assert.AreEqual(0.1, (double)forwardRates[0, 0], 1e-10);
+        Assert.AreEqual(0.1, (double)forwardRates[1, 0], 1e-10);
+        Assert.AreEqual(0.1, (double)forwardRates[2, 0], 1e-10);
     }
     
     [Test]
@@ -70,7 +105,7 @@ public class SingleCurveBootstrapperTest
         };
         
         string handle = 
-            SingleCurveBootstrapper.Bootstrap(
+            CurveBootstrapper.Bootstrap(
                 handle: "BootstrappedSingleCurve", 
                 curveParameters: curveParameters,
                 customRateIndex: null,
@@ -114,7 +149,7 @@ public class SingleCurveBootstrapperTest
         
         DayCounter dayCounter = new Actual365Fixed();
         string handle = 
-            SingleCurveBootstrapper.Bootstrap(
+            CurveBootstrapper.Bootstrap(
                 handle: "BootstrappedSingleCurve", 
                 curveParameters, 
                 customRateIndex: null,
@@ -187,7 +222,7 @@ public class SingleCurveBootstrapperTest
         object[] instruments = {depositInstruments, fraInstruments};
         Jibar jibar = new(new Period("3m"));
         DayCounter dayCounter = jibar.dayCounter();
-        string handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
+        string handle = CurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
         YieldTermStructure curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 1e-6; 
         
@@ -282,7 +317,7 @@ public class SingleCurveBootstrapperTest
 
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
         Actual365Fixed dayCounter = new();
-        string handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
+        string handle = CurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
         YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.0001;
         List<string> tenors = new() {"0m", "1m", "3m", "6m", "9m", "12m", "15m", "18m", "21m", "24m"};
@@ -391,7 +426,7 @@ public class SingleCurveBootstrapperTest
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
         var jibar = new Jibar(new Period("3m"));
         var dayCounter = jibar.dayCounter();
-        string handle = SingleCurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
+        string handle = CurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
         YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.000000001;
         DateTime date3m = (DateTime)DateUtils.AddTenorToDate(baseDate, "3M", "ZAR", "ModFol");

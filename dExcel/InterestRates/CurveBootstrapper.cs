@@ -491,6 +491,6 @@ public static class CurveBootstrapper
             instruments.Add(oisInstruments);
         }
         
-        return SingleCurveBootstrapper.Bootstrap(handle, curveParameters, null, instruments.ToArray());
+        return Bootstrap(handle, curveParameters, null, instruments.ToArray());
     }
 }
