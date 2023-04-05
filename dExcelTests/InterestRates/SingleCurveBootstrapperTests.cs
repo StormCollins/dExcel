@@ -1,5 +1,6 @@
 ﻿namespace dExcelTests.InterestRates;
 
+using dExcel.Curves;
 using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.InterestRates;
@@ -46,7 +47,6 @@ public class SingleCurveBootstrapperTest
         object[] instruments = {deposits, fras, swaps};
         string handle = SingleCurveBootstrapper.Bootstrap("ZAR-Swap", curveParameters, null, instruments);
     }
-    
     
     [Test]
     public void Bootstrap_MissingBaseDate_Test()
@@ -435,5 +435,16 @@ public class SingleCurveBootstrapperTest
         //               Math.Exp(-0.1 * dayCounter.yearFraction(baseDate.AddMonths(6), baseDate.AddMonths(9))),
         //     actual: curve.discount(baseDate.AddMonths(9)),
         //     delta: tolerance);
+    }
+
+    [Test]
+    public void Bootstrap_Get_ZarSwapCurveTest()
+    {
+        // TODO: Needs to warn user if not connected to VPN.
+        string handle = CurveBootstrapper.Get("ZarSwapCurve", "ZAR-Swap", new DateTime(2023, 03, 31));
+        object[] dates = {new DateTime(2023, 03, 31).ToOADate(), new DateTime(2024, 03, 31).ToOADate()};
+        object discountFactors = CurveUtils.GetDiscountFactors(handle, dates);
+        Assert.AreEqual(((object[,])discountFactors)[0, 0], 1.000000000000000000); 
+        Assert.AreEqual(((object[,])discountFactors)[1, 0], 0.92268020845922072d);
     }
 }

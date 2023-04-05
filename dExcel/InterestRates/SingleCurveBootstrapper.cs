@@ -1,6 +1,4 @@
-﻿using dExcel.Dates;
-
-namespace dExcel.InterestRates;
+﻿namespace dExcel.InterestRates;
 
 using ExcelUtils;
 using ExcelDna.Integration;
@@ -194,7 +192,7 @@ public static class SingleCurveBootstrapper
 
                     if (tenors is null)
                     {
-                        return CommonUtils.DExcelErrorMessage("Swap tenors missing");
+                        return CommonUtils.DExcelErrorMessage("Swap tenors missing.");
                     }
                     
                     if (includeInstruments[i])
@@ -217,13 +215,6 @@ public static class SingleCurveBootstrapper
                 {
                     if (includeInstruments[i])
                     {
-                        // rateHelpers.Add(
-                        //     item: new DatedOISRateHelper(
-                        //     startDate: (DateTime)DateUtils.AddTenorToDate(baseDate, "2d", "USD", "ModFol"), 
-                        //     endDate: endDates?[i],
-                        //     fixedRate: new Handle<Quote>(new SimpleQuote(rates?[i])),
-                        //     overnightIndex: rateIndex as OvernightIndex));
-
                         rateHelpers.Add(
                             item: new OISRateHelper(2, new Period(tenors?[i]), new Handle<Quote>(new SimpleQuote(rates?[i])), rateIndex as OvernightIndex));
                     }

@@ -30,7 +30,7 @@ public static class OmicronUtils
             this.value = value;
         }
     }
-    
+
     public static List<QuoteValue>? DeserializeOmicronObjects(string json)
     {
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings

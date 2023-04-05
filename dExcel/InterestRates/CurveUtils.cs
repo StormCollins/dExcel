@@ -62,7 +62,8 @@ public static class CurveUtils
     [ExcelFunction(
         Name = "d.Curve_Create",
         Description = "Creates an interest rate curve given dates and corresponding discount factors.",
-        Category = "∂Excel: Interest Rates")]
+        Category = "∂Excel: Interest Rates",
+        IsVolatile = true)]
     public static string Create(
         [ExcelArgument(
             Name = "Handle",
@@ -276,19 +277,32 @@ public static class CurveUtils
         Name = "d.Curve_GetInstruments",
         Description = "Extracts the instruments used to bootstrap the curve.",
         Category = "∂Excel: Interest Rates")]
-    public static object GetInstruments(string handle)
+    public static object GetInstruments(
+        [ExcelArgument(
+            Name = "Handle", 
+            Description = 
+                "The 'handle' or name used to refer to the object in memory.\n" + 
+                "Each curve must have a a unique handle.")]
+        string handle)
     {
         CurveDetails curve = GetCurveDetails(handle);
         List<object> instrumentGroups = curve.InstrumentGroups.ToList();
+
+        if (instrumentGroups.Count == 0)
+        {
+            return CommonUtils.DExcelErrorMessage(
+                "No instruments found. Was this bootstrapped or built from discount factors directly?");
+        }
+        
         int numberOfRows = 0;
-        int maxColumNumber = 0;
+        int maxColumnNumber = 0;
         foreach (object[,] instrumentGroup in instrumentGroups)
         {
             numberOfRows += instrumentGroup.GetLength(0) + 1;
-            maxColumNumber = Math.Max(maxColumNumber, instrumentGroup.GetLength(1));
+            maxColumnNumber = Math.Max(maxColumnNumber, instrumentGroup.GetLength(1));
         }
         
-        object[,] output = new object[numberOfRows, maxColumNumber];
+        object[,] output = new object[numberOfRows, maxColumnNumber];
 
         int row = 0;
         foreach (object[,] instrumentGroup in instrumentGroups)
@@ -297,10 +311,21 @@ public static class CurveUtils
             {
                 for (int j = 0; j < instrumentGroup.GetLength(1); j++)
                 {
-                    output[row, j] = instrumentGroup[i, j] ?? "";
+                    if (instrumentGroup[i, j].ToString() == ExcelEmpty.Value.ToString())
+                    {
+                        output[row, j] = "";
+                    }
+                    else if (instrumentGroup[i, j] == null)
+                    {
+                        output[row, j] = "";
+                    }
+                    else
+                    {
+                        output[row, j] = instrumentGroup[i, j];
+                    }
                 }
 
-                for (int j = instrumentGroup.GetLength(1); j < maxColumNumber; j++)
+                for (int j = instrumentGroup.GetLength(1); j < maxColumnNumber; j++)
                 {
                     output[row, j] = "";
                 }
@@ -308,7 +333,7 @@ public static class CurveUtils
                 row++;
             }
 
-            for (int j = 0; j < maxColumNumber; j++)
+            for (int j = 0; j < maxColumnNumber; j++)
             {
                 output[row, j] = "";
             }
