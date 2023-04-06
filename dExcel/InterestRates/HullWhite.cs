@@ -2,7 +2,6 @@
 
 namespace dExcel;
 
-using dExcel.Curves;
 using ExcelDna.Integration;
 using QLNet;
 

@@ -302,7 +302,7 @@ public static class CurveUtils
             maxColumnNumber = Math.Max(maxColumnNumber, instrumentGroup.GetLength(1));
         }
         
-        object[,] output = new object[numberOfRows, maxColumnNumber];
+        object[,] output = new object[numberOfRows - 1, maxColumnNumber];
 
         int row = 0;
         foreach (object[,] instrumentGroup in instrumentGroups)
@@ -311,11 +311,11 @@ public static class CurveUtils
             {
                 for (int j = 0; j < instrumentGroup.GetLength(1); j++)
                 {
-                    if (instrumentGroup[i, j].ToString() == ExcelEmpty.Value.ToString())
+                    if (instrumentGroup[i, j] == null)
                     {
                         output[row, j] = "";
                     }
-                    else if (instrumentGroup[i, j] == null)
+                    else if (instrumentGroup[i, j].ToString() == ExcelEmpty.Value.ToString())
                     {
                         output[row, j] = "";
                     }
@@ -333,9 +333,12 @@ public static class CurveUtils
                 row++;
             }
 
-            for (int j = 0; j < maxColumnNumber; j++)
+            if (row != numberOfRows - 1)
             {
-                output[row, j] = "";
+                for (int j = 0; j < maxColumnNumber; j++)
+                {
+                    output[row, j] = "";
+                }
             }
             
             row++;

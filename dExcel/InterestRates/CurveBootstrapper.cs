@@ -1,44 +1,19 @@
-﻿namespace dExcel.Curves;
+﻿using System.Security.Cryptography;
+using Microsoft.VisualBasic.Devices;
 
-using ExcelUtils;
+namespace dExcel.InterestRates;
+
+using Dates;
 using ExcelDna.Integration;
-using InterestRates;
+using ExcelUtils;
 using Omicron;
 using OmicronUtils;
 using QLNet;
 using Utilities;
 
-public class TenorComparer : Comparer<Tenor>
-{
-    public override int Compare(Tenor x, Tenor y)
-    {
-        if (x.Unit == y.Unit)
-        {
-            return x.Amount.CompareTo(y.Amount);
-        }
-
-        int xAmount = x.Unit switch
-        {
-            TenorUnit.Day => x.Amount,
-            TenorUnit.Week => x.Amount * 7,
-            TenorUnit.Month => x.Amount * 30,
-            TenorUnit.Year => x.Amount * 365,
-            _ => x.Amount,
-        };
-
-        int yAmount = y.Unit switch
-        {
-            TenorUnit.Day => y.Amount,
-            TenorUnit.Week => y.Amount * 7,
-            TenorUnit.Month => y.Amount * 30,
-            TenorUnit.Year => y.Amount * 365,
-            _ => y.Amount,
-        };
-        
-        return xAmount.CompareTo(yAmount);   
-    }
-}
-
+/// <summary>
+/// A class containing a collection of interest rate curve bootstrapping utilities.
+/// </summary>
 public static class CurveBootstrapper
 {
     /// <summary>
@@ -59,7 +34,7 @@ public static class CurveBootstrapper
             Name = "Handle",
             Description =
                 "The 'handle' or name used to refer to the object in memory.\n" +
-                "Each curve must have a a unique handle.")]
+                "Each curve in a workbook must have a a unique handle.")]
         string handle,
         [ExcelArgument(
             Name = "Curve Parameters",
@@ -101,6 +76,7 @@ public static class CurveBootstrapper
 
         string? interpolation =
             ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Interpolation", columnHeaderIndex);
+        
         if (interpolation == null)
         {
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(rateIndexTenor).ToUpper());
@@ -236,10 +212,11 @@ public static class CurveBootstrapper
 
                     if (includeInstruments[i])
                     {
-                        RelinkableHandle<YieldTermStructure>? discountCurve = null;
+                        RelinkableHandle<YieldTermStructure>? discountCurve = new();
                         if (discountCurveHandle != null)
                         {
-                            discountCurve.linkTo(CurveUtils.GetCurveObject(discountCurveHandle));
+                            YieldTermStructure? yieldTermStructure = CurveUtils.GetCurveObject(discountCurveHandle);
+                            discountCurve.linkTo(yieldTermStructure);
                         }
                         
                         rateHelpers.Add(
@@ -360,11 +337,28 @@ public static class CurveBootstrapper
         Description = "Extracts and bootstraps a curve from the Omicron database.",
         Category = "∂Excel: Interest Rates")]
     public static string Get(
+        [ExcelArgument(
+            Name = "Handle",
+            Description =
+                "The 'handle' or name used to refer to the object in memory.\n" +
+                "Each curve in a workbook must have a a unique handle.")]
         string handle,
+        [ExcelArgument(
+            Name = "Curve Name",
+            Description = "The name of the curve in Omicron. Current available options are:\n" +
+                          "• USD-OIS\n" +
+                          "• ZAR-Swap")]
         string curveName,
+        [ExcelArgument(
+            Name = "Base Date",
+            Description = "The base date of the curve i.e., the date for which you'd like to extract the curve.")]
         DateTime baseDate,
+        [ExcelArgument(
+            Name = "DF Interpolation",
+            Description = "(Optional)The discount factor interpolation style.\nDefault = 'Exponential'")]
         string interpolation = "Exponential")
     {
+        // TODO: List the available types of interpolation.
         // Assume has deposits, FRAs, and Swaps
         // Could create more complicated abstract code for mapping from quotes to 2d tables but I would advise against this.
         string rateIndexName = "";
@@ -380,9 +374,22 @@ public static class CurveBootstrapper
                 rateIndexTenor = "1d";
                 break;
         }
-        
-        List<QuoteValue> quoteValues =
-            OmicronUtils.GetSwapCurveQuotes(rateIndexName, null, 1, baseDate.ToString("yyyy-MM-dd"));
+
+        List<QuoteValue> quoteValues = new();
+        try
+        {
+            quoteValues =
+                OmicronUtils.GetSwapCurveQuotes(rateIndexName, null, 1, baseDate.ToString("yyyy-MM-dd"));
+        }
+        catch (Exception ex)
+        {
+            if (!NetworkUtils.GetVpnConnectionStatus())
+            {
+                return CommonUtils.DExcelErrorMessage("Not connected to Deloitte network/VPN.");
+            }
+
+            return CommonUtils.DExcelErrorMessage("Unknown error.");
+        }
 
         object[,] curveParameters =
         {
@@ -470,27 +477,12 @@ public static class CurveBootstrapper
         }
 
         List<object> instruments = new();
+        if (deposits.Any()) instruments.Add(depositInstruments);
+        if (fras.Any()) instruments.Add(fraInstruments);
+        if (swaps.Any()) instruments.Add(swapInstruments);
+        if (oiss.Any()) instruments.Add(oisInstruments);
 
-        if (deposits.Any())
-        {
-            instruments.Add(depositInstruments);
-        }
-
-        if (fras.Any())
-        {
-            instruments.Add(fraInstruments);
-        }
-        
-        if (swaps.Any())
-        {
-            instruments.Add(swapInstruments);
-        }
-        
-        if (oiss.Any())
-        {
-            instruments.Add(oisInstruments);
-        }
-        
         return Bootstrap(handle, curveParameters, null, instruments.ToArray());
     }
 }
+

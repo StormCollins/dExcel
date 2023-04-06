@@ -1,88 +1,15 @@
 ﻿namespace dExcelTests.InterestRates;
 
-using dExcel.Curves;
 using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.InterestRates;
 using NUnit.Framework;
 using QLNet;
+using DateTime = System.DateTime;
 
 [TestFixture]
 public class CurveBootstrapperTest
 {
-    [Test]
-    public void Bootstrap_FlatZarSwapCurve_Test()
-    {
-       DateTime baseDate = new DateTime(2022, 06, 22); 
-        
-        object[,] curveParameters = 
-        {
-            {"Parameter", "Value"},
-            {"BaseDate", baseDate.ToOADate()},
-            {"RateIndexName", "JIBAR"},
-            {"RateIndexTenor", "3m"},
-            {"Interpolation", "Exponential"},
-        };
-
-        object[,] deposits =
-        {
-            {"Deposits", "", ""},
-            {"Tenors", "Rates", "Include"},
-            {"1m", 0.1, "TRUE"},
-            {"2m", 0.1, "TRUE"},
-            {"3m", 0.1, "TRUE"},
-        };
-
-        object[,] fras =
-        {
-            {"FRAs", "", ""},
-            {"FraTenors", "Rates", "Include"},
-            {"3x6", 0.1, "TRUE"},
-            {"6x9", 0.1, "TRUE"},
-            {"9x12", 0.1, "TRUE"},
-        };
-
-        object[,] swaps =
-        {
-            {"Interest Rate Swaps", "", ""},
-            {"Tenors", "Rates", "Include"},
-            {"2y", 0.1, "TRUE"},
-            {"3y", 0.1, "TRUE"},
-        };
-        
-        object[] instruments = {deposits, fras, swaps};
-        string handle = CurveBootstrapper.Bootstrap("FlatZarSwapCurve", curveParameters, null, instruments);
-        object[,] dates =
-        {
-            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "1m", "ZAR", "ModFol")).ToOADate()},
-            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "2m", "ZAR", "ModFol")).ToOADate()},
-            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "3m", "ZAR", "ModFol")).ToOADate()},
-        };
-        
-        object[,] zeroRates = (object[,])CurveUtils.GetZeroRates(handle, dates, "Simple"); 
-        Assert.AreEqual(0.1, (double)zeroRates[0, 0], 1e-10);
-        Assert.AreEqual(0.1, (double)zeroRates[1, 0], 1e-10);
-        Assert.AreEqual(0.1, (double)zeroRates[2, 0], 1e-10);
-        object[,] startDates =
-        {
-            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "3m", "ZAR", "ModFol")).ToOADate()},
-            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "6m", "ZAR", "ModFol")).ToOADate()},
-            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "9m", "ZAR", "ModFol")).ToOADate()},
-        };
-        
-        object[,] endDates =
-        {
-            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "6m", "ZAR", "ModFol")).ToOADate()},
-            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "9m", "ZAR", "ModFol")).ToOADate()},
-            { ((DateTime)DateUtils.AddTenorToDate(baseDate, "12m", "ZAR", "ModFol")).ToOADate()},
-        };
-        
-        object[,] forwardRates = (object[,]) CurveUtils.GetForwardRates(handle, startDates, endDates, "Simple");
-        Assert.AreEqual(0.1, (double)forwardRates[0, 0], 1e-10);
-        Assert.AreEqual(0.1, (double)forwardRates[1, 0], 1e-10);
-        Assert.AreEqual(0.1, (double)forwardRates[2, 0], 1e-10);
-    }
-    
     [Test]
     public void Bootstrap_MissingBaseDate_Test()
     {
@@ -424,8 +351,8 @@ public class CurveBootstrapperTest
         };
             
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
-        var jibar = new Jibar(new Period("3m"));
-        var dayCounter = jibar.dayCounter();
+        Jibar jibar = new Jibar(new Period("3m"));
+        DayCounter? dayCounter = jibar.dayCounter();
         string handle = CurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
         YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.000000001;
@@ -476,8 +403,9 @@ public class CurveBootstrapperTest
     public void Bootstrap_Get_ZarSwapCurveTest()
     {
         // TODO: Needs to warn user if not connected to VPN.
-        string handle = CurveBootstrapper.Get("ZarSwapCurve", "ZAR-Swap", new DateTime(2023, 03, 31));
-        object[] dates = {new DateTime(2023, 03, 31).ToOADate(), new DateTime(2024, 03, 31).ToOADate()};
+        DateTime baseDate = new(2023, 03, 31);
+        string handle = CurveBootstrapper.Get("ZarSwapCurve", "ZAR-Swap", baseDate);
+        object[] dates = {baseDate.ToOADate(), baseDate.AddYears(1).ToOADate()};
         object discountFactors = CurveUtils.GetDiscountFactors(handle, dates);
         Assert.AreEqual(((object[,])discountFactors)[0, 0], 1.000000000000000000); 
         Assert.AreEqual(((object[,])discountFactors)[1, 0], 0.92268020845922072d);

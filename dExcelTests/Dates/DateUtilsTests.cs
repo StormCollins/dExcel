@@ -1,6 +1,5 @@
 ﻿namespace dExcelTests.Dates;
 
-using dExcel;
 using dExcel.Dates;
 using dExcel.Utilities;
 using NUnit.Framework;
