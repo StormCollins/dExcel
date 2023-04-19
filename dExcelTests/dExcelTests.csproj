@@ -35,4 +35,10 @@
     <ProjectReference Include="..\dExcel\dExcel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="NQuantLib">
+      <HintPath>..\..\..\..\Users\stcollins.ZADELOITTE\Desktop\QuantLib-SWIG-1.29\QuantLib-SWIG-1.29\CSharp\csharp\bin\Release\net6.0\NQuantLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

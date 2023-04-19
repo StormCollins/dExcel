@@ -2,6 +2,7 @@
 
 using ExcelDna.Integration;
 using QLNet;
+using QL = QuantLib;
 using System;
 using Utilities;
 
@@ -22,8 +23,8 @@ public static class DateUtils
         Category = "∂Excel: Dates")]
     public static double Act360(DateTime startDate, DateTime endDate)
     {
-        Actual360 dayCounter = new();
-        return dayCounter.yearFraction(startDate, endDate);
+        QL.Actual360 dayCounter = new();
+        return dayCounter.yearFraction(startDate.ToQuantLibDate(), endDate.ToQuantLibDate());
     }
     
     /// <summary>
@@ -274,6 +275,9 @@ public static class DateUtils
             return errorMessage;
         }
 
+        if (tenor == "ON") tenor = "1d";
+        if (tenor == "SW") tenor = "1w";
+        
         return (DateTime) calendar.advance((Date) date, new Period(tenor),
             (BusinessDayConvention) businessDayConvention);
     }

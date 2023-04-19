@@ -255,12 +255,20 @@ public class OmicronUtilsTests
     }
 
     [Test]
-    public void TestGetSwapCurveQuotes()
+    public void GetSwapCurveQuotesTest()
     {
         string rawJson = 
             File.ReadAllText(@"C:\GitLab\dExcelTools\dExcel\dExcelTests\OmicronUtilsTests\OmicronRequisition1Example.json"); 
         List<QuoteValue> quoteValues = OmicronUtils.DeserializeOmicronObjects(rawJson);
         List<QuoteValue> zarSwapCurveQuotes = OmicronUtils.GetSwapCurveQuotes("JIBAR", quoteValues);
         Assert.AreEqual(zarSwapCurveQuotes.Count, 23);
+    }
+
+    [Test]
+    public void GetFxVolQuotesTest()
+    {
+        List<QuoteValue> quoteValues = OmicronUtils.GetFxVolQuotes(null, 1, "2023-03-31");
+        // QLNet.BlackVarianceSurface surface = 
+        //     new QLNet.BlackVarianceSurface()
     }
 }

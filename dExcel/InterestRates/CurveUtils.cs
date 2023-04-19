@@ -24,8 +24,8 @@ public static class CurveUtils
     public static YieldTermStructure? GetCurveObject(string handle)
     {
         DataObjectController controller = DataObjectController.Instance;
-        YieldTermStructure curve = ((CurveDetails)controller.GetDataObject(handle)).TermStructure as YieldTermStructure;
-        Settings.setEvaluationDate(curve.referenceDate());
+        YieldTermStructure? curve = ((CurveDetails)controller.GetDataObject(handle)).TermStructure as YieldTermStructure;
+        Settings.setEvaluationDate(curve?.referenceDate());
         return curve;
     }
 
@@ -156,15 +156,27 @@ public static class CurveUtils
             Description = "The 'handle' or name used to store & retrieve the curve.")]
             string handle,
         [ExcelArgument(
-            Name = "Dates",
-            Description = "The dates for which to get the discount factors.")]
+            Name = "Dates/Year Fractions",
+            Description = "The dates/year fractions for which to get the discount factors.")]
             object[] dates)
     {
         object[,] discountFactors = new object[dates.Length, 1];
         YieldTermStructure? curve = GetCurveObject(handle);
-        for (int i = 0; i < dates.Length; i++)
+        // Most "current" dates are in the range 40,000 - 50,000.
+        // Hence it's safe to assume that if it's less than 1,000 it must be a year fraction.
+        if ((double) dates[0] < 1_000)
         {
-            discountFactors[i, 0] = curve.discount((Date)DateTime.FromOADate((double)dates[i]));
+            for (int i = 0; i < dates.Length; i++)
+            {
+                discountFactors[i, 0] = curve.discount((double) dates[i]);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < dates.Length; i++)
+            {
+                discountFactors[i, 0] = curve.discount((Date)DateTime.FromOADate((double)dates[i]));
+            }    
         }
         
         return discountFactors;

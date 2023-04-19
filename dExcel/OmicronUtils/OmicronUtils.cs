@@ -13,24 +13,6 @@ public static class OmicronUtils
 {
     private const string OmicronUrl = "https://omicron.fsa-aks.deloitte.co.za";
 
-    private const int RequisitionId = 1;
-
-    private const string Date = "2023-02-14";
-
-    public class OmicronObject
-    {
-        public QuoteType type;
-        public DateTime date;
-        public double value;
-
-        public OmicronObject(QuoteType type, DateTime date, double value)
-        {
-            this.type = type;
-            this.date = date;
-            this.value = value;
-        }
-    }
-
     public static List<QuoteValue>? DeserializeOmicronObjects(string json)
     {
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings
@@ -62,6 +44,21 @@ public static class OmicronUtils
                     (x.Type.GetType() == typeof(InterestRateSwap) && 
                      ((InterestRateSwap)x.Type).ReferenceIndex.Name == indexName) ||
                     (x.Type.GetType() == typeof(Ois) && ((Ois)x.Type).ReferenceIndex.Name == indexName))
+                .ToList();
+    }
+
+    public static List<QuoteValue> GetFxVolQuotes(
+        List<QuoteValue>? quotes = null, 
+        int? requisitionId = null,
+        string? date = null)
+    {
+        quotes ??= GetOmicronRequisitionData(requisitionId, date);
+
+        return 
+            quotes
+                .Where(x =>
+                    (x.Type.GetType() == typeof(FxOption)) &&
+                    ((FxOption)x.Type).ReferenceSpot == new FxSpot(Currency.USD, Currency.ZAR))
                 .ToList();
     }
 
@@ -170,10 +167,8 @@ public static class OmicronUtils
                     return new InterestRateSwap(rateIndex, paymentFrequency, tenor);
                 case "Ois":
                     rateIndex = JsonConvert.DeserializeObject<RateIndex>(jObject["ReferenceIndex"]?.ToString() ?? string.Empty);
-                    string empty = string.Empty;
-                    if (empty != null)
-                        tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString() ?? empty);
-                    return new Ois(new RateIndex("FEDFUND",new Tenor(1, TenorUnit.Day)), new Tenor(10, TenorUnit.Month));
+                    tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString());
+                    return new Ois(rateIndex, tenor);
                 case "RateIndex":
                     string? name = jObject["Name"]?.ToString();
                     tenor = JsonConvert.DeserializeObject<Tenor>(jObject["Tenor"]?.ToString() ?? string.Empty);

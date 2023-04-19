@@ -1,7 +1,4 @@
-﻿using System.Security.Cryptography;
-using Microsoft.VisualBasic.Devices;
-
-namespace dExcel.InterestRates;
+﻿namespace dExcel.InterestRates;
 
 using Dates;
 using ExcelDna.Integration;
@@ -388,7 +385,7 @@ public static class CurveBootstrapper
                 return CommonUtils.DExcelErrorMessage("Not connected to Deloitte network/VPN.");
             }
 
-            return CommonUtils.DExcelErrorMessage("Unknown error.");
+            return CommonUtils.DExcelErrorMessage($"Unknown error. {ex.Message}");
         }
 
         object[,] curveParameters =

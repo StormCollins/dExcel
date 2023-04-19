@@ -1,9 +1,13 @@
 ﻿namespace dExcel.Utilities;
 
-using System.Diagnostics.CodeAnalysis;
 using ExcelDna.Integration;
+using LogLinear = QLNet.LogLinear;
 using QLNet;
+using System.Diagnostics.CodeAnalysis;
 
+/// <summary>
+/// A collection of common utility functions that don't quite fit elsewhere.
+/// </summary>
 public static class CommonUtils
 {
     /// <summary>
@@ -158,14 +162,14 @@ public static class CommonUtils
             interpolationMethodToParse.ToUpper() switch
             {
                 "BACKWARDFLAT" => new BackwardFlat(),
-                "CUBIC" => new Cubic(),
+                "CUBIC" => new Cubic(CubicInterpolation.DerivativeApprox.Spline, false, CubicInterpolation.BoundaryCondition.SecondDerivative, 0, CubicInterpolation.BoundaryCondition.SecondDerivative, 0),
                 "FORWARDFLAT" => new ForwardFlat(),
                 "LINEAR" => new Linear(),
-                "LOGCUBIC" => new LogCubic(),
+                "LOGCUBIC" => new LogCubic(CubicInterpolation.DerivativeApprox.Spline, false, CubicInterpolation.BoundaryCondition.SecondDerivative, 0, CubicInterpolation.BoundaryCondition.SecondDerivative, 0),
                 "EXPONENTIAL" => new LogLinear(),
                 _ => null,
             };
-
+        
         if (interpolation == null)
         {
             errorMessage = DExcelErrorMessage($"Invalid interpolation method: '{interpolationMethodToParse}'");
