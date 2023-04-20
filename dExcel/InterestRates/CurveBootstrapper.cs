@@ -1,12 +1,12 @@
-﻿namespace dExcel.InterestRates;
-
-using Dates;
+﻿using dExcel.Dates;
+using dExcel.ExcelUtils;
+using dExcel.OmicronUtils;
+using dExcel.Utilities;
 using ExcelDna.Integration;
-using ExcelUtils;
 using Omicron;
-using OmicronUtils;
-using QLNet;
-using Utilities;
+using QL = QuantLib;
+
+namespace dExcel.InterestRates;
 
 /// <summary>
 /// A class containing a collection of interest rate curve bootstrapping utilities.
@@ -55,7 +55,7 @@ public static class CurveBootstrapper
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseDate).ToUpper());
         }
 
-        Settings.setEvaluationDate(baseDate);
+        QL.Settings.instance().setEvaluationDate(baseDate.ToQuantLibDate());
 
         string? rateIndexName =
             ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexName", columnHeaderIndex);
@@ -83,16 +83,16 @@ public static class CurveBootstrapper
             ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "DiscountCurveHandle", columnHeaderIndex);
 
         
-        IborIndex? rateIndex = null;
+        QL.IborIndex? rateIndex = null;
         if (rateIndexName is not null)
         {
             rateIndex =
                 rateIndexName switch
                 {
-                    "EURIBOR" => new Euribor(new Period(rateIndexTenor)),
-                    "FEDFUND" => new FedFunds(),
-                    "JIBAR" => new Jibar(new Period(rateIndexTenor)),
-                    "USD-LIBOR" => new USDLibor(new Period(rateIndexTenor)),
+                    "EURIBOR" => new QL.Euribor(new QL.Period(rateIndexTenor)),
+                    "FEDFUND" => new QL.FedFunds(),
+                    "JIBAR" => new QL.Jibar(new QL.Period(rateIndexTenor)),
+                    "USD-LIBOR" => new QL.USDLibor(new QL.Period(rateIndexTenor)),
                     _ => null,
                 };
         }
@@ -121,7 +121,7 @@ public static class CurveBootstrapper
             return CommonUtils.DExcelErrorMessage($"Unsupported rate index: {rateIndexName}");
         }
 
-        List<RateHelper> rateHelpers = new();
+        List<QL.RateHelper> rateHelpers = new();
 
         foreach (object instrumentGroup in instrumentGroups)
         {
@@ -157,9 +157,9 @@ public static class CurveBootstrapper
                     if (includeInstruments[i])
                     {
                         rateHelpers.Add(
-                            item: new DepositRateHelper(
+                            item: new QL.DepositRateHelper(
                                 rate: rates[i],
-                                tenor: new Period(tenors[i]),
+                                tenor: new QL.Period(tenors[i]),
                                 fixingDays: rateIndex.fixingDays(),
                                 calendar: rateIndex.fixingCalendar(),
                                 convention: rateIndex.businessDayConvention(),
@@ -185,9 +185,9 @@ public static class CurveBootstrapper
                         }
 
                         rateHelpers.Add(
-                            item: new FraRateHelper(
-                                rate: new Handle<Quote>(new SimpleQuote(rates[i])),
-                                periodToStart: new Period(fraTenors[i]),
+                            item: new QL.FraRateHelper(
+                                rate: new QL.QuoteHandle(new QL.SimpleQuote(rates[i])),
+                                periodToStart: new QL.Period(fraTenors[i]),
                                 iborIndex: rateIndex));
                     }
                 }
@@ -209,23 +209,37 @@ public static class CurveBootstrapper
 
                     if (includeInstruments[i])
                     {
-                        RelinkableHandle<YieldTermStructure>? discountCurve = new();
+                        QL.RelinkableYieldTermStructureHandle? discountCurve = new();
                         if (discountCurveHandle != null)
                         {
-                            YieldTermStructure? yieldTermStructure = CurveUtils.GetCurveObject(discountCurveHandle);
+                            var yieldTermStructure = CurveUtils.GetCurveObject(discountCurveHandle);
                             discountCurve.linkTo(yieldTermStructure);
                         }
+                       
+                        QL.QuoteHandle quoteHandle = new(new QL.SimpleQuote(rates[i]));
+                        QL.SwapRateHelper? swapRateHelper = 
+                                new QL.SwapRateHelper(
+                                    quoteHandle,
+                                    new QL.Period(3, QL.TimeUnit.Months),
+                                    new  QL.SouthAfrica(),
+                                    QL.Frequency.Quarterly,
+                                    QL.BusinessDayConvention.ModifiedFollowing,
+                                    new QL.Actual360(),
+                                    new QL.Jibar(new QL.Period(3, QL.TimeUnit.Months)),
+                                    new QL.QuoteHandle(new QL.SimpleQuote(0)),
+                                    new QL.Period(3, QL.TimeUnit.Months),
+                                    discountCurve);
                         
-                        rateHelpers.Add(
-                            item: new SwapRateHelper(
-                                rate: new Handle<Quote>(new SimpleQuote(rates[i])),
-                                tenor: new Period(tenors[i]),
-                                calendar: rateIndex.fixingCalendar(),
-                                fixedFrequency: Frequency.Quarterly,
-                                fixedConvention: rateIndex.businessDayConvention(),
-                                fixedDayCount: rateIndex.dayCounter(),
-                                iborIndex: rateIndex,
-                                discount: discountCurve));
+                        // rateHelpers.Add(
+                        //     item: new QL.SwapRateHelper(
+                        //         new QL.QuoteHandle(new QL.SimpleQuote(rates[i])),
+                        //         new QL.Period(tenors[i]),
+                        //         rateIndex.fixingCalendar(),
+                        //         QL.Frequency.Quarterly,
+                        //         rateIndex.businessDayConvention(),
+                        //         rateIndex.dayCounter(),
+                        //         rateIndex,
+                        //         discountCurve));
                     }
                 }
             }
@@ -243,29 +257,27 @@ public static class CurveBootstrapper
                         //     overnightIndex: rateIndex as OvernightIndex));
 
                         rateHelpers.Add(
-                            item: new OISRateHelper(2, new Period(tenors?[i]),
-                                new Handle<Quote>(new SimpleQuote(rates?[i])), rateIndex as OvernightIndex));
+                            item: new QL.OISRateHelper(
+                                2, new QL.Period(tenors?[i]),
+                                new QL.QuoteHandle(new QL.SimpleQuote((double)rates?[i])), rateIndex as QL.OvernightIndex));
                     }
                 }
             }
         }
 
-        YieldTermStructure termStructure;
+        QL.YieldTermStructure termStructure;
         if (string.Compare(interpolation, "BackwardFlat", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
             termStructure =
-                new PiecewiseYieldCurve<Discount, BackwardFlat>(
-                    referenceDate: new Date(baseDate),
+                new QL.PiecewiseFlatForward(
+                    referenceDate: baseDate.ToQuantLibDate(),
                     instruments: rateHelpers,
-                    dayCounter: rateIndex.dayCounter(),
-                    jumps: new List<Handle<Quote>>(),
-                    jumpDates: new List<Date>(),
-                    accuracy: 1.0e-20);
+                    dayCounter: rateIndex.dayCounter());
         }
         else if (string.Compare(interpolation, "Cubic", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
             termStructure =
-                new PiecewiseYieldCurve<Discount, Cubic>(
+                new QL.PiecewiseCubicZero(
                     referenceDate: new Date(baseDate),
                     instruments: rateHelpers,
                     dayCounter: rateIndex.dayCounter(),
@@ -482,4 +494,3 @@ public static class CurveBootstrapper
         return Bootstrap(handle, curveParameters, null, instruments.ToArray());
     }
 }
-

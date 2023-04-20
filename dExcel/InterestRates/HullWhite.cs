@@ -73,39 +73,40 @@ public static class HullWhite
             volTypes.Add(swaptionData[i, volTypesIndex].ToString());
         }
         
-        var discountCurve = CurveUtils.GetDiscountCurve(curveHandle);
-        var termStructure = new Handle<YieldTermStructure>(discountCurve);
-        var jibar = new Jibar(new Period(3, TimeUnit.Months), termStructure);
-
-        List<CalibrationHelper> swaptions = new();
-        for (int i = 0; i < swaptionMaturities.Count; i++)
-        {
-            swaptions.Add(new SwaptionHelper(
-                maturity: new Period(swaptionMaturities[i], TimeUnit.Years),
-                length: new Period(swapLengths[i], TimeUnit.Years),
-                volatility: new Handle<Quote>(new SimpleQuote((double)swaptionVols[i])),
-                index: jibar,
-                fixedLegTenor: jibar.tenor(),
-                fixedLegDayCounter: jibar.dayCounter(),
-                floatingLegDayCounter: jibar.dayCounter(),
-                termStructure,
-                type: VolatilityType.ShiftedLognormal));
-        }
-
-        QLNet.HullWhite hullWhite = new(termStructure);
-        for (int i = 0; i < swaptions.Count; i++)
-        {
-            swaptions[i].setPricingEngine(new JamshidianSwaptionEngine(hullWhite));
-        }
-        CalibrateModel(hullWhite, swaptions);
-        var parameters = new Dictionary<string, double>()
-        {
-            ["alpha"] = hullWhite.parameters()[0],
-            ["sigma"] = hullWhite.parameters()[1],
-        };
-
-        DataObjectController dataObjectController = DataObjectController.Instance;
-        return dataObjectController.Add(parameterHandle, parameters);
+        // var discountCurve = CurveUtils.GetDiscountCurve(curveHandle);
+        // var termStructure = new Handle<YieldTermStructure>(discountCurve);
+        // var jibar = new Jibar(new Period(3, TimeUnit.Months), termStructure);
+        //
+        // List<CalibrationHelper> swaptions = new();
+        // for (int i = 0; i < swaptionMaturities.Count; i++)
+        // {
+        //     swaptions.Add(new SwaptionHelper(
+        //         maturity: new Period(swaptionMaturities[i], TimeUnit.Years),
+        //         length: new Period(swapLengths[i], TimeUnit.Years),
+        //         volatility: new Handle<Quote>(new SimpleQuote((double)swaptionVols[i])),
+        //         index: jibar,
+        //         fixedLegTenor: jibar.tenor(),
+        //         fixedLegDayCounter: jibar.dayCounter(),
+        //         floatingLegDayCounter: jibar.dayCounter(),
+        //         termStructure,
+        //         type: VolatilityType.ShiftedLognormal));
+        // }
+        //
+        // QLNet.HullWhite hullWhite = new(termStructure);
+        // for (int i = 0; i < swaptions.Count; i++)
+        // {
+        //     swaptions[i].setPricingEngine(new JamshidianSwaptionEngine(hullWhite));
+        // }
+        // CalibrateModel(hullWhite, swaptions);
+        // var parameters = new Dictionary<string, double>()
+        // {
+        //     ["alpha"] = hullWhite.parameters()[0],
+        //     ["sigma"] = hullWhite.parameters()[1],
+        // };
+        //
+        // DataObjectController dataObjectController = DataObjectController.Instance;
+        // return dataObjectController.Add(parameterHandle, parameters);
+        return "";
     }
     
     /// <summary>

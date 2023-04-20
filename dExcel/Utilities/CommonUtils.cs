@@ -1,9 +1,9 @@
-﻿namespace dExcel.Utilities;
-
-using ExcelDna.Integration;
+﻿using ExcelDna.Integration;
 using LogLinear = QLNet.LogLinear;
-using QLNet;
+using QL = QuantLib;
 using System.Diagnostics.CodeAnalysis;
+
+namespace dExcel.Utilities;
 
 /// <summary>
 /// A collection of common utility functions that don't quite fit elsewhere.
@@ -122,17 +122,17 @@ public static class CommonUtils
     /// <returns>True it can parse the string to a day count convention, else false.</returns>
     public static bool TryParseDayCountConvention(
         string dayCountConventionToParse, 
-        [NotNullWhen(true)]out DayCounter? dayCountConvention,
+        [NotNullWhen(true)]out QL.DayCounter? dayCountConvention,
         [NotNullWhen(false)]out string? errorMessage)
     {
         dayCountConvention =
             dayCountConventionToParse.ToUpper() switch
             {
-                "ACT360" or "ACTUAL360" => new Actual360(),
-                "ACT365" or "ACTUAL365" => new Actual365Fixed(),
-                "ACTACT" or "ACTUALACTUAL" => new ActualActual(),
-                "BUSINESS252" => new Business252(),
-                "30360" or "THIRTY360" => new Thirty360(Thirty360.Thirty360Convention.BondBasis, null),
+                "ACT360" or "ACTUAL360" => new QL.Actual360(),
+                "ACT365" or "ACTUAL365" => new QL.Actual365Fixed(),
+                "ACTACT" or "ACTUALACTUAL" => new QL.ActualActual(QL.ActualActual.Convention.ISDA),
+                "BUSINESS252" => new QL.Business252(),
+                "30360" or "THIRTY360" => new QL.Thirty360(QL.Thirty360.Convention.ISDA, null),
                 _ => null,
             };
 
@@ -146,39 +146,39 @@ public static class CommonUtils
         return true;
     }
     
-    /// <summary>
-    /// Tries to parse the interpolation method of the input string to the <see cref="interpolation"/> out parameter.
-    /// If it cannot parse the interpolation method it returns false and populates the <see cref="errorMessage"/> out
-    /// parameter.
-    /// </summary>
-    /// <param name="errorMessage">The error message (if any).</param>
-    /// <returns>True if it can parse the string to an interpolation object, else false.</returns>
-    public static bool TryParseInterpolation(
-        string interpolationMethodToParse, 
-        [NotNullWhen(true)]out IInterpolationFactory? interpolation,
-        [NotNullWhen(false)]out string? errorMessage)
-    {
-        interpolation =
-            interpolationMethodToParse.ToUpper() switch
-            {
-                "BACKWARDFLAT" => new BackwardFlat(),
-                "CUBIC" => new Cubic(CubicInterpolation.DerivativeApprox.Spline, false, CubicInterpolation.BoundaryCondition.SecondDerivative, 0, CubicInterpolation.BoundaryCondition.SecondDerivative, 0),
-                "FORWARDFLAT" => new ForwardFlat(),
-                "LINEAR" => new Linear(),
-                "LOGCUBIC" => new LogCubic(CubicInterpolation.DerivativeApprox.Spline, false, CubicInterpolation.BoundaryCondition.SecondDerivative, 0, CubicInterpolation.BoundaryCondition.SecondDerivative, 0),
-                "EXPONENTIAL" => new LogLinear(),
-                _ => null,
-            };
-        
-        if (interpolation == null)
-        {
-            errorMessage = DExcelErrorMessage($"Invalid interpolation method: '{interpolationMethodToParse}'");
-            return false;
-        }
-       
-        errorMessage = null;
-        return true;
-    }
+    // /// <summary>
+    // /// Tries to parse the interpolation method of the input string to the <see cref="interpolation"/> out parameter.
+    // /// If it cannot parse the interpolation method it returns false and populates the <see cref="errorMessage"/> out
+    // /// parameter.
+    // /// </summary>
+    // /// <param name="errorMessage">The error message (if any).</param>
+    // /// <returns>True if it can parse the string to an interpolation object, else false.</returns>
+    // public static bool TryParseInterpolation(
+    //     string interpolationMethodToParse, 
+    //     [NotNullWhen(true)]out IInterpolationFactory? interpolation,
+    //     [NotNullWhen(false)]out string? errorMessage)
+    // {
+    //     interpolation =
+    //         interpolationMethodToParse.ToUpper() switch
+    //         {
+    //             "BACKWARDFLAT" => new QL.BackwardFlat(),
+    //             "CUBIC" => new QL.Cubic(CubicInterpolation.DerivativeApprox.Spline, false, CubicInterpolation.BoundaryCondition.SecondDerivative, 0, CubicInterpolation.BoundaryCondition.SecondDerivative, 0),
+    //             "FORWARDFLAT" => new QL.ForwardFlat(),
+    //             "LINEAR" => new QL.Linear(),
+    //             "LOGCUBIC" => new QL.LogCubic(CubicInterpolation.DerivativeApprox.Spline, false, CubicInterpolation.BoundaryCondition.SecondDerivative, 0, CubicInterpolation.BoundaryCondition.SecondDerivative, 0),
+    //             "EXPONENTIAL" => new QL.LogLinear(),
+    //             _ => null,
+    //         };
+    //     
+    //     if (interpolation == null)
+    //     {
+    //         errorMessage = DExcelErrorMessage($"Invalid interpolation method: '{interpolationMethodToParse}'");
+    //         return false;
+    //     }
+    //    
+    //     errorMessage = null;
+    //     return true;
+    // }
     
      /// <summary>
      /// Tries to parse the compounding convention of the input string to the <see cref="interpolation"/> out parameter.
@@ -189,18 +189,18 @@ public static class CommonUtils
      /// <returns>True if it can parse the string to a compounding convention, else false.</returns>
      public static bool TryParseCompoundingConvention(
          string compoundingConventionToParse, 
-         [NotNullWhen(true)]out (Compounding compoudng, Frequency frequency)? compoundingConvention,
+         [NotNullWhen(true)]out (QL.Compounding compoudng, QL.Frequency frequency)? compoundingConvention,
          [NotNullWhen(false)]out string? errorMessage)
      {
             compoundingConvention = 
                 compoundingConventionToParse.ToUpper() switch
                 {
-                    "SIMPLE" => (Compounding.Simple, Frequency.Once),
-                    "NACM" => (Compounding.Compounded, Frequency.Monthly),
-                    "NACQ" => (Compounding.Compounded, Frequency.Quarterly),
-                    "NACS" => (Compounding.Compounded, Frequency.Semiannual),
-                    "NACA" => (Compounding.Compounded, Frequency.Annual),
-                    "NACC" => (Compounding.Continuous, Frequency.NoFrequency),
+                    "SIMPLE" => (QL.Compounding.Simple, QL.Frequency.Once),
+                    "NACM" => (QL.Compounding.Compounded, QL.Frequency.Monthly),
+                    "NACQ" => (QL.Compounding.Compounded, QL.Frequency.Quarterly),
+                    "NACS" => (QL.Compounding.Compounded, QL.Frequency.Semiannual),
+                    "NACA" => (QL.Compounding.Compounded, QL.Frequency.Annual),
+                    "NACC" => (QL.Compounding.Continuous, QL.Frequency.NoFrequency),
                     _ => null,
                 };
  

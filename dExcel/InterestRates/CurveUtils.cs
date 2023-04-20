@@ -1,9 +1,10 @@
-﻿namespace dExcel.InterestRates;
-
-using ExcelUtils;
+﻿using dExcel.Dates;
+using dExcel.ExcelUtils;
+using dExcel.Utilities;
 using ExcelDna.Integration;
-using QLNet;
-using Utilities;
+using QL = QuantLib;
+
+namespace dExcel.InterestRates;
 
 /// <summary>
 /// A collection of utility functions for dealing with interest rate curves.
@@ -21,11 +22,11 @@ public static class CurveUtils
     /// </summary>
     /// <param name="handle">The handle for the relevant curve object.</param>
     /// <returns>Returns the YieldTermStructure object.</returns>
-    public static YieldTermStructure? GetCurveObject(string handle)
+    public static QL.YieldTermStructure? GetCurveObject(string handle)
     {
         DataObjectController controller = DataObjectController.Instance;
-        YieldTermStructure? curve = ((CurveDetails)controller.GetDataObject(handle)).TermStructure as YieldTermStructure;
-        Settings.setEvaluationDate(curve?.referenceDate());
+        QL.YieldTermStructure? curve = ((CurveDetails)controller.GetDataObject(handle)).TermStructure as QL.YieldTermStructure;
+        QL.Settings.instance().setEvaluationDate(curve?.referenceDate());
         return curve;
     }
 
@@ -34,7 +35,7 @@ public static class CurveUtils
     /// </summary>
     /// <param name="handle">The handle for the relevant curve object.</param>
     /// <returns>Returns the DayCounter object e.g. Actual365Fixed.</returns>
-    private static DayCounter GetCurveDayCountConvention(string handle)
+    private static QL.DayCounter GetCurveDayCountConvention(string handle)
     {
         DataObjectController dataObjectController = DataObjectController.Instance;
         return ((CurveDetails)dataObjectController.GetDataObject(handle)).DayCountConvention; 
@@ -88,11 +89,11 @@ public static class CurveUtils
                 $"({datesRange.GetLength(0)} ≠ {discountFactorsRange.GetLength(0)}).");
         }
 
-        List<Date> dates = new();
+        List<QL.Date> dates = new();
         List<double> discountFactors = new();
         for (int i = 0; i < datesRange.GetLength(0); i++)
         {
-            dates.Add(DateTime.FromOADate((double)datesRange[i, 0]));
+            dates.Add(DateTime.FromOADate((double)datesRange[i, 0]).ToQuantLibDate());
             discountFactors.Add((double)discountFactorsRange[i, 0]);
         }
 
@@ -104,7 +105,7 @@ public static class CurveUtils
 
         if (!CommonUtils.TryParseDayCountConvention(
                 dayCountConventionToParse: dayCountConventionParameter, 
-                dayCountConvention: out DayCounter? dayCountConvention,
+                dayCountConvention: out QL.DayCounter? dayCountConvention,
                 errorMessage: out string? dayCountConventionErrorMessage))
         {
             return dayCountConventionErrorMessage;
@@ -116,27 +117,34 @@ public static class CurveUtils
             return CommonUtils.DExcelErrorMessage("'Interpolation' not set in parameters.");
         }
 
-        if (!CommonUtils.TryParseInterpolation(
-                interpolationMethodToParse: interpolationParameter,
-                interpolation: out IInterpolationFactory? interpolation,
-                errorMessage: out string? interpolationErrorMessage))
-        {
-            return interpolationErrorMessage;
-        }
+        // if (!CommonUtils.TryParseInterpolation(
+        //         interpolationMethodToParse: interpolationParameter,
+        //         interpolation: out IInterpolationFactory? interpolation,
+        //         errorMessage: out string? interpolationErrorMessage))
+        // {
+        //     return interpolationErrorMessage;
+        // }
 
+        
         string? calendarsParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Calendars");
         IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
-        Type interpolationType = typeof(InterpolatedDiscountCurve<>).MakeGenericType(interpolation.GetType());
-        object? termStructure = Activator.CreateInstance(interpolationType, dates, discountFactors, dayCountConvention, interpolation);
-        CurveDetails curveDetails = new(termStructure, dayCountConvention, interpolationParameter, dates, discountFactors);
-        DataObjectController dataObjectController = DataObjectController.Instance;
-        return dataObjectController.Add(handle, curveDetails);
-    }
+        (QL.Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsParameter);  
 
-    public static InterpolatedDiscountCurve<LogLinear> GetDiscountCurve(string handle)
-    {
-        DataObjectController dataObjectController = DataObjectController.Instance;
-        return (InterpolatedDiscountCurve<LogLinear>)dataObjectController.GetDataObject(handle);
+        if (interpolationParameter.ToUpper() == "LINEAR")
+        {
+            QL.DiscountCurve discountCurve = new(new QL.DateVector(dates), new QL.DoubleVector(discountFactors), dayCountConvention, calendar);  
+            CurveDetails curveDetails = new(discountCurve, dayCountConvention, interpolationParameter, dates, discountFactors);
+            DataObjectController dataObjectController = DataObjectController.Instance;
+            return dataObjectController.Add(handle, curveDetails);
+        }
+        
+        return CommonUtils.DExcelErrorMessage($"Unsupported interpolation method: {interpolationParameter}");
+        
+        // Type interpolationType = typeof(InterpolatedDiscountCurve<>).MakeGenericType(interpolation.GetType());
+        // object? termStructure = Activator.CreateInstance(interpolationType, dates, discountFactors, dayCountConvention, interpolation);
+        // CurveDetails curveDetails = new(termStructure, dayCountConvention, interpolationParameter, dates, discountFactors);
+        // DataObjectController dataObjectController = DataObjectController.Instance;
+        // return dataObjectController.Add(handle, curveDetails);
     }
 
     /// <summary>
@@ -161,7 +169,7 @@ public static class CurveUtils
             object[] dates)
     {
         object[,] discountFactors = new object[dates.Length, 1];
-        YieldTermStructure? curve = GetCurveObject(handle);
+        QL.YieldTermStructure? curve = GetCurveObject(handle);
         // Most "current" dates are in the range 40,000 - 50,000.
         // Hence it's safe to assume that if it's less than 1,000 it must be a year fraction.
         if ((double) dates[0] < 1_000)
@@ -175,7 +183,7 @@ public static class CurveUtils
         {
             for (int i = 0; i < dates.Length; i++)
             {
-                discountFactors[i, 0] = curve.discount((Date)DateTime.FromOADate((double)dates[i]));
+                discountFactors[i, 0] = curve.discount(DateTime.FromOADate((double)dates[i]).ToQuantLibDate());
             }    
         }
         
@@ -192,7 +200,7 @@ public static class CurveUtils
         object[,] endDatesRange, 
         string compoundingConventionParameter)
     {
-        YieldTermStructure? curve = GetCurveObject(handle);
+        QL.YieldTermStructure? curve = GetCurveObject(handle);
         if (curve is null)
         {
             return CommonUtils.DExcelErrorMessage($"{handle} returned null object.");
@@ -200,7 +208,7 @@ public static class CurveUtils
 
         if (!CommonUtils.TryParseCompoundingConvention(
                 compoundingConventionParameter,
-                out (Compounding compounding, Frequency frequency)? compoundingConvention,
+                out (QL.Compounding compounding, QL.Frequency frequency)? compoundingConvention,
                 out string? compoundingConventionErrorMessage))
         {
             return compoundingConventionErrorMessage;
@@ -209,18 +217,18 @@ public static class CurveUtils
 
         List<DateTime> startDates = ExcelArrayUtils.ConvertExcelRangeToList<DateTime>(startDatesRange);
         List<DateTime> endDates = ExcelArrayUtils.ConvertExcelRangeToList<DateTime>(endDatesRange);
-        DayCounter dayCountConvention = GetCurveDayCountConvention(handle);
+        QL.DayCounter dayCountConvention = GetCurveDayCountConvention(handle);
 
         object[,] forwardRates = new object[startDates.Count, 1];
         for (int i = 0; i < startDates.Count; i++)
         {
             forwardRates[i, 0] = 
                 curve.forwardRate(
-                    d1: (Date)startDates[i], 
-                    d2: (Date)endDates[i], 
-                    dayCounter: dayCountConvention, 
-                    comp: compoundingConvention.Value.compounding, 
-                    freq: compoundingConvention.Value.frequency).rate();
+                    startDates[i].ToQuantLibDate(), 
+                    endDates[i].ToQuantLibDate(),
+                    dayCountConvention, 
+                    compoundingConvention.Value.compounding, 
+                    compoundingConvention.Value.frequency).rate();
         }
 
         return forwardRates;
@@ -253,18 +261,18 @@ public static class CurveUtils
                           "Default = NACC")]
             string compoundingConventionParameter = "NACC")
     {
-        YieldTermStructure? curve = GetCurveObject(handle);
+        QL.YieldTermStructure? curve = GetCurveObject(handle);
         if (curve is null)
         {
             return CommonUtils.DExcelErrorMessage($"Curve with handle {handle} not found. Try refreshing it.");
         }
 
-        List<Date> dates = new();
-        DayCounter dayCountConvention = GetCurveDayCountConvention(handle);
+        List<QL.Date> dates = new();
+        QL.DayCounter dayCountConvention = GetCurveDayCountConvention(handle);
 
         if (!CommonUtils.TryParseCompoundingConvention(
                 compoundingConventionParameter,
-                out (Compounding compounding, Frequency frequency)? compoundingConvention,
+                out (QL.Compounding compounding, QL.Frequency frequency)? compoundingConvention,
                 out string? compoundingConventionErrorMessage))
         {
             return compoundingConventionErrorMessage; 
@@ -273,13 +281,13 @@ public static class CurveUtils
         object[,] zeroRates = new object[datesRange.Length, 1];
         for (int i = 0; i < datesRange.GetLength(0); i++)
         {
-            dates.Add(DateTime.FromOADate((double)datesRange[i, 0]));
+            dates.Add(DateTime.FromOADate((double)datesRange[i, 0]).ToQuantLibDate());
             zeroRates[i, 0] = 
                 curve.zeroRate(
-                    d: dates[i], 
-                    dayCounter: dayCountConvention, 
-                    comp: compoundingConvention.Value.compounding, 
-                    freq: compoundingConvention.Value.frequency).rate();
+                    dates[i], 
+                    dayCountConvention, 
+                    compoundingConvention.Value.compounding, 
+                    compoundingConvention.Value.frequency).rate();
         }
 
         return zeroRates;

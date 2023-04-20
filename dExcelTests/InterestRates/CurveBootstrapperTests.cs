@@ -1,15 +1,20 @@
-﻿namespace dExcelTests.InterestRates;
-
-using dExcel.Dates;
+﻿using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.InterestRates;
 using NUnit.Framework;
-using QLNet;
+using QL = QuantLib;
 using DateTime = System.DateTime;
+
+namespace dExcelTests.InterestRates;
 
 [TestFixture]
 public class CurveBootstrapperTest
 {
+    public void TestCurveBootstrapper()
+    {
+        
+    }
+    
     [Test]
     public void Bootstrap_MissingBaseDate_Test()
     {
@@ -74,7 +79,7 @@ public class CurveBootstrapperTest
             {"6m", "JIBAR", depositRates["6m"], "TRUE"},
         };
         
-        DayCounter dayCounter = new Actual365Fixed();
+        QL.DayCounter dayCounter = new QL.Actual365Fixed();
         string handle = 
             CurveBootstrapper.Bootstrap(
                 handle: "BootstrappedSingleCurve", 
@@ -82,21 +87,21 @@ public class CurveBootstrapperTest
                 customRateIndex: null,
                 instruments);
 
-        YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
-        const double tolerance = 0.01; 
-        Assert.AreEqual(1.0, curve.discount(baseDate));
+        QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
+        const double tolerance = 0.01;
+        Assert.AreEqual(1.0, curve.discount(baseDate.ToQuantLibDate()));
                     
         DateTime date1M = (DateTime) DateUtils.AddTenorToDate(baseDate, "1m", "ZAR", "ModFol");
-        double discountFactor1M = 1 / (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate, date1M));
-        Assert.AreEqual(discountFactor1M, curve.discount(date1M), tolerance);
+        double discountFactor1M = 1 / (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date1M.ToQuantLibDate()));
+        Assert.AreEqual(discountFactor1M, curve.discount(date1M.ToQuantLibDate()), tolerance);
         
         DateTime date3M = (DateTime) DateUtils.AddTenorToDate(baseDate, "3m", "ZAR", "ModFol");
-        double discountFactor3M = 1 / (1 + depositRates["3m"] * dayCounter.yearFraction(baseDate, date3M));
-        Assert.AreEqual(discountFactor3M, curve.discount(date3M), tolerance);
+        double discountFactor3M = 1 / (1 + depositRates["3m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date3M.ToQuantLibDate()));
+        Assert.AreEqual(discountFactor3M, curve.discount(date3M.ToQuantLibDate()), tolerance);
         
         DateTime date6M = (DateTime) DateUtils.AddTenorToDate(baseDate, "6m", "ZAR", "ModFol");
-        double discountFactor6M = 1 / (1 + depositRates["6m"] * dayCounter.yearFraction(baseDate, date6M));
-        Assert.AreEqual(discountFactor6M, curve.discount(date6M), tolerance); 
+        double discountFactor6M = 1 / (1 + depositRates["6m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date6M.ToQuantLibDate()));
+        Assert.AreEqual(discountFactor6M, curve.discount(date6M.ToQuantLibDate()), tolerance); 
     }
     
     [Test]
@@ -147,37 +152,43 @@ public class CurveBootstrapperTest
         };
 
         object[] instruments = {depositInstruments, fraInstruments};
-        Jibar jibar = new(new Period("3m"));
-        DayCounter dayCounter = jibar.dayCounter();
+        QL.Jibar jibar = new(new QL.Period("3m"));
+        QL.DayCounter dayCounter = jibar.dayCounter();
         string handle = CurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
-        YieldTermStructure curve = CurveUtils.GetCurveObject(handle);
+        QL.YieldTermStructure curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 1e-6; 
         
-        Assert.AreEqual(1.0, curve.discount(baseDate));
+        Assert.AreEqual(1.0, curve.discount(baseDate.ToQuantLibDate()));
         
         DateTime date1M = (DateTime) DateUtils.AddTenorToDate(baseDate, "1m", "ZAR", "ModFol");
-        double discountFactor1M = 1 / (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate, date1M));
-        Assert.AreEqual(discountFactor1M, curve.discount(date1M), tolerance);
+        double discountFactor1M = 1 / (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date1M.ToQuantLibDate()));
+        Assert.AreEqual(discountFactor1M, curve.discount(date1M.ToQuantLibDate()), tolerance);
         
         DateTime date3M = (DateTime) DateUtils.AddTenorToDate(baseDate, "3m", "ZAR", "ModFol");
-        double discountFactor3M = 1 / (1 + depositRates["3m"] * dayCounter.yearFraction(baseDate, date3M));
-        Assert.AreEqual(discountFactor3M, curve.discount(date3M), tolerance);
+        double discountFactor3M = 
+            1 / (1 + depositRates["3m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date3M.ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor3M, curve.discount(date3M.ToQuantLibDate()), tolerance);
         
         DateTime date6M = (DateTime) DateUtils.AddTenorToDate(baseDate, "6m", "ZAR", "ModFol");
-        double discountFactor6M = 1 / (1 + depositRates["6m"] * dayCounter.yearFraction(baseDate, date6M));
-        Assert.AreEqual(discountFactor6M, curve.discount(date6M), tolerance); 
+        double discountFactor6M = 
+            1 / (1 + depositRates["6m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date6M.ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor6M, curve.discount(date6M.ToQuantLibDate()), tolerance); 
        
         DateTime date9M = (DateTime) DateUtils.AddTenorToDate(baseDate, "9m", "ZAR", "ModFol");
         double discountFactor9M = 
-            discountFactor6M * 1 / (1 + fraRates["6x9"] * dayCounter.yearFraction(date6M, date9M));
+            discountFactor6M * 
+            1 / (1 + fraRates["6x9"] * dayCounter.yearFraction(date6M.ToQuantLibDate(), date9M.ToQuantLibDate()));
         
-        Assert.AreEqual(discountFactor9M, curve.discount(date9M), tolerance); 
+        Assert.AreEqual(discountFactor9M, curve.discount(date9M.ToQuantLibDate()), tolerance); 
         
         DateTime date12M = (DateTime) DateUtils.AddTenorToDate(baseDate, "12m", "ZAR", "ModFol");
         double discountFactor12M = 
-            discountFactor9M * 1 / (1 + fraRates["9x12"] * dayCounter.yearFraction(date9M, date12M));
+            discountFactor9M * 
+            1 / (1 + fraRates["9x12"] * dayCounter.yearFraction(date9M.ToQuantLibDate(), date12M.ToQuantLibDate()));
         
-        Assert.AreEqual(discountFactor12M, curve.discount(date12M), tolerance); 
+        Assert.AreEqual(discountFactor12M, curve.discount(date12M.ToQuantLibDate()), tolerance); 
     }
     
     [Test]
@@ -243,32 +254,43 @@ public class CurveBootstrapperTest
         };
 
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
-        Actual365Fixed dayCounter = new();
+        QL.Actual365Fixed dayCounter = new();
         string handle = CurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
-        YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
+        QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.0001;
         List<string> tenors = new() {"0m", "1m", "3m", "6m", "9m", "12m", "15m", "18m", "21m", "24m"};
 
         Dictionary<string, DateTime> dates = tenors.ToDictionary(t => t, t => (DateTime)DateUtils.AddTenorToDate(baseDate, t, "ZAR", "ModFol"));
         
-        double discountFactor1M = 1 / (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate, dates["1m"]));
-        Assert.AreEqual(discountFactor1M, curve.discount(dates["1m"]), tolerance);
+        double discountFactor1M = 
+            1 / 
+            (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), dates["1m"].ToQuantLibDate()));
         
-        double discountFactor3M = 1 / (1 + depositRates["3m"] * dayCounter.yearFraction(baseDate, dates["3m"]));
-        Assert.AreEqual(discountFactor3M, curve.discount(dates["3m"]), tolerance);
+        Assert.AreEqual(discountFactor1M, curve.discount(dates["1m"].ToQuantLibDate()), tolerance);
         
-        double discountFactor6M = 1 / (1 + depositRates["6m"] * dayCounter.yearFraction(baseDate, dates["6m"]));
-        Assert.AreEqual(discountFactor6M, curve.discount(dates["6m"]), tolerance); 
+        double discountFactor3M = 
+            1 / 
+            (1 + depositRates["3m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), dates["3m"].ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor3M, curve.discount(dates["3m"].ToQuantLibDate()), tolerance);
+        
+        double discountFactor6M = 
+            1 / 
+            (1 + depositRates["6m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), dates["6m"].ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor6M, curve.discount(dates["6m"].ToQuantLibDate()), tolerance); 
        
         double discountFactor9M = 
-            discountFactor6M * 1 / (1 + fraRates["6x9"] * dayCounter.yearFraction(dates["6m"], dates["9m"]));
+            discountFactor6M / 
+            (1 + fraRates["6x9"] * dayCounter.yearFraction(dates["6m"].ToQuantLibDate(), dates["9m"].ToQuantLibDate()));
         
-        Assert.AreEqual(discountFactor9M, curve.discount(dates["9m"]), tolerance); 
+        Assert.AreEqual(discountFactor9M, curve.discount(dates["9m"].ToQuantLibDate()), tolerance); 
         
         double discountFactor12M = 
-            discountFactor9M * 1 / (1 + fraRates["9x12"] * dayCounter.yearFraction(dates["9m"], dates["12m"]));
+            discountFactor9M / 
+            (1 + fraRates["9x12"] * dayCounter.yearFraction(dates["9m"].ToQuantLibDate(), dates["12m"].ToQuantLibDate()));
 
-        Assert.AreEqual(discountFactor12M, curve.discount(dates["12m"]), tolerance);
+        Assert.AreEqual(discountFactor12M, curve.discount(dates["12m"].ToQuantLibDate()), tolerance);
 
         List<double> startDatesRange = 
             dates.Values.ToList().GetRange(0, dates.Count - 1).Select(d => d.ToOADate()).ToList();
@@ -292,7 +314,10 @@ public class CurveBootstrapperTest
            endDatesRange
                .Zip(
                    startDatesRange, 
-                   (s, e) => dayCounter.yearFraction(DateTime.FromOADate(s), DateTime.FromOADate(e)))
+                   (s, e) => 
+                       dayCounter.yearFraction(
+                           d1: DateTime.FromOADate(s).ToQuantLibDate(), 
+                           d2: DateTime.FromOADate(e).ToQuantLibDate()))
                .ToList();
        
        double numerator =
@@ -313,13 +338,13 @@ public class CurveBootstrapperTest
     [Test]
     public void Bootstrap_BackwardFlatInterpolation_Test()
     {
-        DateTime baseDate = new(2022, 06, 01);
+        QL.Date baseDate = new(1, 6.ToQuantLibMonth(), 2022);
             
         object[,] curveParameters =
         {
             {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
-            {"BaseDate", baseDate.ToOADate()},
+            {"BaseDate", baseDate.ToDateTime().ToOADate()},
             {"RateIndexName", "JIBAR"},
             {"RateIndexTenor", "3m"},
             {"Interpolation", "Linear"},
@@ -351,12 +376,12 @@ public class CurveBootstrapperTest
         };
             
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
-        Jibar jibar = new Jibar(new Period("3m"));
-        DayCounter? dayCounter = jibar.dayCounter();
+        QL.Jibar jibar = new(new QL.Period(3, QL.TimeUnit.Months));
+        QL.DayCounter? dayCounter = jibar.dayCounter();
         string handle = CurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
-        YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
+        QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.000000001;
-        DateTime date3m = (DateTime)DateUtils.AddTenorToDate(baseDate, "3M", "ZAR", "ModFol");
+        QL.Date date3m = ((DateTime)DateUtils.AddTenorToDate(baseDate.ToDateTime(), "3M", "ZAR", "ModFol")).ToQuantLibDate();
         Assert.AreEqual(1.0, curve.discount(baseDate));
         Assert.AreEqual(
             expected: 1 / (1 + 0.1 * dayCounter.yearFraction(baseDate, date3m)),
@@ -372,16 +397,23 @@ public class CurveBootstrapperTest
         //     actual: curve.discount(baseDate.AddMonths(5)),
         //     delta: tolerance);
 
+        QL.Calendar calendar = jibar.fixingCalendar();
 
         double discountFactor1Y =
-            Math.Exp(-0.130 * dayCounter.yearFraction(baseDate, baseDate.AddMonths(6))) *
-            Math.Exp(-0.135 * dayCounter.yearFraction(baseDate.AddMonths(6), baseDate.AddMonths(9)));
+            Math.Exp(-0.130 * dayCounter.yearFraction(
+                d1: baseDate, 
+                d2: calendar.advance(baseDate, new QL.Period(6, QL.TimeUnit.Months)))) *
+            Math.Exp(-0.135 * dayCounter.yearFraction(
+                d1: calendar.advance(baseDate, new QL.Period(6, QL.TimeUnit.Months)), 
+                d2: calendar.advance(baseDate, new QL.Period(9, QL.TimeUnit.Months))));
 
         int tenor = 9;
         double expectedNaccZeroRate1Y =
-            -1 * Math.Log(discountFactor1Y) / dayCounter.yearFraction(baseDate, baseDate.AddMonths(tenor));
-        double actualNaccZeroRate1Y = -1 * Math.Log(curve.discount(baseDate.AddMonths(tenor))) /
-                                                    dayCounter.yearFraction(baseDate, baseDate.AddMonths(tenor));
+            -1 * Math.Log(discountFactor1Y) / 
+            dayCounter.yearFraction(baseDate, baseDate.ToDateTime().AddMonths(tenor).ToQuantLibDate());
+        double actualNaccZeroRate1Y = 
+            -1 * Math.Log(curve.discount(calendar.advance(baseDate, new QL.Period(tenor, QL.TimeUnit.Months)))) / 
+            dayCounter.yearFraction(baseDate, calendar.advance(baseDate, new QL.Period(tenor, QL.TimeUnit.Months)));
         // Assert.AreEqual(expectedNaccZeroRate1Y, actualNaccZeroRate1Y);
         
         // Assert.AreEqual(

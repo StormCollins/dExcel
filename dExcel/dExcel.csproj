@@ -233,11 +233,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ExcelDna.AddIn" Version="1.6.1-beta3" />
-    <PackageReference Include="ExcelDna.Integration" Version="1.6.1-beta3" />
-    <PackageReference Include="ExcelDna.IntelliSense" Version="1.6.1-beta3" />
-    <PackageReference Include="ExcelDna.Interop" Version="15.0.0-preview3" />
-    <PackageReference Include="ExcelDna.Registration" Version="1.6.1-beta3" />
+    <PackageReference Include="ExcelDna.AddIn" Version="1.6.0" />
+    <PackageReference Include="ExcelDna.Integration" Version="1.7.0-rc3" />
+    <PackageReference Include="ExcelDna.IntelliSense" Version="1.7.0-rc3" />
+    <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
+    <PackageReference Include="ExcelDna.Registration" Version="1.7.0-rc3" />
     <PackageReference Include="fuzzysharp" Version="2.0.2" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.701" />
     <PackageReference Include="MaterialDesignThemes" Version="4.7.1" />
@@ -299,7 +299,7 @@
 
   <ItemGroup>
     <Reference Include="NQuantLib">
-      <HintPath>..\..\..\..\Users\stcollins.ZADELOITTE\Desktop\QuantLib-SWIG-1.29\QuantLib-SWIG-1.29\CSharp\csharp\bin\Release\net6.0\NQuantLib.dll</HintPath>
+      <HintPath>..\..\..\..\Lib\QuantLib-SWIG-1.30\CSharp\csharp\bin\Release\net6.0\NQuantLib.dll</HintPath>
     </Reference>
   </ItemGroup>
 

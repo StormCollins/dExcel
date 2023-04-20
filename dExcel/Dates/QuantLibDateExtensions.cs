@@ -42,4 +42,43 @@ public static class QuantLibDateExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(i), @"Month parameter must be between 1 and 12.")
         };
     }
+
+    public static QL.Weekday ToQuantLibWeekday(this DayOfWeek dayOfWeek)
+    {
+        return dayOfWeek switch
+        {
+            DayOfWeek.Monday => QL.Weekday.Monday,
+            DayOfWeek.Tuesday => QL.Weekday.Tuesday,
+            DayOfWeek.Wednesday => QL.Weekday.Wednesday,
+            DayOfWeek.Thursday => QL.Weekday.Thursday,
+            DayOfWeek.Friday => QL.Weekday.Friday,
+            DayOfWeek.Saturday => QL.Weekday.Saturday,
+            DayOfWeek.Sunday => QL.Weekday.Sunday,
+        };
+    }
+
+    public static int ToInt(this QL.Month month)
+    {
+        return month switch
+        {
+            QL.Month.January => 1,
+            QL.Month.February => 2,
+            QL.Month.March => 3,
+            QL.Month.April => 4,
+            QL.Month.May => 5,
+            QL.Month.June => 6,
+            QL.Month.July => 7,
+            QL.Month.August => 8,
+            QL.Month.September => 9,
+            QL.Month.October => 10,
+            QL.Month.November => 11,
+            QL.Month.December => 12,
+            _ => throw new ArgumentOutOfRangeException(nameof(month), @"Month parameter must be between 1 and 12.")
+        };
+    }
+    
+    public static DateTime ToDateTime(this QL.Date date)
+    {
+        return new DateTime(date.year(), date.month().ToInt(), date.dayOfMonth());
+    }
 }

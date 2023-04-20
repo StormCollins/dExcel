@@ -1,6 +1,6 @@
 ﻿namespace dExcel.Dates;
 
-using QLNet;
+using QL = QuantLib;
 using System.Text.RegularExpressions;
 using Utilities;
 
@@ -18,15 +18,15 @@ public static class DateParserUtils
     /// </summary>
     /// <param name="businessDayConventionToParse">Business day convention to parse.</param>
     /// <returns>QLNet business day convention.</returns>
-    public static (BusinessDayConvention? businessDayConvention, string errorMessage) ParseBusinessDayConvention(
+    public static (QL.BusinessDayConvention? businessDayConvention, string errorMessage) ParseBusinessDayConvention(
         string businessDayConventionToParse)
     {
-        BusinessDayConvention? businessDayConvention = businessDayConventionToParse.ToUpper() switch
+        QL.BusinessDayConvention? businessDayConvention = businessDayConventionToParse.ToUpper() switch
         {
-            "FOL" or "FOLLOWING" => BusinessDayConvention.Following,
-            "MODFOL" or "MODIFIEDFOLLOWING" => BusinessDayConvention.ModifiedFollowing,
-            "MODPREC" or "MODIFIEDPRECEDING" => BusinessDayConvention.ModifiedPreceding,
-            "PREC" or "PRECEDING" => BusinessDayConvention.Preceding,
+            "FOL" or "FOLLOWING" => QL.BusinessDayConvention.Following,
+            "MODFOL" or "MODIFIEDFOLLOWING" => QL.BusinessDayConvention.ModifiedFollowing,
+            "MODPREC" or "MODIFIEDPRECEDING" => QL.BusinessDayConvention.ModifiedPreceding,
+            "PREC" or "PRECEDING" => QL.BusinessDayConvention.Preceding,
             _ => null,
         };
 
@@ -43,9 +43,9 @@ public static class DateParserUtils
     /// <returns>A custom QLNet calendar.</returns>
     /// <exception cref="ArgumentException">Thrown for invalid dates in <param name="holidaysOrCalendars"></param>.
     /// </exception>
-    public static (Calendar? calendar, string errorMessage) ParseHolidays(
+    public static (QL.Calendar? calendar, string errorMessage) ParseHolidays(
         object[,] holidaysOrCalendars, 
-        Calendar calendar)
+        QL.Calendar calendar)
     {
         // There is a single column of holidays.
         if (holidaysOrCalendars.GetLength(1) == 1)
@@ -54,7 +54,7 @@ public static class DateParserUtils
             {
                 if (double.TryParse(holiday.ToString(), out double holidayValue))
                 {
-                    calendar.addHoliday(DateTime.FromOADate(holidayValue));
+                    calendar.addHoliday(DateTime.FromOADate(holidayValue).ToQuantLibDate());
                 }
                 else
                 {
@@ -74,7 +74,7 @@ public static class DateParserUtils
                 {
                     if (double.TryParse(holidaysOrCalendars[i, j].ToString(), out double holidayValue))
                     {
-                        calendar.addHoliday(DateTime.FromOADate(holidayValue));
+                        calendar.addHoliday(DateTime.FromOADate(holidayValue).ToQuantLibDate());
                     }
                 }
             }
@@ -88,46 +88,46 @@ public static class DateParserUtils
     /// </summary>
     /// <param name="calendarToParse">Calendar to parse.</param>
     /// <returns>QLNet calendar.</returns>
-    private static (Calendar? calendar, string errorMessage) ParseSingleCalendar(string? calendarToParse)
+    private static (QL.Calendar? calendar, string errorMessage) ParseSingleCalendar(string? calendarToParse)
     {
-        Calendar? calendar = calendarToParse?.ToUpper() switch
+        QL.Calendar? calendar = calendarToParse?.ToUpper() switch
         {
-            "ARS" or "ARGENTINA" => new Argentina(),
-            "AUD" or "AUSTRALIA" => new Australia(),
-            "BWP" or "BOTSWANA" => new Botswana(),
-            "BRL" or "BRAZIL" => new Brazil(),
-            "CAD" or "CANADA" => new Canada(),
-            "CHF" or "SWITZERLAND" => new Switzerland(),
-            "CNH" or "CNY" or "CHINA" => new China(),
-            "CZK" or "CZECH REPUBLIC" => new CzechRepublic(),
-            "DKK" or "DENMARK" => new Denmark(),
-            "EUR" => new TARGET(),
-            "GBP" or "UK" or "UNITED KINGDOM" => new UnitedKingdom(),
-            "GERMANY" => new Germany(),
-            "HKD" or "HONG KONG" => new HongKong(),
-            "HUF" or "HUNGARY" => new Hungary(),
-            "INR" or "INDIA" => new India(),
-            "ILS" or "ISRAEL" => new Israel(),
-            "ITALY" => new Italy(),
-            "JPY" or "JAPAN" => new Japan(),
-            "KRW" or "SOUTH KOREA" => new SouthKorea(),
-            "MXN" or "MEXICO" => new Mexico(),
-            "NOK" or "NORWAY" => new Norway(),
-            "NZD" or "NEW ZEALAND" => new NewZealand(),
-            "PLN" or "POLAND" => new Poland(),
-            "RON" or "ROMANIA" => new Romania(),
-            "RUB" or "RUSSIA" => new Russia(),
-            "SAR" or "SAUDI ARABIA" => new SaudiArabia(),
-            "SGD" or "SINGAPORE" => new Singapore(),
-            "SKK" or "SWEDEN" => new Sweden(),
-            "SLOVAKIA" => new Slovakia(),
-            "THB" or "THAILAND" => new Thailand(),
-            "TRY" or "TURKEY" => new Turkey(),
-            "TWD" or "TAIWAN" => new Taiwan(),
-            "UAH" or "UKRAINE" => new Ukraine(),
-            "USD" or "USA" or "UNITED STATES" or "UNITED STATES OF AMERICA" => new UnitedStates(),
-            "WEEKENDSONLY" => new WeekendsOnly(),
-            "ZAR" or "SOUTH AFRICA" => new SouthAfrica(),
+            "ARS" or "ARGENTINA" => new QL.Argentina(),
+            "AUD" or "AUSTRALIA" => new QL.Australia(),
+            "BRL" or "BRAZIL" => new QL.Brazil(),
+            "CAD" or "CANADA" => new QL.Canada(),
+            "CHF" or "SWITZERLAND" => new QL.Switzerland(),
+            "CNH" or "CNY" or "CHINA" => new QL.China(),
+            "CZK" or "CZECH REPUBLIC" => new QL.CzechRepublic(),
+            "DKK" or "DENMARK" => new QL.Denmark(),
+            "EUR" => new QL.TARGET(),
+            "GBP" or "UK" or "UNITED KINGDOM" => new QL.UnitedKingdom(),
+            "GERMANY" => new QL.Germany(),
+            "HKD" or "HONG KONG" => new QL.HongKong(),
+            "HUF" or "HUNGARY" => new QL.Hungary(),
+            "INR" or "INDIA" => new QL.India(),
+            "ILS" or "ISRAEL" => new QL.Israel(),
+            "ITALY" => new QL.Italy(),
+            "JPY" or "JAPAN" => new QL.Japan(),
+            "KRW" or "SOUTH KOREA" => new QL.SouthKorea(),
+            "MXN" or "MEXICO" => new QL.Mexico(),
+            "NOK" or "NORWAY" => new QL.Norway(),
+            "NZD" or "NEW ZEALAND" => new QL.NewZealand(),
+            "PLN" or "POLAND" => new QL.Poland(),
+            "RON" or "ROMANIA" => new QL.Romania(),
+            "RUB" or "RUSSIA" => new QL.Russia(),
+            "SAR" or "SAUDI ARABIA" => new QL.SaudiArabia(),
+            "SGD" or "SINGAPORE" => new QL.Singapore(),
+            "SKK" or "SWEDEN" => new QL.Sweden(),
+            "SLOVAKIA" => new QL.Slovakia(),
+            "THB" or "THAILAND" => new QL.Thailand(),
+            "TRY" or "TURKEY" => new QL.Turkey(),
+            "TWD" or "TAIWAN" => new QL.Taiwan(),
+            "UAH" or "UKRAINE" => new QL.Ukraine(),
+            "USD" or "USA" or "UNITED STATES" or "UNITED STATES OF AMERICA" => 
+                new QL.UnitedStates(QL.UnitedStates.Market.FederalReserve),
+            "WEEKENDSONLY" => new QL.WeekendsOnly(),
+            "ZAR" or "SOUTH AFRICA" => new QL.SouthAfrica(),
             _ => null,
         };
 
@@ -141,15 +141,15 @@ public static class DateParserUtils
     /// </summary>
     /// <param name="calendarsToParse">String of comma separated calendars e.g., 'EUR,USD,ZAR'.</param>
     /// <returns>A tuple consisting of the joint calendar and a possible error message.</returns>
-    private static (Calendar? calendar, string errorMessage) ParseJointCalendar(string? calendarsToParse)
+    private static (QL.Calendar? calendar, string errorMessage) ParseJointCalendar(string? calendarsToParse)
     {
         IEnumerable<string>? calendars = calendarsToParse?.Split(',').Select(x => x.Trim());
 
         if (calendars != null)
         {
             IEnumerable<string> enumerable = calendars as string[] ?? calendars.ToArray();
-            (Calendar? calendar0, string errorMessage0) = ParseSingleCalendar(enumerable.ElementAt(0));
-            (Calendar? calendar1, string errorMessage1) = ParseSingleCalendar(enumerable.ElementAt(1));
+            (QL.Calendar? calendar0, string errorMessage0) = ParseSingleCalendar(enumerable.ElementAt(0));
+            (QL.Calendar? calendar1, string errorMessage1) = ParseSingleCalendar(enumerable.ElementAt(1));
 
             if (calendar0 is null)
             {
@@ -161,17 +161,17 @@ public static class DateParserUtils
                 return (calendar1, errorMessage1);
             }
 
-            JointCalendar jointCalendar = new(calendar0, calendar1);
+            QL.JointCalendar jointCalendar = new(calendar0, calendar1);
 
             for (int i = 2; i < enumerable.Count(); i++)
             {
-                (Calendar? currentCalendar, string currentErrorMessage) = ParseSingleCalendar(enumerable.ElementAt(i));
+                (QL.Calendar? currentCalendar, string currentErrorMessage) = ParseSingleCalendar(enumerable.ElementAt(i));
                 if (currentCalendar is null)
                 {
                     return (currentCalendar, currentErrorMessage);
                 }
 
-                jointCalendar = new JointCalendar(jointCalendar, currentCalendar);
+                jointCalendar = new QL.JointCalendar(jointCalendar, currentCalendar);
             }
 
             return (jointCalendar, "");
@@ -185,7 +185,7 @@ public static class DateParserUtils
     /// </summary>
     /// <param name="calendarsToParse">The calendar string to parse e.g., 'ZAR' or 'EUR,USD,ZAR'.</param>
     /// <returns>A tuple containing the relevant calendar object and a possible error message.</returns>
-    public static (Calendar? calendar, string errorMessage) ParseCalendars(string? calendarsToParse)
+    public static (QL.Calendar? calendar, string errorMessage) ParseCalendars(string? calendarsToParse)
     {
         if (calendarsToParse != null && calendarsToParse.Contains(','))
         {

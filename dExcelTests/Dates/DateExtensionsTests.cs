@@ -11,7 +11,7 @@ public class DateExtensionsTests
     public void ToQuantLibMonthTest()
     {
         DateTime dateTime = new(2023, 03, 31);
-        dateTime.Month.ToQuantLibMonth();
+        Assert.AreEqual(QL.Month.March, dateTime.Month.ToQuantLibMonth());
     }
     
     [Test]
@@ -19,5 +19,6 @@ public class DateExtensionsTests
     {
         DateTime dateTime = new(2023, 03, 31);
         QL.Date date = dateTime.ToQuantLibDate();
+        Assert.AreEqual(new QL.Date(31, QL.Month.March, 2023), date);
     }
 }

@@ -1,9 +1,9 @@
-﻿namespace dExcelTests.Dates;
-
-using dExcel.Dates;
+﻿using dExcel.Dates;
 using dExcel.Utilities;
 using NUnit.Framework;
-using QLNet;
+using QL = QuantLib;
+
+namespace dExcelTests.Dates;
 
 [TestFixture]
 public sealed class DateUtilsTests
@@ -11,7 +11,7 @@ public sealed class DateUtilsTests
     public static IEnumerable<TestCaseData> FolDayHolidaysTestCaseData()
     {
         yield return new TestCaseData(new DateTime(2022, 01, 01))
-            .Returns(new DateTime(2022, 01, 04));
+            .Returns(new DateTime(2022, 01, 04).ToQuantLibDate());
     }
     
     [Test]
@@ -32,15 +32,15 @@ public sealed class DateUtilsTests
             { new DateTime(2023, 03, 12).ToOADate(), string.Empty },
         };
         
-        DateTime actual = (DateTime)DateUtils.FolDay(new DateTime(2023, 02, 11), holidays);
-        DateTime expected = new DateTime(2023, 02, 13);
+        QL.Date actual = (QL.Date)DateUtils.FolDay(new DateTime(2023, 02, 11), holidays);
+        QL.Date expected = new(13, 2.ToQuantLibMonth(), 2023);
         Assert.AreEqual(expected, actual);
     }
     
     public static IEnumerable<TestCaseData> FolDayCalendarsTestData()
     {
         yield return new TestCaseData(new DateTime(2022, 06, 16), new object[,] {{"ZAR"}})
-            .Returns(new DateTime(2022, 06, 17));
+            .Returns(new DateTime(2022, 06, 17).ToQuantLibDate());
         yield return new TestCaseData(new DateTime(2022, 06, 17), new object[,] {{"WRE"}})
             .Returns(CommonUtils.UnsupportedCalendarMessage("WRE"));
     }
@@ -55,13 +55,13 @@ public sealed class DateUtilsTests
     public static IEnumerable<TestCaseData> ModFolDayHolidaysTestCaseData()
     {
         yield return new TestCaseData(new DateTime(2022, 01, 01))
-            .Returns(new DateTime(2022, 01, 04));
+            .Returns(new DateTime(2022, 01, 04).ToQuantLibDate());
         yield return new TestCaseData(new DateTime(2022, 01, 03))
-            .Returns(new DateTime(2022, 01, 04));
+            .Returns(new DateTime(2022, 01, 04).ToQuantLibDate());
         yield return new TestCaseData(new DateTime(2022, 01, 04))
-            .Returns(new DateTime(2022, 01, 04));
+            .Returns(new DateTime(2022, 01, 04).ToQuantLibDate());
         yield return new TestCaseData(new DateTime(2022, 04, 30))
-            .Returns(new DateTime(2022, 04, 29));
+            .Returns(new DateTime(2022, 04, 29).ToQuantLibDate());
     }
     
     [Test]
@@ -75,7 +75,7 @@ public sealed class DateUtilsTests
     public static IEnumerable<TestCaseData> ModFolDayCalendarsTestData()
     {
         yield return new TestCaseData(new DateTime(2022, 12, 31), new object[,] {{"ZAR"}})
-            .Returns(new DateTime(2022, 12, 30));
+            .Returns(new DateTime(2022, 12, 30).ToQuantLibDate());
         yield return new TestCaseData(new DateTime(2022, 12, 31), new object[,] {{"WRE"}})
             .Returns(CommonUtils.UnsupportedCalendarMessage("WRE"));
     }
@@ -99,11 +99,11 @@ public sealed class DateUtilsTests
     public static IEnumerable<TestCaseData> PrevDayHolidaysTestCaseData()
     {
         yield return new TestCaseData(new DateTime(2022, 01, 01))
-            .Returns(new DateTime(2021, 12, 31));
+            .Returns(new DateTime(2021, 12, 31).ToQuantLibDate());
         yield return new TestCaseData(new DateTime(2022, 01, 03))
-            .Returns(new DateTime(2021, 12, 31));
+            .Returns(new DateTime(2021, 12, 31).ToQuantLibDate());
         yield return new TestCaseData(new DateTime(2022, 01, 04))
-            .Returns(new DateTime(2022, 01, 04));
+            .Returns(new DateTime(2022, 01, 04).ToQuantLibDate());
     }
 
     [Test]
@@ -117,7 +117,7 @@ public sealed class DateUtilsTests
     public static IEnumerable<TestCaseData> PrevDayCalendarsTestCaseData()
     {
         yield return new TestCaseData(new DateTime(2022, 06, 16), new object[,] {{"ZAR"}})
-            .Returns(new DateTime(2022, 06, 15));
+            .Returns(new DateTime(2022, 06, 15).ToQuantLibDate());
         yield return new TestCaseData(new DateTime(2022, 06, 16), new object[,] {{"WRE"}})
             .Returns(CommonUtils.UnsupportedCalendarMessage("WRE"));
     }
@@ -132,7 +132,7 @@ public sealed class DateUtilsTests
     public static IEnumerable<TestCaseData> AddTenorToDateTestCaseData()
     {
         yield return new TestCaseData(new DateTime(2022, 01, 04), "3m", "ZAR", "MODFOL")
-            .Returns(new DateTime(2022, 04, 04));
+            .Returns(new DateTime(2022, 04, 04).ToQuantLibDate());
     }
 
     [Test]
@@ -175,20 +175,20 @@ public sealed class DateUtilsTests
     
     public static IEnumerable<TestCaseData> BusinessDayConventionTestData()
     {
-        yield return new TestCaseData("FOL").Returns(BusinessDayConvention.Following);
-        yield return new TestCaseData("FOLLOWING").Returns(BusinessDayConvention.Following);
-        yield return new TestCaseData("MODFOL").Returns(BusinessDayConvention.ModifiedFollowing);
-        yield return new TestCaseData("MODIFIEDFOLLOWING").Returns(BusinessDayConvention.ModifiedFollowing);
-        yield return new TestCaseData("MODPREC").Returns(BusinessDayConvention.ModifiedPreceding);
-        yield return new TestCaseData("MODIFIEDPRECEDING").Returns(BusinessDayConvention.ModifiedPreceding);
-        yield return new TestCaseData("PREC").Returns(BusinessDayConvention.Preceding);
-        yield return new TestCaseData("PRECEDING").Returns(BusinessDayConvention.Preceding);
+        yield return new TestCaseData("FOL").Returns(QL.BusinessDayConvention.Following);
+        yield return new TestCaseData("FOLLOWING").Returns(QL.BusinessDayConvention.Following);
+        yield return new TestCaseData("MODFOL").Returns(QL.BusinessDayConvention.ModifiedFollowing);
+        yield return new TestCaseData("MODIFIEDFOLLOWING").Returns(QL.BusinessDayConvention.ModifiedFollowing);
+        yield return new TestCaseData("MODPREC").Returns(QL.BusinessDayConvention.ModifiedPreceding);
+        yield return new TestCaseData("MODIFIEDPRECEDING").Returns(QL.BusinessDayConvention.ModifiedPreceding);
+        yield return new TestCaseData("PREC").Returns(QL.BusinessDayConvention.Preceding);
+        yield return new TestCaseData("PRECEDING").Returns(QL.BusinessDayConvention.Preceding);
         yield return new TestCaseData("Invalid").Returns(null);
     } 
     
     [Test]
     [TestCaseSource(nameof(BusinessDayConventionTestData))]
-    public BusinessDayConvention? TestParseBusinessDayConvention(string businessDayConventionToParse)
+    public QL.BusinessDayConvention? TestParseBusinessDayConvention(string businessDayConventionToParse)
     {
         return DateParserUtils.ParseBusinessDayConvention(businessDayConventionToParse).businessDayConvention;
     }
@@ -210,24 +210,24 @@ public sealed class DateUtilsTests
     
     public static IEnumerable<TestCaseData> DayCountConventionTestData()
     {
-        yield return new TestCaseData("ACT360").Returns(new Actual360());
-        yield return new TestCaseData("ACTUAL360").Returns(new Actual360()); 
-        yield return new TestCaseData("ACT365").Returns(new Actual365Fixed());
-        yield return new TestCaseData("ACT365F").Returns(new Actual365Fixed());
-        yield return new TestCaseData("ACTUAL365").Returns(new Actual365Fixed());
-        yield return new TestCaseData("ACTUAL365F").Returns(new Actual365Fixed());
-        yield return new TestCaseData("ACTACT").Returns(new ActualActual());
-        yield return new TestCaseData("ACTUALACTUAL").Returns(new ActualActual());
-        yield return new TestCaseData("BUS252").Returns(new Business252());
-        yield return new TestCaseData("BUSINESS252").Returns(new Business252());
+        yield return new TestCaseData("ACT360").Returns(new QL.Actual360().name());
+        yield return new TestCaseData("ACTUAL360").Returns(new QL.Actual360().name()); 
+        yield return new TestCaseData("ACT365").Returns(new QL.Actual365Fixed().name());
+        yield return new TestCaseData("ACT365F").Returns(new QL.Actual365Fixed().name());
+        yield return new TestCaseData("ACTUAL365").Returns(new QL.Actual365Fixed().name());
+        yield return new TestCaseData("ACTUAL365F").Returns(new QL.Actual365Fixed().name());
+        yield return new TestCaseData("ACTACT").Returns(new QL.ActualActual(QL.ActualActual.Convention.ISDA).name());
+        yield return new TestCaseData("ACTUALACTUAL").Returns(new QL.ActualActual(QL.ActualActual.Convention.ISDA).name());
+        yield return new TestCaseData("BUS252").Returns(new QL.Business252().name());
+        yield return new TestCaseData("BUSINESS252").Returns(new QL.Business252().name());
         yield return new TestCaseData("Invalid").Returns(null);
     }
 
     [Test]
     [TestCaseSource(nameof(DayCountConventionTestData))]
-    public DayCounter? TestParseDayCountConvention(string dayCountConventionToParse)
+    public string? TestParseDayCountConvention(string dayCountConventionToParse)
     {
-        return DateUtils.ParseDayCountConvention(dayCountConventionToParse);
+        return DateUtils.ParseDayCountConvention(dayCountConventionToParse)?.name();
     }
 
     [Test]
@@ -259,8 +259,8 @@ public sealed class DateUtilsTests
     {
         DateTime d1 = new(2022, 01, 01);
         DateTime d2 = new(2022, 04, 01);
-        SouthAfrica southAfrica = new();
-        Assert.AreEqual(southAfrica.businessDaysBetween(d1, d2) / 252.0, DateUtils.Business252(d1, d2, "ZAR")); 
+        QL.SouthAfrica southAfrica = new();
+        Assert.AreEqual(southAfrica.businessDaysBetween(d1.ToQuantLibDate(), d2.ToQuantLibDate()) / 252.0, DateUtils.Business252(d1, d2, "ZAR")); 
     }
 
     [Test]
@@ -390,10 +390,10 @@ public sealed class DateUtilsTests
 
         object[,] expectedSchedule =
         {
-            { new DateTime(2022, 03, 31) },
-            { new DateTime(2022, 06, 30) },
-            { new DateTime(2022, 09, 30) },
-            { new DateTime(2022, 12, 30) },
+            { new DateTime(2022, 03, 31).ToQuantLibDate() },
+            { new DateTime(2022, 06, 30).ToQuantLibDate() },
+            { new DateTime(2022, 09, 30).ToQuantLibDate() },
+            { new DateTime(2022, 12, 30).ToQuantLibDate() },
         };
 
         Assert.AreEqual(expectedSchedule, actualSchedule);

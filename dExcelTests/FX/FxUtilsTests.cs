@@ -68,7 +68,7 @@ public class FxUtilsTests
             ExcelArrayUtils.ConvertListToExcelRange(
                 tenors
                     .Select(t =>
-                        DateUtils.Act360(baseDate, (DateTime) DateUtils.AddTenorToDate(baseDate, t, "EUR", "ModFol")))
+                        DateUtils.Act360(baseDate, (DateTime)DateUtils.AddTenorToDate(baseDate, t, "EUR", "ModFol")))
                     .ToList(), 0);
         
         double[,] moneynessVols =
