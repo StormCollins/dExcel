@@ -23,7 +23,6 @@ public class AddInController : IExcelAddIn
         Assembly.LoadFrom(Path.Combine(xllPath, "FuzzySharp.dll"));
         Assembly.LoadFrom(Path.Combine(xllPath, "MaterialDesignColors.dll"));
         Assembly.LoadFrom(Path.Combine(xllPath, "MaterialDesignThemes.Wpf.dll"));
-        Assembly.LoadFrom(Path.Combine(xllPath, "QLNet.dll"));
 
         // Register the Standard Parameter Conversions (with the optional switch on how to treat references to empty cells)
         ParameterConversionConfiguration? paramConversionConfig =
