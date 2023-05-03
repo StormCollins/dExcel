@@ -1,8 +1,4 @@
-﻿using LiveChartsCore.Kernel.Sketches;
-
-namespace dExcel.WPF;
-
-using dExcel.InterestRates;
+﻿using dExcel.InterestRates;
 using Excel = Microsoft.Office.Interop.Excel;
 using ExcelDna.Integration;
 using LiveChartsCore.Defaults;
@@ -12,6 +8,8 @@ using LiveChartsCore;
 using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.Windows;
+
+namespace dExcel.WPF;
 
 /// <summary>
 /// Interaction logic for TableFormatter.xaml which allows users to quickly select and apply the format for a selected
@@ -37,7 +35,7 @@ public partial class CurvePlotter: Window
         ObservableCollection<DateTimePoint> values = new();
         for (int i = 0; i < curveDetails.DiscountFactorDates?.Count; i++)
         {
-            values.Add(new DateTimePoint(curveDetails.DiscountFactorDates[i].ToDateTime(), curveDetails.DiscountFactors?[i]));
+            values.Add(new DateTimePoint(curveDetails.DiscountFactorDates[i], curveDetails.DiscountFactors?[i]));
         }
         
         ChartArea.Series = new ObservableCollection<ISeries>

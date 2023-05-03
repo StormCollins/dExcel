@@ -1,9 +1,8 @@
-﻿namespace dExcel.Dates;
-
+﻿using dExcel.Utilities;
 using ExcelDna.Integration;
-using QLNet;
-using System;
-using Utilities;
+using QL = QuantLib;
+
+namespace dExcel.Dates;
 
 /// <summary>
 /// A collection of date utility functions.
@@ -22,8 +21,8 @@ public static class DateUtils
         Category = "∂Excel: Dates")]
     public static double Act360(DateTime startDate, DateTime endDate)
     {
-        Actual360 dayCounter = new();
-        return dayCounter.yearFraction(startDate, endDate);
+        QL.Actual360 dayCounter = new();
+        return dayCounter.yearFraction(startDate.ToQuantLibDate(), endDate.ToQuantLibDate());
     }
     
     /// <summary>
@@ -38,8 +37,8 @@ public static class DateUtils
         Category = "∂Excel: Dates")]
     public static double Act364(DateTime startDate, DateTime endDate)
     {
-        Actual364 dayCounter = new();
-        return dayCounter.yearFraction(startDate, endDate);
+        QL.Actual364 dayCounter = new();
+        return dayCounter.yearFraction(startDate.ToQuantLibDate(), endDate.ToQuantLibDate());
     }
 
     /// <summary>
@@ -55,15 +54,15 @@ public static class DateUtils
         Category = "∂Excel: Dates")]
     public static object Business252(DateTime startDate, DateTime endDate, string calendarsToParse)
     {
-        (Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsToParse);
+        (QL.Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsToParse);
         if (calendar is null)
         {
             return errorMessage;
         }
         
-        Business252 dayCounter = new(calendar);
+        QL.Business252 dayCounter = new(calendar);
         
-        return dayCounter.yearFraction(startDate, endDate);
+        return dayCounter.yearFraction(startDate.ToQuantLibDate(), endDate.ToQuantLibDate());
     }
     
     /// <summary>
@@ -78,8 +77,8 @@ public static class DateUtils
         Category = "∂Excel: Dates")]
     public static double Thirty360(DateTime startDate, DateTime endDate)
     {
-        Thirty360 dayCounter = new(QLNet.Thirty360.Thirty360Convention.ISDA);
-        return dayCounter.yearFraction(startDate, endDate);
+        QL.Thirty360 dayCounter = new(QL.Thirty360.Convention.ISDA);
+        return dayCounter.yearFraction(startDate.ToQuantLibDate(), endDate.ToQuantLibDate());
     }
     
     /// <summary>
@@ -94,8 +93,8 @@ public static class DateUtils
         Category = "∂Excel: Dates")]
     public static double Act365(DateTime startDate, DateTime endDate)
     {
-        Actual365Fixed dayCounter = new();
-        return dayCounter.yearFraction(startDate, endDate);
+        QL.Actual365Fixed dayCounter = new();
+        return dayCounter.yearFraction(startDate.ToQuantLibDate(), endDate.ToQuantLibDate());
     }
     
     /// <summary>
@@ -121,16 +120,16 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        (Calendar? calendar, string errorMessage) result;
+        (QL.Calendar? calendar, string errorMessage) result;
         if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
         {
             result = DateParserUtils.ParseCalendars(holidaysOrCalendar[0, 0].ToString());
         }
         else
         {
-            BespokeCalendar bespokeCalendar = new();
-            bespokeCalendar.addWeekend(DayOfWeek.Saturday);
-            bespokeCalendar.addWeekend(DayOfWeek.Sunday);
+            QL.BespokeCalendar bespokeCalendar = new("BespokeCalendar");
+            bespokeCalendar.addWeekend(DayOfWeek.Saturday.ToQuantLibWeekday());
+            bespokeCalendar.addWeekend(DayOfWeek.Sunday.ToQuantLibWeekday());
             result = DateParserUtils.ParseHolidays(holidaysOrCalendar, bespokeCalendar);
         }
 
@@ -139,7 +138,7 @@ public static class DateUtils
             return result.errorMessage;
         }
 
-        return (DateTime) result.calendar?.adjust(date);
+        return result.calendar?.adjust(date.ToQuantLibDate());
     }
 
     /// <summary>
@@ -165,16 +164,16 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        (Calendar? calendar, string errorMessage) result;
+        (QL.Calendar? calendar, string errorMessage) result;
         if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
         {
             result = DateParserUtils.ParseCalendars(holidaysOrCalendar[0, 0].ToString());
         }
         else
         {
-            BespokeCalendar bespokeCalendar = new();
-            bespokeCalendar.addWeekend(DayOfWeek.Saturday);
-            bespokeCalendar.addWeekend(DayOfWeek.Sunday);
+            QL.BespokeCalendar bespokeCalendar = new("BespokeCalendar");
+            bespokeCalendar.addWeekend(DayOfWeek.Saturday.ToQuantLibWeekday());
+            bespokeCalendar.addWeekend(DayOfWeek.Sunday.ToQuantLibWeekday());
             result = DateParserUtils.ParseHolidays(holidaysOrCalendar, bespokeCalendar);
         }
 
@@ -183,7 +182,7 @@ public static class DateUtils
             return result.errorMessage;
         }
 
-        return (DateTime) result.calendar.adjust(date, BusinessDayConvention.ModifiedFollowing);
+        return result.calendar.adjust(date.ToQuantLibDate(), QL.BusinessDayConvention.ModifiedFollowing);
     }
 
     /// <summary>
@@ -209,16 +208,16 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        (Calendar? calendar, string errorMessage) result;
+        (QL.Calendar? calendar, string errorMessage) result;
         if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
         {
             result = DateParserUtils.ParseCalendars(holidaysOrCalendar[0, 0].ToString());
         }
         else
         {
-            BespokeCalendar bespokeCalendar = new();
-            bespokeCalendar.addWeekend(DayOfWeek.Saturday);
-            bespokeCalendar.addWeekend(DayOfWeek.Sunday);
+            QL.BespokeCalendar bespokeCalendar = new("BespokeCalendar");
+            bespokeCalendar.addWeekend(DayOfWeek.Saturday.ToQuantLibWeekday());
+            bespokeCalendar.addWeekend(DayOfWeek.Sunday.ToQuantLibWeekday());
             result = DateParserUtils.ParseHolidays(holidaysOrCalendar, bespokeCalendar);
         }
 
@@ -227,7 +226,7 @@ public static class DateUtils
             return result.errorMessage;
         }
 
-        return (DateTime) result.calendar.adjust(date, BusinessDayConvention.Preceding);
+        return result.calendar.adjust(date.ToQuantLibDate(), QL.BusinessDayConvention.Preceding);
     }
 
     /// <summary>
@@ -260,13 +259,13 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        (Calendar? calendar, string calendarErrorMessage) = DateParserUtils.ParseCalendars(userCalendar);
+        (QL.Calendar? calendar, string calendarErrorMessage) = DateParserUtils.ParseCalendars(userCalendar);
         if (calendar is null)
         {
             return calendarErrorMessage;
         }
 
-        (BusinessDayConvention? businessDayConvention, string errorMessage) =
+        (QL.BusinessDayConvention? businessDayConvention, string errorMessage) =
             DateParserUtils.ParseBusinessDayConvention(userBusinessDayConvention);
 
         if (businessDayConvention is null)
@@ -274,8 +273,13 @@ public static class DateUtils
             return errorMessage;
         }
 
-        return (DateTime) calendar.advance((Date) date, new Period(tenor),
-            (BusinessDayConvention) businessDayConvention);
+        if (tenor == "ON") tenor = "1d";
+        if (tenor == "SW") tenor = "1w";
+        
+        return calendar.advance(
+            d: date.ToQuantLibDate(), 
+            period: new QL.Period(tenor), 
+            convention: (QL.BusinessDayConvention) businessDayConvention).ToDateTime();
     }
 
     /// <summary>
@@ -324,14 +328,14 @@ public static class DateUtils
     /// </summary>
     /// <param name="dayCountConventionToParse">Day count convention to parse.</param>
     /// <returns>QLNet day count convention.</returns>
-    public static DayCounter? ParseDayCountConvention(string dayCountConventionToParse)
+    public static QL.DayCounter? ParseDayCountConvention(string dayCountConventionToParse)
     {
-        DayCounter? dayCountConvention = dayCountConventionToParse.ToUpper() switch
+        QL.DayCounter? dayCountConvention = dayCountConventionToParse.ToUpper() switch
         {
-            "ACT360" or "ACTUAL360" => new Actual360(),
-            "ACT365" or "ACT365F" or "ACTUAL365" or "ACTUAL365F" => new Actual365Fixed(),
-            "ACTACT" or "ACTUALACTUAL" => new ActualActual(),
-            "BUS252" or "BUSINESS252" => new Business252(),
+            "ACT360" or "ACTUAL360" => new QL.Actual360(),
+            "ACT365" or "ACT365F" or "ACTUAL365" or "ACTUAL365F" => new QL.Actual365Fixed(),
+            "ACTACT" or "ACTUALACTUAL" => new QL.ActualActual(QL.ActualActual.Convention.ISDA),
+            "BUS252" or "BUSINESS252" => new QL.Business252(),
             _ => null,
         };
 
@@ -416,7 +420,7 @@ public static class DateUtils
             Description = "The single calendar (e.g., 'USD', 'ZAR') or joint calendar (e.g., 'USD,ZAR') to parse.")]
         string calendarsToParse)
     {
-        (Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsToParse);
+        (QL.Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsToParse);
         if (calendar is null)
         {
             return new object[,] {{errorMessage}};
@@ -428,7 +432,8 @@ public static class DateUtils
         {
             DateTime currentDate = startDate.AddDays(i);
 
-            if (!calendar.isWeekend(currentDate.DayOfWeek) && calendar.isHoliday(currentDate))
+            if (!calendar.isWeekend(currentDate.DayOfWeek.ToQuantLibWeekday()) && 
+                calendar.isHoliday(currentDate.ToQuantLibDate()))
             {
                 holidays.Add(currentDate);
             }
@@ -482,13 +487,13 @@ public static class DateUtils
                           "\n'IMM' = IMM dates.")]
         string ruleToParse)
     {
-        (Calendar? calendar, string calendarErrorMessage) = DateParserUtils.ParseCalendars(calendarsToParse);
+        (QL.Calendar? calendar, string calendarErrorMessage) = DateParserUtils.ParseCalendars(calendarsToParse);
         if (calendar is null)
         {
             return new object[,] {{calendarErrorMessage}};
         }
 
-        (BusinessDayConvention? businessDayConvention, string errorMessage) =
+        (QL.BusinessDayConvention? businessDayConvention, string errorMessage) =
             DateParserUtils.ParseBusinessDayConvention(businessDayConventionToParse);
 
         if (businessDayConvention is null)
@@ -501,29 +506,29 @@ public static class DateUtils
             return new object[,] {{ CommonUtils.DExcelErrorMessage($"Unsupported rule specified: '{ruleToParse}'") }};
         }
 
-        DateGeneration.Rule rule = ruleToParse.ToUpper() switch
+        QL.DateGeneration.Rule rule = ruleToParse.ToUpper() switch
         {
-            "BACKWARD" => DateGeneration.Rule.Backward,
-            "FORWARD" => DateGeneration.Rule.Forward,
-            "IMM" => DateGeneration.Rule.TwentiethIMM,
-            _ => DateGeneration.Rule.Forward,
+            "BACKWARD" => QL.DateGeneration.Rule.Backward,
+            "FORWARD" => QL.DateGeneration.Rule.Forward,
+            "IMM" => QL.DateGeneration.Rule.TwentiethIMM,
+            _ => QL.DateGeneration.Rule.Forward,
         };
 
-        Schedule schedule =
+        QL.Schedule schedule =
             new(
-                effectiveDate: new Date(startDate),
-                terminationDate: new Date(endDate),
-                tenor: new Period(frequency),
+                effectiveDate: startDate.ToQuantLibDate(),
+                terminationDate: endDate.ToQuantLibDate(),
+                tenor: new QL.Period(frequency),
                 calendar: calendar,
-                convention: (BusinessDayConvention) businessDayConvention,
-                terminationDateConvention: (BusinessDayConvention) businessDayConvention,
+                convention: (QL.BusinessDayConvention) businessDayConvention,
+                terminationDateConvention: (QL.BusinessDayConvention) businessDayConvention,
                 rule: rule,
                 endOfMonth: false);
 
         object[,] output = new object[schedule.dates().Count, 1];
         for (int i = 0; i < schedule.dates().Count; i++)
         {
-            output[i, 0] = schedule.dates()[i].ToDateTime();
+            output[i, 0] = schedule.dates()[i];
         }
 
         return output;
@@ -555,12 +560,12 @@ public static class DateUtils
         Category = "∂Excel: Dates")]
     public static object IsBusinessDay(DateTime date, string calendarsToParse)
     {
-        (Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsToParse); 
+        (QL.Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsToParse); 
         if (calendar is null)
         {
             return errorMessage;
         }
        
-        return calendar.isBusinessDay(date);
+        return calendar.isBusinessDay(date.ToQuantLibDate());
     }
 } 

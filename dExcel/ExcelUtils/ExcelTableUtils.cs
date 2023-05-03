@@ -3,10 +3,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Dates;
+using dExcel.Dates;
+using dExcel.Utilities;
 using ExcelDna.Integration;
-using QLNet;
-using Utilities;
+using QL = QuantLib;
 
 /// <summary>
 /// A class for manipulating dExcel type tables in Excel.
@@ -189,9 +189,9 @@ public static class ExcelTableUtils
                 conversionType: typeof(T));
         }
 
-        if (typeof(T) == typeof(BusinessDayConvention))
+        if (typeof(T) == typeof(QL.BusinessDayConvention))
         {
-            (BusinessDayConvention? businessDayConvention, string errorMessage) =
+            (QL.BusinessDayConvention? businessDayConvention, string errorMessage) =
                 DateParserUtils.ParseBusinessDayConvention(table[rowIndex, columnIndex].ToString() ?? string.Empty);
 
             if (businessDayConvention != null)
@@ -203,31 +203,31 @@ public static class ExcelTableUtils
                 CommonUtils.DExcelErrorMessage($"Invalid Business Day Convention: {table[rowIndex, columnIndex]}"));
         }
 
-        if (typeof(T) == typeof(DayCounter))
+        if (typeof(T) == typeof(QL.DayCounter))
         {
-            DayCounter? dayCountConvention =
+            QL.DayCounter? dayCountConvention =
                 DateUtils.ParseDayCountConvention(table[rowIndex, columnIndex].ToString() ?? string.Empty);
             
             if (dayCountConvention != null)
             {
-                if (dayCountConvention.GetType() == typeof(Business252))
+                if (dayCountConvention.GetType() == typeof(QL.Business252))
                 {
-                    return (T)Convert.ChangeType(dayCountConvention, typeof(Business252)); 
+                    return (T)Convert.ChangeType(dayCountConvention, typeof(QL.Business252)); 
                 }
                 
-                if (dayCountConvention.GetType() == typeof(Actual360))
+                if (dayCountConvention.GetType() == typeof(QL.Actual360))
                 {
-                    return (T)Convert.ChangeType(dayCountConvention, typeof(Actual360)); 
+                    return (T)Convert.ChangeType(dayCountConvention, typeof(QL.Actual360)); 
                 }
 
-                if (dayCountConvention.GetType() == typeof(Actual365Fixed))
+                if (dayCountConvention.GetType() == typeof(QL.Actual365Fixed))
                 {
-                    return (T)Convert.ChangeType(dayCountConvention, typeof(Actual365Fixed));
+                    return (T)Convert.ChangeType(dayCountConvention, typeof(QL.Actual365Fixed));
                 }
 
-                if (dayCountConvention.GetType() == typeof(ActualActual))
+                if (dayCountConvention.GetType() == typeof(QL.ActualActual))
                 {
-                    return (T)Convert.ChangeType(dayCountConvention, typeof(ActualActual));
+                    return (T)Convert.ChangeType(dayCountConvention, typeof(QL.ActualActual));
                 }
             }
 

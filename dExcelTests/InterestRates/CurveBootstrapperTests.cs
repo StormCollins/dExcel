@@ -1,147 +1,455 @@
-﻿namespace dExcelTests;
-
+﻿using dExcel.Dates;
+using dExcel.ExcelUtils;
+using dExcel.InterestRates;
 using NUnit.Framework;
-using QLNet;
+using QL = QuantLib;
+using DateTime = System.DateTime;
+
+namespace dExcelTests.InterestRates;
 
 [TestFixture]
-public class CurveBootstrapperTests
+public class CurveBootstrapperTest
 {
-    [Test]
-    public void UsdOisTest()
+    public void TestCurveBootstrapper()
     {
-        var fedFundsIndex = new FedFunds();
-        var settlementDate = new Date(04, 04, 2022);
-        Settings.setEvaluationDate(settlementDate);
-
-        var oisOnDeposit =
-            new DepositRateHelper(
-                new Handle<Quote>(new SimpleQuote(0.00330)),
-            new Period("1d"),
-                fedFundsIndex.fixingDays(),
-                fedFundsIndex.fixingCalendar(),
-                fedFundsIndex.businessDayConvention(),
-                fedFundsIndex.endOfMonth(),
-                fedFundsIndex.dayCounter());
-//        USDONFSR = X  0.33171
-//USDSWFSR = X	#N/A
-//USD1MFSR = X  0.452
-//USD2MFSR = X	#N/A
-//USD3MFSR = X  0.96157
-//USD1X4F = 1.156
-//USD2X5F = 1.473
-//USD3X6F = 1.666
-//USD4X7F = 1.872
-//USD5X8F = 2.109
-//USD6X9F = 2.2986
-//USD7X10F = 2.4846
-//USD8X11F = 2.636
-//USD9X12F = 2.7651
-//USD12X15F = 3.055
-//USD15X18F = 3.1827
-//USD18X21F = 3.149
-//USD21X24F = FMD   3.01
-//USDSB3L2Y = 2.5665
-//USDSB3L3Y = 2.656
-//USDSB3L4Y = 2.599
-//USDSB3L5Y = 2.5137
-//USDSB3L6Y = 2.476
-//USDSB3L7Y = 2.4513
-//USDSB3L8Y = 2.454
-//USDSB3L9Y = 2.409
-//USDSB3L10Y = 2.3951
-//USDSB3L12Y = 2.4051
-//USDSB3L15Y = 2.42625
-//USDSB3L20Y = 2.3693
-//USDSB3L25Y = 2.34
-//USDSB3L30Y = 2.2424
-//USDSB3L40Y = 2.108
-
-        // var oisRateHelper1d = new DatedOISRateHelper(settlementDate, new Date(05, 05, 2022),
-        //             new Handle<Quote>(new SimpleQuote(0.00330)), fedFundsIndex);
-        var oisRateHelper1m = new DatedOISRateHelper(settlementDate, new Date(04, 05, 2022),
-            new Handle<Quote>(new SimpleQuote(0.00342)), fedFundsIndex);
-        // var oisRateHelper1m = new OISRateHelper(2, new Period("1M"), new Handle<Quote>(new SimpleQuote(0.00342)), fedFundsIndex);
-        var oisRateHelper2m = new DatedOISRateHelper(settlementDate, new Date(06, 06, 2022),
-            new Handle<Quote>(new SimpleQuote(0.00565)), fedFundsIndex);
-        // var oisRateHelper2m = new OISRateHelper(2, new Period("2M"), new Handle<Quote>(new SimpleQuote(0.00565)), fedFundsIndex);
-        var oisRateHelper3m = new DatedOISRateHelper(settlementDate, new Date(05, 07, 2022),
-            new Handle<Quote>(new SimpleQuote(0.00718)), fedFundsIndex);
-        // var oisRateHelper3m = new OISRateHelper(2, new Period("3M"), new Handle<Quote>(new SimpleQuote(0.00718)), fedFundsIndex);
-        var oisRateHelper4m = new DatedOISRateHelper(settlementDate, new Date(04, 08, 2022),
-            new Handle<Quote>(new SimpleQuote(0.00856)), fedFundsIndex);
-        // var oisRateHelper4m = new OISRateHelper(2, new Period("4M"), new Handle<Quote>(new SimpleQuote(0.00856)), fedFundsIndex);
-        var oisRateHelper5m = new OISRateHelper(2, new Period("5M"), new Handle<Quote>(new SimpleQuote(0.01009)), fedFundsIndex);
-        var oisRateHelper6m = new OISRateHelper(2, new Period("6M"), new Handle<Quote>(new SimpleQuote(0.01118)), fedFundsIndex);
-        var oisRateHelper9m = new OISRateHelper(2, new Period("9M"), new Handle<Quote>(new SimpleQuote(0.01458)), fedFundsIndex);
-        var oisRateHelper12m = new OISRateHelper(2, new Period("12M"), new Handle<Quote>(new SimpleQuote(0.01731)), fedFundsIndex);
-        var oisRateHelper18m = new OISRateHelper(2, new Period("18M"), new Handle<Quote>(new SimpleQuote(0.02088)), fedFundsIndex);
-        var oisRateHelper2y = new OISRateHelper(2, new Period("2y"), new Handle<Quote>(new SimpleQuote(0.02305)), fedFundsIndex);
-        var oisRateHelper3y = new OISRateHelper(2, new Period("3y"), new Handle<Quote>(new SimpleQuote(0.02345)), fedFundsIndex);
-        var oisRateHelper4y = new OISRateHelper(2, new Period("4y"), new Handle<Quote>(new SimpleQuote(0.02285)), fedFundsIndex);
-        var oisRateHelper5y = new OISRateHelper(2, new Period("5y"), new Handle<Quote>(new SimpleQuote(0.02210)), fedFundsIndex);
-        var oisRateHelper7y = new OISRateHelper(2, new Period("7y"), new Handle<Quote>(new SimpleQuote(0.02138)), fedFundsIndex);
-        var oisRateHelper10y = new OISRateHelper(2, new Period("10y"), new Handle<Quote>(new SimpleQuote(0.02097)), fedFundsIndex);
-        var oisRateHelper12y = new OISRateHelper(2, new Period("12y"), new Handle<Quote>(new SimpleQuote(0.02100)), fedFundsIndex);
-
-        var oisHelpers = new List<RateHelper>
+        
+    }
+    
+    [Test]
+    public void Bootstrap_MissingBaseDate_Test()
+    {
+        object[,] curveParameters =
         {
-            oisOnDeposit,
-            oisRateHelper1m,
-            oisRateHelper2m,
-            oisRateHelper3m,
-            oisRateHelper4m,
-            oisRateHelper5m,
-            oisRateHelper6m,
-            oisRateHelper9m,
-            oisRateHelper12m,
-            oisRateHelper18m,
-            oisRateHelper2y,
-            oisRateHelper3y,
-            oisRateHelper4y,
-            oisRateHelper5y,
-            oisRateHelper7y,
-            oisRateHelper10y,
-            oisRateHelper12y,
+            {"CurveUtils Parameters", ""},
+            {"Parameter", "Value"},
+            {"RateIndexName", "JIBAR"},
+            {"RateIndexTenor", "3m"},
+            {"Interpolation", "Linear"},
         };
 
-        var tolerance = 1.0e-14;
-        var oisCurve = 
-            new PiecewiseYieldCurve<Discount, LogLinear>(
-                settlementDate, oisHelpers, fedFundsIndex.dayCounter(), new List<Handle<Quote>>(), new List<Date>(), tolerance);
+        object[,] instrumentGroups = 
+        {
+            {"Deposits", "", "", ""},
+            {"Tenors", "RateIndex", "Rates", "Include"},
+            {"1m", "JIBAR", 0.1, "TRUE"},
+            {"3m", "JIBAR", 0.1, "TRUE"},
+            {"6m", "JIBAR", 0.1, "TRUE"},
+        };
+        
+        string handle = 
+            CurveBootstrapper.Bootstrap(
+                handle: "BootstrappedSingleCurve", 
+                curveParameters: curveParameters,
+                customRateIndex: null,
+                instrumentGroups: instrumentGroups);
+        
+            const string expected = "#∂Excel Error: Curve parameter missing: 'BASEDATE'.";
+            Assert.AreEqual(expected, handle);
+    }
+        
+    [Test]
+    public void Bootstrap_FlatCurve_Deposits_Test()
+    {
+        DateTime baseDate = new(2022, 06, 01);
 
-        Date d1 = new Date(31, 03, 2022);
-        Date d2 = new Date(04, 04, 2022);
-        Date d3 = new Date(05, 04, 2022);
-        Date d4 = new Date(04, 05, 2022);
-        Date d5 = new Date(06, 06, 2022);
-        Date d6 = new Date(05, 07, 2022);
-        Date d7 = new Date(04, 08, 2022);
-        Date d8 = new Date(06, 09, 2022);
-        Date d9 = new Date(04, 10, 2022);
-        Date d10 = new Date(04, 01, 2023);
-        Date d11 = new Date(04, 04, 2023);
-        Date d12 = new Date(04, 10, 2023);
-        Date d13 = new Date(04, 04, 2024);
+        object[,] curveParameters =
+        {
+            {"CurveUtils Parameters", ""},
+            {"Parameter", "Value"},
+            {"BaseDate", baseDate.ToOADate()},
+            {"RateIndexName", "JIBAR"},
+            {"RateIndexTenor", "3m"},
+            {"Interpolation", "Linear"},
+        };
 
-        // var df1 = oisCurve.discount(d1);
-        var df2 = oisCurve.discount(d2);
-        var df3 = oisCurve.discount(d3);
-        var df4 = oisCurve.discount(d4);
-        var df5 = oisCurve.discount(d5);
-        var df6 = oisCurve.discount(d6);
-        var df7 = oisCurve.discount(d7);
-        var df8 = oisCurve.discount(d8);
-        var df9 = oisCurve.discount(d9);
-        var df10 = oisCurve.discount(d10);
-        var df11 = oisCurve.discount(d11);
-        var df12 = oisCurve.discount(d12);
-        var df13 = oisCurve.discount(d13);
+        Dictionary<string, double> depositRates = 
+            new()
+            {
+                ["1m"] = 0.1,
+                ["3m"] = 0.1,
+                ["6m"] = 0.1,
+            };
+        
+        object[,] instruments = 
+        {
+            {"Deposits", "", "", ""},
+            {"Tenors", "RateIndex", "Rates", "Include"},
+            {"1m", "JIBAR", depositRates["1m"], "TRUE"},
+            {"3m", "JIBAR", depositRates["3m"], "TRUE"},
+            {"6m", "JIBAR", depositRates["6m"], "TRUE"},
+        };
+        
+        QL.DayCounter dayCounter = new QL.Actual365Fixed();
+        string handle = 
+            CurveBootstrapper.Bootstrap(
+                handle: "BootstrappedSingleCurve", 
+                curveParameters, 
+                customRateIndex: null,
+                instruments);
 
-        // ---------------------------------------------------------------
-        // Dual CurveUtils bootstrapping 
-        RelinkableHandle<YieldTermStructure> forecastCurve = new RelinkableHandle<YieldTermStructure>();
-        USDLibor libor = new USDLibor(new Period("3m"), forecastCurve);
+        QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
+        const double tolerance = 0.01;
+        Assert.AreEqual(1.0, curve.discount(baseDate.ToQuantLibDate()));
+                    
+        DateTime date1M = (DateTime) DateUtils.AddTenorToDate(baseDate, "1m", "ZAR", "ModFol");
+        double discountFactor1M = 1 / (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date1M.ToQuantLibDate()));
+        Assert.AreEqual(discountFactor1M, curve.discount(date1M.ToQuantLibDate()), tolerance);
+        
+        DateTime date3M = (DateTime) DateUtils.AddTenorToDate(baseDate, "3m", "ZAR", "ModFol");
+        double discountFactor3M = 1 / (1 + depositRates["3m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date3M.ToQuantLibDate()));
+        Assert.AreEqual(discountFactor3M, curve.discount(date3M.ToQuantLibDate()), tolerance);
+        
+        DateTime date6M = (DateTime) DateUtils.AddTenorToDate(baseDate, "6m", "ZAR", "ModFol");
+        double discountFactor6M = 1 / (1 + depositRates["6m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date6M.ToQuantLibDate()));
+        Assert.AreEqual(discountFactor6M, curve.discount(date6M.ToQuantLibDate()), tolerance); 
+    }
+    
+    [Test]
+    public void Bootstrap_FlatCurve_DepositsAndFras_Test()
+    {
+        DateTime baseDate = new(2022, 06, 01);
+        
+        object[,] curveParameters =
+        {
+            {"CurveUtils Parameters", ""},
+            {"Parameter", "Value"},
+            {"BaseDate", baseDate.ToOADate()},
+            {"RateIndexName", "JIBAR"},
+            {"RateIndexTenor", "3m"},
+            {"Interpolation", "Linear"},
+        };
 
-        //DepositRateHelper depositRateHelper = new DepositRateHelper()
+        Dictionary<string, double> depositRates = 
+            new()
+            {
+                ["1m"] = 0.1,
+                ["3m"] = 0.1,
+                ["6m"] = 0.1,
+            };
+        
+        object[,] depositInstruments = 
+        {
+            {"Deposits", "", "", ""},
+            {"Tenors", "RateIndex", "Rates", "Include"},
+            {"1m", "JIBAR", depositRates["1m"], "TRUE"},
+            {"3m", "JIBAR", depositRates["3m"], "TRUE"},
+            {"6m", "JIBAR", depositRates["6m"], "TRUE"},
+        };
+       
+        Dictionary<string, double> fraRates = 
+            new()
+            {
+                ["6x9"] = 0.1,
+                ["9x12"] = 0.1,
+            };
+        
+        object[,] fraInstruments = 
+        {
+            {"FRAs", "", "", ""},
+            {"FraTenors", "RateIndex", "Rates", "Include"},
+            {"6x9", "JIBAR", fraRates["6x9"], "TRUE"},
+            {"9x12", "JIBAR", fraRates["9x12"], "TRUE"},
+        };
+
+        object[] instruments = {depositInstruments, fraInstruments};
+        QL.Jibar jibar = new(new QL.Period("3m"));
+        QL.DayCounter dayCounter = jibar.dayCounter();
+        string handle = CurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
+        QL.YieldTermStructure curve = CurveUtils.GetCurveObject(handle);
+        const double tolerance = 1e-6; 
+        
+        Assert.AreEqual(1.0, curve.discount(baseDate.ToQuantLibDate()));
+        
+        DateTime date1M = (DateTime) DateUtils.AddTenorToDate(baseDate, "1m", "ZAR", "ModFol");
+        double discountFactor1M = 1 / (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date1M.ToQuantLibDate()));
+        Assert.AreEqual(discountFactor1M, curve.discount(date1M.ToQuantLibDate()), tolerance);
+        
+        DateTime date3M = (DateTime) DateUtils.AddTenorToDate(baseDate, "3m", "ZAR", "ModFol");
+        double discountFactor3M = 
+            1 / (1 + depositRates["3m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date3M.ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor3M, curve.discount(date3M.ToQuantLibDate()), tolerance);
+        
+        DateTime date6M = (DateTime) DateUtils.AddTenorToDate(baseDate, "6m", "ZAR", "ModFol");
+        double discountFactor6M = 
+            1 / (1 + depositRates["6m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), date6M.ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor6M, curve.discount(date6M.ToQuantLibDate()), tolerance); 
+       
+        DateTime date9M = (DateTime) DateUtils.AddTenorToDate(baseDate, "9m", "ZAR", "ModFol");
+        double discountFactor9M = 
+            discountFactor6M * 
+            1 / (1 + fraRates["6x9"] * dayCounter.yearFraction(date6M.ToQuantLibDate(), date9M.ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor9M, curve.discount(date9M.ToQuantLibDate()), tolerance); 
+        
+        DateTime date12M = (DateTime) DateUtils.AddTenorToDate(baseDate, "12m", "ZAR", "ModFol");
+        double discountFactor12M = 
+            discountFactor9M * 
+            1 / (1 + fraRates["9x12"] * dayCounter.yearFraction(date9M.ToQuantLibDate(), date12M.ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor12M, curve.discount(date12M.ToQuantLibDate()), tolerance); 
+    }
+    
+    [Test]
+    public void Bootstrap_FlatCurve_DepositsFrasAndSwaps_Test()
+    {
+        DateTime baseDate = new(2022, 06, 01);
+
+        object[,] curveParameters =
+        {
+            {"CurveUtils Parameters", ""},
+            {"Parameter", "Value"},
+            {"BaseDate", baseDate.ToOADate()},
+            {"RateIndexName", "JIBAR"},
+            {"RateIndexTenor", "3m"},
+            {"Interpolation", "Exponential"},
+        };
+
+        Dictionary<string, double> depositRates = 
+            new()
+            {
+                ["1m"] = 0.1,
+                ["3m"] = 0.1,
+                ["6m"] = 0.1,
+            };
+        
+        object[,] depositInstruments = 
+        {
+            {"Deposits", "", "", ""},
+            {"Tenors", "RateIndex", "Rates", "Include"},
+            {"1m", "JIBAR", depositRates["1m"], "TRUE"},
+            {"3m", "JIBAR", depositRates["3m"], "TRUE"},
+            {"6m", "JIBAR", depositRates["6m"], "TRUE"},
+        };
+       
+        Dictionary<string, double> fraRates = 
+            new()
+            {
+                ["6x9"] = 0.1,
+                ["9x12"] = 0.1,
+            };
+        
+        object[,] fraInstruments = 
+        {
+            {"FRAs", "", "", ""},
+            {"FraTenors", "RateIndex", "Rates", "Include"},
+            {"6x9", "JIBAR", fraRates["6x9"], "TRUE"},
+            {"9x12", "JIBAR", fraRates["9x12"], "TRUE"},
+        };
+
+        Dictionary<string, double> swapRates = 
+            new()
+            {
+                ["2y"] = 0.1,
+                ["3y"] = 0.1,
+            };
+        
+        object[,] swapInstruments =
+        {
+            {"Interest Rate Swaps", "", "", ""},
+            {"Tenors", "RateIndex", "Rates", "Include"},
+            {"2y", "JIBAR", swapRates["2y"], "TRUE"},
+            {"3y", "JIBAR", swapRates["3y"], "TRUE"},
+        };
+
+        object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
+        QL.Actual365Fixed dayCounter = new();
+        string handle = 
+            CurveBootstrapper.Bootstrap(
+                handle: nameof(Bootstrap_FlatCurve_DepositsFrasAndSwaps_Test), 
+                curveParameters: curveParameters, 
+                customRateIndex: null, 
+                instrumentGroups: instruments);
+        
+        QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
+        const double tolerance = 0.0001;
+        List<string> tenors = new() {"0m", "1m", "3m", "6m", "9m", "12m", "15m", "18m", "21m", "24m"};
+        Dictionary<string, DateTime> dates = tenors.ToDictionary(t => t, t => (DateTime)DateUtils.AddTenorToDate(baseDate, t, "ZAR", "ModFol"));
+        
+        double discountFactor1M = 
+            1 / 
+            (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), dates["1m"].ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor1M, curve.discount(dates["1m"].ToQuantLibDate()), tolerance);
+        
+        double discountFactor3M = 
+            1 / 
+            (1 + depositRates["3m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), dates["3m"].ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor3M, curve.discount(dates["3m"].ToQuantLibDate()), tolerance);
+        
+        double discountFactor6M = 
+            1 / 
+            (1 + depositRates["6m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), dates["6m"].ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor6M, curve.discount(dates["6m"].ToQuantLibDate()), tolerance); 
+       
+        double discountFactor9M = 
+            discountFactor6M / 
+            (1 + fraRates["6x9"] * dayCounter.yearFraction(dates["6m"].ToQuantLibDate(), dates["9m"].ToQuantLibDate()));
+        
+        Assert.AreEqual(discountFactor9M, curve.discount(dates["9m"].ToQuantLibDate()), tolerance); 
+        
+        double discountFactor12M = 
+            discountFactor9M / 
+            (1 + fraRates["9x12"] * dayCounter.yearFraction(dates["9m"].ToQuantLibDate(), dates["12m"].ToQuantLibDate()));
+
+        Assert.AreEqual(discountFactor12M, curve.discount(dates["12m"].ToQuantLibDate()), tolerance);
+
+        List<double> startDatesRange = 
+            dates.Values.ToList().GetRange(0, dates.Count - 1).Select(d => d.ToOADate()).ToList();
+        
+        List<double> endDatesRange = 
+            dates.Values.ToList().GetRange(1, dates.Count - 1).Select(d => d.ToOADate()).ToList();
+        
+        List<double> forwardRates = 
+            ExcelArrayUtils.ConvertExcelRangeToList<double>(
+                (object[,])CurveUtils.GetForwardRates(
+                    handle: handle, 
+                    startDatesRange: ExcelArrayUtils.ConvertListToExcelRange(startDatesRange, 0), 
+                    endDatesRange: ExcelArrayUtils.ConvertListToExcelRange(endDatesRange, 0), 
+                    compoundingConventionParameter: "Simple"));
+
+       List<double> discountFactors =
+            ExcelArrayUtils.ConvertExcelRangeToList<double>(
+                (object[,])CurveUtils.GetDiscountFactors(handle, endDatesRange.Cast<object>().ToArray()));
+       
+       List<double> dayCountFractions = 
+           endDatesRange
+               .Zip(
+                   startDatesRange, 
+                   (s, e) => 
+                       dayCounter.yearFraction(
+                           d1: DateTime.FromOADate(s).ToQuantLibDate(), 
+                           d2: DateTime.FromOADate(e).ToQuantLibDate()))
+               .ToList();
+       
+       double numerator =
+           forwardRates.Zip(
+                dayCountFractions.Zip(
+                    discountFactors, (t, df) => t * df), 
+            (f, tDf) => f * tDf).Sum(); 
+       
+       double denominator =
+                dayCountFractions.Zip(
+                    discountFactors, (t, df) => t * df).Sum(); 
+       
+       double parSwapRate2Y = numerator / denominator;
+    
+       Assert.AreEqual(swapRates["2y"], parSwapRate2Y, tolerance);
+    }
+    
+    [Test]
+    public void Bootstrap_BackwardFlatInterpolation_Test()
+    {
+        QL.Date baseDate = new(1, 6.ToQuantLibMonth(), 2022);
+            
+        object[,] curveParameters =
+        {
+            {"CurveUtils Parameters", ""},
+            {"Parameter", "Value"},
+            {"BaseDate", baseDate.ToDateTime().ToOADate()},
+            {"RateIndexName", "JIBAR"},
+            {"RateIndexTenor", "3m"},
+            {"Interpolation", "Linear"},
+        };
+            
+        object[,] depositInstruments = 
+        {
+            {"Deposits", "", "", ""},
+            {"Tenors", "RateIndex", "Rates", "Include"},
+            {"3m", "JIBAR", 0.1, "TRUE"},
+            {"6m", "JIBAR", 0.1, "TRUE"},
+        };
+                   
+        object[,] fraInstruments = 
+        {
+            {"FRAs", "", "", ""},
+            {"FraTenors", "RateIndex", "Rates", "Include"},
+            {"6x9", "JIBAR", 0.1, "TRUE"},
+            {"9x12", "JIBAR", 0.1, "TRUE"},
+        };
+            
+        object[,] swapInstruments =
+        {
+            {"Interest Rate Swaps", "", "", ""},
+            {"Tenors", "RateIndex", "Rates", "Include"},
+            {"2y", "JIBAR", 0.1, "TRUE"},
+            {"3y", "JIBAR", 0.1, "TRUE"},
+        };
+            
+        object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
+        QL.Jibar jibar = new(new QL.Period(3, QL.TimeUnit.Months));
+        QL.DayCounter? dayCounter = jibar.dayCounter();
+        string handle = 
+            CurveBootstrapper.Bootstrap(
+                handle: nameof(Bootstrap_BackwardFlatInterpolation_Test), 
+                curveParameters: curveParameters, 
+                customRateIndex: null, 
+                instrumentGroups: instruments);
+        
+        QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
+        const double tolerance = 0.000000001;
+        QL.Date date3m = ((DateTime)DateUtils.AddTenorToDate(baseDate.ToDateTime(), "3M", "ZAR", "ModFol")).ToQuantLibDate();
+        Assert.AreEqual(1.0, curve.discount(baseDate));
+        Assert.AreEqual(
+            expected: 1 / (1 + 0.1 * dayCounter.yearFraction(baseDate, date3m)),
+            actual: curve.discount(date3m),
+            delta: tolerance);
+        
+        // Assert.AreEqual(
+        //     expected: Math.Exp(-0.105 * dayCounter.yearFraction(baseDate, baseDate.AddMonths(3))),
+        //     actual: curve.discount(baseDate.AddMonths(3)),
+        //     delta: tolerance);
+        // Assert.AreEqual(
+        //     expected: Math.Exp(-0.13 * dayCounter.yearFraction(baseDate, baseDate.AddMonths(5))),
+        //     actual: curve.discount(baseDate.AddMonths(5)),
+        //     delta: tolerance);
+
+        QL.Calendar calendar = jibar.fixingCalendar();
+
+        double discountFactor1Y =
+            Math.Exp(-0.130 * dayCounter.yearFraction(
+                d1: baseDate, 
+                d2: calendar.advance(baseDate, new QL.Period(6, QL.TimeUnit.Months)))) *
+            Math.Exp(-0.135 * dayCounter.yearFraction(
+                d1: calendar.advance(baseDate, new QL.Period(6, QL.TimeUnit.Months)), 
+                d2: calendar.advance(baseDate, new QL.Period(9, QL.TimeUnit.Months))));
+
+        int tenor = 9;
+        double expectedNaccZeroRate1Y =
+            -1 * Math.Log(discountFactor1Y) / 
+            dayCounter.yearFraction(baseDate, baseDate.ToDateTime().AddMonths(tenor).ToQuantLibDate());
+        double actualNaccZeroRate1Y = 
+            -1 * Math.Log(curve.discount(calendar.advance(baseDate, new QL.Period(tenor, QL.TimeUnit.Months)))) / 
+            dayCounter.yearFraction(baseDate, calendar.advance(baseDate, new QL.Period(tenor, QL.TimeUnit.Months)));
+        // Assert.AreEqual(expectedNaccZeroRate1Y, actualNaccZeroRate1Y);
+        
+        // Assert.AreEqual(
+        //     expected: discountFactor1Y,
+        //     actual: curve.discount(baseDate.AddMonths(tenor)),
+        //     delta: tolerance);
+        // Assert.AreEqual(
+        //     expected: Math.Exp(-0.1 * dayCounter.yearFraction(baseDate, baseDate.AddMonths(6))),
+        //     actual: curve.discount(baseDate.AddMonths(6)),
+        //     delta: tolerance);
+        // Assert.AreEqual(
+        //     expected: Math.Exp(-0.1 * dayCounter.yearFraction(baseDate, baseDate.AddMonths(6))) *
+        //               Math.Exp(-0.1 * dayCounter.yearFraction(baseDate.AddMonths(6), baseDate.AddMonths(9))),
+        //     actual: curve.discount(baseDate.AddMonths(9)),
+        //     delta: tolerance);
+    }
+
+    [Test]
+    public void Bootstrap_Get_ZarSwapCurveTest()
+    {
+        // TODO: Needs to warn user if not connected to VPN.
+        DateTime baseDate = new(2023, 03, 31);
+        string handle = CurveBootstrapper.Get("ZarSwapCurve", "ZAR-Swap", baseDate);
+        object[] dates = {baseDate.ToOADate(), baseDate.AddYears(1).ToOADate()};
+        object discountFactors = CurveUtils.GetDiscountFactors(handle, dates);
+        Assert.AreEqual(((object[,])discountFactors)[0, 0], 1.000000000000d); 
+        Assert.AreEqual((double)((object[,])discountFactors)[1, 0], 0.922680208459d, 1e-10d);
     }
 }

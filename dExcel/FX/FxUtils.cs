@@ -1,9 +1,9 @@
-﻿namespace dExcel.FX;
-
+﻿using dExcel.ExcelUtils;
+using dExcel.InterestRates;
 using ExcelDna.Integration;
 using mnd = MathNet.Numerics.Distributions;
-using QLNet;
-using Utilities;
+
+namespace dExcel.FX;
 
 public static class FxUtils
 {
@@ -11,6 +11,72 @@ public static class FxUtils
     {
         return 0;
     }
+
+    [ExcelFunction(
+        Name = "d.FX_ConvertDeltaToMoneynessVolSurface",
+        Description = "Convert a delta vol surface to a moneyness vol surface.",
+        Category = "∂Excel: FX")]
+    public static object ConvertDeltaToMoneynessVolSurface(
+        object[,] volsRange,
+        object[,] deltasRange,
+        object[,] optionMaturitiesRange,
+        string domesticCurveHandle,
+        string foreignCurveHandle)
+    {
+        List<double> deltas = ExcelArrayUtils.ConvertExcelRangeToList<double>(deltasRange);
+        List<object> optionMaturities = 
+            ExcelArrayUtils.ConvertExcelRangeToList<double>(optionMaturitiesRange).Cast<object>().ToList();
+        List<(double moneyness, double optionMaturity, double vol)> moneynessSurface = new();
+        List<double> moneynesses = new();
+
+        List<double> domesticRates = 
+            ExcelArrayUtils.ConvertExcelRangeToList<double>(
+                (object[,])CurveUtils.GetDiscountFactors(domesticCurveHandle, optionMaturities.ToArray()));
+        
+        List<double> foreignRates = 
+            ExcelArrayUtils.ConvertExcelRangeToList<double>(
+                (object[,])CurveUtils.GetDiscountFactors(domesticCurveHandle, optionMaturities.ToArray()));
+        
+        for (int i = 0; i < optionMaturities.Count; i++)
+        {
+            for (int j = 0; j < deltas.Count; j++)
+            {
+                double moneyness = 
+                    Math.Exp(
+                        mnd.Normal.InvCDF(0, 1, deltas[i]) * 
+                        (double)volsRange[i, j] * Math.Sqrt((double)optionMaturities[i]) -
+                        (domesticRates[i] - foreignRates[i] + 0.5 * (double)volsRange[i, j] * (double)volsRange[i, j]) * (double)optionMaturities[i]);
+
+                moneynesses.Add(Math.Round(moneyness, 3));
+                moneynessSurface.Add((Math.Round(moneyness, 3) , (double)optionMaturities[i], (double)volsRange[i, j]));
+            } 
+        }
+
+        moneynesses = moneynesses.Distinct().ToList();
+        moneynesses.Sort();
+
+        object[,] output = new object[optionMaturities.Count + 1, moneynesses.Count + 1];
+
+        foreach ((double moneyness, double optionMaturity, double vol) in moneynessSurface)
+        {
+            int moneynessIndex = moneynesses.IndexOf(moneyness);
+            int optionMaturityIndex = optionMaturities.IndexOf(optionMaturity);
+            output[optionMaturityIndex + 1, moneynessIndex + 1] = vol;
+        }
+
+        for (int j = 0; j < moneynesses.Count; j++)
+        {
+            output[0, j + 1] = moneynesses[j];
+        }
+
+        for (int i = 0; i < optionMaturities.Count; i++)
+        {
+            output[i + 1, 0] = optionMaturities[i];
+        }
+        
+        return output;
+    }
+
 
     /// <summary>
     /// Calculates the delta of an FX option (call or put) using the formula:
@@ -44,4 +110,13 @@ public static class FxUtils
 
         return Math.Exp(-1 * foreignRate * optionMaturity) * (mnd.Normal.CDF(0, 1, d1) - 1);
     }
+
+    // [ExcelFunction(
+    //     Name = "d.FX_GetVolSurface",
+    //     Description = "Extracts the specified vol surface from the Omicron database.",
+    //     Category = "∂Excel: FX")]
+    // public static string GetVolSurface()
+    // {
+    //     OmicronUtils.GetFxVolQuotes();
+    // }
 }

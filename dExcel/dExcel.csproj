@@ -9,6 +9,7 @@
 		<UseWPF>true</UseWPF>
 		<ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<LangVersion>11</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -232,17 +233,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ExcelDna.AddIn" Version="1.6.1-beta3" />
-    <PackageReference Include="ExcelDna.Integration" Version="1.6.1-beta3" />
-    <PackageReference Include="ExcelDna.IntelliSense" Version="1.6.1-beta3" />
-    <PackageReference Include="ExcelDna.Interop" Version="15.0.0-preview3" />
-    <PackageReference Include="ExcelDna.Registration" Version="1.6.1-beta3" />
+    <PackageReference Include="ExcelDna.AddIn" Version="1.7.0-rc4" />
+    <PackageReference Include="ExcelDna.Integration" Version="1.7.0-rc4" />
+    <PackageReference Include="ExcelDna.IntelliSense" Version="1.7.0-rc4" />
+    <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
+    <PackageReference Include="ExcelDna.Registration" Version="1.7.0-rc4" />
     <PackageReference Include="fuzzysharp" Version="2.0.2" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.701" />
     <PackageReference Include="MaterialDesignThemes" Version="4.7.1" />
     <PackageReference Include="mathnet.numerics" Version="5.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-    <PackageReference Include="QLNet" Version="1.12.1-preview.29" />
+    <PackageReference Include="Omicron.Client" Version="3.0.34-gfe82d59cee" />
+    <PackageReference Include="Omicron.Data" Version="0.1.94-g311531ad8e" />
+    <PackageReference Include="Omicron.Model" Version="3.0.34-gfe82d59cee" />
+    <PackageReference Include="Omicron.Refinitiv" Version="0.1.81-g7a6f78cb15" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
   </ItemGroup>
 
@@ -291,6 +294,12 @@
     <Page Update="WPF\FunctionSearch.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="NQuantLib">
+      <HintPath>..\..\..\..\Lib\QuantLib-SWIG-1.30\CSharp\csharp\bin\Release\net6.0\NQuantLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

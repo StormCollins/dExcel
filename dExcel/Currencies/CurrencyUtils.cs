@@ -1,7 +1,7 @@
-﻿namespace dExcel.Currencies;
-
+﻿using QL = QuantLib;
 using System.Reflection;
-using QLNet;
+
+namespace dExcel.Currencies;
 
 /// <summary>
 /// A set of utility functions for dealing with currencies.
@@ -13,12 +13,12 @@ public static class CurrencyUtils
     /// </summary>
     /// <param name="currencyToParse">Currency to parse.</param>
     /// <returns>QLNet currency.</returns>
-    public static Currency? ParseCurrency(string currencyToParse)
+    public static QL.Currency? ParseCurrency(string currencyToParse)
     {
         Assembly? qlNet = 
             AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == "QLNet");
         
         Type? type = qlNet?.GetType($"QLNet.{currencyToParse.ToUpper()}Currency");
-        return type is not null ? (Currency?) Activator.CreateInstance(type) : null;
+        return type is not null ? (QL.Currency?) Activator.CreateInstance(type) : null;
     }
 }

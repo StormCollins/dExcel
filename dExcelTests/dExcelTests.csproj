@@ -4,6 +4,7 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<LangVersion>11</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +33,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\dExcel\dExcel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="NQuantLib">
+      <HintPath>..\..\..\..\Lib\QuantLib-SWIG-1.30\CSharp\csharp\bin\Release\net6.0\NQuantLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

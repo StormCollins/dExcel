@@ -1,6 +1,6 @@
-﻿namespace dExcel.InterestRates;
+﻿using QL = QuantLib;
 
-using QLNet;
+namespace dExcel.InterestRates;
 
 /// <summary>
 /// A class used to encapsulate the most common attributes of an interest rate curve.
@@ -15,7 +15,7 @@ public class CurveDetails
     /// <summary>
     /// The day count convention.
     /// </summary>
-    public DayCounter DayCountConvention { get; }
+    public QL.DayCounter DayCountConvention { get; }
   
     /// <summary>
     /// The interpolation style of the curve used to interpolate discount factors.
@@ -25,12 +25,17 @@ public class CurveDetails
     /// <summary>
     /// The node dates of the discount factors.
     /// </summary>
-    public List<Date>? DiscountFactorDates { get; }
+    public List<DateTime>? DiscountFactorDates { get; }
    
     /// <summary>
     /// The discount factors at the node dates.
     /// </summary>
     public List<double>? DiscountFactors { get; }
+    
+    /// <summary>
+    /// The instrument groups used to bootstrap the curve.
+    /// </summary>
+    public object[] InstrumentGroups { get; }
 
     /// <summary>
     /// 
@@ -42,15 +47,17 @@ public class CurveDetails
     /// <param name="discountFactors"></param>
     public CurveDetails(
         object? termStructure,
-        DayCounter dayCountConvention,
+        QL.DayCounter dayCountConvention,
         string interpolation,
-        IEnumerable<Date>? discountFactorDates,
-        IEnumerable<double>? discountFactors)
+        IEnumerable<DateTime>? discountFactorDates,
+        IEnumerable<double>? discountFactors,
+        params object[] instrumentGroups)
     {
         this.TermStructure = termStructure;
         this.DayCountConvention = dayCountConvention;       
         this.DiscountFactorInterpolation = interpolation;
         this.DiscountFactorDates = discountFactorDates?.ToList();
         this.DiscountFactors = discountFactors?.ToList();
+        this.InstrumentGroups = instrumentGroups;
     }
 }

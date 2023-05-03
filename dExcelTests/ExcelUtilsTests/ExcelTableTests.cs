@@ -1,8 +1,8 @@
-﻿namespace dExcelTests.ExcelUtilsTests;
-
-using dExcel.ExcelUtils;
+﻿using dExcel.ExcelUtils;
 using NUnit.Framework;
-using QLNet;
+using QL = QuantLib;
+
+namespace dExcelTests.ExcelUtilsTests;
 
 [TestFixture]
 public class ExcelTableTests
@@ -217,37 +217,38 @@ public class ExcelTableTests
     public void LookUpBusinessDayConventionTest()
     {
         Assert.AreEqual(
-            expected: BusinessDayConvention.ModifiedFollowing,
-            actual: ExcelTableUtils.GetTableValue<BusinessDayConvention>(_parameterTable, "Value", "ValidBusinessDayConvention")); 
+            expected: QL.BusinessDayConvention.ModifiedFollowing,
+            actual: ExcelTableUtils.GetTableValue<QL.BusinessDayConvention>(_parameterTable, "Value", "ValidBusinessDayConvention")); 
     }
 
     [Test]
     public void LookUpInvalidBusinessDayConventionTest()
     {
         Assert.Throws<ArgumentException>(() => 
-            ExcelTableUtils.GetTableValue<BusinessDayConvention>(_parameterTable, "Value", "InvalidBusinessDayConvention"));
+            ExcelTableUtils.GetTableValue<QL.BusinessDayConvention>(_parameterTable, "Value", "InvalidBusinessDayConvention"));
     }
 
     public static IEnumerable<TestCaseData> LookUpDayCountConventionTestCaseData()
     {
-        yield return new TestCaseData("Bus252DayCountConvention").Returns(new Business252());
-        yield return new TestCaseData("Act360DayCountConvention").Returns(new Actual360());
-        yield return new TestCaseData("Act365DayCountConvention").Returns(new Actual365Fixed());
-        yield return new TestCaseData("ActActDayCountConvention").Returns(new ActualActual());
+        yield return new TestCaseData("Bus252DayCountConvention").Returns(new QL.Business252().name());
+        yield return new TestCaseData("Act360DayCountConvention").Returns(new QL.Actual360().name());
+        yield return new TestCaseData("Act365DayCountConvention").Returns(new QL.Actual365Fixed().name());
+        yield return new TestCaseData("ActActDayCountConvention")
+            .Returns(new QL.ActualActual(QL.ActualActual.Convention.ISDA).name());
     }
 
     [Test]
     [TestCaseSource(nameof(LookUpDayCountConventionTestCaseData))]
-    public DayCounter? LookUpDayCountConventionTest(string label)
+    public string? LookUpDayCountConventionTest(string label)
     {
-        return ExcelTableUtils.GetTableValue<DayCounter>(_parameterTable, "Value", label);
+        return ExcelTableUtils.GetTableValue<QL.DayCounter>(_parameterTable, "Value", label).name();
     }
 
     [Test]
     public void LookUpInvalidDayCountConventionTest()
     {
         Assert.Throws<ArgumentException>(() => 
-            ExcelTableUtils.GetTableValue<DayCounter>(_parameterTable, "Value", "InvalidDayCountConvention"));
+            ExcelTableUtils.GetTableValue<QL.DayCounter>(_parameterTable, "Value", "InvalidDayCountConvention"));
     }
     #endregion 
 
