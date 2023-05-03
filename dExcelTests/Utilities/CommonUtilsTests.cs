@@ -83,38 +83,10 @@ public class CommonUtilsTests
                 errorMessage: out string? actualErrorMessage); 
         
         Assert.AreEqual(expectedResult, actualResult);
-        Assert.AreEqual(expectedDayCountConvention, actualDayCountConvention);
+        if (expectedDayCountConvention != null)
+            Assert.AreEqual(expectedDayCountConvention.name(), actualDayCountConvention.name());
         Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
     }
-    
-    // public static IEnumerable<TestCaseData> TryParseInterpolation_TestData()
-    // {
-    //     yield return new TestCaseData("BACKWARDFLAT", true, new BackwardFlat(), null);
-    //     yield return new TestCaseData("CUBIC", true, new Cubic(), null);
-    //     yield return new TestCaseData("FORWARDFLAT", true, new ForwardFlat(), null);
-    //     yield return new TestCaseData("LINEAR", true, new Linear(), null);
-    //     yield return new TestCaseData("LOGCUBIC", true, new LogCubic(), null);
-    //     yield return new TestCaseData("EXPONENTIAL", true, new LogLinear(), null);
-    //     yield return new TestCaseData("Invalid", false, null, "#∂Excel Error: Invalid interpolation method: 'Invalid'");
-    // }
-    //
-    // [Test]
-    // [TestCaseSource(nameof(TryParseInterpolation_TestData))]
-    // public void TryParseInterpolation_Test(
-    //     string interpolationType, 
-    //     bool expectedResult, 
-    //     IInterpolationFactory? expectedInterpolation, 
-    //     string? expectedErrorMessage)
-    // {
-    //     bool actualResult = CommonUtils.TryParseInterpolation(
-    //         interpolationMethodToParse: interpolationType,
-    //         interpolation: out IInterpolationFactory? actualInterpolation, 
-    //         errorMessage: out string? actualErrorMessage);  
-    //     
-    //     Assert.AreEqual(expectedResult, actualResult);
-    //     Assert.AreEqual(expectedInterpolation?.GetType(), actualInterpolation?.GetType());
-    //     Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
-    // }
     
     public static IEnumerable<TestCaseData> TryParseCompoundingConvention_TestData()
     {

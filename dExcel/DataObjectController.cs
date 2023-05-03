@@ -1,10 +1,10 @@
-﻿namespace dExcel;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Utilities;
+using dExcel.Utilities;
+
+namespace dExcel;
 
 public sealed class DataObjectController
 {
@@ -37,6 +37,7 @@ public sealed class DataObjectController
         {
             return CommonUtils.DExcelErrorMessage($"Handle may not contain following: {string.Join(", ", bannedCharacters)}");
         }
+        
         if (!_dataObjects.ContainsKey(handle))
         {
             _dataObjects.Add(handle, dataObject);

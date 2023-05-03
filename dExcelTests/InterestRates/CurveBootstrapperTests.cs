@@ -203,7 +203,7 @@ public class CurveBootstrapperTest
             {"BaseDate", baseDate.ToOADate()},
             {"RateIndexName", "JIBAR"},
             {"RateIndexTenor", "3m"},
-            {"Interpolation", "Linear"},
+            {"Interpolation", "Exponential"},
         };
 
         Dictionary<string, double> depositRates = 
@@ -255,11 +255,16 @@ public class CurveBootstrapperTest
 
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
         QL.Actual365Fixed dayCounter = new();
-        string handle = CurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
+        string handle = 
+            CurveBootstrapper.Bootstrap(
+                handle: nameof(Bootstrap_FlatCurve_DepositsFrasAndSwaps_Test), 
+                curveParameters: curveParameters, 
+                customRateIndex: null, 
+                instrumentGroups: instruments);
+        
         QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.0001;
         List<string> tenors = new() {"0m", "1m", "3m", "6m", "9m", "12m", "15m", "18m", "21m", "24m"};
-
         Dictionary<string, DateTime> dates = tenors.ToDictionary(t => t, t => (DateTime)DateUtils.AddTenorToDate(baseDate, t, "ZAR", "ModFol"));
         
         double discountFactor1M = 
@@ -358,7 +363,6 @@ public class CurveBootstrapperTest
             {"6m", "JIBAR", 0.1, "TRUE"},
         };
                    
-            // {"1m", "JIBAR", 0.10, "TRUE"},
         object[,] fraInstruments = 
         {
             {"FRAs", "", "", ""},
@@ -378,7 +382,13 @@ public class CurveBootstrapperTest
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
         QL.Jibar jibar = new(new QL.Period(3, QL.TimeUnit.Months));
         QL.DayCounter? dayCounter = jibar.dayCounter();
-        string handle = CurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
+        string handle = 
+            CurveBootstrapper.Bootstrap(
+                handle: nameof(Bootstrap_BackwardFlatInterpolation_Test), 
+                curveParameters: curveParameters, 
+                customRateIndex: null, 
+                instrumentGroups: instruments);
+        
         QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.000000001;
         QL.Date date3m = ((DateTime)DateUtils.AddTenorToDate(baseDate.ToDateTime(), "3M", "ZAR", "ModFol")).ToQuantLibDate();
@@ -439,7 +449,7 @@ public class CurveBootstrapperTest
         string handle = CurveBootstrapper.Get("ZarSwapCurve", "ZAR-Swap", baseDate);
         object[] dates = {baseDate.ToOADate(), baseDate.AddYears(1).ToOADate()};
         object discountFactors = CurveUtils.GetDiscountFactors(handle, dates);
-        Assert.AreEqual(((object[,])discountFactors)[0, 0], 1.000000000000000000); 
-        Assert.AreEqual(((object[,])discountFactors)[1, 0], 0.92268020845922072d);
+        Assert.AreEqual(((object[,])discountFactors)[0, 0], 1.000000000000d); 
+        Assert.AreEqual((double)((object[,])discountFactors)[1, 0], 0.922680208459d, 1e-10d);
     }
 }

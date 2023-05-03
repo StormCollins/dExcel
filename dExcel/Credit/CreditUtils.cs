@@ -1,9 +1,9 @@
-﻿namespace dExcel.CreditUtils;
+﻿using ExcelDna.Integration;
+using QL = QuantLib;
 
-using System;
-using System.Collections.Generic;
-using ExcelDna.Integration;
-using QLNet;
+namespace dExcel.CreditUtils;
+
+using Dates;
 
 public static class CreditUtils
 {
@@ -17,16 +17,15 @@ public static class CreditUtils
         object[,] datesRange,
         object[,] survivalProbabilitiesRange)
     {
-        List<Date> dates = new();
-        List<double> survivalProbabilities = new();
+        QL.DateVector dates = new();
+        QL.DoubleVector survivalProbabilities = new();
         for (int i = 0; i < datesRange.GetLength(0); i++)
         {
-            dates.Add((Date)DateTime.FromOADate((double)datesRange[i, 0]));
+            dates.Add(DateTime.FromOADate((double)datesRange[i, 0]).ToQuantLibDate());
             survivalProbabilities.Add((double)survivalProbabilitiesRange[i, 0]);
         }
-
-        InterpolatedSurvivalProbabilityCurve<LogLinear> curve =
-            new(dates, survivalProbabilities, new Actual360());
+        
+        QL.SurvivalProbabilityCurve curve = new(dates, survivalProbabilities, new QL.Actual360());
 
         DataObjectController dataObjectController = DataObjectController.Instance;
         return dataObjectController.Add(handle, curve);

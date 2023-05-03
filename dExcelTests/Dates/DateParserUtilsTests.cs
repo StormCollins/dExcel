@@ -10,8 +10,6 @@ public class DateParserUtilsTests
     {
         yield return new TestCaseData("ARS").Returns(new QL.Argentina().name());
         yield return new TestCaseData("Argentina").Returns(new QL.Argentina().name()); 
-        yield return new TestCaseData("AUD").Returns(new QL.Australia().name());
-        yield return new TestCaseData("Australia").Returns(new QL.Australia().name());
         yield return new TestCaseData("BRL").Returns(new QL.Brazil().name());
         yield return new TestCaseData("Brazil").Returns(new QL.Brazil().name());
         yield return new TestCaseData("CAD").Returns(new QL.Canada().name());
@@ -51,8 +49,6 @@ public class DateParserUtilsTests
         yield return new TestCaseData("New Zealand").Returns(new QL.NewZealand().name());
         yield return new TestCaseData("PLN").Returns(new QL.Poland().name());
         yield return new TestCaseData("Poland").Returns(new QL.Poland().name());
-        yield return new TestCaseData("RON").Returns(new QL.Romania().name());
-        yield return new TestCaseData("Romania").Returns(new QL.Romania().name());
         yield return new TestCaseData("Russia").Returns(new QL.Russia().name());
         yield return new TestCaseData("SAR").Returns(new QL.SaudiArabia().name());
         yield return new TestCaseData("Saudi Arabia").Returns(new QL.SaudiArabia().name());

@@ -1,10 +1,9 @@
-﻿namespace dExcel.FX;
-
-using ExcelUtils;
+﻿using dExcel.ExcelUtils;
+using dExcel.InterestRates;
 using ExcelDna.Integration;
-using InterestRates;
-using QLNet;
 using mnd = MathNet.Numerics.Distributions;
+
+namespace dExcel.FX;
 
 public static class FxUtils
 {

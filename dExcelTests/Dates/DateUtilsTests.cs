@@ -139,7 +139,7 @@ public sealed class DateUtilsTests
     [TestCaseSource(nameof(AddTenorToDateTestCaseData))]
     public object AddTenorToDateTest(DateTime date, string tenor, string? userCalendar, string userBusinessDayConvention)
     {
-        return DateUtils.AddTenorToDate(date, tenor, userCalendar, userBusinessDayConvention);
+        return ((DateTime)DateUtils.AddTenorToDate(date, tenor, userCalendar, userBusinessDayConvention)).ToQuantLibDate();
     }
 
     [Test]

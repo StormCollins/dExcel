@@ -1,11 +1,10 @@
-﻿namespace dExcelTests.FX;
-
-using dExcel.Dates;
+﻿using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.FX;
 using NUnit.Framework;
-using QLNet;
 using QL = QuantLib;
+
+namespace dExcelTests.FX;
 
 [TestFixture]
 public class FxUtilsTests
@@ -111,61 +110,5 @@ public class FxUtilsTests
         };
         
         // object convertedVolSurface = FxUtils.ConvertDeltaToMoneynessVolSurface(deltaVols, deltas, optionMaturities, 0.1, 0.2);
-    }
-
-
-    [Test]
-    public void InterpolationTest()
-    {
-        Cubic interpolationFactory = new();
-        List<double> xBegin = new() { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
-        List<double> yBegin = new() { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
-        CubicNaturalSpline splineNatural = new(xBegin, xBegin.Count, yBegin);
-        Discount discount = new();
-        discount.discountImpl(splineNatural, 0.1);
-        // InterpolatedDiscountCurve<IInterpolationFactory> test = 
-        // new InterpolatedDiscountCurve<IInterpolationFactory>(new Actual360(), null, null, splineNatural);
-        QL.DateVector usdCurveDates = 
-            new(
-                new List<QL.Date>()
-                {
-                    new(31, QL.Month.March, 2023),
-                    new(3, QL.Month.April, 2023),
-                    new(4, QL.Month.April, 2023),
-                    new(11, QL.Month.April, 2023),
-                    new(4, QL.Month.May, 2023),
-                    new(5, QL.Month.June, 2023),
-                    new(5, QL.Month.July, 2023),
-                    new(4, QL.Month.October, 2023),
-                    new(4, QL.Month.January, 2024),
-                    new(4, QL.Month.April, 2024),
-                    new(4, QL.Month.April, 2025),
-                    new(6, QL.Month.April, 2026),
-                    new(5, QL.Month.April, 2027),
-                    new(4, QL.Month.April, 2028),
-                    new(4, QL.Month.April, 2029),
-                    new(4, QL.Month.April, 2030),
-                    new(4, QL.Month.April, 2031),
-                    new(5, QL.Month.April, 2032),
-                    new(4, QL.Month.April, 2033),
-                    new(4, QL.Month.April, 2035),
-                    new(5, QL.Month.April, 2038),
-                    new(6, QL.Month.April, 2043),
-                    new(6, QL.Month.April, 2048),
-                    new(4, QL.Month.April, 2053),
-                    new(4, QL.Month.April, 2063),
-                    new(4, QL.Month.April, 2073),
-                });
-
-        QL.DoubleVector usdCurveValues = new(new List<double>()
-        {
-            1, 0.999594748, 0.999459682, 0.998485477, 0.995236637, 0.99065656, 0.986389473, 0.973558139, 0.961709557,
-            0.951187072, 0.917197683, 0.888698879, 0.86212352, 0.836076594, 0.810267688, 0.785011688, 0.760210466,
-            0.735227273, 0.710992469, 0.663886482, 0.5985451, 0.509908045, 0.446464292, 0.395983824, 0.331760479,
-            0.293876051
-        });
-        
-        QL.DiscountCurve usdDiscountCurve = new QL.DiscountCurve(usdCurveDates, usdCurveValues, new QL.Actual360());
-        
     }
 }

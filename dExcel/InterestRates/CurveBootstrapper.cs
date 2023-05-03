@@ -1,6 +1,5 @@
 ﻿using dExcel.Dates;
 using dExcel.ExcelUtils;
-using dExcel.OmicronUtils;
 using dExcel.Utilities;
 using ExcelDna.Integration;
 using Omicron;
@@ -48,8 +47,10 @@ public static class CurveBootstrapper
         params object[] instrumentGroups)
     {
         int columnHeaderIndex = ExcelTableUtils.GetRowIndex(curveParameters, "Parameter");
+        
         DateTime baseDate =
             ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", columnHeaderIndex);
+        
         if (baseDate == default)
         {
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseDate).ToUpper());
@@ -59,6 +60,7 @@ public static class CurveBootstrapper
 
         string? rateIndexName =
             ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexName", columnHeaderIndex);
+        
         if (rateIndexName is null && customRateIndex is null)
         {
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(rateIndexName).ToUpper());
@@ -121,7 +123,8 @@ public static class CurveBootstrapper
             return CommonUtils.DExcelErrorMessage($"Unsupported rate index: {rateIndexName}");
         }
 
-        List<QL.RateHelper> rateHelpers = new();
+        // List<QL.RateHelper> rateHelpers = new();
+        QL.RateHelperVector rateHelpers = new();
 
         foreach (object instrumentGroup in instrumentGroups)
         {
@@ -157,7 +160,7 @@ public static class CurveBootstrapper
                     if (includeInstruments[i])
                     {
                         rateHelpers.Add(
-                            item: new QL.DepositRateHelper(
+                            new QL.DepositRateHelper(
                                 rate: rates[i],
                                 tenor: new QL.Period(tenors[i]),
                                 fixingDays: rateIndex.fixingDays(),
@@ -185,7 +188,7 @@ public static class CurveBootstrapper
                         }
 
                         rateHelpers.Add(
-                            item: new QL.FraRateHelper(
+                            new QL.FraRateHelper(
                                 rate: new QL.QuoteHandle(new QL.SimpleQuote(rates[i])),
                                 periodToStart: new QL.Period(fraTenors[i]),
                                 iborIndex: rateIndex));
@@ -217,19 +220,19 @@ public static class CurveBootstrapper
                         }
                        
                         QL.QuoteHandle quoteHandle = new(new QL.SimpleQuote(rates[i]));
-                        QL.SwapRateHelper? swapRateHelper = 
-                                new QL.SwapRateHelper(
-                                    quoteHandle,
-                                    new QL.Period(3, QL.TimeUnit.Months),
-                                    new  QL.SouthAfrica(),
-                                    QL.Frequency.Quarterly,
-                                    QL.BusinessDayConvention.ModifiedFollowing,
-                                    new QL.Actual360(),
-                                    new QL.Jibar(new QL.Period(3, QL.TimeUnit.Months)),
-                                    new QL.QuoteHandle(new QL.SimpleQuote(0)),
-                                    new QL.Period(3, QL.TimeUnit.Months),
-                                    discountCurve);
-                        
+                        rateHelpers.Add(
+                            new QL.SwapRateHelper(
+                                rate: quoteHandle,
+                                tenor: new QL.Period(tenors[i]),
+                                calendar: rateIndex.fixingCalendar(),
+                                fixedFrequency: rateIndex.tenor().frequency(),
+                                fixedConvention: rateIndex.businessDayConvention(),
+                                fixedDayCount: rateIndex.dayCounter(),
+                                index: rateIndex,
+                                spread: new QL.QuoteHandle(new QL.SimpleQuote(0)),
+                                fwdStart: new QL.Period(0, QL.TimeUnit.Months),
+                                discountingCurve: discountCurve));
+
                         // rateHelpers.Add(
                         //     item: new QL.SwapRateHelper(
                         //         new QL.QuoteHandle(new QL.SimpleQuote(rates[i])),
@@ -257,9 +260,11 @@ public static class CurveBootstrapper
                         //     overnightIndex: rateIndex as OvernightIndex));
 
                         rateHelpers.Add(
-                            item: new QL.OISRateHelper(
-                                2, new QL.Period(tenors?[i]),
-                                new QL.QuoteHandle(new QL.SimpleQuote((double)rates?[i])), rateIndex as QL.OvernightIndex));
+                            new QL.OISRateHelper(
+                                settlementDays: 2, 
+                                tenor: new QL.Period(tenors?[i]),
+                                rate: new QL.QuoteHandle(new QL.SimpleQuote((double)rates?[i])), 
+                                index: rateIndex as QL.OvernightIndex));
                     }
                 }
             }
@@ -271,71 +276,57 @@ public static class CurveBootstrapper
             termStructure =
                 new QL.PiecewiseFlatForward(
                     referenceDate: baseDate.ToQuantLibDate(),
-                    instruments: rateHelpers,
+                    instruments: new QL.RateHelperVector(rateHelpers),
                     dayCounter: rateIndex.dayCounter());
         }
         else if (string.Compare(interpolation, "Cubic", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
             termStructure =
                 new QL.PiecewiseCubicZero(
-                    referenceDate: new Date(baseDate),
+                    referenceDate: baseDate.ToQuantLibDate(),
                     instruments: rateHelpers,
-                    dayCounter: rateIndex.dayCounter(),
-                    jumps: new List<Handle<Quote>>(),
-                    jumpDates: new List<Date>(),
-                    accuracy: 1.0e-20);
+                    dayCounter: rateIndex.dayCounter());
         }
         else if (string.Compare(interpolation, "Exponential", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
             termStructure =
-                new PiecewiseYieldCurve<Discount, LogLinear>(
-                    referenceDate: new Date(baseDate),
+                new QL.PiecewiseLogLinearDiscount(
+                    referenceDate: baseDate.ToQuantLibDate(),
                     instruments: rateHelpers,
-                    dayCounter: rateIndex.dayCounter(),
-                    jumps: new List<Handle<Quote>>(),
-                    jumpDates: new List<Date>(),
-                    accuracy: 1.0e-20);
+                    dayCounter: rateIndex.dayCounter());
         }
         else if (string.Compare(interpolation, "ForwardFlat", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
             termStructure =
-                new PiecewiseYieldCurve<Discount, ForwardFlat>(
-                    referenceDate: new Date(baseDate),
+                new QL.PiecewiseFlatForward(
+                    referenceDate: baseDate.ToQuantLibDate(),
                     instruments: rateHelpers,
                     dayCounter: rateIndex.dayCounter(),
-                    jumps: new List<Handle<Quote>>(),
-                    jumpDates: new List<Date>(),
-                    accuracy: 1.0e-20);
+                    jumps: null,
+                    jumpDates: null);
         }
         else if (string.Compare(interpolation, "Linear", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
             termStructure =
-                new PiecewiseYieldCurve<Discount, Linear>(
-                    referenceDate: new Date(baseDate),
+                new QL.PiecewiseLinearZero(
+                    referenceDate: baseDate.ToQuantLibDate(),
                     instruments: rateHelpers,
-                    dayCounter: rateIndex.dayCounter(),
-                    jumps: new List<Handle<Quote>>(),
-                    jumpDates: new List<Date>(),
-                    accuracy: 1.0e-20);
+                    dayCounter: rateIndex.dayCounter());
         }
         else if (string.Compare(interpolation, "LogCubic", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
             termStructure =
-                new PiecewiseYieldCurve<Discount, LogCubic>(
-                    referenceDate: new Date(baseDate),
+                new QL.PiecewiseLogCubicDiscount(
+                    referenceDate: baseDate.ToQuantLibDate(),
                     instruments: rateHelpers,
-                    dayCounter: rateIndex.dayCounter(),
-                    jumps: new List<Handle<Quote>>(),
-                    jumpDates: new List<Date>(),
-                    accuracy: 1.0e-20);
+                    dayCounter: rateIndex.dayCounter());
         }
         else
         {
             return CommonUtils.DExcelErrorMessage($"Unknown interpolation method: '{interpolation}'");
         }
 
-        CurveDetails curveDetails = new(termStructure, rateIndex.dayCounter(), interpolation, new List<Date>(),
-            new List<double>(), instrumentGroups);
+        CurveDetails curveDetails = new(termStructure, rateIndex.dayCounter(), interpolation, null,  null, instrumentGroups);
         DataObjectController dataObjectController = DataObjectController.Instance;
         return dataObjectController.Add(handle, curveDetails);
     }
@@ -388,7 +379,7 @@ public static class CurveBootstrapper
         try
         {
             quoteValues =
-                OmicronUtils.GetSwapCurveQuotes(rateIndexName, null, 1, baseDate.ToString("yyyy-MM-dd"));
+                OmicronUtils.OmicronUtils.GetSwapCurveQuotes(rateIndexName, null, 1, baseDate.ToString("yyyy-MM-dd"));
         }
         catch (Exception ex)
         {

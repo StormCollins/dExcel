@@ -1,6 +1,6 @@
-﻿namespace dExcel.InterestRates;
+﻿using QL = QuantLib;
 
-using QL = QuantLib;
+namespace dExcel.InterestRates;
 
 /// <summary>
 /// A class used to encapsulate the most common attributes of an interest rate curve.
@@ -25,7 +25,7 @@ public class CurveDetails
     /// <summary>
     /// The node dates of the discount factors.
     /// </summary>
-    public List<QL.Date>? DiscountFactorDates { get; }
+    public List<DateTime>? DiscountFactorDates { get; }
    
     /// <summary>
     /// The discount factors at the node dates.
@@ -49,7 +49,7 @@ public class CurveDetails
         object? termStructure,
         QL.DayCounter dayCountConvention,
         string interpolation,
-        IEnumerable<QL.Date>? discountFactorDates,
+        IEnumerable<DateTime>? discountFactorDates,
         IEnumerable<double>? discountFactors,
         params object[] instrumentGroups)
     {

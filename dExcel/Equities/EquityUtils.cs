@@ -1,16 +1,17 @@
-﻿namespace dExcel.Equities;
-
-using ExcelDna.Integration;
-using Utilities;
+﻿using ExcelDna.Integration;
+using dExcel.Dates;
+using dExcel.Utilities;
 using mnd = MathNet.Numerics.Distributions;
 using mns = MathNet.Numerics.Statistics;
+using QL = QuantLib;
+
+namespace dExcel.Equities;
 
 /// <summary>
 /// A collection of utility functions for equities.
 /// </summary>
 public static class EquityUtils
 {
-
     /// <summary>
     /// Calculates the historic volatility of an equity.
     /// </summary>
@@ -107,5 +108,96 @@ public static class EquityUtils
         }
 
         return Math.Max(equallyWeightedVolatility, ewmaVolatility);
+    }
+
+    [ExcelFunction(
+        Name = "d.Equity_CreateEuropeanOption",
+        Description = "Create an European equity option.",
+        Category = "∂Excel: Equities")]
+    public static string CreateEuropeanOption(
+        string handle,
+        double spot,
+        double strike, 
+        double riskFreeRate,
+        double volatility,
+        DateTime tradeDate,
+        DateTime maturityDate,
+        string dayCountConvention,
+        string putOrCall)
+    {
+        QL.Option.Type optionType;
+        
+        if (string.Compare(putOrCall, "Put", StringComparison.OrdinalIgnoreCase) == 0)
+        {
+            optionType = QL.Option.Type.Put; 
+        }
+        else
+        {
+            optionType = QL.Option.Type.Call;
+        }
+        
+        QL.PlainVanillaPayoff payoff = new(optionType, strike);
+        QL.EuropeanExercise exercise = new(maturityDate.ToQuantLibDate()); 
+        QL.VanillaOption vanillaOption = new(payoff, exercise);
+        QL.QuoteHandle spotHandle = new(new QL.SimpleQuote(spot));
+        
+        CommonUtils.TryParseDayCountConvention(dayCountConvention, out QL.DayCounter? dayCounter, out string errorMessage);
+
+        QL.FlatForward interestRateCurve =
+            new(tradeDate.ToQuantLibDate(),
+                new QL.QuoteHandle(new QL.SimpleQuote(riskFreeRate)),
+                dayCounter);
+        
+        QL.FlatForward dividendCurve =
+            new(tradeDate.ToQuantLibDate(),
+                new QL.QuoteHandle(new QL.SimpleQuote(0)),
+                dayCounter);
+        
+        QL.BlackConstantVol constantVol = new(tradeDate.ToQuantLibDate(), new QL.SouthAfrica(), volatility, dayCounter);
+        
+        QL.BlackScholesMertonProcess blackScholesMertonProcess = 
+            new(spotHandle, 
+                new QL.YieldTermStructureHandle(dividendCurve),
+                new QL.YieldTermStructureHandle(interestRateCurve),
+                new QL.BlackVolTermStructureHandle(constantVol));
+        
+        vanillaOption.setPricingEngine(new QL.AnalyticEuropeanEngine(blackScholesMertonProcess));
+        var dataObjectController = DataObjectController.Instance;
+        return dataObjectController.Add(handle, vanillaOption);
+    }
+
+    [ExcelFunction(
+        Name = "d.Equity_GetDetails",
+        Description = "Get price of equity option.",
+        Category = "∂Excel:Equities")]
+    public static object GetOptionDetails(string handle)
+    {
+        var dataObjectController = DataObjectController.Instance; 
+        QL.VanillaOption option = (QL.VanillaOption)dataObjectController.GetDataObject(handle);
+        object[,] output = new object[,]
+        {
+            {"Price", option.NPV()},
+            {"Delta", option.delta()},
+            {"Vega", option.vega()},
+        };
+        
+        return output;
+    }
+
+
+    [ExcelFunction(
+        Name = "d.Portfolio_CreatePortfolio",
+        Description = "Create portfolio.",
+        Category = "∂Excel: Equities")]
+    public static string CreatePortfolio(string handle, params object[] handles)
+    {
+        var dataObjectController = DataObjectController.Instance;
+        List<string> handlesList = new();
+        foreach (var currentHandle in handles)
+        {
+            handlesList.Add(currentHandle.ToString());
+        }
+        
+        return dataObjectController.Add(handle, handlesList); 
     }
 }

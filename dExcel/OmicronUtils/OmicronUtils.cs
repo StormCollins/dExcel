@@ -1,6 +1,4 @@
-﻿namespace dExcel.OmicronUtils;
-
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -8,6 +6,8 @@ using Newtonsoft.Json.Linq;
 using Omicron;
 using JsonConverter = Newtonsoft.Json.JsonConverter;
 using Option = Omicron.Option;
+
+namespace dExcel.OmicronUtils;
 
 public static class OmicronUtils
 {

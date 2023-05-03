@@ -1,13 +1,13 @@
-﻿namespace dExcel;
-
-using System.Data.SQLite;
+﻿using System.Data.SQLite;
 using System.DirectoryServices;
 using System.IO;
 using System.Reflection;
 using System.Security.Principal;
 using ExcelDna.Integration;
 using ExcelDna.Registration;
-using Utilities;
+using dExcel.Utilities;
+
+namespace dExcel;
 
 public class AddInController : IExcelAddIn
 {

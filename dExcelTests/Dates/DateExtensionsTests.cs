@@ -1,8 +1,8 @@
-﻿namespace dExcelTests.Dates;
-
-using dExcel.Dates;
+﻿using dExcel.Dates;
 using NUnit.Framework;
 using QL = QuantLib;
+
+namespace dExcelTests.Dates;
 
 [TestFixture]
 public class DateExtensionsTests

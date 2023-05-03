@@ -1,8 +1,8 @@
-﻿namespace dExcelTests.InterestRates;
-
-using dExcel.InterestRates;
+﻿using dExcel.InterestRates;
 using dExcel.Utilities;
 using NUnit.Framework;
+
+namespace dExcelTests.InterestRates;
 
 [TestFixture]
 public class CurveUtilsTests
@@ -10,6 +10,7 @@ public class CurveUtilsTests
     private static readonly object[,] CurveParameters =
     {
         { "Parameter", "Value" },
+        { "Calendars", "ZAR"},
         { "DayCountConvention", "Actual365" },
         { "Interpolation", "Exponential" },
     };
@@ -69,11 +70,12 @@ public class CurveUtilsTests
         Assert.AreEqual(0.119509, (double)zeroRates[4, 0], 0.00001);
     }
     
-    [TestCase]
+    [Test]
     public void ZarGetDiscountFactorsTest()
     {
+        string handle1 = CurveUtils.Create("ZarSwapCurve", CurveParameters, DatesRange, DiscountFactorRange); 
         object[] interpolationDates = { new DateTime(2022, 01, 15).ToOADate() };
-        object[,] dfs = (object[,])CurveUtils.GetDiscountFactors(Handle, interpolationDates);
+        object[,] dfs = (object[,])CurveUtils.GetDiscountFactors(handle1, interpolationDates);
 
         double expectedDf =
             Math.Exp((Math.Log(0.99) - Math.Log(1.00))
@@ -84,7 +86,7 @@ public class CurveUtilsTests
         Assert.AreEqual(expectedDf, dfs[0, 0]);
     }
 
-    [TestCase]
+    [Test]
     public void TestIncompatiblySizedDateAndDiscountFactorsRange()
     {
         string actual = 

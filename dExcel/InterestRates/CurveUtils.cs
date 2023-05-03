@@ -117,34 +117,76 @@ public static class CurveUtils
             return CommonUtils.DExcelErrorMessage("'Interpolation' not set in parameters.");
         }
 
-        // if (!CommonUtils.TryParseInterpolation(
-        //         interpolationMethodToParse: interpolationParameter,
-        //         interpolation: out IInterpolationFactory? interpolation,
-        //         errorMessage: out string? interpolationErrorMessage))
-        // {
-        //     return interpolationErrorMessage;
-        // }
-
-        
-        string? calendarsParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Calendars");
+        string? calendarsParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Calendars", 0);
         IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
         (QL.Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsParameter);  
 
-        if (interpolationParameter.ToUpper() == "LINEAR")
+        if (string.Compare(interpolationParameter, "EXPONENTIAL", StringComparison.OrdinalIgnoreCase) == 0)
         {
-            QL.DiscountCurve discountCurve = new(new QL.DateVector(dates), new QL.DoubleVector(discountFactors), dayCountConvention, calendar);  
-            CurveDetails curveDetails = new(discountCurve, dayCountConvention, interpolationParameter, dates, discountFactors);
+            QL.DiscountCurve discountCurve = 
+                new(
+                    dates: new QL.DateVector(dates), 
+                    discounts: new QL.DoubleVector(discountFactors), 
+                    dayCounter: dayCountConvention, 
+                    calendar: calendar);
+
+            CurveDetails curveDetails = 
+                new(
+                    termStructure: discountCurve, 
+                    dayCountConvention: dayCountConvention, 
+                    interpolation: interpolationParameter, 
+                    discountFactorDates: dates.Select(x => x.ToDateTime()), 
+                    discountFactors: discountFactors);
+            
+            DataObjectController dataObjectController = DataObjectController.Instance;
+            return dataObjectController.Add(handle, curveDetails);
+        }
+
+        if (
+            string.Compare(interpolationParameter, "CUBIC", StringComparison.OrdinalIgnoreCase) == 0)
+        {
+            QL.NaturalCubicDiscountCurve discountCurve = 
+                new(
+                    dates: new QL.DateVector(dates), 
+                    discounts: new QL.DoubleVector(discountFactors), 
+                    dayCounter: dayCountConvention, 
+                    calendar: calendar);
+            
+            CurveDetails curveDetails = 
+                new(
+                    termStructure: discountCurve, 
+                    dayCountConvention: dayCountConvention, 
+                    interpolation: interpolationParameter, 
+                    discountFactorDates: dates.Select(x => x.ToDateTime()), 
+                    discountFactors: discountFactors);
+            
+            DataObjectController dataObjectController = DataObjectController.Instance;
+            return dataObjectController.Add(handle, curveDetails);
+        }
+
+        
+        if (interpolationParameter.ToLower() == "LOGCUBIC")
+        {
+            QL.MonotonicLogCubicDiscountCurve discountCurve = 
+                new(
+                    dates: new QL.DateVector(dates), 
+                    discounts: new QL.DoubleVector(discountFactors), 
+                    dayCounter: dayCountConvention, 
+                    calendar: calendar);
+            
+            CurveDetails curveDetails = 
+                new(
+                    termStructure: discountCurve, 
+                    dayCountConvention: dayCountConvention, 
+                    interpolation: interpolationParameter, 
+                    discountFactorDates: dates.Select(x => x.ToDateTime()), 
+                    discountFactors: discountFactors);
+            
             DataObjectController dataObjectController = DataObjectController.Instance;
             return dataObjectController.Add(handle, curveDetails);
         }
         
         return CommonUtils.DExcelErrorMessage($"Unsupported interpolation method: {interpolationParameter}");
-        
-        // Type interpolationType = typeof(InterpolatedDiscountCurve<>).MakeGenericType(interpolation.GetType());
-        // object? termStructure = Activator.CreateInstance(interpolationType, dates, discountFactors, dayCountConvention, interpolation);
-        // CurveDetails curveDetails = new(termStructure, dayCountConvention, interpolationParameter, dates, discountFactors);
-        // DataObjectController dataObjectController = DataObjectController.Instance;
-        // return dataObjectController.Add(handle, curveDetails);
     }
 
     /// <summary>

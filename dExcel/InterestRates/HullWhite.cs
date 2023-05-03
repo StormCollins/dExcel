@@ -1,9 +1,7 @@
-﻿using dExcel.InterestRates;
+﻿using ExcelDna.Integration;
+using QL = QuantLib;
 
 namespace dExcel;
-
-using ExcelDna.Integration;
-using QLNet;
 
 public static class HullWhite
 {
@@ -115,7 +113,7 @@ public static class HullWhite
     /// <param name="model">The short rate model to calibrate.</param>
     /// <param name="helpers">The calibration instruments.</param>
     /// <exception cref="ArgumentNullException">Thrown if the model is null.</exception>
-    private static void CalibrateModel(ShortRateModel model, List<CalibrationHelper> helpers)
+    private static void CalibrateModel(QL.ShortRateModel model, QL.CalibrationHelperVector helpers)
     {
         if (model == null)
         {
@@ -123,11 +121,9 @@ public static class HullWhite
         }
 
         model.calibrate(
-            instruments: helpers,
-            method: new LevenbergMarquardt(),
-            endCriteria: new EndCriteria(400, 100, 1.0e-8, 1.0e-8, 1.0e-8),
-            additionalConstraint: new Constraint(),
-            weights: new List<double>());
+            helpers,
+            new QL.LevenbergMarquardt(),
+            new QL.EndCriteria(400, 100, 1.0e-8, 1.0e-8, 1.0e-8));
     }
 
     /// <summary>
@@ -142,7 +138,7 @@ public static class HullWhite
     public static object[,] GetHullWhiteParameters(string handle)
     {
         DataObjectController dataObjectController = DataObjectController.Instance;
-        var parameters = (Dictionary<string, double>)dataObjectController.GetDataObject(handle);
+        Dictionary<string, double> parameters = (Dictionary<string, double>)dataObjectController.GetDataObject(handle);
         object[,] output = new object[3, 2];
         output[0, 0] = "Parameter";
         output[0, 1] = "Value";

@@ -1,5 +1,4 @@
 ﻿using ExcelDna.Integration;
-using LogLinear = QLNet.LogLinear;
 using QL = QuantLib;
 using System.Diagnostics.CodeAnalysis;
 
@@ -125,6 +124,7 @@ public static class CommonUtils
         [NotNullWhen(true)]out QL.DayCounter? dayCountConvention,
         [NotNullWhen(false)]out string? errorMessage)
     {
+        // Note: The the 30360 convention has not been tested. 
         dayCountConvention =
             dayCountConventionToParse.ToUpper() switch
             {
@@ -132,7 +132,7 @@ public static class CommonUtils
                 "ACT365" or "ACTUAL365" => new QL.Actual365Fixed(),
                 "ACTACT" or "ACTUALACTUAL" => new QL.ActualActual(QL.ActualActual.Convention.ISDA),
                 "BUSINESS252" => new QL.Business252(),
-                "30360" or "THIRTY360" => new QL.Thirty360(QL.Thirty360.Convention.ISDA, null),
+                "30360" or "THIRTY360" => new QL.Thirty360(QL.Thirty360.Convention.ISDA),
                 _ => null,
             };
 

@@ -57,6 +57,11 @@ public static class QuantLibDateExtensions
         };
     }
 
+    /// <summary>
+    /// Converts a QuantLib month to an integer e.g., Jan => 1, Feb => 2 etc.
+    /// </summary>
+    /// <param name="month">The QuantLib month to convert.</param>
+    /// <returns>An integer between 1 and 12 representing a month.</returns>
     public static int ToInt(this QL.Month month)
     {
         return month switch
@@ -73,10 +78,14 @@ public static class QuantLibDateExtensions
             QL.Month.October => 10,
             QL.Month.November => 11,
             QL.Month.December => 12,
-            _ => throw new ArgumentOutOfRangeException(nameof(month), @"Month parameter must be between 1 and 12.")
         };
     }
     
+    /// <summary>
+    /// Converts a QuantLib date to a standard C# DateTime.
+    /// </summary>
+    /// <param name="date">The QuantLib date to convert.</param>
+    /// <returns>A standard C# DateTime.</returns>
     public static DateTime ToDateTime(this QL.Date date)
     {
         return new DateTime(date.year(), date.month().ToInt(), date.dayOfMonth());
