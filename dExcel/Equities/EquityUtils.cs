@@ -1,4 +1,5 @@
-﻿using ExcelDna.Integration;
+﻿using System.Security.Cryptography;
+using ExcelDna.Integration;
 using dExcel.Dates;
 using dExcel.Utilities;
 using mnd = MathNet.Numerics.Distributions;
@@ -112,31 +113,45 @@ public static class EquityUtils
 
     [ExcelFunction(
         Name = "d.Equity_CreateEuropeanOption",
-        Description = "Create an European equity option.",
+        Description = "Creates an European equity option.",
         Category = "∂Excel: Equities")]
     public static string CreateEuropeanOption(
+        [ExcelArgument(
+            Name = "Handle",
+            Description =
+                "The 'handle' or name used to refer to the object in memory.\n" +
+                "Each curve in a workbook must have a a unique handle.")]
         string handle,
+        [ExcelArgument(Name = "S₀", Description = "Initial stock price.")]
         double spot,
+        [ExcelArgument(Name = "K", Description = "Strike.")]
         double strike, 
+        [ExcelArgument(Name = "r", Description = "Risk free rate (NACC). Only used for discounting.")]
         double riskFreeRate,
+        [ExcelArgument(Name = "q", Description = "Dividend Yield (NACC).")]
+        double dividendYield,
+        [ExcelArgument(Name = "Vol", Description = "Volatility.")]
         double volatility,
+        [ExcelArgument(Name = "Trade Date", Description = "The trade date.")]
         DateTime tradeDate,
+        [ExcelArgument(Name = "Maturity Date", Description = "The maturity/exercise date of the option.")]
         DateTime maturityDate,
+        [ExcelArgument(Name = "Calendar", Description = "The calendar for the option e.g., 'South Africa' or 'ZAR'.")]
+        string calendar,
+        [ExcelArgument(Name = "Day Count Convention", Description = "Day count convention e.g., 'Act360' or 'Act365'.")]
         string dayCountConvention,
-        string putOrCall)
+        [ExcelArgument(Name = "Option Type", Description = "'Call'/'C' or 'Put'/'P'.")]
+        string optionType)
     {
-        QL.Option.Type optionType;
-        
-        if (string.Compare(putOrCall, "Put", StringComparison.OrdinalIgnoreCase) == 0)
+        if (!CommonUtils.TryParseOptionTypeToQuantLibType(
+                optionType: optionType, 
+                quantLibOptionType: out QL.Option.Type? quantLibOptionType,
+                out string? optionTypeErrorMessage))
         {
-            optionType = QL.Option.Type.Put; 
-        }
-        else
-        {
-            optionType = QL.Option.Type.Call;
+            return optionTypeErrorMessage;
         }
         
-        QL.PlainVanillaPayoff payoff = new(optionType, strike);
+        QL.PlainVanillaPayoff payoff = new((QL.Option.Type)quantLibOptionType, strike);
         QL.EuropeanExercise exercise = new(maturityDate.ToQuantLibDate()); 
         QL.VanillaOption vanillaOption = new(payoff, exercise);
         QL.QuoteHandle spotHandle = new(new QL.SimpleQuote(spot));
@@ -149,11 +164,18 @@ public static class EquityUtils
                 dayCounter);
         
         QL.FlatForward dividendCurve =
-            new(tradeDate.ToQuantLibDate(),
-                new QL.QuoteHandle(new QL.SimpleQuote(0)),
-                dayCounter);
-        
-        QL.BlackConstantVol constantVol = new(tradeDate.ToQuantLibDate(), new QL.SouthAfrica(), volatility, dayCounter);
+            new(
+                referenceDate: tradeDate.ToQuantLibDate(),
+                forward: new QL.QuoteHandle(new QL.SimpleQuote(dividendYield)),
+                dayCounter: dayCounter);
+
+        (QL.Calendar? qlCalendar, string? qlCalendarErrorMessage) = DateParserUtils.ParseCalendars(calendar);
+        if (qlCalendar == null)
+        {
+            return qlCalendarErrorMessage;
+        }
+
+        QL.BlackConstantVol constantVol = new(tradeDate.ToQuantLibDate(), qlCalendar, volatility, dayCounter);
         
         QL.BlackScholesMertonProcess blackScholesMertonProcess = 
             new(spotHandle, 
@@ -167,19 +189,54 @@ public static class EquityUtils
     }
 
     [ExcelFunction(
-        Name = "d.Equity_GetDetails",
+        Name = "d.Equity_GetPrice",
         Description = "Get price of equity option.",
-        Category = "∂Excel:Equities")]
-    public static object GetOptionDetails(string handle)
+        Category = "∂Excel: Equities")]
+    public static object GetPrice(string handle, bool verbose = false)
     {
-        var dataObjectController = DataObjectController.Instance; 
-        QL.VanillaOption option = (QL.VanillaOption)dataObjectController.GetDataObject(handle);
-        object[,] output = new object[,]
+        var dataObjectController = DataObjectController.Instance;
+        object dataObject = dataObjectController.GetDataObject(handle);
+        object output;
+
+        if (dataObject.GetType() == typeof(QL.VanillaOption))
         {
-            {"Price", option.NPV()},
-            {"Delta", option.delta()},
-            {"Vega", option.vega()},
-        };
+            QL.VanillaOption vanillaOption = (QL.VanillaOption)dataObject;
+            if (verbose)
+            {
+                output = new object[,]
+                {
+                    { "Price", vanillaOption.NPV() },
+                    { "Delta", vanillaOption.delta() },
+                    { "Vega", vanillaOption.vega() },
+                };
+            }
+            else
+            {
+                output = vanillaOption.NPV();
+            }
+        }
+        else if (dataObject.GetType() == typeof(QL.BasketOption))
+        {
+            QL.BasketOption basketOption = (QL.BasketOption)dataObject;
+            if (verbose)
+            {
+                output = new object[,]
+                {
+                    { "Price", basketOption.NPV() },
+                    { "Delta", basketOption.delta() },
+                    { "Vega", basketOption.vega() },
+                };
+            }
+            else
+            {
+                output = basketOption.NPV();
+            }
+
+        }
+        else
+        {
+            return CommonUtils.DExcelErrorMessage("Unknown option type.");
+        }
         
         return output;
     }

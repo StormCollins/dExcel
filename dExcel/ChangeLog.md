@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to ∂Excel will be documented in this file.
 
+## [0.2.0] - 2023-05-03
+### Features
+- Added multi-curve bootstrapping support in ``d.Curve_Boostrap``.
+- Converted from QLNet to QuantLib-SWIG.
+
 ## [0.1.4] - 2023-02-21
 ### Features
 - Added ``d.Math_InterpolateChosenColumn``.

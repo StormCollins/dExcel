@@ -28,6 +28,26 @@ public class CommonUtilsTests
     }
 
     [Test]
+    [TestCase("Call", true, QL.Option.Type.Call, null)]
+    [TestCase("CALL", true, QL.Option.Type.Call, null)]
+    [TestCase("Put", true, QL.Option.Type.Put, null)]
+    [TestCase("PUT", true, QL.Option.Type.Put, null)]
+    [TestCase("Invalid", false, null, "#∂Excel Error: Invalid option type: 'Invalid'")]
+    public void TryParseOptionTypeToQuantLibType_Test(
+        string optionType,
+        bool expectedResult,
+        QL.Option.Type? expected,
+        string? expectedErrorMessage)
+    {
+        bool actualResult =
+            CommonUtils.TryParseOptionTypeToQuantLibType(optionType, out QL.Option.Type? quantLibOptionType, out string? actualErrorMessage);
+
+        Assert.AreEqual(expectedResult, actualResult);
+        Assert.AreEqual(expected, quantLibOptionType);
+        Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
+    }
+
+    [Test]
     [TestCase("Buy", true, 1, null)]
     [TestCase("BUY", true, 1, null)]
     [TestCase("Long", true, 1, null)]

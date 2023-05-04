@@ -1,8 +1,8 @@
-﻿namespace dExcel.Equities;
-
+﻿using dExcel.Utilities;
 using ExcelDna.Integration;
-using Utilities;
 using mnd = MathNet.Numerics.Distributions;
+
+namespace dExcel.Equities;
 
 /// <summary>
 /// A collection of pricers for equity derivatives.

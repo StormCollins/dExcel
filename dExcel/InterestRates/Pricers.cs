@@ -1,9 +1,8 @@
-﻿namespace dExcel.InterestRates;
-
-using System;
-using mnd = MathNet.Numerics.Distributions;
+﻿using mnd = MathNet.Numerics.Distributions;
 using ExcelDna.Integration;
-using Utilities;
+using dExcel.Utilities;
+
+namespace dExcel.InterestRates;
 
 /// <summary>
 /// A collection of pricers for interest rate derivatives.
@@ -175,7 +174,6 @@ public static class Pricers
 
         return results;
     }
-    
 
     [ExcelFunction(
         Name = "d.IR_BachelierForwardOptionPricer",
@@ -225,7 +223,5 @@ public static class Pricers
 
         return longOrShortDirection * (forwardOrSpot.ToUpper() == "F" ? value : Math.Exp(-rate * optionMaturity) * value);
     }
-    
-    
-    
 }
+

@@ -138,7 +138,7 @@ public static class DateUtils
             return result.errorMessage;
         }
 
-        return result.calendar?.adjust(date.ToQuantLibDate());
+        return ((QL.Date)result.calendar?.adjust(date.ToQuantLibDate())).ToDateTime().ToOADate();
     }
 
     /// <summary>
@@ -152,7 +152,8 @@ public static class DateUtils
         Name = "d.Dates_ModFolDay",
         Description = "Calculates the next business day using the 'modified following' convention.\n" +
                       "Deprecates AQS function: 'ModFolDay'",
-        Category = "∂Excel: Dates")]
+        Category = "∂Excel: Dates",
+        IsVolatile = true)]
     public static object ModFolDay(
         [ExcelArgument(Name = "Date", Description = "The date to adjust.")]
         DateTime date,
@@ -182,7 +183,7 @@ public static class DateUtils
             return result.errorMessage;
         }
 
-        return result.calendar.adjust(date.ToQuantLibDate(), QL.BusinessDayConvention.ModifiedFollowing);
+        return ((QL.Date)result.calendar.adjust(date.ToQuantLibDate(), QL.BusinessDayConvention.ModifiedFollowing)).ToDateTime().ToOADate();
     }
 
     /// <summary>
@@ -226,7 +227,7 @@ public static class DateUtils
             return result.errorMessage;
         }
 
-        return result.calendar.adjust(date.ToQuantLibDate(), QL.BusinessDayConvention.Preceding);
+        return ((QL.Date)result.calendar.adjust(date.ToQuantLibDate(), QL.BusinessDayConvention.Preceding)).ToDateTime().ToOADate();
     }
 
     /// <summary>
@@ -528,7 +529,7 @@ public static class DateUtils
         object[,] output = new object[schedule.dates().Count, 1];
         for (int i = 0; i < schedule.dates().Count; i++)
         {
-            output[i, 0] = schedule.dates()[i];
+            output[i, 0] = schedule.dates()[i].ToDateTime().ToOADate();
         }
 
         return output;

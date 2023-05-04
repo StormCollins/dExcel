@@ -76,6 +76,44 @@ public static class CommonUtils
     }
 
     /// <summary>
+    /// Tries to parse a string to a QuantLib option type i.e, "Call" or "Put".
+    /// </summary>
+    /// <param name="optionType">Option type: 'Call'/'C' or 'Put'/'P'.</param>
+    /// <param name="quantLibOptionType">The equivalent QuantLib option type.</param>
+    /// <param name="errorMessage">The error message if it cannot parse the option type.</param>
+    /// <returns>Returns TRUE if the option type is valid i.e., 'Call'/'C' or 'Put'/'P'. Otherwise FALSE.</returns>
+    public static bool TryParseOptionTypeToQuantLibType(
+        string optionType, 
+        [NotNullWhen(true)]out QL.Option.Type? quantLibOptionType, 
+        [NotNullWhen(false)]out string? errorMessage)
+    {
+        switch (optionType.ToUpper())
+        {
+            case "C":
+            case "CALL":
+                quantLibOptionType = QL.Option.Type.Call;
+                errorMessage = null;
+                return true;
+            case "P":
+            case "PUT":
+                quantLibOptionType = QL.Option.Type.Put;
+                errorMessage = null;
+                return true;
+            default:
+                quantLibOptionType = null;
+                errorMessage = DExcelErrorMessage($"Invalid option type: '{optionType}'");
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// Returns the sign for a given direction (Long/Short i.e., Buy/Sell).
+    /// </summary>
+    /// <param name="direction">Direction: 'Long'/'L'/'Buy'/'B' or 'Short'/'S'/'Sell'.</param>
+    /// <param name="sign">The sign, +1 for 'Long'/'L'/'Buy'/'B' and -1 for 'Short'/'S'/'Sell', if it can parse the
+    /// direction.</param>
+    /// <param name="errorMessage">The error message if it cannot parse the direction.</param>
+    /// <summary>
     /// Returns the sign for a given direction (Long/Short i.e., Buy/Sell).
     /// </summary>
     /// <param name="direction">Direction: 'Long'/'L'/'Buy'/'B' or 'Short'/'S'/'Sell'.</param>

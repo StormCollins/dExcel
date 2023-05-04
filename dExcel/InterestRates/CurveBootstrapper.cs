@@ -83,7 +83,6 @@ public static class CurveBootstrapper
         
         string? discountCurveHandle =
             ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "DiscountCurveHandle", columnHeaderIndex);
-
         
         QL.IborIndex? rateIndex = null;
         if (rateIndexName is not null)

@@ -1,8 +1,5 @@
-﻿using System.Data.SQLite;
-using System.DirectoryServices;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
-using System.Security.Principal;
 using ExcelDna.Integration;
 using ExcelDna.Registration;
 using dExcel.Utilities;
