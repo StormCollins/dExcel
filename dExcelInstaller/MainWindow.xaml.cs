@@ -299,13 +299,20 @@ public partial class MainWindow : Window
     /// <returns>All versions of the ∂Excel add-in available remotely.</returns>
     private IEnumerable<string?>? GetAllAvailableRemoteDExcelReleases()
     {
-        if (string.Compare(DExcelRemoteSource.Text, "Shared Drive", StringComparison.OrdinalIgnoreCase) == 0)
+        try
         {
-            return Directory
-                .GetFiles(SharedDriveReleasesPath)
-                .Where(x => Regex.IsMatch(x, @"\d+(\.\d+)*(?=\.zip)"))
-                .Select(Path.GetFileNameWithoutExtension)
-                .Reverse();
+            if (string.Compare(DExcelRemoteSource.Text, "Shared Drive", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return Directory
+                    .GetFiles(SharedDriveReleasesPath)
+                    .Where(x => Regex.IsMatch(x, @"\d+(\.\d+)*(?=\.zip)"))
+                    .Select(Path.GetFileNameWithoutExtension)
+                    .Reverse();
+            }
+        }
+        catch (Exception exception)
+        {
+            // TODO: Handle this more gracefully.
         }
 
         return null;
