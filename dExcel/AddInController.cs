@@ -6,6 +6,8 @@ using dExcel.Utilities;
 
 namespace dExcel;
 
+using Dates;
+
 public class AddInController : IExcelAddIn
 {
     public void AutoClose()
@@ -24,7 +26,9 @@ public class AddInController : IExcelAddIn
         // Register the Standard Parameter Conversions (with the optional switch on how to treat references to empty cells)
         ParameterConversionConfiguration? paramConversionConfig =
             new ParameterConversionConfiguration()
-                .AddParameterConversion(ParameterConversions.GetOptionalConversion(treatEmptyAsMissing: true));
+                .AddParameterConversion(ParameterConversions.GetOptionalConversion(treatEmptyAsMissing: true))
+                .AddParameterConversion((string s) => DateUtils.ParseDayCountConvention(s));
+                // .AddParameterConversion((string s) => CommonUtils.ParseBusinessDayConvention(s));
 
         ExcelRegistration
             .GetExcelFunctions()

@@ -103,7 +103,7 @@ public static class CurveUtils
             return CommonUtils.DExcelErrorMessage("Parameter not set: 'DayCountConvention'");
         }
 
-        if (!CommonUtils.TryParseDayCountConvention(
+        if (!ParserUtils.TryParseQuantLibDayCountConvention(
                 dayCountConventionToParse: dayCountConventionParameter, 
                 dayCountConvention: out QL.DayCounter? dayCountConvention,
                 errorMessage: out string? dayCountConventionErrorMessage))
@@ -248,7 +248,7 @@ public static class CurveUtils
             return CommonUtils.DExcelErrorMessage($"{handle} returned null object.");
         }
 
-        if (!CommonUtils.TryParseCompoundingConvention(
+        if (!ParserUtils.TryParseQuantLibCompoundingConvention(
                 compoundingConventionParameter,
                 out (QL.Compounding compounding, QL.Frequency frequency)? compoundingConvention,
                 out string? compoundingConventionErrorMessage))
@@ -311,7 +311,7 @@ public static class CurveUtils
         List<QL.Date> dates = new();
         QL.DayCounter dayCountConvention = GetCurveDayCountConvention(handle);
 
-        if (!CommonUtils.TryParseCompoundingConvention(
+        if (!ParserUtils.TryParseQuantLibCompoundingConvention(
                 compoundingConventionParameter,
                 out (QL.Compounding compounding, QL.Frequency frequency)? compoundingConvention,
                 out string? compoundingConventionErrorMessage))

@@ -58,17 +58,19 @@ public static class Pricers
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif 
-        if (!CommonUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
+        if (!ParserUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
         {
             return optionTypeErrorMessage;
         }  
        
-        if (!CommonUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
+        if (!ParserUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
         {
             return directionErrorMessage;
         }
         
-        double d1 = (Math.Log(forwardRate / strike) + 0.5 * Math.Pow(vol, 2) * optionMaturity) / (vol * Math.Sqrt(optionMaturity));
+        double d1 = 
+            (Math.Log(forwardRate / strike) + 0.5 * Math.Pow(vol, 2) * optionMaturity) / (vol * Math.Sqrt(optionMaturity));
+        
         double d2 = d1 - vol * Math.Sqrt(optionMaturity);
         double discountFactor = Math.Exp(-1 * riskFreeRate * optionMaturity);
         double price = 
@@ -142,12 +144,12 @@ public static class Pricers
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif 
-        if (!CommonUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
+        if (!ParserUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
         {
             return optionTypeErrorMessage;
         }  
        
-        if (!CommonUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
+        if (!ParserUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
         {
             return directionErrorMessage;
         }
@@ -214,7 +216,7 @@ public static class Pricers
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif 
-        if (!CommonUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
+        if (!ParserUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
         {
             return optionTypeErrorMessage;
         }  

@@ -55,12 +55,12 @@ public static class Pricers
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif 
-        if (!CommonUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
+        if (!ParserUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
         {
             return optionTypeErrorMessage;
         }  
        
-        if (!CommonUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
+        if (!ParserUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
         {
             return directionErrorMessage;
         }

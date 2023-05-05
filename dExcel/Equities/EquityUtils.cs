@@ -150,7 +150,7 @@ public static class EquityUtils
         [ExcelArgument(Name = "Option Type", Description = "'Call'/'C' or 'Put'/'P'.")]
         string optionType)
     {
-        if (!TryParseOptionTypeToQuantLibType(
+        if (!ParserUtils.TryParseQuantLibOptionType(
                 optionType: optionType, 
                 quantLibOptionType: out QL.Option.Type? quantLibOptionType,
                 out string? optionTypeErrorMessage))
@@ -163,7 +163,7 @@ public static class EquityUtils
         QL.VanillaOption vanillaOption = new(payoff, exercise);
         QL.QuoteHandle spotHandle = new(new QL.SimpleQuote(spot));
         
-        TryParseDayCountConvention(dayCountConvention, out QL.DayCounter? dayCounter, out string errorMessage);
+        ParserUtils.TryParseQuantLibDayCountConvention(dayCountConvention, out QL.DayCounter? dayCounter, out string errorMessage);
 
         QL.FlatForward interestRateCurve =
             new(tradeDate.ToQuantLibDate(),
