@@ -7,8 +7,6 @@ using QL = QuantLib;
 
 namespace dExcel.Equities;
 
-using static CommonUtils;
-
 /// <summary>
 /// A collection of utility functions for equities.
 /// </summary>
@@ -22,50 +20,39 @@ public static class EquityUtils
     /// <param name="businessDaysPerYear">The number of business days in a year.</param>
     /// <param name="dates">The dates for the corresponding stock prices.</param>
     /// <param name="prices">The stock prices for the corresponding dates.</param>
-    /// <param name="weightingStyle">Set to 'Equal' or 'Exponential' for equally or exponentially weighted volatilities respectively.</param>
+    /// <param name="weightingStyle">Set to 'Equal' or 'Exponential' for equally or exponentially weighted volatilities
+    /// respectively.</param>
     /// <param name="lambda"></param>
-    /// <returns></returns>
+    /// <returns>Historic volatility.</returns>
     [ExcelFunction(
         Name = "d.Equity_Volatility",
-        Description = "Calculates the historic volatility of an equity.\n" +
-                      "Deprecates AQS function: 'DT_Volatility'",
+        Description = "Calculates the historic volatility of an equity.\nDeprecates AQS function: 'DT_Volatility'",
         Category = "∂Excel: Equities")]
     public static object Volatility(
-        [ExcelArgument(
-            Name = "Valuation Date",
-            Description = "The valuation date.")]
+        [ExcelArgument(Name = "Valuation Date", Description = "The valuation date.")]
         DateTime valuationDate,
-        [ExcelArgument(
-            Name = "Maturity Date",
-            Description = "The maturity date.")]
+        [ExcelArgument(Name = "Maturity Date", Description = "The maturity date.")]
         DateTime maturityDate,
-        [ExcelArgument(
-            Name = "Business Days in Year",
-            Description = "The number of business days in a year.")]
+        [ExcelArgument(Name = "Business Days in Year", Description = "The number of business days in a year.")]
         int businessDaysPerYear,
         [ExcelArgument(
             Name = "Weighting Style",
-            Description = "Set to 'Equal' or 'Exponential' for equally or exponentially weighted volatilities respectively.")]
+            Description = 
+                "Set to 'Equal' or 'Exponential' for equally or exponentially weighted volatilities respectively.")]
         string weightingStyle,
-        [ExcelArgument(
-            Name = "Lambda",
-            Description = "EWMA Lambda parameter.")]
+        [ExcelArgument(Name = "Lambda", Description = "EWMA Lambda parameter.")]
         double lambda,
-        [ExcelArgument(
-            Name = "Dates",
-            Description = "The dates for the corresponding stock prices.")]
+        [ExcelArgument(Name = "Dates", Description = "The dates for the corresponding stock prices.")]
         object[,] dates,
-        [ExcelArgument(
-            Name = "Prices",
-            Description = "Stock prices for the corresponding dates.")]
+        [ExcelArgument(Name = "Prices", Description = "Stock prices for the corresponding dates.")]
         object[,] prices)
     {
 #if DEBUG
-        InFunctionWizard();
+        CommonUtils.InFunctionWizard();
 #endif
         if (dates.GetLength(0) != prices.GetLength(0))
         {
-            return DExcelErrorMessage("Date array and stock price array have different sizes.");
+            return CommonUtils.DExcelErrorMessage("Date array and stock price array have different sizes.");
         }
 
         List<(DateTime date, double price)> datesAndPrices = new();
@@ -106,28 +93,40 @@ public static class EquityUtils
                 {
                     ewmaSeries[i] = 
                         Math.Sqrt(
-                            Math.Pow(ewmaSeries[i + 1], 2) * lambda + (1 - lambda) * squareReturns[i] * businessDaysPerYear);
+                            Math.Pow(ewmaSeries[i + 1], 2) * 
+                            lambda + (1 - lambda) * squareReturns[i] * businessDaysPerYear);
                 }
                 ewmaVolatility = ewmaSeries[0];
                 break;
             }
             default:
-                return DExcelErrorMessage($"Invalid weighting style: {weightingStyle}");
+                return CommonUtils.DExcelErrorMessage($"Invalid weighting style: {weightingStyle}");
         }
 
         return Math.Max(equallyWeightedVolatility, ewmaVolatility);
     }
 
+    /// <summary>
+    /// Creates a handle to an European equity option.
+    /// </summary>
+    /// <param name="handle"></param>
+    /// <param name="spot"></param>
+    /// <param name="strike"></param>
+    /// <param name="riskFreeRate"></param>
+    /// <param name="dividendYield"></param>
+    /// <param name="volatility"></param>
+    /// <param name="tradeDate"></param>
+    /// <param name="maturityDate"></param>
+    /// <param name="calendar"></param>
+    /// <param name="dayCountConvention"></param>
+    /// <param name="optionType"></param>
+    /// <returns></returns>
     [ExcelFunction(
         Name = "d.Equity_CreateEuropeanOption",
         Description = "Creates an European equity option.",
         Category = "∂Excel: Equities")]
     public static string CreateEuropeanOption(
-        [ExcelArgument(
-            Name = "Handle",
-            Description =
-                "The 'handle' or name used to refer to the object in memory.\n" +
-                "Each curve in a workbook must have a a unique handle.")]
+        [ExcelArgument(Name = "Handle", Description = DescriptionUtils.Handle)]
         string handle,
         [ExcelArgument(Name = "S₀", Description = "Initial stock price.")]
         double spot,
@@ -238,11 +237,10 @@ public static class EquityUtils
             {
                 output = basketOption.NPV();
             }
-
         }
         else
         {
-            return DExcelErrorMessage("Unknown option type.");
+            return CommonUtils.DExcelErrorMessage("Unknown option type.");
         }
         
         return output;
