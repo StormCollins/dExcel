@@ -114,11 +114,19 @@ public partial class Dashboard : Window
     /// <returns>All versions of the ∂Excel add-in available remotely.</returns>
     private IEnumerable<string?>? GetAllAvailableRemoteDExcelReleases()
     {
-        return Directory
-            .GetFiles(SharedDriveReleasesPath)
-            .Where(x => Regex.IsMatch(x, @"\d+(.\d+)(?=\.zip)"))
-            .Select(Path.GetFileNameWithoutExtension)
-            .Reverse();
+        try
+        {
+            return Directory
+                .GetFiles(SharedDriveReleasesPath)
+                .Where(x => Regex.IsMatch(x, @"\d+(.\d+)(?=\.zip)"))
+                .Select(Path.GetFileNameWithoutExtension)
+                .Reverse();
+        }
+        catch (Exception exception)
+        {
+        }
+
+        return null;
     }
 
     private void Dashboard_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
