@@ -1,6 +1,6 @@
-﻿namespace dExcel.Dates;
+﻿using Omicron;
 
-using Omicron;
+namespace dExcel.Dates;
 
 /// <summary>
 /// A class implementing a comparer for Omicron tenors.
@@ -12,6 +12,7 @@ public class TenorComparer : Comparer<Tenor>
     /// </summary>
     /// <param name="x">First tenor.</param>
     /// <param name="y">Second tenor.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if an unknown tenor is used.</exception>
     /// <returns>0 if x == y, -1 if x &lt; y, and 1 if x &gt; y.</returns>
     public override int Compare(Tenor? x, Tenor? y)
     {

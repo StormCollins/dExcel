@@ -1,8 +1,8 @@
-﻿namespace dExcel.ExcelUtils;
-
-using Excel = Microsoft.Office.Interop.Excel;
+﻿using Excel = Microsoft.Office.Interop.Excel;
 using ExcelDna.Integration;
 using static Microsoft.Office.Interop.Excel.XlRgbColor;
+
+namespace dExcel.ExcelUtils;
 
 /// <summary>
 /// Used to specify the orientation of a table.

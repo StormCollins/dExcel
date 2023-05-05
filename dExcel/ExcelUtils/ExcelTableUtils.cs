@@ -1,12 +1,10 @@
-﻿namespace dExcel.ExcelUtils;
-
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using dExcel.Dates;
 using dExcel.Utilities;
 using ExcelDna.Integration;
 using QL = QuantLib;
+
+namespace dExcel.ExcelUtils;
 
 /// <summary>
 /// A class for manipulating dExcel type tables in Excel.
@@ -108,10 +106,10 @@ public static class ExcelTableUtils
     /// Gets a column from an Excel table given the zero-based column index.
     /// </summary>
     /// <param name="table">The input range.</param>
-    /// <param name="columnHeader">The zero-based column index.</param>
+    /// <param name="columnIndex">The zero-based column index.</param>
     /// <typeparam name="T">The type to cast the column to e.g. "string" or "double".</typeparam>
     /// <returns>The table column.</returns>
-    public static List<T>? GetColumn<T>(object[,] table, int columnIndex = 0)
+    public static List<T> GetColumn<T>(object[,] table, int columnIndex = 0)
     {
         if (typeof(T) == typeof(DateTime))
         {
@@ -192,7 +190,7 @@ public static class ExcelTableUtils
         if (typeof(T) == typeof(QL.BusinessDayConvention))
         {
             (QL.BusinessDayConvention? businessDayConvention, string errorMessage) =
-                DateParserUtils.ParseBusinessDayConvention(table[rowIndex, columnIndex].ToString() ?? string.Empty);
+                DateUtils.ParseBusinessDayConvention(table[rowIndex, columnIndex].ToString() ?? string.Empty);
 
             if (businessDayConvention != null)
             {

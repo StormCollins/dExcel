@@ -2,16 +2,24 @@
 using dExcel.InterestRates;
 using ExcelDna.Integration;
 using mnd = MathNet.Numerics.Distributions;
+using QL = QuantLib;
 
 namespace dExcel.FX;
 
+/// <summary>
+/// A collection of utility functions for working with FX.
+/// </summary>
 public static class FxUtils
 {
-    public static double GetStrikeVolFromDeltaSurface(object[,] deltaSurface, double spot, double optionStrike, double domesticDf, double foreignDf)
-    {
-        return 0;
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="volsRange"></param>
+    /// <param name="deltasRange"></param>
+    /// <param name="optionMaturitiesRange"></param>
+    /// <param name="domesticCurveHandle"></param>
+    /// <param name="foreignCurveHandle"></param>
+    /// <returns></returns>
     [ExcelFunction(
         Name = "d.FX_ConvertDeltaToMoneynessVolSurface",
         Description = "Convert a delta vol surface to a moneyness vol surface.",
@@ -77,7 +85,6 @@ public static class FxUtils
         return output;
     }
 
-
     /// <summary>
     /// Calculates the delta of an FX option (call or put) using the formula:
     ///
@@ -110,13 +117,4 @@ public static class FxUtils
 
         return Math.Exp(-1 * foreignRate * optionMaturity) * (mnd.Normal.CDF(0, 1, d1) - 1);
     }
-
-    // [ExcelFunction(
-    //     Name = "d.FX_GetVolSurface",
-    //     Description = "Extracts the specified vol surface from the Omicron database.",
-    //     Category = "∂Excel: FX")]
-    // public static string GetVolSurface()
-    // {
-    //     OmicronUtils.GetFxVolQuotes();
-    // }
 }

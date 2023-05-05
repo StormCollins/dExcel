@@ -15,10 +15,10 @@ public static class CurrencyUtils
     /// <returns>QLNet currency.</returns>
     public static QL.Currency? ParseCurrency(string currencyToParse)
     {
-        Assembly? quantlib = 
+        Assembly? quantLib = 
             AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == "NQuantLib");
         
-        Type? type = quantlib?.GetType($"QuantLib.{currencyToParse.ToUpper()}Currency");
+        Type? type = quantLib?.GetType($"QuantLib.{currencyToParse.ToUpper()}Currency");
         return type is not null ? (QL.Currency?) Activator.CreateInstance(type) : null;
     }
 }

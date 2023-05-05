@@ -1,12 +1,10 @@
-﻿namespace dExcel.Mathematics;
-
-using System;
-using System.Linq;
-using System.Numerics;
+﻿using System.Numerics;
 using ExcelDna.Integration;
-using ExcelUtils;
-using Utilities;
+using dExcel.ExcelUtils;
+using dExcel.Utilities;
 using mni = MathNet.Numerics.Interpolation;
+
+namespace dExcel.Mathematics;
 
 /// <summary>
 /// A collection of mathematical utility functions.
@@ -27,7 +25,11 @@ public static class MathUtils
         Description = "Performs linear, exponential, or flat interpolation on a 2D surface for a given (x,y) coordinate.",
         Category = "∂Excel: Mathematics")]
     public static object Interpolate2D(
-        [ExcelArgument(Name = "XY", Description = "Matrix from which to interpolate, where X is the horizontal dimension and Y the vertical dimension. XY must include the numeric row and column headings.")]
+        [ExcelArgument(
+            Name = "XY", 
+            Description = 
+                "Matrix from which to interpolate, where X is the horizontal dimension and Y the vertical " +
+                "dimension. XY must include the numeric row and column headings.")]
         object[,] xy,
         [ExcelArgument(Name = "X", Description = "X-value (along horizontal-axis) for which to interpolate.")]
         double x,
@@ -142,12 +144,16 @@ public static class MathUtils
 #endif
         if (columnIndex < 0)
         {
-            return CommonUtils.DExcelErrorMessage($"Column index < 0. Must be between 0 and {yRangeColumns.GetLength(1) - 1}.");
+            return 
+                CommonUtils.DExcelErrorMessage(
+                    $"Column index < 0. Must be between 0 and {yRangeColumns.GetLength(1) - 1}.");
         }
 
         if (columnIndex >= yRangeColumns.GetLength(1))
         {   
-            return CommonUtils.DExcelErrorMessage($"Column index ≥ {yRangeColumns.GetLength(1)}. Must be between 0 and {yRangeColumns.GetLength(1) - 1}.");
+            return CommonUtils.DExcelErrorMessage(
+                $"Column index ≥ {yRangeColumns.GetLength(1)}. " +
+                $"Must be between 0 and {yRangeColumns.GetLength(1) - 1}.");
         }
 
         List<double> yValues = new();
@@ -159,7 +165,7 @@ public static class MathUtils
         return Interpolate(xRange, ExcelArrayUtils.ConvertListToExcelRange(yValues, 0), xi, method);
     }
     
-        /// <summary>
+    /// <summary>
     /// Performs linear, exponential, or flat interpolation on a range for a single given point.
     /// </summary>
     /// <param name="xRange">Independent variable.</param>
@@ -244,7 +250,10 @@ public static class MathUtils
             Complex x1Complex = xValues[upperXIndex];
             Complex y0Complex = yValues[lowerXIndex];
             Complex y1Complex = yValues[upperXIndex];
-            Complex yi = (Complex.Log(y1Complex) - Complex.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + Complex.Log(y0Complex);
+            Complex yi = 
+                (Complex.Log(y1Complex) - Complex.Log(y0Complex)) / (x1Complex - x0Complex) * (xiComplex - x0Complex) + 
+                Complex.Log(y0Complex);
+            
             Complex outputY = Complex.Exp(yi);
             return outputY.Real;
         }   

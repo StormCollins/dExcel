@@ -18,6 +18,33 @@ public static class QuantLibDateExtensions
     }
 
     /// <summary>
+    /// Converts an "OA" date i.e., an Excel integer based date to a QuantLib Date.
+    /// </summary>
+    /// <param name="oaDate">The OA date to convert.</param>
+    /// <returns>A QuantLib date.</returns>
+    public static QL.Date ToQuantLibDate(this double oaDate)
+    {
+        DateTime dateTime = DateTime.FromOADate(oaDate);
+        return new QL.Date(dateTime.Day, dateTime.Month.ToQuantLibMonth(), dateTime.Year);
+    }
+
+    /// <summary>
+    /// Converts an object to a QuantLib Date.
+    /// </summary>
+    /// <param name="date">The date object to convert.</param>
+    /// <returns>A QuantLib date.</returns>
+    /// <exception cref="ArgumentException">Thrown if it can't handle the type conversion.</exception>
+    public static QL.Date ToQuantLibDate(this object date)
+    {
+        return date switch
+        {
+            DateTime time => time.ToQuantLibDate(),
+            double oaDate => oaDate.ToQuantLibDate(),
+            _ => throw new ArgumentException($"Cannot convert {date.GetType().Name} to QuantLib Date.")
+        };
+    }
+    
+    /// <summary>
     /// Converts an integer value, between 1 and 12, to a QuantLib Month.
     /// </summary>
     /// <param name="i">The integer value to convert.</param>
@@ -89,5 +116,15 @@ public static class QuantLibDateExtensions
     public static DateTime ToDateTime(this QL.Date date)
     {
         return new DateTime(date.year(), date.month().ToInt(), date.dayOfMonth());
+    }
+
+    /// <summary>
+    /// Converts a QuantLib date to an 'OA' date i.e., the common date format for Excel. 
+    /// </summary>
+    /// <param name="date">The QuantLib date to convert.</param>
+    /// <returns>An OA Date which is valid in Excel.</returns>
+    public static double ToOaDate(this QL.Date date)
+    {
+        return date.ToDateTime().ToOADate();
     }
 }

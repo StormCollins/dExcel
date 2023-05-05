@@ -1,6 +1,6 @@
-﻿using mnd = MathNet.Numerics.Distributions;
-using ExcelDna.Integration;
+﻿using ExcelDna.Integration;
 using dExcel.Utilities;
+using mnd = MathNet.Numerics.Distributions;
 
 namespace dExcel.InterestRates;
 
@@ -175,10 +175,23 @@ public static class Pricers
         return results;
     }
 
+    /// <summary>
+    /// Used for pricing an interest rate future/forward with Bachelier's model i.e., using normal swaption vols.
+    /// </summary>
+    /// <param name="forwardRate">Forward rate.</param>
+    /// <param name="rate">Risk free rate (NACC).</param>
+    /// <param name="strike">Strike.</param>
+    /// <param name="vol">Volatility.</param>
+    /// <param name="optionMaturity">Option maturity.</param>
+    /// <param name="optionType">Option type i.e.,'Call'/'C' or 'Put'/'P'.</param>
+    /// <param name="forwardOrSpot">Option on 'forward' or 'spot'.</param>
+    /// <param name="longOrShort">The direction of the option i.e., 'Long' or 'Short'.</param>
+    /// <returns>The price of the option.</returns>
     [ExcelFunction(
         Name = "d.IR_BachelierForwardOptionPricer",
-        Description = "Bachelier option pricer on spot or futures/forwards." +
-                      "\nTo price swaptions you need to multiply by the relevant annuity factor.",
+        Description = 
+            "Bachelier option pricer on spot or futures/forwards." +
+            "\nTo price swaptions you need to multiply by the relevant annuity factor.",
         Category = "∂Excel: Interest Rates")]
     public static object Bachelier(
         [ExcelArgument(Name = "Forward Rate", Description = "Forward rate.")]
@@ -224,4 +237,3 @@ public static class Pricers
         return longOrShortDirection * (forwardOrSpot.ToUpper() == "F" ? value : Math.Exp(-rate * optionMaturity) * value);
     }
 }
-

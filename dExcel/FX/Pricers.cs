@@ -1,8 +1,8 @@
-﻿namespace dExcel.FX;
-
-using ExcelDna.Integration;
-using Utilities;
+﻿using ExcelDna.Integration;
+using dExcel.Utilities;
 using mnd = MathNet.Numerics.Distributions;
+
+namespace dExcel.FX;
 
 /// <summary>
 /// A collection of pricers for equity derivatives.
@@ -97,7 +97,7 @@ public static class Pricers
             {"Domestic Discount Factor", domesticDiscountFactor},
             {"Foreign Discount Factor", foreignDiscountFactor},
         };
-
+        
         return results;
     }
 }

@@ -1,19 +1,24 @@
-﻿using ExcelDna.Integration;
-using QL = QuantLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using QL = QuantLib;
 using dExcel.Dates;
-using dExcel.Utilities;
 
 namespace dExcel.InterestRates
 {
-    using Utilities;
-
+    /// <summary>
+    /// Common interest rate instruments.
+    /// </summary>
     public static class Instruments
     {
+        /// <summary>
+        /// Used to create a fixed-for-floating interest rate swap object in Excel.
+        /// </summary>
+        /// <param name="swapType">'Payer' or 'Receiver'.</param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="frequency"></param>
+        /// <param name="calendars"></param>
+        /// <param name="businessDayConvention"></param>
+        /// <param name="generationRule"></param>
+        /// <returns></returns>
         public static object CreateInterestRateSwap(
             string swapType,
             DateTime startDate,
@@ -26,8 +31,8 @@ namespace dExcel.InterestRates
             QL.Swap.Type qlSwapType = (swapType.ToUpper() == "Payer")? QL.Swap.Type.Payer : QL.Swap.Type.Receiver;
             DateUtils.GenerateSchedule(startDate, endDate, frequency, calendars, businessDayConvention, generationRule);
             (QL.BusinessDayConvention? qlBusinessDayConvention, string? businessDayConventionErrorMessage) = 
-                DateParserUtils.ParseBusinessDayConvention(businessDayConvention);
-            (QL.Calendar? calendar, string? calendarErrorMessage) = DateParserUtils.ParseCalendars(calendars);
+                DateUtils.ParseBusinessDayConvention(businessDayConvention);
+            (QL.Calendar? calendar, string? calendarErrorMessage) = DateUtils.ParseCalendars(calendars);
             QL.Schedule schedule = 
                 new(startDate.ToQuantLibDate(), 
                     endDate.ToQuantLibDate(),

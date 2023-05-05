@@ -1,9 +1,9 @@
-﻿namespace dExcel.InterestRates;
-
+﻿using dExcel.Utilities;
 using ExcelDna.Integration;
-using Utilities;
 
-public static class RatesUtils
+namespace dExcel.InterestRates;
+
+public static class InterestRateUtils
 {
     /// <summary>
     /// Calculates the forward rate from two discount factors.
@@ -15,10 +15,11 @@ public static class RatesUtils
     /// <returns>Forward rate over the period dT.</returns>
     [ExcelFunction(
        Name = "d.IR_DiscountFactorsToForwardRate",
-       Description = "Calculates the forward rate from two discount factors.\n" +
-                     "Deprecates AQS Function: 'Disc2ForwardRate'",
+       Description = 
+           "Calculates the forward rate from two discount factors.\n" +
+            "Deprecates AQS Function: 'Disc2ForwardRate'",
        Category = "∂Excel: Interest Rates")]
-    public static object Disc2ForwardRate(
+    public static object DiscountFactorsToForwardRate(
        [ExcelArgument(
             Name = "Compounding Convention",
             Description = "Options: 'Simple', 'NACA', 'NACS', 'NACQ', 'NACM', 'NACC'")]
@@ -56,7 +57,8 @@ public static class RatesUtils
     /// Converts an interest rate from one compounding convention to another.
     /// </summary>
     /// <param name="rate">Interest rate.</param>
-    /// <param name="rateTenor">The tenor associated with the supplied interest rate, inputted as a year fraction.</param>
+    /// <param name="rateTenor">The tenor associated with the supplied interest rate, inputted as a year fraction.
+    /// </param>
     /// <param name="oldCompoundingConvention">Compounding convention to convert from.</param>
     /// <param name="newCompoundingConvention">Compounding convention to convert to.</param>
     /// <returns>Interest rate converted to new compounding convention.</returns>

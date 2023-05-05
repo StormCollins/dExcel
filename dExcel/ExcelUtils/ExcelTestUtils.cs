@@ -1,8 +1,6 @@
-﻿namespace dExcel.ExcelUtils;
+﻿using ExcelDna.Integration;
 
-using ExcelDna.Integration;
-using static String;
-using System;
+namespace dExcel.ExcelUtils;
 
 /// <summary>
 /// A collection of utilities for performing basic fuzzy logic on tests/checks in Excel.
@@ -132,7 +130,7 @@ public static class ExcelTestUtils
             return Math.Abs(y - x) < tolerance ? TestOutputs.Ok.ToString() : TestOutputs.Error.ToString();
         }
 
-        return Compare(a.ToString(), b.ToString(), StringComparison.OrdinalIgnoreCase) == 0
+        return string.Compare(a.ToString(), b.ToString(), StringComparison.OrdinalIgnoreCase) == 0
             ? TestOutputs.Ok.ToString()
             : (useWarning) 
                 ? TestOutputs.Warning.ToString() 
@@ -260,7 +258,7 @@ public static class ExcelTestUtils
             }
             else
             {
-                resultArray[i] = xRange[i].ToString() ?? Empty;
+                resultArray[i] = xRange[i].ToString() ?? string.Empty;
             }
         }
 
@@ -281,7 +279,7 @@ public static class ExcelTestUtils
                     return TestOutputs.Error.ToString();
                 }
                 
-                if (Compare(x[i].ToString(), TestOutputs.Warning.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(x[i].ToString(), TestOutputs.Warning.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     result = TestOutputs.Warning.ToString();
                 }
@@ -308,12 +306,12 @@ public static class ExcelTestUtils
             {
                 for (int j = 0; j < x.GetLength(1); j++)
                 {
-                    if (Compare(x[i, j].ToString(), TestOutputs.Error.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Compare(x[i, j].ToString(), TestOutputs.Error.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         return TestOutputs.Error.ToString();
                     }
                     
-                    if (Compare(x[i, j].ToString(), TestOutputs.Warning.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Compare(x[i, j].ToString(), TestOutputs.Warning.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         result = TestOutputs.Warning.ToString();
                     }
@@ -362,14 +360,14 @@ public static class ExcelTestUtils
         {
             for (int j = 0; j < x.GetLength(1); j++)
             {
-                if (Compare(
+                if (string.Compare(
                         strA: x[i, j].ToString(), 
                         strB: TestOutputs.Ok.ToString(),
                         comparisonType: StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     output[i, j] = TestOutputs.Error.ToString();
                 }
-                else if (Compare(x[i, j].ToString(), TestOutputs.Error.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
+                else if (string.Compare(x[i, j].ToString(), TestOutputs.Error.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     output[i, j] = TestOutputs.Ok.ToString();
                 }
@@ -417,7 +415,7 @@ public static class ExcelTestUtils
             }
             else
             {
-                resultArray[i] = xRange[i].ToString() ?? Empty;
+                resultArray[i] = xRange[i].ToString() ?? "";
             }
         }
 
@@ -433,12 +431,12 @@ public static class ExcelTestUtils
             string result = TestOutputs.Ok.ToString();
             for (int i = 0; i < x.GetLength(0); i++)
             {
-                if (Compare(x[i].ToString(), TestOutputs.Ok.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(x[i].ToString(), TestOutputs.Ok.ToString(), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return TestOutputs.Ok.ToString();
                 }
                 
-                if (Compare(
+                if (string.Compare(
                         strA: x[i].ToString(), 
                         strB: TestOutputs.Warning.ToString(),
                         comparisonType: StringComparison.OrdinalIgnoreCase) == 0)
@@ -468,7 +466,7 @@ public static class ExcelTestUtils
             {
                 for (int j = 0; j < x.GetLength(1); j++)
                 {
-                    if (Compare(
+                    if (string.Compare(
                             strA: x[i, j].ToString(), 
                             strB: TestOutputs.Ok.ToString(),
                             comparisonType: StringComparison.OrdinalIgnoreCase) == 0)
@@ -476,7 +474,7 @@ public static class ExcelTestUtils
                         return TestOutputs.Ok.ToString();
                     }
                     
-                    if (Compare(
+                    if (string.Compare(
                             strA: x[i, j].ToString(), 
                             strB: TestOutputs.Warning.ToString(),
                             comparisonType: StringComparison.OrdinalIgnoreCase) == 0)

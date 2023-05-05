@@ -13,14 +13,15 @@ namespace dExcel.InterestRates;
 public static class CurveBootstrapper
 {
     /// <summary>
-    /// Bootstraps a single curve i.e., this is not a multi-curve bootstrapper.
+    /// Bootstraps an interest rate curve. It supports multi-curve bootstrapping.
     /// Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR.
     /// </summary>
-    /// <param name="handle"></param>
-    /// <param name="curveParameters"></param>
-    /// <param name="customRateIndex"></param>
-    /// <param name="instrumentGroups"></param>
-    /// <returns></returns>
+    /// <param name="handle">The 'handle' or name used to refer to the object in memory.
+    /// Each object in a workbook must have a unique handle.</param>
+    /// <param name="curveParameters">The parameters required to construct the curve.</param>
+    /// <param name="customRateIndex">(Optional)A custom rate index.</param>
+    /// <param name="instrumentGroups">The list of instrument groups used in the bootstrapping.</param>
+    /// <returns>A handle to a bootstrapped curve.</returns>
     [ExcelFunction(
         Name = "d.Curve_Bootstrap",
         Description = "Bootstraps a single curve i.e. this is not a multi-curve bootstrapper.",
@@ -30,11 +31,14 @@ public static class CurveBootstrapper
             Name = "Handle",
             Description =
                 "The 'handle' or name used to refer to the object in memory.\n" +
-                "Each curve in a workbook must have a a unique handle.")]
+                "Each object in a workbook must have a unique handle.")]
         string handle,
         [ExcelArgument(
             Name = "Curve Parameters",
-            Description = "The curves parameters: 'BaseDate', 'RateIndexName', 'RateIndexTenor', 'Interpolation'.")]
+            Description = 
+                "The curves parameters: " +
+                "'BaseDate', 'RateIndexName', 'RateIndexTenor', 'Interpolation', (Optional)'DiscountCurveHandle', " +
+                "(Optional)'AllowExtrapolation'")]
         object[,] curveParameters,
         [ExcelArgument(
             Name = "(Optional)Custom Rate Index",
@@ -68,6 +72,7 @@ public static class CurveBootstrapper
 
         string? rateIndexTenor =
             ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "RateIndexTenor", columnHeaderIndex);
+        
         if (rateIndexTenor is null && customRateIndex is null && rateIndexName != "FEDFUND")
         {
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(rateIndexTenor).ToUpper());
@@ -83,6 +88,14 @@ public static class CurveBootstrapper
         
         string? discountCurveHandle =
             ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "DiscountCurveHandle", columnHeaderIndex);
+        
+        bool? allowExtrapolation =
+            ExcelTableUtils.GetTableValue<bool>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex);
+        
+        if (allowExtrapolation == null)
+        {
+            allowExtrapolation = true;
+        }
         
         QL.IborIndex? rateIndex = null;
         if (rateIndexName is not null)
@@ -111,8 +124,6 @@ public static class CurveBootstrapper
         //             _ => throw new NotImplementedException(),
         //         };
         //
-        //     
-        //
         //     rateIndex = new IborIndex("Test", new Period(tenor), settlementDays, z.x, z.y, )
         // }
 
@@ -122,7 +133,6 @@ public static class CurveBootstrapper
             return CommonUtils.DExcelErrorMessage($"Unsupported rate index: {rateIndexName}");
         }
 
-        // List<QL.RateHelper> rateHelpers = new();
         QL.RateHelperVector rateHelpers = new();
 
         foreach (object instrumentGroup in instrumentGroups)
@@ -211,10 +221,10 @@ public static class CurveBootstrapper
 
                     if (includeInstruments[i])
                     {
-                        QL.RelinkableYieldTermStructureHandle? discountCurve = new();
+                        QL.RelinkableYieldTermStructureHandle discountCurve = new();
                         if (discountCurveHandle != null)
                         {
-                            var yieldTermStructure = CurveUtils.GetCurveObject(discountCurveHandle);
+                            QL.YieldTermStructure? yieldTermStructure = CurveUtils.GetCurveObject(discountCurveHandle);
                             discountCurve.linkTo(yieldTermStructure);
                         }
                        
@@ -251,13 +261,6 @@ public static class CurveBootstrapper
                 {
                     if (includeInstruments[i])
                     {
-                        // rateHelpers.Add(
-                        //     item: new DatedOISRateHelper(
-                        //     startDate: (DateTime)DateUtils.AddTenorToDate(baseDate, "2d", "USD", "ModFol"), 
-                        //     endDate: endDates?[i],
-                        //     fixedRate: new Handle<Quote>(new SimpleQuote(rates?[i])),
-                        //     overnightIndex: rateIndex as OvernightIndex));
-
                         rateHelpers.Add(
                             new QL.OISRateHelper(
                                 settlementDays: 2, 
@@ -300,9 +303,7 @@ public static class CurveBootstrapper
                 new QL.PiecewiseFlatForward(
                     referenceDate: baseDate.ToQuantLibDate(),
                     instruments: rateHelpers,
-                    dayCounter: rateIndex.dayCounter(),
-                    jumps: null,
-                    jumpDates: null);
+                    dayCounter: rateIndex.dayCounter());
         }
         else if (string.Compare(interpolation, "Linear", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
@@ -325,12 +326,26 @@ public static class CurveBootstrapper
             return CommonUtils.DExcelErrorMessage($"Unknown interpolation method: '{interpolation}'");
         }
 
+        if ((bool)allowExtrapolation)
+        {
+            termStructure.enableExtrapolation();
+        }
+        
         CurveDetails curveDetails = new(termStructure, rateIndex.dayCounter(), interpolation, null,  null, instrumentGroups);
         DataObjectController dataObjectController = DataObjectController.Instance;
         return dataObjectController.Add(handle, curveDetails);
     }
 
-
+    /// <summary>
+    /// Extracts and bootstraps a curve from the Omicron database.
+    /// </summary>
+    /// <param name="handle">The 'handle' or name used to refer to the object in memory.
+    /// Each object in a workbook must have a a unique handle.</param>
+    /// <param name="curveName">The name of the curve in Omicron. Current available options are:
+    /// 'ZAR-Swap', 'USD-OIS'</param>
+    /// <param name="baseDate"></param>
+    /// <param name="interpolation"></param>
+    /// <returns></returns>
     [ExcelFunction(
         Name = "d.Curve_Get",
         Description = "Extracts and bootstraps a curve from the Omicron database.",
@@ -340,7 +355,7 @@ public static class CurveBootstrapper
             Name = "Handle",
             Description =
                 "The 'handle' or name used to refer to the object in memory.\n" +
-                "Each curve in a workbook must have a a unique handle.")]
+                "Each object in a workbook must have a a unique handle.")]
         string handle,
         [ExcelArgument(
             Name = "Curve Name",
@@ -359,7 +374,8 @@ public static class CurveBootstrapper
     {
         // TODO: List the available types of interpolation.
         // Assume has deposits, FRAs, and Swaps
-        // Could create more complicated abstract code for mapping from quotes to 2d tables but I would advise against this.
+        // One could create more complicated abstract code for mapping from quotes to 2d tables but I would advise
+        // against this.
         string rateIndexName = "";
         string rateIndexTenor = "";
         switch (curveName.ToUpper())
@@ -374,7 +390,7 @@ public static class CurveBootstrapper
                 break;
         }
 
-        List<QuoteValue> quoteValues = new();
+        List<QuoteValue> quoteValues;
         try
         {
             quoteValues =
@@ -458,16 +474,16 @@ public static class CurveBootstrapper
             row++;
         }
         
-        List<QuoteValue> oiss = quoteValues.Where(x => x.Type.GetType() == typeof(Ois)).ToList();
-        oiss = oiss.OrderBy(x => ((Ois)x.Type).Tenor, new TenorComparer()).ToList();
-        object[,] oisInstruments = new object[oiss.Count + 2, 3];
+        List<QuoteValue> overnightIndexSwaps = quoteValues.Where(x => x.Type.GetType() == typeof(Ois)).ToList();
+        overnightIndexSwaps = overnightIndexSwaps.OrderBy(x => ((Ois)x.Type).Tenor, new TenorComparer()).ToList();
+        object[,] oisInstruments = new object[overnightIndexSwaps.Count + 2, 3];
         oisInstruments[0, 0] = "OISs";
         oisInstruments[1, 0] = "Tenors";
         oisInstruments[1, 1] = "Rates";
         oisInstruments[1, 2] = "Include";
 
         row = 2;
-        foreach (QuoteValue ois in oiss)
+        foreach (QuoteValue ois in overnightIndexSwaps)
         {
             oisInstruments[row, 0] = ((Ois)ois.Type).Tenor.ToString();
             oisInstruments[row, 1] = ois.Value;
@@ -479,7 +495,7 @@ public static class CurveBootstrapper
         if (deposits.Any()) instruments.Add(depositInstruments);
         if (fras.Any()) instruments.Add(fraInstruments);
         if (swaps.Any()) instruments.Add(swapInstruments);
-        if (oiss.Any()) instruments.Add(oisInstruments);
+        if (overnightIndexSwaps.Any()) instruments.Add(oisInstruments);
 
         return Bootstrap(handle, curveParameters, null, instruments.ToArray());
     }

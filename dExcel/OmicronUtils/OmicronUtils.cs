@@ -1,18 +1,29 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Headers;
+using JsonConverter = Newtonsoft.Json.JsonConverter;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Omicron;
-using JsonConverter = Newtonsoft.Json.JsonConverter;
 using Option = Omicron.Option;
 
 namespace dExcel.OmicronUtils;
 
+/// <summary>
+/// A collection of utility functions for interfacing with Omicron, the market data database.
+/// </summary>
 public static class OmicronUtils
 {
+    /// <summary>
+    /// The URL to Omicron.
+    /// </summary>
     private const string OmicronUrl = "https://omicron.fsa-aks.deloitte.co.za";
 
+    /// <summary>
+    /// Deserializes Omicron objects from a given JSON string.
+    /// </summary>
+    /// <param name="json">The JSON string to deserialize.</param>
+    /// <returns>A list of deserialized Omicron 'QuoteValues'.</returns>
     public static List<QuoteValue>? DeserializeOmicronObjects(string json)
     {
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings
@@ -28,13 +39,23 @@ public static class OmicronUtils
         return JsonConvert.DeserializeObject<List<QuoteValue>>(json);
     }
 
+    /// <summary>
+    /// Extracts the relevant swap curve quotes from a either Omicron directly or a pre-deserialized list of Omicron
+    /// 'QuoteValues'. Thus one must either populate the <param name="quotes"/> or populate both the
+    /// <param name="requisitionId"/> and .
+    /// </summary>
+    /// <param name="indexName">The index name e.g., 'JIBAR'</param>
+    /// <param name="quotes">(Optional)The list of Omicron quote values to loop through. If the</param>
+    /// <param name="requisitionId">The relevant requisition ID in Omicron.</param>
+    /// <param name="marketDataDate">The market data date for which to extract the data from Omicron.</param>
+    /// <returns>A list of the relevant swap curve quotes.</returns>
     public static List<QuoteValue> GetSwapCurveQuotes(
         string indexName, 
         List<QuoteValue>? quotes = null, 
         int? requisitionId = null,
-        string? date = null)
+        string? marketDataDate = null)
     {
-        quotes ??= GetOmicronRequisitionData(requisitionId, date);
+        quotes ??= GetOmicronRequisitionData(requisitionId, marketDataDate);
 
         return 
             quotes
@@ -47,6 +68,16 @@ public static class OmicronUtils
                 .ToList();
     }
 
+    /// <summary>
+    /// Extracts the relevant FX vol surface quotes from a either Omicron directly or a pre-deserialized list of Omicron
+    /// 'QuoteValues'. Thus one must either populate the <param name="quotes"/> or populate both the
+    /// <param name="requisitionId"/> and the <param name="date"/>.
+    /// </summary>
+    /// <param name="indexName">The index name e.g., 'JIBAR'</param>
+    /// <param name="quotes">(Optional)The list of Omicron quote values to loop through. If the</param>
+    /// <param name="requisitionId">The relevant requisition ID in Omicron.</param>
+    /// <param name="marketDataDate">The market data date for which to extract the data from Omicron.</param>
+    /// <returns>A list of the relevant swap curve quotes.</returns>
     public static List<QuoteValue> GetFxVolQuotes(
         List<QuoteValue>? quotes = null, 
         int? requisitionId = null,
@@ -62,9 +93,16 @@ public static class OmicronUtils
                 .ToList();
     }
 
-    private static List<QuoteValue>? GetOmicronRequisitionData(int? requisitionId, string? date)
+    /// <summary>
+    /// Extracts a list of deserialized Omicron quote values from the Omicron REST APi for a given requisition ID and
+    /// market data date.
+    /// </summary>
+    /// <param name="requisitionId">The relevant numerical requisition ID.</param>
+    /// <param name="marketDataDate">Market data date.</param>
+    /// <returns>A list of deserialized Omicron quote values.</returns>
+    private static List<QuoteValue>? GetOmicronRequisitionData(int? requisitionId, string? marketDataDate)
     {
-        if (requisitionId == null && date == null)
+        if (requisitionId == null && marketDataDate == null)
         {
             return null;
         }
@@ -73,11 +111,12 @@ public static class OmicronUtils
         client.DefaultRequestHeaders.Accept.Clear(); 
         client.BaseAddress = new Uri(OmicronUrl);
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));   
-        HttpResponseMessage response = client.GetAsync(OmicronUrl + "/api/requisition/" + requisitionId + "/" + date).Result;
+        HttpResponseMessage response = 
+            client.GetAsync(OmicronUrl + "/api/requisition/" + requisitionId + "/" + marketDataDate).Result;
         
         if (response.IsSuccessStatusCode)
         {
-            string jsonQuotes = response.Content.ReadAsStringAsync().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
+            string jsonQuotes = response.Content.ReadAsStringAsync().Result;  
             return DeserializeOmicronObjects(jsonQuotes);
         }
 
@@ -109,8 +148,7 @@ public static class OmicronUtils
             }
         }
   
-        public override void WriteJson(JsonWriter writer, object value,
-            JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }

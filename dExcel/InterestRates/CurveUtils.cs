@@ -119,7 +119,7 @@ public static class CurveUtils
 
         string? calendarsParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Calendars", 0);
         IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
-        (QL.Calendar? calendar, string errorMessage) = DateParserUtils.ParseCalendars(calendarsParameter);  
+        (QL.Calendar? calendar, string errorMessage) = DateUtils.ParseCalendars(calendarsParameter);  
 
         if (string.Compare(interpolationParameter, "EXPONENTIAL", StringComparison.OrdinalIgnoreCase) == 0)
         {
@@ -203,7 +203,7 @@ public static class CurveUtils
     public static object GetDiscountFactors(
         [ExcelArgument(
             Name = "Handle",
-            Description = "The 'handle' or name used to store & retrieve the curve.")]
+            Description = "The 'handle' or name used to store and retrieve the curve.")]
             string handle,
         [ExcelArgument(
             Name = "Dates/Year Fractions",
@@ -299,8 +299,7 @@ public static class CurveUtils
             object[,] datesRange,
         [ExcelArgument(
             Name = "(Optional)Compounding Convention",
-            Description = "The compounding convention: Simple, NACC, NACM, NACQ, NACS, NACA \n" +
-                          "Default = NACC")]
+            Description = "The compounding convention: Simple, NACC, NACM, NACQ, NACS, NACA \nDefault = NACC")]
             string compoundingConventionParameter = "NACC")
     {
         QL.YieldTermStructure? curve = GetCurveObject(handle);
@@ -335,6 +334,13 @@ public static class CurveUtils
         return zeroRates;
     }
 
+    /// <summary>
+    /// Extracts the instruments used to bootstrap the curve.
+    /// </summary>
+    /// <param name="handle">The 'handle' or name used to refer to the object in memory. Each object must have a unique
+    /// handle.</param>
+    /// <returns>A 2d object containing the list of instruments used to bootstrap the curve. If the curve wasn't
+    /// bootstrapped it just returns a warning message.</returns>
     [ExcelFunction(
         Name = "d.Curve_GetInstruments",
         Description = "Extracts the instruments used to bootstrap the curve.",
@@ -344,7 +350,7 @@ public static class CurveUtils
             Name = "Handle", 
             Description = 
                 "The 'handle' or name used to refer to the object in memory.\n" + 
-                "Each curve must have a a unique handle.")]
+                "Each object must have a unique handle.")]
         string handle)
     {
         CurveDetails curve = GetCurveDetails(handle);

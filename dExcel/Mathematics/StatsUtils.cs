@@ -1,11 +1,11 @@
-﻿namespace dExcel.Mathematics;
-
-using ExcelDna.Integration;
-using Utilities;
+﻿using ExcelDna.Integration;
+using dExcel.Utilities;
 using mnd = MathNet.Numerics.Distributions;
 using mnl = MathNet.Numerics.LinearAlgebra;
 using mnr = MathNet.Numerics.Random;
 using mns = MathNet.Numerics.Statistics;
+
+namespace dExcel.Mathematics;
 
 /// <summary>
 /// A collection of statistical utility functions.
@@ -20,9 +20,10 @@ public static class StatsUtils
     /// <returns>The Cholesky decomposition of a matrix if valid.</returns>
     [ExcelFunction(
         Name = "d.Stats_Cholesky",
-        Description = "Calculates the Cholesky decomposition of a symmetric positive-definite matrix.\n" +
-                      "Note this returns an upper-triangular matrix.\n" +
-                      "Deprecates the AQS function: 'Chol'",
+        Description = 
+            "Calculates the Cholesky decomposition of a symmetric positive-definite matrix.\n" +
+            "Note this returns an upper-triangular matrix.\n" +
+            "Deprecates the AQS function: 'Chol'",
         Category = "∂Excel: Stats")]
     public static object Cholesky(
         [ExcelArgument(
@@ -95,8 +96,8 @@ public static class StatsUtils
     /// <summary>
     /// Generates a sequence of standard normal random variates.
     ///
-    /// The total number of elements returned is given either by the size of the region the user has selected in Excel or
-    /// the optional parameters "rowCount" and "columnCount".
+    /// The total number of elements returned is given either by the size of the region the user has selected in Excel
+    /// or the optional parameters "rowCount" and "columnCount".
     /// </summary>
     /// <param name="seed">Seed</param>
     /// <param name="rowCount">The number of rows to output.</param>
@@ -104,8 +105,9 @@ public static class StatsUtils
     /// <returns>A region of standard normal random variates.</returns>
     [ExcelFunction(
         Name = "d.Stats_NormalRandomNumbers",
-        Description = "Generates a sequence of standard normal random variates.\n" +
-                      "Deprecates AQS function: 'Randn'",
+        Description = 
+            "Generates a sequence of standard normal random variates.\n" +
+            "Deprecates AQS function: 'Randn'",
         Category = "∂Excel: Stats",
         IsVolatile = true)]
     public static object NormalRandomNumbers(
@@ -166,16 +168,20 @@ public static class StatsUtils
         int seed,
         [ExcelArgument(
             Name = "Correlated Set Count",
-            Description = "The number of sets of correlated random numbers to generate.\n" +
-                          "e.g., If this is 'm' and the size of the correlation matrix is 'n x n' then the number of random" +
-                          "numbers generated will be 'mn'.")]
+            Description = 
+                "The number of sets of correlated random numbers to generate.\n" +
+                "e.g., If this is 'm' and the size of the correlation matrix is 'n x n' then the number of random" +
+                "numbers generated will be 'mn'.")]
         int correlatedSetCount,
         [ExcelArgument(
             Name = "Correlation Matrix", 
             Description = "Correlation matrix of the random numbers.")]
         double[,] correlationMatrixRange)
     {
-        mnl.Matrix<double> randomNumbers = mnl.CreateMatrix.DenseOfArray((double[,])NormalRandomNumbers(seed, correlatedSetCount, correlationMatrixRange.GetLength(0)));
+        mnl.Matrix<double> randomNumbers = 
+            mnl.CreateMatrix.DenseOfArray(
+                (double[,])NormalRandomNumbers(seed, correlatedSetCount, correlationMatrixRange.GetLength(0)));
+        
         object choleskyResults =  Cholesky(correlationMatrixRange);
         if (choleskyResults is string errorMessage)
         {

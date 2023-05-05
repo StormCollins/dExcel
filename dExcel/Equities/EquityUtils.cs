@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography;
-using ExcelDna.Integration;
+﻿using ExcelDna.Integration;
 using dExcel.Dates;
 using dExcel.Utilities;
 using mnd = MathNet.Numerics.Distributions;
@@ -7,6 +6,8 @@ using mns = MathNet.Numerics.Statistics;
 using QL = QuantLib;
 
 namespace dExcel.Equities;
+
+using static CommonUtils;
 
 /// <summary>
 /// A collection of utility functions for equities.
@@ -60,11 +61,11 @@ public static class EquityUtils
         object[,] prices)
     {
 #if DEBUG
-        CommonUtils.InFunctionWizard();
+        InFunctionWizard();
 #endif
         if (dates.GetLength(0) != prices.GetLength(0))
         {
-            return CommonUtils.DExcelErrorMessage("Date array and stock price array have different sizes.");
+            return DExcelErrorMessage("Date array and stock price array have different sizes.");
         }
 
         List<(DateTime date, double price)> datesAndPrices = new();
@@ -78,34 +79,40 @@ public static class EquityUtils
         DateTime startDate = valuationDate - (maturityDate - valuationDate);
 
         // Determine the relevant time period over which volatility should be calculated.
-        List<(DateTime date, double price)> sortedDatesAndPricesForVolCalculation = sortedDatesAndPrices.Where(x => startDate <= x.date && x.date <= endDate).ToList();
+        List<(DateTime date, double price)> sortedDatesAndPricesForVolCalculation = 
+            sortedDatesAndPrices.Where(x => startDate <= x.date && x.date <= endDate).ToList();
         List<double> returns = new();
         for (int i = 0; i < sortedDatesAndPricesForVolCalculation.Count - 1; i++)
         {
-            returns.Add(Math.Log(sortedDatesAndPricesForVolCalculation[i].price / sortedDatesAndPricesForVolCalculation[i + 1].price));
+            returns.Add(
+                Math.Log(
+                    sortedDatesAndPricesForVolCalculation[i].price / 
+                    sortedDatesAndPricesForVolCalculation[i + 1].price));
         }
 
         double equallyWeightedVolatility = 0.0;
         double ewmaVolatility = 0.0;
-        if (weightingStyle.ToUpper() == "EQUAL")
+        switch (weightingStyle.ToUpper())
         {
-            equallyWeightedVolatility = mns.Statistics.StandardDeviation(returns) * Math.Sqrt(businessDaysPerYear);
-        }
-        else if (weightingStyle.ToUpper() == "EXPONENTIAL")
-        {
-            List<double> squareReturns = returns.Select(x => x * x).ToList();
-            double initialEwma = Math.Sqrt(squareReturns.Skip(Math.Max(0, squareReturns.Count() - 24)).Sum());
-            List<double> ewmaSeries = Enumerable.Repeat(0.0, squareReturns.Count - 1).Append(initialEwma).ToList();
-            int m = ewmaSeries.Count - 1;
-            for (int i = ewmaSeries.Count - 1; i > 0; i--)
+            case "EQUAL":
+                equallyWeightedVolatility = mns.Statistics.StandardDeviation(returns) * Math.Sqrt(businessDaysPerYear);
+                break;
+            case "EXPONENTIAL":
             {
-                ewmaSeries[i] = Math.Sqrt(Math.Pow(ewmaSeries[i + 1], 2) * lambda + (1 - lambda) * squareReturns[i] * businessDaysPerYear);
+                List<double> squareReturns = returns.Select(x => x * x).ToList();
+                double initialEwma = Math.Sqrt(squareReturns.Skip(Math.Max(0, squareReturns.Count - 24)).Sum());
+                List<double> ewmaSeries = Enumerable.Repeat(0.0, squareReturns.Count - 1).Append(initialEwma).ToList();
+                for (int i = ewmaSeries.Count - 1; i > 0; i--)
+                {
+                    ewmaSeries[i] = 
+                        Math.Sqrt(
+                            Math.Pow(ewmaSeries[i + 1], 2) * lambda + (1 - lambda) * squareReturns[i] * businessDaysPerYear);
+                }
+                ewmaVolatility = ewmaSeries[0];
+                break;
             }
-            ewmaVolatility = ewmaSeries[0];
-        }
-        else
-        {
-            return CommonUtils.DExcelErrorMessage($"Invalid weighting style: {weightingStyle}");
+            default:
+                return DExcelErrorMessage($"Invalid weighting style: {weightingStyle}");
         }
 
         return Math.Max(equallyWeightedVolatility, ewmaVolatility);
@@ -143,7 +150,7 @@ public static class EquityUtils
         [ExcelArgument(Name = "Option Type", Description = "'Call'/'C' or 'Put'/'P'.")]
         string optionType)
     {
-        if (!CommonUtils.TryParseOptionTypeToQuantLibType(
+        if (!TryParseOptionTypeToQuantLibType(
                 optionType: optionType, 
                 quantLibOptionType: out QL.Option.Type? quantLibOptionType,
                 out string? optionTypeErrorMessage))
@@ -156,7 +163,7 @@ public static class EquityUtils
         QL.VanillaOption vanillaOption = new(payoff, exercise);
         QL.QuoteHandle spotHandle = new(new QL.SimpleQuote(spot));
         
-        CommonUtils.TryParseDayCountConvention(dayCountConvention, out QL.DayCounter? dayCounter, out string errorMessage);
+        TryParseDayCountConvention(dayCountConvention, out QL.DayCounter? dayCounter, out string errorMessage);
 
         QL.FlatForward interestRateCurve =
             new(tradeDate.ToQuantLibDate(),
@@ -169,7 +176,7 @@ public static class EquityUtils
                 forward: new QL.QuoteHandle(new QL.SimpleQuote(dividendYield)),
                 dayCounter: dayCounter);
 
-        (QL.Calendar? qlCalendar, string? qlCalendarErrorMessage) = DateParserUtils.ParseCalendars(calendar);
+        (QL.Calendar? qlCalendar, string? qlCalendarErrorMessage) = DateUtils.ParseCalendars(calendar);
         if (qlCalendar == null)
         {
             return qlCalendarErrorMessage;
@@ -235,26 +242,9 @@ public static class EquityUtils
         }
         else
         {
-            return CommonUtils.DExcelErrorMessage("Unknown option type.");
+            return DExcelErrorMessage("Unknown option type.");
         }
         
         return output;
-    }
-
-
-    [ExcelFunction(
-        Name = "d.Portfolio_CreatePortfolio",
-        Description = "Create portfolio.",
-        Category = "∂Excel: Equities")]
-    public static string CreatePortfolio(string handle, params object[] handles)
-    {
-        var dataObjectController = DataObjectController.Instance;
-        List<string> handlesList = new();
-        foreach (var currentHandle in handles)
-        {
-            handlesList.Add(currentHandle.ToString());
-        }
-        
-        return dataObjectController.Add(handle, handlesList); 
     }
 }

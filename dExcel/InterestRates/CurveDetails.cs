@@ -23,12 +23,12 @@ public class CurveDetails
     public string DiscountFactorInterpolation { get; } 
     
     /// <summary>
-    /// The node dates of the discount factors.
+    /// The node dates of the discount factors. These are useful for plotting the curve for illustrative purposes.
     /// </summary>
     public List<DateTime>? DiscountFactorDates { get; }
    
     /// <summary>
-    /// The discount factors at the node dates.
+    /// The discount factors at the node dates. These are useful for plotting the curve for illustrative purposes.
     /// </summary>
     public List<double>? DiscountFactors { get; }
     
@@ -38,13 +38,14 @@ public class CurveDetails
     public object[] InstrumentGroups { get; }
 
     /// <summary>
-    /// 
+    /// The class constructor. 
     /// </summary>
-    /// <param name="termStructure"></param>
-    /// <param name="dayCountConvention"></param>
-    /// <param name="interpolation"></param>
-    /// <param name="discountFactorDates"></param>
-    /// <param name="discountFactors"></param>
+    /// <param name="termStructure">The interest rate curve.</param>
+    /// <param name="dayCountConvention">The day count convention.</param>
+    /// <param name="interpolation">The interpolation style.</param>
+    /// <param name="discountFactorDates">The discount factor dates.</param>
+    /// <param name="discountFactors">The instrument groups. This is only populated if the curve was bootstrapped.
+    /// </param>
     public CurveDetails(
         object? termStructure,
         QL.DayCounter dayCountConvention,

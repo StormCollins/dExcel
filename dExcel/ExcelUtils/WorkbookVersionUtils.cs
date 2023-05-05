@@ -1,17 +1,16 @@
-﻿namespace dExcel.ExcelUtils;
-
-using System;
-using ExcelDna.Integration;
+﻿using ExcelDna.Integration;
 using Excel = Microsoft.Office.Interop.Excel;
 using Microsoft.Office.Core;
+
+namespace dExcel.ExcelUtils;
 
 public static class VersionUtils
 {
     public static bool TrySetWorkbookdExcelVersion(string version)
     {
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
-        var activeWorkbook = xlApp.ActiveWorkbook;
-        var properties = (DocumentProperties)activeWorkbook.CustomDocumentProperties;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Workbook? activeWorkbook = xlApp.ActiveWorkbook;
+        DocumentProperties? properties = (DocumentProperties)activeWorkbook.CustomDocumentProperties;
         try
         {
             foreach (DocumentProperty prop in properties)
@@ -35,8 +34,8 @@ public static class VersionUtils
     public static bool TryGetWorkbookdExcelVersion(out string? version)
     {
         DocumentProperties properties;
-        var xlApp = (Excel.Application)ExcelDnaUtil.Application;
-        var activeWorkbook = xlApp.ActiveWorkbook;
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        Excel.Workbook? activeWorkbook = xlApp.ActiveWorkbook;
         properties = (DocumentProperties)activeWorkbook.CustomDocumentProperties;
 
         foreach (DocumentProperty prop in properties)
