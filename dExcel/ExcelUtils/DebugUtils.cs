@@ -1,9 +1,8 @@
-﻿using System.Reflection;
+﻿using Excel = Microsoft.Office.Interop.Excel;
 using ExcelDna.Integration;
-using Excel = Microsoft.Office.Interop.Excel;
+using System.Reflection;
 
-namespace dExcel;
-
+namespace dExcel.ExcelUtils;
 /// <summary>
 /// A collection of utility functions to debug the dExcel application at runtime from Excel.
 /// </summary>

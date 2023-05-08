@@ -1,8 +1,11 @@
 ﻿using QL = QuantLib;
 using dExcel.Dates;
+using dExcel.Utilities;
 
 namespace dExcel.InterestRates
 {
+    using ExcelDna.Integration;
+
     /// <summary>
     /// Common interest rate instruments.
     /// </summary>
@@ -12,13 +15,20 @@ namespace dExcel.InterestRates
         /// Used to create a fixed-for-floating interest rate swap object in Excel.
         /// </summary>
         /// <param name="swapType">'Payer' or 'Receiver'.</param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="frequency"></param>
-        /// <param name="calendars"></param>
-        /// <param name="businessDayConvention"></param>
-        /// <param name="generationRule"></param>
+        /// <param name="startDate">Start date.</param>
+        /// <param name="endDate">End date.</param>
+        /// <param name="frequency">Payment/receive frequency (assumed to be the same).</param>
+        /// <param name="calendars">Calendars.</param>
+        /// <param name="businessDayConvention">Business day convention.</param>
+        /// <param name="generationRule">Date generation rule: 'Forward', 'Backward', or 'IMM'.
+        /// 'Forward' => Dates are generated starting at the start date and moving towards the end date.
+        /// 'Backward' => Dates are generated starting at the end date and moving towards the start date.
+        /// 'IMM' => IMM convention i.e., business date on or closest to 20th of Mar, Jun, Sep, Dec.</param>
         /// <returns></returns>
+        [ExcelFunction(
+            Name = "d.IR_CreateInterestRateSwap",
+            Description = "Creates a fixed-for-floating interest rate swap object in Excel",
+            Category = "∂Excel: Interest Rates")]
         public static object CreateInterestRateSwap(
             string swapType,
             DateTime startDate,
@@ -28,11 +38,18 @@ namespace dExcel.InterestRates
             string businessDayConvention,
             string generationRule)
         {
-            QL.Swap.Type qlSwapType = (swapType.ToUpper() == "Payer")? QL.Swap.Type.Payer : QL.Swap.Type.Receiver;
-            DateUtils.GenerateSchedule(startDate, endDate, frequency, calendars, businessDayConvention, generationRule);
+            if (!ParserUtils.TryParseQuantLibSwapType(
+                    swapType, 
+                    out QL.Swap.Type? qlSwapType,
+                    out string? swapTypeErrorMessage))
+            {
+                return swapTypeErrorMessage;
+            }
+            
             (QL.BusinessDayConvention? qlBusinessDayConvention, string? businessDayConventionErrorMessage) = 
                 DateUtils.ParseBusinessDayConvention(businessDayConvention);
             (QL.Calendar? calendar, string? calendarErrorMessage) = DateUtils.ParseCalendars(calendars);
+            
             QL.Schedule schedule = 
                 new(startDate.ToQuantLibDate(), 
                     endDate.ToQuantLibDate(),
@@ -42,9 +59,10 @@ namespace dExcel.InterestRates
                     (QL.BusinessDayConvention)qlBusinessDayConvention,
                     QL.DateGeneration.Rule.Backward,
                     false);
+            
             QL.VanillaSwap vanillaSwap =
                 new(
-                    type: QL.Swap.Type.Payer, 
+                    type: (QL.Swap.Type)qlSwapType, 
                     nominal: 1000000, 
                     fixedSchedule: schedule, 
                     fixedRate: 0.1, 

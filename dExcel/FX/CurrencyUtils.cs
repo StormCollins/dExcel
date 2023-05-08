@@ -1,7 +1,7 @@
 ﻿using QL = QuantLib;
 using System.Reflection;
 
-namespace dExcel.Currencies;
+namespace dExcel.FX;
 
 /// <summary>
 /// A set of utility functions for dealing with currencies.
@@ -9,10 +9,10 @@ namespace dExcel.Currencies;
 public static class CurrencyUtils
 {
     /// <summary>
-    /// Parses a string as a QLNet currency.
+    /// Parses a string as a QuantLib currency.
     /// </summary>
     /// <param name="currencyToParse">Currency to parse.</param>
-    /// <returns>QLNet currency.</returns>
+    /// <returns>QuantLib currency.</returns>
     public static QL.Currency? ParseCurrency(string currencyToParse)
     {
         Assembly? quantLib = 

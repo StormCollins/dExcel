@@ -5,7 +5,7 @@ using QL = QuantLib;
 namespace dExcelTests.Utilities;
 
 [TestFixture]
-public class CommonUtilsTests
+public class ParserUtilsTests
 {
     [Test]
     [TestCase("Call", true, 1, null)]
@@ -20,7 +20,7 @@ public class CommonUtilsTests
         string? expectedErrorMessage)
     {
         bool actualResult = 
-            CommonUtils.TryParseOptionTypeToSign(optionType, out int? actualSign, out string? actualErrorMessage);
+            ParserUtils.TryParseOptionTypeToSign(optionType, out int? actualSign, out string? actualErrorMessage);
         
         Assert.AreEqual(expectedResult, actualResult);
         Assert.AreEqual(expectedSign, actualSign);
@@ -40,7 +40,7 @@ public class CommonUtilsTests
         string? expectedErrorMessage)
     {
         bool actualResult =
-            CommonUtils.TryParseOptionTypeToQuantLibType(optionType, out QL.Option.Type? quantLibOptionType, out string? actualErrorMessage);
+            ParserUtils.TryParseQuantLibOptionType(optionType, out QL.Option.Type? quantLibOptionType, out string? actualErrorMessage);
 
         Assert.AreEqual(expectedResult, actualResult);
         Assert.AreEqual(expected, quantLibOptionType);
@@ -64,7 +64,7 @@ public class CommonUtilsTests
         string? expectedErrorMessage)
     {
         bool actualResult = 
-            CommonUtils.TryParseDirectionToSign(direction, out int? actualSign, out string? actualErrorMessage);
+            ParserUtils.TryParseDirectionToSign(direction, out int? actualSign, out string? actualErrorMessage);
         
         Assert.AreEqual(expectedResult, actualResult);
         Assert.AreEqual(expectedSign, actualSign);
@@ -97,14 +97,14 @@ public class CommonUtilsTests
         string? expectedErrorMessage)
     {
         bool actualResult = 
-            CommonUtils.TryParseDayCountConvention(
+            ParserUtils.TryParseQuantLibDayCountConvention(
                 dayCountConventionToParse: dayCountConventionToParse, 
                 dayCountConvention: out QL.DayCounter? actualDayCountConvention, 
                 errorMessage: out string? actualErrorMessage); 
         
         Assert.AreEqual(expectedResult, actualResult);
         if (expectedDayCountConvention != null)
-            Assert.AreEqual(expectedDayCountConvention.name(), actualDayCountConvention.name());
+            Assert.AreEqual(expectedDayCountConvention.name(), actualDayCountConvention?.name());
         Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
     }
     
@@ -127,7 +127,7 @@ public class CommonUtilsTests
         (QL.Compounding, QL.Frequency)? expectedCompoundingConvention, 
         string? expectedErrorMessage)
     {
-        bool actualResult = CommonUtils.TryParseCompoundingConvention(
+        bool actualResult = ParserUtils.TryParseQuantLibCompoundingConvention(
             compoundingConventionToParse: compoundingConvention,
             compoundingConvention: out (QL.Compounding, QL.Frequency)? actualCompoundingConvention, 
             errorMessage: out string? actualErrorMessage);  

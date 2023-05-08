@@ -8,10 +8,7 @@ using System.Windows.Media.Imaging;
 /// <summary>
 /// The formatting settings to apply to a table.
 /// </summary>
-/// <param name="IsVertical">True if the table is vertical (i.e. has column headers) else false if horizontal 
-/// (i.e. has row headers).</param>
-/// <param name="HasTwoHeaders">True if the table has two header rows.</param>
-public readonly record struct FormattingSettings(int columnHeaderCount, int rowHeaderCount);
+public readonly record struct FormattingSettings(int ColumnHeaderCount, int RowHeaderCount);
 
 /// <summary>
 /// Interaction logic for TableFormatter.xaml which allows users to quickly select and apply the format for a selected

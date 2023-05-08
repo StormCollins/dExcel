@@ -2,8 +2,7 @@
 using ExcelDna.Integration;
 using QL = QuantLib;
 
-namespace dExcel.CreditUtils;
-
+namespace dExcel.Credit;
 
 /// <summary>
 /// A collection of utility functions for working with survival probability curves.

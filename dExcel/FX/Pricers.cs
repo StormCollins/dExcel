@@ -55,12 +55,15 @@ public static class Pricers
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif 
-        if (!CommonUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
+        if (!ParserUtils.TryParseOptionTypeToSign(
+                optionType, 
+                out int? optionTypeSign, 
+                out string? optionTypeErrorMessage))
         {
             return optionTypeErrorMessage;
         }  
        
-        if (!CommonUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
+        if (!ParserUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
         {
             return directionErrorMessage;
         }
@@ -75,7 +78,11 @@ public static class Pricers
             return CommonUtils.DExcelErrorMessage($"Volatility non-positive: {vol}");
         }
 
-        double d1 = (Math.Log(spotPrice / strike) + (domesticRiskFreeRate - foreignRiskFreeRate + Math.Pow(vol, 2)/2) * optionMaturity) / (vol * Math.Sqrt(optionMaturity));
+        double d1 = 
+            (Math.Log(spotPrice / strike) + 
+             (domesticRiskFreeRate - foreignRiskFreeRate + Math.Pow(vol, 2)/2) * optionMaturity) / 
+            (vol * Math.Sqrt(optionMaturity));
+        
         double d2 = d1 - vol * Math.Sqrt(optionMaturity);
         double domesticDiscountFactor = Math.Exp(-1 * domesticRiskFreeRate * optionMaturity);
         double foreignDiscountFactor = Math.Exp(-1 * foreignRiskFreeRate * optionMaturity);
@@ -84,7 +91,7 @@ public static class Pricers
                 (spotPrice * foreignDiscountFactor * mnd.Normal.CDF(0, 1, (double)optionTypeSign * d1) -
                         strike * domesticDiscountFactor * mnd.Normal.CDF(0, 1, (double)optionTypeSign * d2)));
         
-        if (outputType.ToUpper() == "PRICE")
+        if (string.Compare(outputType, "PRICE", StringComparison.OrdinalIgnoreCase) == 0)
         {
             return price;
         }

@@ -7,6 +7,8 @@ using DateTime = System.DateTime;
 
 namespace dExcelTests.InterestRates;
 
+using System.Diagnostics;
+
 [TestFixture]
 public class CurveBootstrapperTest
 {
@@ -89,6 +91,7 @@ public class CurveBootstrapperTest
 
         QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.01;
+        Debug.Assert(curve != null, nameof(curve) + " != null");
         Assert.AreEqual(1.0, curve.discount(baseDate.ToQuantLibDate()));
                     
         DateTime date1M = (DateTime) DateUtils.AddTenorToDate(baseDate, "1m", "ZAR", "ModFol");
@@ -155,9 +158,10 @@ public class CurveBootstrapperTest
         QL.Jibar jibar = new(new QL.Period("3m"));
         QL.DayCounter dayCounter = jibar.dayCounter();
         string handle = CurveBootstrapper.Bootstrap("BootstrappedSingleCurve", curveParameters, null, instruments);
-        QL.YieldTermStructure curve = CurveUtils.GetCurveObject(handle);
-        const double tolerance = 1e-6; 
-        
+        QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
+        const double tolerance = 1e-6;
+
+        Debug.Assert(curve != null, nameof(curve) + " != null");
         Assert.AreEqual(1.0, curve.discount(baseDate.ToQuantLibDate()));
         
         DateTime date1M = (DateTime) DateUtils.AddTenorToDate(baseDate, "1m", "ZAR", "ModFol");
@@ -270,7 +274,8 @@ public class CurveBootstrapperTest
         double discountFactor1M = 
             1 / 
             (1 + depositRates["1m"] * dayCounter.yearFraction(baseDate.ToQuantLibDate(), dates["1m"].ToQuantLibDate()));
-        
+
+        Debug.Assert(curve != null, nameof(curve) + " != null");
         Assert.AreEqual(discountFactor1M, curve.discount(dates["1m"].ToQuantLibDate()), tolerance);
         
         double discountFactor3M = 
@@ -391,11 +396,12 @@ public class CurveBootstrapperTest
         
         QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.000000001;
-        QL.Date date3m = ((DateTime)DateUtils.AddTenorToDate(baseDate.ToDateTime(), "3M", "ZAR", "ModFol")).ToQuantLibDate();
+        QL.Date date3M = ((DateTime)DateUtils.AddTenorToDate(baseDate.ToDateTime(), "3M", "ZAR", "ModFol")).ToQuantLibDate();
+        Debug.Assert(curve != null, nameof(curve) + " != null");
         Assert.AreEqual(1.0, curve.discount(baseDate));
         Assert.AreEqual(
-            expected: 1 / (1 + 0.1 * dayCounter.yearFraction(baseDate, date3m)),
-            actual: curve.discount(date3m),
+            expected: 1 / (1 + 0.1 * dayCounter.yearFraction(baseDate, date3M)),
+            actual: curve.discount(date3M),
             delta: tolerance);
         
         // Assert.AreEqual(

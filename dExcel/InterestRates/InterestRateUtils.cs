@@ -17,7 +17,7 @@ public static class InterestRateUtils
        Name = "d.IR_DiscountFactorsToForwardRate",
        Description = 
            "Calculates the forward rate from two discount factors.\n" +
-            "Deprecates AQS Function: 'Disc2ForwardRate'",
+           "Deprecates AQS Function: 'Disc2ForwardRate'",
        Category = "∂Excel: Interest Rates")]
     public static object DiscountFactorsToForwardRate(
        [ExcelArgument(
@@ -25,22 +25,19 @@ public static class InterestRateUtils
             Description = "Options: 'Simple', 'NACA', 'NACS', 'NACQ', 'NACM', 'NACC'")]
         string compoundingConvention,
        [ExcelArgument(
-            Name = "Near DF",
+            Name = "Near Discount Factor",
             Description = "Discount factor nearest to the discount curve base date.")]
         double nearDiscountFactor,
        [ExcelArgument(
-            Name = "Far DF",
+            Name = "Far Discount Factor",
             Description = "Discount factor furthest from the discount curve base date.")]
         double farDiscountFactor,
-       [ExcelArgument(
-            Name = "ΔT",
-            Description = "The year fraction between discount factors.")]
+       [ExcelArgument(Name = "ΔT", Description = "The year fraction between discount factors.")]
         double dT)
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-
         return compoundingConvention.ToUpper() switch
         {
             "SIMPLE" => (nearDiscountFactor / farDiscountFactor - 1) / dT,
@@ -163,13 +160,17 @@ public static class InterestRateUtils
             // Sixth - if the same rate is used for conversion, it should output that rate
             default:
             {
-                if (string.Equals(oldCompoundingConvention, newCompoundingConvention, StringComparison.CurrentCultureIgnoreCase) )
+                if (string.Compare(
+                        strA: oldCompoundingConvention, 
+                        strB: newCompoundingConvention, 
+                        comparisonType: StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return rate;
                 }
 
                 return CommonUtils.DExcelErrorMessage(
-                    !new List<string> { "Simple", "NACC", "NACA", "NACS", "NACQ", "NACM" }.Contains(newCompoundingConvention)
+                    !new List<string> { "Simple", "NACC", "NACA", "NACS", "NACQ", "NACM" }
+                        .Contains(newCompoundingConvention) 
                         ? $"Invalid new compounding convention: {newCompoundingConvention}"
                         : $"Invalid old compounding convention: {oldCompoundingConvention}");
             }

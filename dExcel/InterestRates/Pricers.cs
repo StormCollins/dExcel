@@ -20,8 +20,8 @@ public static class Pricers
     /// <param name="optionMaturity">Option maturity in years.</param>
     /// <param name="optionType">'Call'/'C' or 'Put'/'P'.</param>
     /// <param name="direction">'Long'/'L'/'Buy'/'B' or 'Short'/'S'/'Sell'.</param>
-    /// <param name="outputType">'VERBOSE' or 'PRICE'. Output full calculation details with 'VERBOSE' or just the price
-    /// with 'PRICE'.</param>
+    /// <param name="outputType">'VERBOSE' or 'PRICE'. Output full calculation details ('VERBOSE') or just the price
+    /// ('PRICE').</param>
     /// <returns>Black price for an option on an interest rate future or FRA.</returns>
     [ExcelFunction(
        Name = "d.IR_BlackForwardOptionPricer",
@@ -36,8 +36,7 @@ public static class Pricers
         double forwardRate,
         [ExcelArgument(Name = "K", Description = "Strike.")]
         double strike,
-        [ExcelArgument(Name = "r",
-            Description = "Risk free rate (NACC). Only used for discounting.")]
+        [ExcelArgument(Name = "r", Description = "Risk free rate (NACC). Only used for discounting.")]
         double riskFreeRate,
         [ExcelArgument(Name = "σ", Description = "Volatility.")]
         double vol,
@@ -51,31 +50,38 @@ public static class Pricers
             Name = "(Optional)Output Type", 
             Description = 
                 "'VERBOSE' or 'PRICE'.\n" +
-                "Output full calculation details with 'VERBOSE' or just the price with 'PRICE'.\n" +
+                "Output full calculation details ('VERBOSE') or just the price ('PRICE').\n" +
                 "Default = 'PRICE'")]
         string outputType = "PRICE")
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif 
-        if (!CommonUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
+        if (!ParserUtils.TryParseOptionTypeToSign(
+                optionType: optionType, 
+                sign: out int? optionTypeSign, 
+                errorMessage: out string? optionTypeErrorMessage))
         {
             return optionTypeErrorMessage;
         }  
        
-        if (!CommonUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
+        if (!ParserUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
         {
             return directionErrorMessage;
         }
         
-        double d1 = (Math.Log(forwardRate / strike) + 0.5 * Math.Pow(vol, 2) * optionMaturity) / (vol * Math.Sqrt(optionMaturity));
+        double d1 = 
+            (Math.Log(forwardRate / strike) + 0.5 * Math.Pow(vol, 2) * optionMaturity) / 
+            (vol * Math.Sqrt(optionMaturity));
+        
         double d2 = d1 - vol * Math.Sqrt(optionMaturity);
         double discountFactor = Math.Exp(-1 * riskFreeRate * optionMaturity);
         double price = 
             (double)directionSign * (double)optionTypeSign * discountFactor * 
-            (forwardRate * mnd.Normal.CDF(0, 1, (double) optionTypeSign * d1) - strike * mnd.Normal.CDF(0, 1, (double) optionTypeSign * d2));
+            (forwardRate * mnd.Normal.CDF(0, 1, (double) optionTypeSign * d1) - 
+             strike * mnd.Normal.CDF(0, 1, (double) optionTypeSign * d2));
         
-        if (outputType.ToUpper() == "PRICE")
+        if (outputType.Equals("PRICE", StringComparison.OrdinalIgnoreCase))
         {
             return price;
         }
@@ -103,20 +109,20 @@ public static class Pricers
     /// <param name="frequency"></param>
     /// <param name="optionType">'Call'/'C' or 'Put'/'P'.</param>
     /// <param name="direction"></param>
-    /// <param name="outputType">'VERBOSE' or 'PRICE'. Output full calculation details with 'VERBOSE' or just the price
-    /// with 'PRICE'.</param>
+    /// <param name="outputType">'VERBOSE' or 'PRICE'. Output full calculation details ('VERBOSE') or just the price
+    /// ('PRICE').</param>
     /// <returns>Black price for a swaption.</returns>
     [ExcelFunction(
        Name = "d.IR_BlackSwaptionPricer",
        Description = "Black pricer for swaptions.\nDeprecates AQS function: 'Black'",
        Category = "∂Excel: Interest Rates")]
-    // TODO: Replace OptionType with an Enum.
     public static object BlackSwaptionPricer(
         [ExcelArgument(Name = "Forward Rate", Description = "Forward rate for interest rate future/FRA.")]
         double forwardRate,
         [ExcelArgument(Name = "Strike", Description = "Strike.")]
         double strike,
-        [ExcelArgument(Name = "Risk free rate (NACC)",
+        [ExcelArgument(
+            Name = "Risk free rate (NACC)",
             Description = "Risk free rate (NACC). Only used for discounting.")]
         double riskFreeRate,
         [ExcelArgument(Name = "Vol", Description = "Volatility.")]
@@ -135,31 +141,38 @@ public static class Pricers
             Name = "(Optional)Output Type", 
             Description = 
                 "'VERBOSE' or 'PRICE'.\n" +
-                "Output full calculation details with 'VERBOSE' or just the price with 'PRICE'.\n" +
+                "Output full calculation details ('VERBOSE') or just the price ('PRICE').\n" +
                 "Default = 'PRICE'")]
         string outputType = "PRICE")
     {
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif 
-        if (!CommonUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
+        if (
+            !ParserUtils.TryParseOptionTypeToSign(
+                optionType: optionType, 
+                sign: out int? optionTypeSign, 
+                errorMessage: out string? optionTypeErrorMessage))
         {
             return optionTypeErrorMessage;
         }  
        
-        if (!CommonUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
+        if (!ParserUtils.TryParseDirectionToSign(direction, out int? directionSign, out string? directionErrorMessage))
         {
             return directionErrorMessage;
         }
         
-        double d1 = (Math.Log(forwardRate / strike) + 0.5 * Math.Pow(vol, 2) * optionMaturity) / (vol * Math.Sqrt(optionMaturity));
+        double d1 = 
+            (Math.Log(forwardRate / strike) + 0.5 * Math.Pow(vol, 2) * optionMaturity) / 
+            (vol * Math.Sqrt(optionMaturity));
         double d2 = d1 - vol * Math.Sqrt(optionMaturity);
         double discountFactor = Math.Exp(-1 * riskFreeRate * optionMaturity);
         double price = 
             (double)directionSign * (double)optionTypeSign * discountFactor * 
-            (forwardRate * mnd.Normal.CDF(0, 1, (double) optionTypeSign * d1) - strike * mnd.Normal.CDF(0, 1, (double) optionTypeSign * d2));
+            (forwardRate * mnd.Normal.CDF(0, 1, (double) optionTypeSign * d1) - 
+             strike * mnd.Normal.CDF(0, 1, (double) optionTypeSign * d2));
         
-        if (outputType.ToUpper() == "PRICE")
+        if (outputType.Equals("PRICE", StringComparison.OrdinalIgnoreCase))
         {
             return price;
         }
@@ -196,7 +209,9 @@ public static class Pricers
     public static object Bachelier(
         [ExcelArgument(Name = "Forward Rate", Description = "Forward rate.")]
         double forwardRate,
-        [ExcelArgument(Name = "Risk Free Rate (NACC)", Description = "Risk free rate. Only required pricing options on forwards.")]
+        [ExcelArgument(
+            Name = "Risk Free Rate (NACC)", 
+            Description = "Risk free rate. Only required pricing options on forwards.")]
         double rate,
         [ExcelArgument(Name = "Strike", Description = "Strike.")]
         double strike,
@@ -214,26 +229,22 @@ public static class Pricers
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif 
-        if (!CommonUtils.TryParseOptionTypeToSign(optionType, out int? optionTypeSign, out string? optionTypeErrorMessage))
+        if (!ParserUtils.TryParseOptionTypeToSign(optionType, out int? sign, out string? optionTypeErrorMessage))
         {
             return optionTypeErrorMessage;
         }  
         
         double d = (forwardRate - strike) / (vol * Math.Sqrt(optionMaturity));
-        double value = (double)optionTypeSign * (forwardRate - strike) * mnd.Normal.CDF(0, 1, (double)optionTypeSign * d) + vol * Math.Sqrt(optionMaturity) * mnd.Normal.PDF(0, 1, d);
-        int longOrShortDirection;
-        switch (longOrShort.ToUpper())
+        double value = 
+            (double)sign * (forwardRate - strike) * 
+            mnd.Normal.CDF(0, 1, (double)sign * d) + 
+            vol * Math.Sqrt(optionMaturity) * mnd.Normal.PDF(0, 1, d);
+
+        if (!ParserUtils.TryParseDirectionToSign(longOrShort, out int? direction, out string? directionError))
         {
-            case "LONG":
-                longOrShortDirection = 1;
-                break;
-            case "SHORT":
-                longOrShortDirection = -1;
-                break;
-            default:
-                return CommonUtils.DExcelErrorMessage($"Invalid 'long'/'short' direction: {longOrShort}");
+            return directionError;
         }
 
-        return longOrShortDirection * (forwardOrSpot.ToUpper() == "F" ? value : Math.Exp(-rate * optionMaturity) * value);
+        return (int)direction * (forwardOrSpot.ToUpper() == "F" ? value : Math.Exp(-rate * optionMaturity) * value);
     }
 }

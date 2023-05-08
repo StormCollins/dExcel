@@ -1,8 +1,9 @@
-﻿using dExcel.Currencies;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using QL = QuantLib;
 
 namespace dExcelTests.Currencies;
+
+using dExcel.FX;
 
 [TestFixture]
 public sealed class CurrencyUtilsTests

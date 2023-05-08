@@ -247,6 +247,7 @@
     <PackageReference Include="Omicron.Model" Version="3.0.34-gfe82d59cee" />
     <PackageReference Include="Omicron.Refinitiv" Version="0.1.81-g7a6f78cb15" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
+    <PackageReference Include="System.DirectoryServices.Protocols" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>

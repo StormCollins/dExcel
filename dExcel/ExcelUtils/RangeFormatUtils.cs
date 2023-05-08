@@ -593,7 +593,6 @@ public static class RangeFormatUtils
         }
     }
 
-
     private static void SetNumericalAndDateFormattingBasedOnHeaders(
         Excel.Range? headerRange,
         Excel.Range contentRange,
@@ -604,7 +603,7 @@ public static class RangeFormatUtils
         {
             int firstColumnIndex = ((Excel.Range)headerRange.Cells[1, 1]).Column;
             int firstRowIndex = ((Excel.Range)headerRange.Cells[1, 1]).Row;
-            List<int> indices = new List<int>();
+            List<int> indices = new();
             foreach (Excel.Range cell in headerRange.Cells)
             {
                 foreach (string item in format.Key)

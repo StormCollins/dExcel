@@ -72,16 +72,25 @@ public static class QuantLibDateExtensions
 
     public static QL.Weekday ToQuantLibWeekday(this DayOfWeek dayOfWeek)
     {
-        return dayOfWeek switch
+        switch (dayOfWeek)
         {
-            DayOfWeek.Monday => QL.Weekday.Monday,
-            DayOfWeek.Tuesday => QL.Weekday.Tuesday,
-            DayOfWeek.Wednesday => QL.Weekday.Wednesday,
-            DayOfWeek.Thursday => QL.Weekday.Thursday,
-            DayOfWeek.Friday => QL.Weekday.Friday,
-            DayOfWeek.Saturday => QL.Weekday.Saturday,
-            DayOfWeek.Sunday => QL.Weekday.Sunday,
-        };
+            case DayOfWeek.Monday:
+                return QL.Weekday.Monday;
+            case DayOfWeek.Tuesday:
+                return QL.Weekday.Tuesday;
+            case DayOfWeek.Wednesday:
+                return QL.Weekday.Wednesday;
+            case DayOfWeek.Thursday:
+                return QL.Weekday.Thursday;
+            case DayOfWeek.Friday:
+                return QL.Weekday.Friday;
+            case DayOfWeek.Saturday:
+                return QL.Weekday.Saturday;
+            case DayOfWeek.Sunday:
+                return QL.Weekday.Sunday;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(dayOfWeek), dayOfWeek, null);
+        }
     }
 
     /// <summary>
@@ -105,6 +114,7 @@ public static class QuantLibDateExtensions
             QL.Month.October => 10,
             QL.Month.November => 11,
             QL.Month.December => 12,
+            _ => throw new ArgumentOutOfRangeException(nameof(month), month, null)
         };
     }
     
