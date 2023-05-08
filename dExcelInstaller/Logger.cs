@@ -135,10 +135,10 @@ public class Logger
 
     private static void LoggerPath_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        var path = ((Run)sender).Text;
+        string? path = ((Run)sender).Text;
         if (Path.HasExtension(path))
         {
-            Process.Start(new ProcessStartInfo(Path.GetDirectoryName(path)) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(Path.GetDirectoryName(path) ?? string.Empty) { UseShellExecute = true });
         }
         else
         {

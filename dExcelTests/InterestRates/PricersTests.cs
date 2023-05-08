@@ -65,7 +65,16 @@ public class PricersTests
          const double riskFreeRate = 0.09;
          const double vol = 0.25;
          const double optionMaturity = 4.0 / 12.0;
-         string actual = Pricers.BlackForwardOptionPricer(forwardRate, strike, riskFreeRate, vol, optionMaturity, "Q", "L").ToString();
+         string? actual = 
+              Pricers.BlackForwardOptionPricer(
+                   forwardRate: forwardRate, 
+                   strike: strike, 
+                   riskFreeRate: riskFreeRate, 
+                   vol: vol, 
+                   optionMaturity: optionMaturity, 
+                   optionType: "Q", 
+                   direction: "L").ToString();
+         
          Assert.AreEqual(CommonUtils.DExcelErrorMessage("Invalid option type: 'Q'"), actual);
     }
 
@@ -77,7 +86,16 @@ public class PricersTests
          const double riskFreeRate = 0.09;
          const double vol = 0.25;
          const double optionMaturity = 4.0 / 12.0;
-         string actual = Pricers.BlackForwardOptionPricer(forwardRate, strike, riskFreeRate, vol, optionMaturity, "P", "Q").ToString();
+         string? actual = 
+              Pricers.BlackForwardOptionPricer(
+                   forwardRate: forwardRate, 
+                   strike: strike, 
+                   riskFreeRate: riskFreeRate, 
+                   vol: vol, 
+                   optionMaturity: optionMaturity, 
+                   optionType: "P", 
+                   direction: "Q").ToString();
+         
          Assert.AreEqual(CommonUtils.DExcelErrorMessage("Invalid direction: 'Q'"), actual);
     }
     
@@ -94,8 +112,8 @@ public class PricersTests
         const double vol = 0.25;
         const double optionMaturity = 4.0 / 12.0;
         double discountFactor = Math.Exp(-1 * riskFreeRate * optionMaturity);
-        double putPrice = (1 / discountFactor) * (double)Pricers.BlackForwardOptionPricer(forwardRate, strike, riskFreeRate, vol, optionMaturity, "P", "L");
-        double callPrice = (1 / discountFactor) * (double)Pricers.BlackForwardOptionPricer(forwardRate, strike, riskFreeRate, vol, optionMaturity, "C", "L");
+        double putPrice = 1 / discountFactor * (double)Pricers.BlackForwardOptionPricer(forwardRate, strike, riskFreeRate, vol, optionMaturity, "P", "L");
+        double callPrice = 1 / discountFactor * (double)Pricers.BlackForwardOptionPricer(forwardRate, strike, riskFreeRate, vol, optionMaturity, "C", "L");
         Assert.AreEqual(callPrice, putPrice + forwardRate - strike, 1e-10);
     }
 }

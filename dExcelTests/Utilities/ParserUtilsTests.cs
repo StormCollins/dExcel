@@ -104,7 +104,7 @@ public class ParserUtilsTests
         
         Assert.AreEqual(expectedResult, actualResult);
         if (expectedDayCountConvention != null)
-            Assert.AreEqual(expectedDayCountConvention.name(), actualDayCountConvention.name());
+            Assert.AreEqual(expectedDayCountConvention.name(), actualDayCountConvention?.name());
         Assert.AreEqual(expectedErrorMessage, actualErrorMessage);
     }
     

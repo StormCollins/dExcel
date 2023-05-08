@@ -3,6 +3,7 @@
 using System.Data.SQLite;
 using System.DirectoryServices;
 using System.Security.Principal;
+using ExcelUtils;
 
 internal static class UsageStatsUtils
 {
@@ -42,7 +43,7 @@ internal static class UsageStatsUtils
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message, "∂Excel Error");
+                MessageBox.Show(e.Message, @"∂Excel Error");
             }
         }
     }

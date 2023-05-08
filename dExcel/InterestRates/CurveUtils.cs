@@ -42,17 +42,6 @@ public static class CurveUtils
     }
 
     /// <summary>
-    /// Gets the interpolation object from a given handle.
-    /// </summary>
-    /// <param name="handle">The handle for the relevant curve object.</param>
-    /// <returns>Returns the interpolation object e.g. LogLinear.</returns>   
-    private static string GetInterpolation(string handle)
-    {
-        DataObjectController dataObjectController = DataObjectController.Instance;
-        return ((CurveDetails)dataObjectController.GetDataObject(handle)).DiscountFactorInterpolation;
-    }
-
-    /// <summary>
     /// Creates a QLNet YieldTermStructure curve object which is stored in the DataObjectController.
     /// </summary>
     /// <param name="handle">Handle or name to extract curve from DataObjectController.</param>

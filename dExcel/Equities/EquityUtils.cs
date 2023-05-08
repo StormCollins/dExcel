@@ -161,8 +161,14 @@ public static class EquityUtils
         QL.EuropeanExercise exercise = new(maturityDate.ToQuantLibDate()); 
         QL.VanillaOption vanillaOption = new(payoff, exercise);
         QL.QuoteHandle spotHandle = new(new QL.SimpleQuote(spot));
-        
-        ParserUtils.TryParseQuantLibDayCountConvention(dayCountConvention, out QL.DayCounter? dayCounter, out string errorMessage);
+
+        if (!ParserUtils.TryParseQuantLibDayCountConvention(
+                dayCountConventionToParse: dayCountConvention, 
+                dayCountConvention: out QL.DayCounter? dayCounter,
+                errorMessage: out string? dayCountConventionErrorMessage))
+        {
+            return dayCountConventionErrorMessage;
+        }
 
         QL.FlatForward interestRateCurve =
             new(tradeDate.ToQuantLibDate(),

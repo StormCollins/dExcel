@@ -62,7 +62,7 @@ public class MathUtilsTests
     {
         object[,] xValues = { { 1.0, 1.0, 3.0, 4.0 } };
         object[,] yValues = { { 2.0, 4.0, 6.0, 8.0 } };
-        string actual = MathUtils.Interpolate(xValues, yValues, 1.5, "flat").ToString();
+        string? actual = MathUtils.Interpolate(xValues, yValues, 1.5, "flat").ToString();
         string expected = CommonUtils.DExcelErrorMessage("Duplicate values in x-values range.");
         Assert.AreEqual(expected, actual);
     }

@@ -1,9 +1,9 @@
-﻿namespace dExcelTests.Equities;
-
-using dExcel.Equities;
+﻿using dExcel.Equities;
 using dExcel.Utilities;
 using NUnit.Framework;
 using mnd = MathNet.Numerics.Distributions;
+
+namespace dExcelTests.Equities;
 
 [TestFixture]
 public class PricersTests

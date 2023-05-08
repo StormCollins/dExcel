@@ -2,11 +2,10 @@
 using System.Reflection;
 using ExcelDna.Integration;
 using ExcelDna.Registration;
+using dExcel.Dates;
 using dExcel.Utilities;
 
 namespace dExcel;
-
-using Dates;
 
 public class AddInController : IExcelAddIn
 {
@@ -18,6 +17,12 @@ public class AddInController : IExcelAddIn
     public void AutoOpen()
     {
         string? xllPath = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+        if (xllPath is null)
+        {
+            MessageBox.Show(@"∂Excel xll path not found.", @"∂Excel Error");
+            throw new FileNotFoundException("∂Excel xll path not found.");
+        }
+        
         Assembly.LoadFrom(Path.Combine(xllPath, "dExcelWpf.dll"));
         Assembly.LoadFrom(Path.Combine(xllPath, "FuzzySharp.dll"));
         Assembly.LoadFrom(Path.Combine(xllPath, "MaterialDesignColors.dll"));

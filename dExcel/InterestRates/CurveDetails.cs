@@ -8,7 +8,8 @@ namespace dExcel.InterestRates;
 public class CurveDetails
 {
     /// <summary>
-    /// The term structure object which is used to calculate interpolated or node discount factors, zero rates, forward rates etc.
+    /// The term structure object which is used to calculate interpolated or node discount factors, zero rates,
+    /// forward rates etc.
     /// </summary>
     public object? TermStructure { get; }
   
@@ -43,8 +44,14 @@ public class CurveDetails
     /// <param name="termStructure">The interest rate curve.</param>
     /// <param name="dayCountConvention">The day count convention.</param>
     /// <param name="interpolation">The interpolation style.</param>
-    /// <param name="discountFactorDates">The discount factor dates.</param>
-    /// <param name="discountFactors">The instrument groups. This is only populated if the curve was bootstrapped.
+    /// <param name="discountFactorDates">
+    /// The 'key' or 'node' dates for discount factors. This is useful for plotting the curve.
+    /// </param>
+    /// <param name="discountFactors">
+    /// The discount factors at 'key' or 'node' dates. This is useful for plotting the curve.
+    /// </param>
+    /// <param name="instrumentGroups">
+    /// The instrument groups. This is only populated if the curve was bootstrapped.
     /// </param>
     public CurveDetails(
         object? termStructure,

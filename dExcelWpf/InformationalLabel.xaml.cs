@@ -1,7 +1,6 @@
-﻿namespace dExcelWpf;
+﻿using System.Windows.Controls;
 
-using System.ComponentModel;
-using System.Windows.Controls;
+namespace dExcelWpf;
 
 /// <summary>
 /// Specifies a label with a helpful tooltip.

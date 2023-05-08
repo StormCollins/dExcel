@@ -10,6 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ExcelDna.Integration;
+using ExcelUtils;
 using Utilities;
 
 /// <summary>

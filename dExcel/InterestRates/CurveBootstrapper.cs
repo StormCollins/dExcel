@@ -27,23 +27,19 @@ public static class CurveBootstrapper
         Description = "Bootstraps a single curve i.e. this is not a multi-curve bootstrapper.",
         Category = "∂Excel: Interest Rates")]
     public static string Bootstrap(
-        [ExcelArgument(
-            Name = "Handle",
-            Description =
-                "The 'handle' or name used to refer to the object in memory.\n" +
-                "Each object in a workbook must have a unique handle.")]
+        [ExcelArgument(Name = "Handle", Description = DescriptionUtils.Handle)]
         string handle,
         [ExcelArgument(
             Name = "Curve Parameters",
             Description = 
                 "The curves parameters: " +
                 "'BaseDate', 'RateIndexName', 'RateIndexTenor', 'Interpolation', (Optional)'DiscountCurveHandle', " +
-                "(Optional)'AllowExtrapolation'")]
+                "(Optional)'AllowExtrapolation' (Default = False)")]
         object[,] curveParameters,
         [ExcelArgument(
             Name = "(Optional)Custom Rate Index",
             Description =
-                "Only populate this parameter if you have not supplied a 'RateIndexName' in the curve parameters.")]
+                "Only populate this parameter if you have NOT supplied a 'RateIndexName' in the curve parameters.")]
         object[,]? customRateIndex = null,
         [ExcelArgument(
             Name = "Instrument Groups",
@@ -94,7 +90,7 @@ public static class CurveBootstrapper
         
         if (allowExtrapolation == null)
         {
-            allowExtrapolation = true;
+            allowExtrapolation = false;
         }
         
         QL.IborIndex? rateIndex = null;
@@ -126,7 +122,6 @@ public static class CurveBootstrapper
         //
         //     rateIndex = new IborIndex("Test", new Period(tenor), settlementDays, z.x, z.y, )
         // }
-
 
         if (rateIndex is null)
         {
@@ -204,8 +199,11 @@ public static class CurveBootstrapper
                     }
                 }
             }
-            else if (string.Compare(instrumentType, "Interest Rate Swaps",
-                         StringComparison.InvariantCultureIgnoreCase) == 0)
+            else if (
+                string.Compare(
+                    strA: instrumentType, 
+                    strB: "Interest Rate Swaps",
+                    comparisonType: StringComparison.OrdinalIgnoreCase) == 0)
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
@@ -255,8 +253,13 @@ public static class CurveBootstrapper
                     }
                 }
             }
-            else if (string.Compare(instrumentType, "OISs", StringComparison.InvariantCultureIgnoreCase) == 0)
+            else if (instrumentType.Equals("OISs", StringComparison.OrdinalIgnoreCase))
             {
+                if (rates is null)
+                {
+                    return CommonUtils.DExcelErrorMessage("OIS rates missing.");
+                }
+                
                 for (int i = 0; i < instrumentCount; i++)
                 {
                     if (includeInstruments[i])
@@ -265,7 +268,7 @@ public static class CurveBootstrapper
                             new QL.OISRateHelper(
                                 settlementDays: 2, 
                                 tenor: new QL.Period(tenors?[i]),
-                                rate: new QL.QuoteHandle(new QL.SimpleQuote((double)rates?[i])), 
+                                rate: new QL.QuoteHandle(new QL.SimpleQuote(rates[i])), 
                                 index: rateIndex as QL.OvernightIndex));
                     }
                 }
@@ -273,7 +276,7 @@ public static class CurveBootstrapper
         }
 
         QL.YieldTermStructure termStructure;
-        if (string.Compare(interpolation, "BackwardFlat", StringComparison.InvariantCultureIgnoreCase) == 0)
+        if (interpolation.Equals("BackwardFlat", StringComparison.OrdinalIgnoreCase))
         {
             termStructure =
                 new QL.PiecewiseFlatForward(
@@ -281,15 +284,15 @@ public static class CurveBootstrapper
                     instruments: new QL.RateHelperVector(rateHelpers),
                     dayCounter: rateIndex.dayCounter());
         }
-        else if (string.Compare(interpolation, "Cubic", StringComparison.InvariantCultureIgnoreCase) == 0)
+        else if (interpolation.Equals("Cubic", StringComparison.OrdinalIgnoreCase))
         {
             termStructure =
-                new QL.PiecewiseCubicZero(
+                new QL.PiecewiseSplineCubicDiscount(
                     referenceDate: baseDate.ToQuantLibDate(),
                     instruments: rateHelpers,
                     dayCounter: rateIndex.dayCounter());
         }
-        else if (string.Compare(interpolation, "Exponential", StringComparison.InvariantCultureIgnoreCase) == 0)
+        else if (interpolation.Equals("Exponential", StringComparison.OrdinalIgnoreCase))
         {
             termStructure =
                 new QL.PiecewiseLogLinearDiscount(
@@ -297,7 +300,7 @@ public static class CurveBootstrapper
                     instruments: rateHelpers,
                     dayCounter: rateIndex.dayCounter());
         }
-        else if (string.Compare(interpolation, "ForwardFlat", StringComparison.InvariantCultureIgnoreCase) == 0)
+        else if (interpolation.Equals("FlatForward", StringComparison.OrdinalIgnoreCase))
         {
             termStructure =
                 new QL.PiecewiseFlatForward(
@@ -305,7 +308,7 @@ public static class CurveBootstrapper
                     instruments: rateHelpers,
                     dayCounter: rateIndex.dayCounter());
         }
-        else if (string.Compare(interpolation, "Linear", StringComparison.InvariantCultureIgnoreCase) == 0)
+        else if (interpolation.Equals("Linear", StringComparison.OrdinalIgnoreCase))
         {
             termStructure =
                 new QL.PiecewiseLinearZero(
@@ -313,7 +316,7 @@ public static class CurveBootstrapper
                     instruments: rateHelpers,
                     dayCounter: rateIndex.dayCounter());
         }
-        else if (string.Compare(interpolation, "LogCubic", StringComparison.InvariantCultureIgnoreCase) == 0)
+        else if (interpolation.Equals("LogCubic", StringComparison.OrdinalIgnoreCase))
         {
             termStructure =
                 new QL.PiecewiseLogCubicDiscount(
@@ -351,21 +354,18 @@ public static class CurveBootstrapper
         Description = "Extracts and bootstraps a curve from the Omicron database.",
         Category = "∂Excel: Interest Rates")]
     public static string Get(
-        [ExcelArgument(
-            Name = "Handle",
-            Description =
-                "The 'handle' or name used to refer to the object in memory.\n" +
-                "Each object in a workbook must have a a unique handle.")]
+        [ExcelArgument(Name = "Handle", Description = DescriptionUtils.Handle)]
         string handle,
         [ExcelArgument(
             Name = "Curve Name",
-            Description = "The name of the curve in Omicron. Current available options are:\n" +
-                          "• USD-OIS\n" +
-                          "• ZAR-Swap")]
+            Description = 
+                "The name of the curve in Omicron. Current available options are:\n" +
+                "• USD-OIS\n" +
+                "• ZAR-Swap")]
         string curveName,
         [ExcelArgument(
             Name = "Base Date",
-            Description = "The base date of the curve i.e., the date for which you'd like to extract the curve.")]
+            Description = "The base date of the curve i.e., the date for which to extract the curve.")]
         DateTime baseDate,
         [ExcelArgument(
             Name = "DF Interpolation",
@@ -373,7 +373,6 @@ public static class CurveBootstrapper
         string interpolation = "Exponential")
     {
         // TODO: List the available types of interpolation.
-        // Assume has deposits, FRAs, and Swaps
         // One could create more complicated abstract code for mapping from quotes to 2d tables but I would advise
         // against this.
         string rateIndexName = "";

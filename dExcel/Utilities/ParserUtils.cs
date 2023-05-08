@@ -15,14 +15,6 @@ public static class ParserUtils
     /// <param name="sign">The sign, +1 for 'Long'/'L'/'Buy'/'B' and -1 for 'Short'/'S'/'Sell', if it can parse the
     /// direction.</param>
     /// <param name="errorMessage">The error message if it cannot parse the direction.</param>
-    /// <summary>
-    /// Returns the sign for a given direction (Long/Short i.e., Buy/Sell).
-    /// </summary>
-    /// <param name="direction">Direction: 'Long'/'L'/'Buy'/'B' or 'Short'/'S'/'Sell'.</param>
-    /// <param name="sign">The sign, +1 for 'Long'/'L'/'Buy'/'B' and -1 for 'Short'/'S'/'Sell', if it can parse the
-    /// direction.</param>
-    /// <param name="errorMessage">The error message if it cannot parse the direction.</param>
-    /// <returns>Returns TRUE if the direction is valid i.e., 'Long'/'L'/'Buy'/'B' or 'Short'/'S'/'Sell'.</returns>
     public static bool TryParseDirectionToSign(
         string direction, 
         [NotNullWhen(true)]out int? sign, 

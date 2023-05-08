@@ -359,23 +359,23 @@ public class RibbonController : ExcelRibbon
         thread.Start();
         thread.Join();
 
-        if (formatSettings is { rowHeaderCount: > 0, columnHeaderCount: > 0 })
+        if (formatSettings is { RowHeaderCount: > 0, ColumnHeaderCount: > 0 })
         {
             Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
-            bool hasTwoRowHeaders = formatSettings.Value.rowHeaderCount == 2;
-            bool hasTwoColumnHeaders = formatSettings.Value.columnHeaderCount == 2;
+            bool hasTwoRowHeaders = formatSettings.Value.RowHeaderCount == 2;
+            bool hasTwoColumnHeaders = formatSettings.Value.ColumnHeaderCount == 2;
             RangeFormatUtils.SetColumnAndRowHeaderBasedTableFormatting(hasTwoRowHeaders, hasTwoColumnHeaders);
         }
-        else if (formatSettings is { columnHeaderCount: > 0 })
+        else if (formatSettings is { ColumnHeaderCount: > 0 })
         {
             Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
-            bool hasTwoHeaders = formatSettings.Value.columnHeaderCount == 2;
+            bool hasTwoHeaders = formatSettings.Value.ColumnHeaderCount == 2;
             RangeFormatUtils.SetVerticallyAlignedTableFormatting(hasTwoHeaders);
         }
-        else if (formatSettings is { rowHeaderCount: > 0 })
+        else if (formatSettings is { RowHeaderCount: > 0 })
         {
             Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
-            bool hasTwoHeaders = formatSettings.Value.rowHeaderCount == 2;
+            bool hasTwoHeaders = formatSettings.Value.RowHeaderCount == 2;
             RangeFormatUtils.SetHorizontallyAlignedTableFormatting(hasTwoHeaders);
         }
     }

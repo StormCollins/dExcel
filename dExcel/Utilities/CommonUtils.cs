@@ -1,6 +1,5 @@
 ﻿using ExcelDna.Integration;
 using QL = QuantLib;
-using System.Diagnostics.CodeAnalysis;
 
 namespace dExcel.Utilities;
 
@@ -31,10 +30,10 @@ public static class CommonUtils
     /// <summary>
     /// Returns a ∂Excel specific error message if a curve parameter is missing.
     /// </summary>
-    /// <param name="message">The error message.</param>
+    /// <param name="missingCurveParameter">The name of the missing curve parameter.</param>
     /// <returns>∂Excel error message with ∂Excel prefix as well as the curve parameter is missing.</returns>
     public static string CurveParameterMissingErrorMessage(string missingCurveParameter) => 
-        DExcelErrorMessage($"Curve parameter missing: '{missingCurveParameter}'.");
+        DExcelErrorMessage($"Missing curve parameter: '{missingCurveParameter}'.");
     
     /// <summary>
     /// Returns an error message that the calendar is unsupported. 
