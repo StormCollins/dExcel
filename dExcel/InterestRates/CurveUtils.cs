@@ -115,7 +115,7 @@ public static class CurveUtils
             QL.DiscountCurve discountCurve = 
                 new(
                     dates: new QL.DateVector(dates), 
-                    discounts: new QL.DoubleVector(discountFactors), 
+                    discounts: new QL.DoubleVector(discountFactors),
                     dayCounter: dayCountConvention, 
                     calendar: calendar);
 
@@ -131,19 +131,16 @@ public static class CurveUtils
             return dataObjectController.Add(handle, curveDetails);
         }
 
-        if (
-            string.Compare(interpolationParameter, "CUBIC", StringComparison.OrdinalIgnoreCase) == 0)
+        if (interpolationParameter.Equals("CUBIC", StringComparison.OrdinalIgnoreCase))
         {
             QL.NaturalCubicDiscountCurve discountCurve = 
-                new(
-                    dates: new QL.DateVector(dates), 
+                new(dates: new QL.DateVector(dates),
                     discounts: new QL.DoubleVector(discountFactors), 
                     dayCounter: dayCountConvention, 
                     calendar: calendar);
             
             CurveDetails curveDetails = 
-                new(
-                    termStructure: discountCurve, 
+                new(termStructure: discountCurve, 
                     dayCountConvention: dayCountConvention, 
                     interpolation: interpolationParameter, 
                     discountFactorDates: dates.Select(x => x.ToDateTime()), 

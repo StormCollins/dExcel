@@ -4,6 +4,7 @@ using mnd = MathNet.Numerics.Distributions;
 using mnl = MathNet.Numerics.LinearAlgebra;
 using mnr = MathNet.Numerics.Random;
 using mns = MathNet.Numerics.Statistics;
+using QL = QuantLib;
 
 namespace dExcel.Mathematics;
 
@@ -144,7 +145,7 @@ public static class StatsUtils
                 results[i, j] = mnd.Normal.InvCDF(0.0, 1.0, random.NextDouble());
             }
         }
-
+        
         return results;
     }
 
@@ -192,4 +193,38 @@ public static class StatsUtils
         mnl.Matrix<double> results = randomNumbers * choleskyMatrix;
         return results.ToArray();
     }
+
+    [ExcelFunction(
+        Name = "d.Stats_GBM",
+        Description = "A GBM path generator",
+        Category = "∂Excel: Stats")]
+    public static object gbmPathGenerator(
+        string handle,
+        double initialValue, double drift, double standardDeviation, int seed,
+        double maturityInYears, int numberOfTimeSteps, int numberOfPaths)
+    {
+        QL.UniformRandomGenerator uniformRandomGenerator = new();
+        QL.UniformRandomSequenceGenerator uniformSequenceGenerator = new((uint)numberOfTimeSteps, uniformRandomGenerator);
+        QL.GaussianRandomSequenceGenerator gaussianSequenceRandomGenerator = new(uniformSequenceGenerator);
+        QL.GeometricBrownianMotionProcess gbmProcess = new(initialValue, drift, standardDeviation);
+        QL.GaussianPathGenerator gaussianPathGenerator =
+            new(gbmProcess, maturityInYears, (uint)numberOfTimeSteps, gaussianSequenceRandomGenerator, false);
+
+        // object[,] output = new object[numberOfPaths, numberOfTimeSteps];
+        // for (int i = 0; i < numberOfPaths; i++)
+        // {
+        //     var path = gaussianPathGenerator.next().value();
+        //     for (int j = 0; j < numberOfTimeSteps; j++)
+        //     {
+        //         output[i, j] = path.value((uint)j);
+        //     }
+        // }
+
+        var instance = DataObjectController.Instance;
+        return instance.Add(handle, gaussianPathGenerator);
+    }
+
+
+    
 }
+

@@ -1,4 +1,5 @@
-﻿using dExcel.Dates;
+﻿using System.Diagnostics;
+using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.InterestRates;
 using NUnit.Framework;
@@ -7,16 +8,9 @@ using DateTime = System.DateTime;
 
 namespace dExcelTests.InterestRates;
 
-using System.Diagnostics;
-
 [TestFixture]
 public class CurveBootstrapperTest
 {
-    public void TestCurveBootstrapper()
-    {
-        
-    }
-    
     [Test]
     public void Bootstrap_MissingBaseDate_Test()
     {
