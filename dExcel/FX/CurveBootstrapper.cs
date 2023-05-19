@@ -1,5 +1,4 @@
-﻿using dExcel.CommonEnums;
-using dExcel.Dates;
+﻿using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.InterestRates;
 using dExcel.Utilities;
@@ -20,7 +19,8 @@ public static class CurveBootstrapper
     /// <param name="handle">The 'handle' or name used to refer to the object in memory.
     /// Each object in a workbook must have a unique handle.</param>
     /// <param name="curveParameters">The parameters required to construct the curve.</param>
-    /// <param name="customBaseCurrencyIndex">(Optional)A custom rate index.</param>
+    /// <param name="customBaseCurrencyIndex">(Optional)A custom rate index for the base currency.</param>
+    /// <param name="customQuoteCurrencyIndex">(Optional)A custom rate index for the quote currency.</param>
     /// <param name="instrumentGroups">The list of instrument groups used in the bootstrapping.</param>
     /// <returns>A handle to a bootstrapped curve.</returns>
     [ExcelFunction(
@@ -40,12 +40,12 @@ public static class CurveBootstrapper
         [ExcelArgument(
             Name = "(Optional)Custom Base Currency Index",
             Description =
-                "Only populate this parameter if you have NOT supplied a 'BaseCurrencyIndex' in the curve parameters.")]
+                "Only populate this if you have NOT supplied a 'BaseCurrencyIndex' in the curve parameters.")]
         object[,]? customBaseCurrencyIndex = null,
         [ExcelArgument(
             Name = "(Optional)Custom Quote Currency Index",
             Description =
-                "Only populate this parameter if you have NOT supplied a 'QuoteCurrencyIndex' in the curve parameters.")]
+                "Only populate this if you have NOT supplied a 'QuoteCurrencyIndex' in the curve parameters.")]
         object[,]? customQuoteCurrencyIndex = null,
         [ExcelArgument(
             Name = "Instrument Groups",

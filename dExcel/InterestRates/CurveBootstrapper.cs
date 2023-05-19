@@ -1,4 +1,5 @@
-﻿using dExcel.Dates;
+﻿using dExcel.CommonEnums;
+using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.Utilities;
 using ExcelDna.Integration;
@@ -7,13 +8,32 @@ using QL = QuantLib;
 
 namespace dExcel.InterestRates;
 
-using CommonEnums;
-
 /// <summary>
 /// A class containing a collection of interest rate curve bootstrapping utilities.
 /// </summary>
 public static class CurveBootstrapper
 {
+    /// <summary>
+    /// Lists all available interpolation methods for interest rate curve bootstrapping.
+    /// </summary>
+    /// <returns>A column of all available interpolation methods for interest rate curve bootstrapping.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_GetAvailableBootstrappingInterpolationMethods",
+        Description = "Returns all available interpolation methods for interest rate curve bootstrapping.",
+        Category = "∂Excel: Interest Rates")]
+    public static object GetAvailableBootstrappingInterpolationMethods()
+    {
+        Array methods = Enum.GetValues(typeof(CurveInterpolationMethods));
+        object[,] output = new object[methods.Length + 1, 1];
+        output[0, 0] = "IR Bootstrapping Interpolation Methods";
+        int i = 0;
+        foreach (CurveInterpolationMethods method in methods)
+        {
+            output[i++, 0] = method.ToString();
+        }
+        
+        return output;
+    }
     
     /// <summary>
     /// Bootstraps an interest rate curve. It supports multi-curve bootstrapping.
@@ -42,7 +62,7 @@ public static class CurveBootstrapper
         [ExcelArgument(
             Name = "(Optional)Custom Rate Index",
             Description =
-                "Only populate this parameter if you have NOT supplied a 'RateIndexName' in the curve parameters.")]
+                "Only populate this if you have NOT supplied a 'RateIndexName' in the curve parameters.")]
         object[,]? customRateIndex = null,
         [ExcelArgument(
             Name = "Instrument Groups",
@@ -262,60 +282,6 @@ public static class CurveBootstrapper
                 }
             }
         }
-
-        // QL.YieldTermStructure termStructure;
-        // if (interpolation.Equals("BackwardFlat", StringComparison.OrdinalIgnoreCase))
-        // {
-        //     termStructure =
-        //         new QL.PiecewiseFlatForward(
-        //             referenceDate: baseDate.ToQuantLibDate(),
-        //             instruments: new QL.RateHelperVector(rateHelpers),
-        //             dayCounter: rateIndex.dayCounter());
-        // }
-        // else if (interpolation.Equals("Cubic", StringComparison.OrdinalIgnoreCase))
-        // {
-        //     termStructure =
-        //         new QL.PiecewiseSplineCubicDiscount(
-        //             referenceDate: baseDate.ToQuantLibDate(),
-        //             instruments: rateHelpers,
-        //             dayCounter: rateIndex.dayCounter());
-        // }
-        // else if (interpolation.Equals("Exponential", StringComparison.OrdinalIgnoreCase))
-        // {
-        //     termStructure =
-        //         new QL.PiecewiseLogLinearDiscount(
-        //             referenceDate: baseDate.ToQuantLibDate(),
-        //             instruments: rateHelpers,
-        //             dayCounter: rateIndex.dayCounter());
-        // }
-        // else if (interpolation.Equals("FlatForward", StringComparison.OrdinalIgnoreCase))
-        // {
-        //     termStructure =
-        //         new QL.PiecewiseFlatForward(
-        //             referenceDate: baseDate.ToQuantLibDate(),
-        //             instruments: rateHelpers,
-        //             dayCounter: rateIndex.dayCounter());
-        // }
-        // else if (interpolation.Equals("Linear", StringComparison.OrdinalIgnoreCase))
-        // {
-        //     termStructure =
-        //         new QL.PiecewiseLinearZero(
-        //             referenceDate: baseDate.ToQuantLibDate(),
-        //             instruments: rateHelpers,
-        //             dayCounter: rateIndex.dayCounter());
-        // }
-        // else if (interpolation.Equals("LogCubic", StringComparison.OrdinalIgnoreCase))
-        // {
-        //     termStructure =
-        //         new QL.PiecewiseLogCubicDiscount(
-        //             referenceDate: baseDate.ToQuantLibDate(),
-        //             instruments: rateHelpers,
-        //             dayCounter: rateIndex.dayCounter());
-        // }
-        // else
-        // {
-        //     return CommonUtils.DExcelErrorMessage($"Unknown interpolation method: '{interpolation}'");
-        // }
 
         QL.YieldTermStructure? termStructure =
             BootstrapCurveFromRateHelpers(

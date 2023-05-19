@@ -453,4 +453,21 @@ public class CurveBootstrapperTest
         Assert.AreEqual(((object[,])discountFactors)[0, 0], 1.000000000000d); 
         Assert.AreEqual((double)((object[,])discountFactors)[1, 0], 0.922680208459d, 1e-10d);
     }
+
+    [Test]
+    public void GetAvailableBootstrappingInterpolationMethods()
+    {
+        Array methods = Enum.GetValues(typeof(CurveInterpolationMethods));
+        object[,] expectedOutput = new object[methods.Length + 1, 1];
+        expectedOutput[0, 0] = "IR Bootstrapping Interpolation Methods";
+        int i = 0;
+        foreach (CurveInterpolationMethods method in methods)
+        {
+            expectedOutput[i++, 0] = method.ToString();
+        }
+        
+        object[,] actualOutput = (object[,])CurveBootstrapper.GetAvailableBootstrappingInterpolationMethods();
+        
+        Assert.AreEqual(expectedOutput, actualOutput);
+    }
 }
