@@ -162,33 +162,17 @@ public static class CurveBootstrapper
             allowExtrapolation = false;
         }
         
-        QL.IborIndex? quoteCurrencyIndex = null;
-        if (quoteCurrencyIndexName is not null)
-        {
-            quoteCurrencyIndex =
-                quoteCurrencyIndexName switch
-                {
-                    "EURIBOR" => new QL.Euribor(new QL.Period(quoteCurrencyIndexTenor), quoteCurrencyForecastCurve),
-                    "FEDFUND" => new QL.FedFunds(quoteCurrencyForecastCurve),
-                    "JIBAR" => new QL.Jibar(new QL.Period(baseCurrencyIndexTenor), quoteCurrencyForecastCurve),
-                    "USD-LIBOR" => new QL.USDLibor(new QL.Period(baseCurrencyIndexTenor), quoteCurrencyForecastCurve),
-                    _ => null,
-                };
-        }
+        QL.IborIndex? quoteCurrencyIndex = 
+            dExcel.InterestRates.CurveBootstrapper.GetIborIndex(
+                indexName: quoteCurrencyIndexName, 
+                indexTenor: quoteCurrencyIndexTenor, 
+                forecastCurve: quoteCurrencyForecastCurve);
         
-        QL.IborIndex? baseCurrencyIndex = null;
-        if (baseCurrencyIndexName is not null)
-        {
-            baseCurrencyIndex =
-                baseCurrencyIndexName switch
-                {
-                    "EURIBOR" => new QL.Euribor(new QL.Period(baseCurrencyIndexTenor), baseCurrencyForecastCurve),
-                    "FEDFUND" => new QL.FedFunds(baseCurrencyForecastCurve),
-                    "JIBAR" => new QL.Jibar(new QL.Period(baseCurrencyIndexTenor), baseCurrencyForecastCurve),
-                    "USD-LIBOR" => new QL.USDLibor(new QL.Period(baseCurrencyIndexTenor), baseCurrencyForecastCurve),
-                    _ => null,
-                };
-        }
+        QL.IborIndex? baseCurrencyIndex = 
+            dExcel.InterestRates.CurveBootstrapper.GetIborIndex(
+                indexName: baseCurrencyIndexName, 
+                indexTenor: baseCurrencyIndexTenor, 
+                forecastCurve: baseCurrencyForecastCurve);
 
         if (baseCurrencyIndex is null)
         {

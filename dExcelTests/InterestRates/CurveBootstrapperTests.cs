@@ -19,7 +19,7 @@ public class CurveBootstrapperTest
         {
             {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
-            {"RateIndexName", "JIBAR"},
+            {"RateIndexName", RateIndices.JIBAR.ToString()},
             {"RateIndexTenor", "3m"},
             {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
@@ -28,9 +28,9 @@ public class CurveBootstrapperTest
         {
             {"Deposits", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"1m", "JIBAR", 0.1, "TRUE"},
-            {"3m", "JIBAR", 0.1, "TRUE"},
-            {"6m", "JIBAR", 0.1, "TRUE"},
+            {"1m", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
+            {"3m", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
+            {"6m", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
         };
         
         string handle = 
@@ -71,9 +71,9 @@ public class CurveBootstrapperTest
         {
             {"Deposits", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"1m", "JIBAR", depositRates["1m"], "TRUE"},
-            {"3m", "JIBAR", depositRates["3m"], "TRUE"},
-            {"6m", "JIBAR", depositRates["6m"], "TRUE"},
+            {"1m", RateIndices.JIBAR.ToString(), depositRates["1m"], "TRUE"},
+            {"3m", RateIndices.JIBAR.ToString(), depositRates["3m"], "TRUE"},
+            {"6m", RateIndices.JIBAR.ToString(), depositRates["6m"], "TRUE"},
         };
         
         QL.DayCounter dayCounter = new QL.Actual365Fixed();
@@ -112,7 +112,7 @@ public class CurveBootstrapperTest
             {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
-            {"RateIndexName", "JIBAR"},
+            {"RateIndexName", RateIndices.JIBAR.ToString()},
             {"RateIndexTenor", "3m"},
             {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
@@ -129,9 +129,9 @@ public class CurveBootstrapperTest
         {
             {"Deposits", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"1m", "JIBAR", depositRates["1m"], "TRUE"},
-            {"3m", "JIBAR", depositRates["3m"], "TRUE"},
-            {"6m", "JIBAR", depositRates["6m"], "TRUE"},
+            {"1m", RateIndices.JIBAR.ToString(), depositRates["1m"], "TRUE"},
+            {"3m", RateIndices.JIBAR.ToString(), depositRates["3m"], "TRUE"},
+            {"6m", RateIndices.JIBAR.ToString(), depositRates["6m"], "TRUE"},
         };
        
         Dictionary<string, double> fraRates = 
@@ -145,8 +145,8 @@ public class CurveBootstrapperTest
         {
             {"FRAs", "", "", ""},
             {"FraTenors", "RateIndex", "Rates", "Include"},
-            {"6x9", "JIBAR", fraRates["6x9"], "TRUE"},
-            {"9x12", "JIBAR", fraRates["9x12"], "TRUE"},
+            {"6x9", RateIndices.JIBAR.ToString(), fraRates["6x9"], "TRUE"},
+            {"9x12", RateIndices.JIBAR.ToString(), fraRates["9x12"], "TRUE"},
         };
 
         object[] instruments = {depositInstruments, fraInstruments};
@@ -200,7 +200,7 @@ public class CurveBootstrapperTest
             {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
-            {"RateIndexName", "JIBAR"},
+            {"RateIndexName", RateIndices.JIBAR.ToString()},
             {"RateIndexTenor", "3m"},
             {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
@@ -217,9 +217,9 @@ public class CurveBootstrapperTest
         {
             {"Deposits", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"1m", "JIBAR", depositRates["1m"], "TRUE"},
-            {"3m", "JIBAR", depositRates["3m"], "TRUE"},
-            {"6m", "JIBAR", depositRates["6m"], "TRUE"},
+            {"1m", RateIndices.JIBAR.ToString(), depositRates["1m"], "TRUE"},
+            {"3m", RateIndices.JIBAR.ToString(), depositRates["3m"], "TRUE"},
+            {"6m", RateIndices.JIBAR.ToString(), depositRates["6m"], "TRUE"},
         };
        
         Dictionary<string, double> fraRates = 
@@ -233,8 +233,8 @@ public class CurveBootstrapperTest
         {
             {"FRAs", "", "", ""},
             {"FraTenors", "RateIndex", "Rates", "Include"},
-            {"6x9", "JIBAR", fraRates["6x9"], "TRUE"},
-            {"9x12", "JIBAR", fraRates["9x12"], "TRUE"},
+            {"6x9", RateIndices.JIBAR.ToString(), fraRates["6x9"], "TRUE"},
+            {"9x12", RateIndices.JIBAR.ToString(), fraRates["9x12"], "TRUE"},
         };
 
         Dictionary<string, double> swapRates = 
@@ -248,8 +248,8 @@ public class CurveBootstrapperTest
         {
             {"Interest Rate Swaps", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"2y", "JIBAR", swapRates["2y"], "TRUE"},
-            {"3y", "JIBAR", swapRates["3y"], "TRUE"},
+            {"2y", RateIndices.JIBAR.ToString(), swapRates["2y"], "TRUE"},
+            {"3y", RateIndices.JIBAR.ToString(), swapRates["3y"], "TRUE"},
         };
 
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
@@ -350,7 +350,7 @@ public class CurveBootstrapperTest
             {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToDateTime().ToOADate()},
-            {"RateIndexName", "JIBAR"},
+            {"RateIndexName", RateIndices.JIBAR.ToString()},
             {"RateIndexTenor", "3m"},
             {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
@@ -359,24 +359,24 @@ public class CurveBootstrapperTest
         {
             {"Deposits", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"3m", "JIBAR", 0.1, "TRUE"},
-            {"6m", "JIBAR", 0.1, "TRUE"},
+            {"3m", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
+            {"6m", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
         };
                    
         object[,] fraInstruments = 
         {
             {"FRAs", "", "", ""},
             {"FraTenors", "RateIndex", "Rates", "Include"},
-            {"6x9", "JIBAR", 0.1, "TRUE"},
-            {"9x12", "JIBAR", 0.1, "TRUE"},
+            {"6x9", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
+            {"9x12", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
         };
             
         object[,] swapInstruments =
         {
             {"Interest Rate Swaps", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"2y", "JIBAR", 0.1, "TRUE"},
-            {"3y", "JIBAR", 0.1, "TRUE"},
+            {"2y", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
+            {"3y", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
         };
             
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};

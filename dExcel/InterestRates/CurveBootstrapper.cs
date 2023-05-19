@@ -13,6 +13,7 @@ namespace dExcel.InterestRates;
 /// </summary>
 public static class CurveBootstrapper
 {
+
     /// <summary>
     /// Lists all available interpolation methods for interest rate curve bootstrapping.
     /// </summary>
@@ -34,7 +35,53 @@ public static class CurveBootstrapper
         
         return output;
     }
-    
+
+    /// <summary>
+    /// Gets the IBOR index for the given name and tenor and can also apply the forecast curve if supplied.
+    /// </summary>
+    /// <param name="indexName">The index name.</param>
+    /// <param name="indexTenor">The index tenor e.g., "3M", "1Y" etc.</param>
+    /// <param name="forecastCurve">The forecast curve for the index.</param>
+    /// <returns>The IBOR index, if successful, otherwise null.</returns>
+    public static QL.IborIndex? GetIborIndex(
+        string? indexName,
+        string? indexTenor,
+        QL.RelinkableYieldTermStructureHandle? forecastCurve = null)
+    {
+        if (!Enum.TryParse(indexName, out RateIndices iborName))
+        {
+            return null;
+        }
+        
+        QL.IborIndex? index;
+        if (forecastCurve is null)
+        {
+            index =
+                iborName switch
+                {
+                    RateIndices.EURIBOR => new QL.Euribor(new QL.Period(indexTenor)),
+                    RateIndices.FEDFUND => new QL.FedFunds(),
+                    RateIndices.JIBAR => new QL.Jibar(new QL.Period(indexTenor)),
+                    RateIndices.USD_LIBOR => new QL.USDLibor(new QL.Period(indexTenor)),
+                    _ => null,
+                };
+        }
+        else 
+        {
+            index =
+                iborName switch
+                {
+                    RateIndices.EURIBOR => new QL.Euribor(new QL.Period(indexTenor), forecastCurve),
+                    RateIndices.FEDFUND => new QL.FedFunds(forecastCurve),
+                    RateIndices.JIBAR => new QL.Jibar(new QL.Period(indexTenor), forecastCurve),
+                    RateIndices.USD_LIBOR => new QL.USDLibor(new QL.Period(indexTenor), forecastCurve),
+                    _ => null,
+                };
+        }
+
+        return index;
+    }
+
     /// <summary>
     /// Bootstraps an interest rate curve. It supports multi-curve bootstrapping.
     /// Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR.
@@ -116,19 +163,7 @@ public static class CurveBootstrapper
             allowExtrapolation = false;
         }
         
-        QL.IborIndex? rateIndex = null;
-        if (rateIndexName is not null)
-        {
-            rateIndex =
-                rateIndexName switch
-                {
-                    "EURIBOR" => new QL.Euribor(new QL.Period(rateIndexTenor)),
-                    "FEDFUND" => new QL.FedFunds(),
-                    "JIBAR" => new QL.Jibar(new QL.Period(rateIndexTenor)),
-                    "USD-LIBOR" => new QL.USDLibor(new QL.Period(rateIndexTenor)),
-                    _ => null,
-                };
-        }
+        QL.IborIndex? rateIndex = GetIborIndex(rateIndexName, rateIndexTenor, null);
         // else
         // {
         //     string? tenor = ExcelTable.GetTableValue<string>(customRateIndex, "Value", "Tenor");
@@ -311,7 +346,15 @@ public static class CurveBootstrapper
         DataObjectController dataObjectController = DataObjectController.Instance;
         return dataObjectController.Add(handle, curveDetails);
     }
-
+    
+    /// <summary>
+    /// Bootstraps a curve (single or multi-curve) given a list of rate helpers.
+    /// </summary>
+    /// <param name="rateHelpers">Rate helpers.</param>
+    /// <param name="referenceDate">The curve base date.</param>
+    /// <param name="dayCountConvention">The day count convention.</param>
+    /// <param name="interpolation">The interpolation method.</param>
+    /// <returns>A bootstrapped term structure, if it succeeds, otherwise null.</returns>
     public static QL.YieldTermStructure? BootstrapCurveFromRateHelpers(
         QL.RateHelperVector rateHelpers,
         DateTime referenceDate,

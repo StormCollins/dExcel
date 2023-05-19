@@ -36,7 +36,6 @@ public class CurveUtilsTests
         { 0.62 },
     };
     
-    
     private static readonly object[,] IncompatiblySizedDiscountFactorRange =
     {
         { 1.00 },
@@ -99,5 +98,22 @@ public class CurveUtilsTests
                 $"({DatesRange.GetLength(0)} ≠ {IncompatiblySizedDiscountFactorRange.GetLength(0)}).");
         
         Assert.AreEqual(expected, actual);
+    }
+    
+    
+    [Test]
+    public void GetAvailableRateIndicesTest()
+    {
+        Array rateIndices = Enum.GetValues(typeof(RateIndices));
+        object[,] expectedOutput = new object[rateIndices.Length + 1, 1];
+        expectedOutput[0, 0] = "Interest Rate Indices";
+        int i = 0;
+        foreach (RateIndices index in rateIndices)
+        {
+            expectedOutput[i++, 0] = index.ToString();
+        }
+        object[,] actualOutput = (object[,])CurveUtils.GetAvailableRateIndices();
+        
+        Assert.AreEqual(expectedOutput, actualOutput);
     }
 }

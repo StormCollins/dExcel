@@ -1,4 +1,5 @@
-﻿using dExcel.Dates;
+﻿using dExcel.CommonEnums;
+using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.Utilities;
 using ExcelDna.Integration;
@@ -11,6 +12,24 @@ namespace dExcel.InterestRates;
 /// </summary>
 public static class CurveUtils
 {
+    /// <summary>
+    /// Lists all available rate indices.
+    /// </summary>
+    /// <returns>A list of all available rate indices.</returns>
+    public static object GetAvailableRateIndices()
+    {
+        Array rateIndices = Enum.GetValues(typeof(RateIndices));
+        object[,] output = new object[rateIndices.Length + 1, 1];
+        output[0, 0] = "Interest Rate Indices";
+        int i = 0;
+        foreach (RateIndices index in rateIndices)
+        {
+            output[i++, 0] = index.ToString();
+        }
+        
+        return output;
+    }
+    
     public static CurveDetails GetCurveDetails(string handle)
     {
         DataObjectController controller = DataObjectController.Instance;

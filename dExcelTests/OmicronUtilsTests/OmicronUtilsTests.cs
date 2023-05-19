@@ -1,5 +1,6 @@
 ﻿namespace dExcelTests.OmicronUtilsTests;
 
+using dExcel.CommonEnums;
 using NUnit.Framework;
 using dExcel.OmicronUtils;
 using Omicron;
@@ -194,7 +195,7 @@ public class OmicronUtilsTests
         List<QuoteValue>? quoteValues = OmicronUtils.DeserializeOmicronObjects(FxBasisSwapJson); 
         FxBasisSwap fxBasisSwap = 
             new(
-                BaseIndex: new RateIndex("JIBAR", new Tenor(3, TenorUnit.Month)), 
+                BaseIndex: new RateIndex(RateIndices.JIBAR.ToString(), new Tenor(3, TenorUnit.Month)), 
                 SpreadIndex: new RateIndex("USD-LIBOR", new Tenor(3, TenorUnit.Month)), 
                 Tenor: new Tenor(12, TenorUnit.Year));
         Assert.AreEqual(quoteValues?[0].Type, fxBasisSwap);
