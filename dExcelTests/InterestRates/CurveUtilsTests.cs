@@ -1,4 +1,5 @@
-﻿using dExcel.InterestRates;
+﻿using dExcel.CommonEnums;
+using dExcel.InterestRates;
 using dExcel.Utilities;
 using NUnit.Framework;
 
@@ -10,9 +11,9 @@ public class CurveUtilsTests
     private static readonly object[,] CurveParameters =
     {
         { "Parameter", "Value" },
-        { "Calendars", "ZAR"},
+        { "Calendars", "ZAR" },
         { "DayCountConvention", "Actual365" },
-        { "Interpolation", "Exponential" },
+        { "Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString() },
     };
 
     private static readonly object[,] DatesRange =

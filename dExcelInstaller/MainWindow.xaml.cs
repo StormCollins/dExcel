@@ -19,6 +19,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 using System.Security.Principal;
 using System.Data.SQLite;
 using System.DirectoryServices;
+using dExcel.Utilities;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
@@ -117,10 +118,7 @@ public partial class MainWindow : Window
             writeCommand.ExecuteNonQuery();
         }
 
-        if (string.Compare(
-                strA: currentDExcelVersion,
-                strB: "Not Installed",
-                comparisonType: StringComparison.InvariantCultureIgnoreCase) == 0)
+        if (currentDExcelVersion.IgnoreCaseEquals("Not Installed"))
         {
             this.Uninstall.IsEnabled = false;
         }

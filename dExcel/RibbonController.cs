@@ -74,7 +74,7 @@ public class RibbonController : ExcelRibbon
         thread.Start();
         thread.Join();
 
-        if (string.Compare(dashBoardAction, "OpenTestingWorkbook", true) == 0)
+        if (dashBoardAction.IgnoreCaseEquals("OpenTestingWorkbook"))
         {
             Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
 #if DEBUG

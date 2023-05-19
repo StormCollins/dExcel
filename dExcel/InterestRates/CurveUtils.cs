@@ -110,7 +110,8 @@ public static class CurveUtils
         IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
         (QL.Calendar? calendar, string errorMessage) = DateUtils.ParseCalendars(calendarsParameter);  
 
-        if (string.Compare(interpolationParameter, "EXPONENTIAL", StringComparison.OrdinalIgnoreCase) == 0)
+        if (interpolationParameter.IgnoreCaseEquals(
+                CommonEnums.CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()))
         {
             QL.DiscountCurve discountCurve = 
                 new(
@@ -211,7 +212,7 @@ public static class CurveUtils
         {
             for (int i = 0; i < dates.Length; i++)
             {
-                discountFactors[i, 0] = curve.discount(DateTime.FromOADate((double)dates[i]).ToQuantLibDate());
+                discountFactors[i, 0] = curve.discount(((double)dates[i]).ToQuantLibDate());
             }    
         }
         

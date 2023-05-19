@@ -4,6 +4,8 @@ using Microsoft.Office.Core;
 
 namespace dExcel.ExcelUtils;
 
+using Utilities;
+
 public static class VersionUtils
 {
     public static bool TrySetWorkbookdExcelVersion(string version)
@@ -15,7 +17,7 @@ public static class VersionUtils
         {
             foreach (DocumentProperty prop in properties)
             {
-                if (string.Compare(prop.Name, "dExcel Version", StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (prop.Name.IgnoreCaseEquals("dExcel Version"))
                 {
                     prop.Value += $",{version}";
                     return true;
@@ -40,7 +42,7 @@ public static class VersionUtils
 
         foreach (DocumentProperty prop in properties)
         {
-            if (string.Compare(prop.Name, "dExcel Version", StringComparison.InvariantCultureIgnoreCase) == 0)
+            if (prop.Name.IgnoreCaseEquals("dExcel Version"))
             {
                 version = prop.Value.ToString();
                 return true;

@@ -86,6 +86,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\dExcelWpf\dExcelWpf.csproj" />
+    <ProjectReference Include="..\dExcel\dExcel.csproj" />
   </ItemGroup>
 
 </Project>

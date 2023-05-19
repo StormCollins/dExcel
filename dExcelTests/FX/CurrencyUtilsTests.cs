@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using QL = QuantLib;
 
-namespace dExcelTests.Currencies;
+namespace dExcelTests.FX;
 
 using dExcel.FX;
 
@@ -16,7 +16,7 @@ public sealed class CurrencyUtilsTests
         yield return new TestCaseData("ZAR").Returns(new QL.ZARCurrency().code());
         yield return new TestCaseData("Invalid").Returns(null);
     }
-    
+
     [Test]
     [TestCaseSource(nameof(CurrencyTestData))]
     public string? TestParseCurrency(string currencyToParse)

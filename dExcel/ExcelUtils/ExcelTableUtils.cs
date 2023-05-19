@@ -78,7 +78,7 @@ public static class ExcelTableUtils
             return column;
         }
 
-        if (string.Compare(columnHeader, "FRATenors", StringComparison.InvariantCultureIgnoreCase) == 0)
+        if (columnHeader.IgnoreCaseEquals("FRATenors"))
         {
             List<T> column =
                 Enumerable
@@ -174,11 +174,18 @@ public static class ExcelTableUtils
         int rowIndexOfColumnHeaders = 1)
     {
         int columnIndex = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader.ToUpper());
-        int rowIndex = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader.ToUpper()) + rowIndexOfColumnHeaders + 1;
-        if (columnIndex == -1  || rowIndex <= rowIndexOfColumnHeaders)
+        if (columnIndex == -1)
         {
             return default;
         }
+        
+        int unadjustedRowIndex = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader.ToUpper());
+        if (unadjustedRowIndex == -1)
+        {
+            return default;
+        }
+        
+        int rowIndex = unadjustedRowIndex + rowIndexOfColumnHeaders + 1;
 
         if (typeof(T) == typeof(DateTime))
         {
@@ -232,8 +239,8 @@ public static class ExcelTableUtils
             throw new ArgumentException(
                 CommonUtils.DExcelErrorMessage($"Invalid Day Count Convention: {table[rowIndex, columnIndex]}"));
         }
-
-        return (T)Convert.ChangeType(table[rowIndex, columnIndex], typeof(T));
+        
+        return (T?)table[rowIndex, columnIndex];
     }
     
     /// <summary>

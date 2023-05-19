@@ -5,7 +5,7 @@ using mnd = MathNet.Numerics.Distributions;
 namespace dExcel.FX;
 
 /// <summary>
-/// A collection of pricers for equity derivatives.
+/// A collection of pricers for FX derivatives.
 /// </summary>
 public static class Pricers
 {
@@ -32,9 +32,9 @@ public static class Pricers
         double spotPrice,
         [ExcelArgument(Name = "K", Description = "Strike.")]
         double strike,
-        [ExcelArgument(Name = "domesticRiskFreeRate", Description = "Domestic risk free rate (NACC).")]
+        [ExcelArgument(Name = "Domestic Risk Free Rate", Description = "Domestic risk free rate (NACC).")]
         double domesticRiskFreeRate,
-        [ExcelArgument(Name = "foreignRiskFreeRate", Description = "Foreign risk free rate (NACC).")]
+        [ExcelArgument(Name = "Foreign Risk Free Rate", Description = "Foreign risk free rate (NACC).")]
         double foreignRiskFreeRate,
         [ExcelArgument(Name = "Vol", Description = "Volatility.")]
         double vol,
@@ -91,7 +91,7 @@ public static class Pricers
                 (spotPrice * foreignDiscountFactor * mnd.Normal.CDF(0, 1, (double)optionTypeSign * d1) -
                         strike * domesticDiscountFactor * mnd.Normal.CDF(0, 1, (double)optionTypeSign * d2)));
         
-        if (string.Compare(outputType, "PRICE", StringComparison.OrdinalIgnoreCase) == 0)
+        if (outputType.IgnoreCaseEquals("Price"))
         {
             return price;
         }

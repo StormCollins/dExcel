@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using dExcel.CommonEnums;
 using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.InterestRates;
@@ -20,7 +21,7 @@ public class CurveBootstrapperTest
             {"Parameter", "Value"},
             {"RateIndexName", "JIBAR"},
             {"RateIndexTenor", "3m"},
-            {"Interpolation", "Linear"},
+            {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
 
         object[,] instrumentGroups = 
@@ -39,7 +40,7 @@ public class CurveBootstrapperTest
                 customRateIndex: null,
                 instrumentGroups: instrumentGroups);
         
-            const string expected = "#∂Excel Error: Curve parameter missing: 'BASEDATE'.";
+            const string expected = "#∂Excel Error: Missing curve parameter: 'BASEDATE'.";
             Assert.AreEqual(expected, handle);
     }
         
@@ -55,7 +56,7 @@ public class CurveBootstrapperTest
             {"BaseDate", baseDate.ToOADate()},
             {"RateIndexName", "JIBAR"},
             {"RateIndexTenor", "3m"},
-            {"Interpolation", "Linear"},
+            {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
 
         Dictionary<string, double> depositRates = 
@@ -113,7 +114,7 @@ public class CurveBootstrapperTest
             {"BaseDate", baseDate.ToOADate()},
             {"RateIndexName", "JIBAR"},
             {"RateIndexTenor", "3m"},
-            {"Interpolation", "Linear"},
+            {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
 
         Dictionary<string, double> depositRates = 
@@ -201,7 +202,7 @@ public class CurveBootstrapperTest
             {"BaseDate", baseDate.ToOADate()},
             {"RateIndexName", "JIBAR"},
             {"RateIndexTenor", "3m"},
-            {"Interpolation", "Exponential"},
+            {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
 
         Dictionary<string, double> depositRates = 
@@ -351,7 +352,7 @@ public class CurveBootstrapperTest
             {"BaseDate", baseDate.ToDateTime().ToOADate()},
             {"RateIndexName", "JIBAR"},
             {"RateIndexTenor", "3m"},
-            {"Interpolation", "Linear"},
+            {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
             
         object[,] depositInstruments = 
