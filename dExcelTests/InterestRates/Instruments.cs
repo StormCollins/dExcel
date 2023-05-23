@@ -70,11 +70,11 @@ public class Instruments
                     forward: new QL.QuoteHandle(new QL.SimpleQuote(0.1)),
                     dayCounter: new QL.Actual365Fixed()));
         
-        QL.HullWhiteProcess hullWhiteProcess1 = new(termStructure, 0.25, 0.02);
-        QL.HullWhiteProcess hullWhiteProcess2 = new(termStructure, 0.15, 0.05);
+        QL.HullWhiteProcess hullWhiteProcess0 = new(termStructure, 0.25, 0.02);
+        QL.HullWhiteProcess hullWhiteProcess1 = new(termStructure, 0.15, 0.05);
         QL.StochasticProcess1DVector stochasticProcess1DVector = new();
+        stochasticProcess1DVector.Add(hullWhiteProcess0);
         stochasticProcess1DVector.Add(hullWhiteProcess1);
-        stochasticProcess1DVector.Add(hullWhiteProcess2);
         QL.Matrix correlationMatrix = new(2, 2);
         correlationMatrix.set(0, 0, 1);
         correlationMatrix.set(0, 1, 0.5);
@@ -85,7 +85,7 @@ public class Instruments
         int numberOfTimeSteps = 5;
         double maturity = 1.0;
         double timeStepSize = maturity / numberOfTimeSteps;
-        QL.Date maturityDate = new(31, QL.Month.March, 2023);
+        QL.Date maturityDate = new(31, QL.Month.March, 2024);
         QL.Calendar calendar = new QL.SouthAfrica();
         QL.Schedule schedule = new(
             effectiveDate: referenceDate, 
@@ -101,13 +101,37 @@ public class Instruments
         QL.DoubleVector timeSteps = new(schedule.dates().Select(x => dayCounter.yearFraction(referenceDate, x)));
         QL.TimeGrid timeGrid = new(timeSteps);
         QL.UniformRandomGenerator uniformRandomGenerator = new();
-        QL.UniformRandomSequenceGenerator uniformRandomSequenceGenerator = new(2 * 5, uniformRandomGenerator);
+        QL.UniformRandomSequenceGenerator uniformRandomSequenceGenerator = new(2 * 4, uniformRandomGenerator);
         QL.GaussianRandomSequenceGenerator gaussianRandomSequenceGenerator = new(uniformRandomSequenceGenerator);
-        
         QL.GaussianMultiPathGenerator multiPathGenerator = 
             new(stochasticProcessArray, timeGrid, gaussianRandomSequenceGenerator);
         
-        QL.MultiPath x = multiPathGenerator.next().value();
+        QL.MultiPath paths = multiPathGenerator.next().value();
+
+        for (uint hullWhiteProcessPath = 0; hullWhiteProcessPath < 2; hullWhiteProcessPath++)
+        {
+            Console.Write($"Hull-White Process {hullWhiteProcessPath}: ");
+            for (uint timeStep = 0; timeStep < 5; timeStep++)
+            {
+               Console.Write($"{paths.at(hullWhiteProcessPath).value(timeStep):0.####} "); 
+            }
+
+            Console.WriteLine();
+        }
+
+        paths = multiPathGenerator.next().value();
+
+        for (uint hullWhiteProcessPath = 0; hullWhiteProcessPath < 2; hullWhiteProcessPath++)
+        {
+            Console.Write($"Hull-White Process {hullWhiteProcessPath}: ");
+            for (uint timeStep = 0; timeStep < 5; timeStep++)
+            {
+               Console.Write($"{paths.at(hullWhiteProcessPath).value(timeStep):0.####} "); 
+            }
+
+            Console.WriteLine();
+        }
+
         
     }
 }
