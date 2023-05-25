@@ -466,7 +466,7 @@ public class CurveBootstrapperTest
             expectedOutput[i++, 0] = method.ToString();
         }
         
-        object[,] actualOutput = (object[,])CurveBootstrapper.GetAvailableBootstrappingInterpolationMethods();
+        object[,] actualOutput = (object[,])CurveBootstrapper.GetBootstrappingInterpolationMethods();
         
         Assert.AreEqual(expectedOutput, actualOutput);
     }

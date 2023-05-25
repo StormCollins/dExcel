@@ -51,14 +51,14 @@ namespace dExcel.InterestRates
             (QL.Calendar? calendar, string? calendarErrorMessage) = DateUtils.ParseCalendars(calendars);
             
             QL.Schedule schedule = 
-                new(startDate.ToQuantLibDate(), 
-                    endDate.ToQuantLibDate(),
-                    new QL.Period(frequency),
-                    calendar,
-                    (QL.BusinessDayConvention)qlBusinessDayConvention,
-                    (QL.BusinessDayConvention)qlBusinessDayConvention,
-                    QL.DateGeneration.Rule.Backward,
-                    false);
+                new(effectiveDate: startDate.ToQuantLibDate(), 
+                    terminationDate: endDate.ToQuantLibDate(),
+                    tenor: new QL.Period(frequency),
+                    calendar: calendar,
+                    convention: (QL.BusinessDayConvention)qlBusinessDayConvention,
+                    terminationDateConvention: (QL.BusinessDayConvention)qlBusinessDayConvention,
+                    rule: QL.DateGeneration.Rule.Backward,
+                    endOfMonth: false);
             
             QL.VanillaSwap vanillaSwap =
                 new(

@@ -29,7 +29,13 @@ public static class CurveUtils
         
         return output;
     }
-    
+   
+    /// <summary>
+    /// Gets all "details" stored with a curve in the DataObject controller e.g., day count convention, interpolation
+    /// method, etc.
+    /// </summary>
+    /// <param name="handle">The 'handle' or name used to refer to the object in memory.</param>
+    /// <returns>A <see cref="CurveDetails"/> object.</returns>
     public static CurveDetails GetCurveDetails(string handle)
     {
         DataObjectController controller = DataObjectController.Instance;
@@ -69,11 +75,13 @@ public static class CurveUtils
     /// <param name="discountFactorsRange">The discount factors for the corresponding dates.</param>
     /// <returns>A string containing the handle and time stamp.</returns>
     [ExcelFunction(
-        Name = "d.Curve_Create",
-        Description = "Creates an interest rate curve given dates and corresponding discount factors.",
+        Name = "d.Curve_CreateFromDiscountFactors",
+        Description = 
+            "Creates an interest rate curve given dates and corresponding discount factors.\n" +
+            "Use 'd.Curve_GetInterpolationMethodsForDiscountFactors' to view available interpolation methods.",
         Category = "∂Excel: Interest Rates",
         IsVolatile = true)]
-    public static string Create(
+    public static string CreateFromDiscountFactors(
         [ExcelArgument(
             Name = "Handle",
             Description = "The 'handle' or name used to store & retrieve the curve.")]
@@ -127,72 +135,63 @@ public static class CurveUtils
 
         string? calendarsParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Calendars", 0);
         IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
-        (QL.Calendar? calendar, string errorMessage) = DateUtils.ParseCalendars(calendarsParameter);  
+        (QL.Calendar? calendar, string errorMessage) = DateUtils.ParseCalendars(calendarsParameter);
 
-        if (interpolationParameter.IgnoreCaseEquals(
-                CommonEnums.CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()))
+        QL.YieldTermStructure discountCurve;
+        
+        if (interpolationParameter.IgnoreCaseEquals(CurveInterpolationMethods.CubicSpline_On_DiscountFactors))
         {
-            QL.DiscountCurve discountCurve = 
-                new(
+            discountCurve = 
+                new QL.NaturalCubicDiscountCurve (
+                    dates: new QL.DateVector(dates),
+                    discounts: new QL.DoubleVector(discountFactors), 
+                    dayCounter: dayCountConvention, 
+                    calendar: calendar);
+        }
+        else if (interpolationParameter.IgnoreCaseEquals(CurveInterpolationMethods.Exponential_On_DiscountFactors))
+        {
+            discountCurve = 
+                new QL.DiscountCurve(
                     dates: new QL.DateVector(dates), 
                     discounts: new QL.DoubleVector(discountFactors),
                     dayCounter: dayCountConvention, 
                     calendar: calendar);
-
-            CurveDetails curveDetails = 
-                new(
-                    termStructure: discountCurve, 
-                    dayCountConvention: dayCountConvention, 
-                    interpolation: interpolationParameter, 
-                    discountFactorDates: dates.Select(x => x.ToDateTime()), 
-                    discountFactors: discountFactors);
-            
-            DataObjectController dataObjectController = DataObjectController.Instance;
-            return dataObjectController.Add(handle, curveDetails);
         }
-
-        if (interpolationParameter.Equals("CUBIC", StringComparison.OrdinalIgnoreCase))
+        else if (interpolationParameter.IgnoreCaseEquals(CurveInterpolationMethods.LogCubic_On_DiscountFactors))
         {
-            QL.NaturalCubicDiscountCurve discountCurve = 
-                new(dates: new QL.DateVector(dates),
-                    discounts: new QL.DoubleVector(discountFactors), 
-                    dayCounter: dayCountConvention, 
-                    calendar: calendar);
-            
-            CurveDetails curveDetails = 
-                new(termStructure: discountCurve, 
-                    dayCountConvention: dayCountConvention, 
-                    interpolation: interpolationParameter, 
-                    discountFactorDates: dates.Select(x => x.ToDateTime()), 
-                    discountFactors: discountFactors);
-            
-            DataObjectController dataObjectController = DataObjectController.Instance;
-            return dataObjectController.Add(handle, curveDetails);
-        }
-
-        
-        if (interpolationParameter.ToLower() == "LOGCUBIC")
-        {
-            QL.MonotonicLogCubicDiscountCurve discountCurve = 
-                new(
+            discountCurve = 
+                new QL.MonotonicLogCubicDiscountCurve (
                     dates: new QL.DateVector(dates), 
                     discounts: new QL.DoubleVector(discountFactors), 
                     dayCounter: dayCountConvention, 
                     calendar: calendar);
             
-            CurveDetails curveDetails = 
-                new(
-                    termStructure: discountCurve, 
-                    dayCountConvention: dayCountConvention, 
-                    interpolation: interpolationParameter, 
-                    discountFactorDates: dates.Select(x => x.ToDateTime()), 
-                    discountFactors: discountFactors);
-            
-            DataObjectController dataObjectController = DataObjectController.Instance;
-            return dataObjectController.Add(handle, curveDetails);
+        }
+        else if (interpolationParameter.IgnoreCaseEquals(CurveInterpolationMethods.NaturalLogCubic_On_DiscountFactors))
+        {
+            discountCurve = 
+                new QL.NaturalLogCubicDiscountCurve(
+                    dates: new QL.DateVector(dates), 
+                    discounts: new QL.DoubleVector(discountFactors),
+                    dayCounter: dayCountConvention, 
+                    calendar: calendar);
+        }
+        else
+        {
+            return CommonUtils.DExcelErrorMessage($"Unsupported interpolation method: {interpolationParameter}");
         }
         
-        return CommonUtils.DExcelErrorMessage($"Unsupported interpolation method: {interpolationParameter}");
+        CurveDetails curveDetails = 
+            new(
+                termStructure: discountCurve, 
+                dayCountConvention: dayCountConvention, 
+                interpolation: interpolationParameter, 
+                discountFactorDates: dates.Select(x => x.ToDateTime()), 
+                discountFactors: discountFactors);
+        
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return dataObjectController.Add(handle, curveDetails);
+        
     }
 
     /// <summary>
@@ -414,10 +413,39 @@ public static class CurveUtils
                     output[row, j] = "";
                 }
             }
-            
             row++;
         }
         
         return output; 
+    }
+
+    /// <summary>
+    /// Gets all the available interpolation methods for discount factors. This is in particularly useful for the
+    /// function <see cref="CreateFromDiscountFactors"/>.
+    /// </summary>
+    /// <returns>A 2D column array of interpolation methods for discount factors.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_GetInterpolationMethodsForDiscountFactors",
+        Description = 
+            "Gets all the available interpolation methods for discount factors.\n" +
+            "This is in particularly useful for the function d.Curve_CreateFromDiscountFactors.",
+        Category = "∂Excel: Interest Rates")]
+    public static object GetInterpolationMethodsForDiscountFactors()
+    {
+        List<string> interpolationMethods = 
+            Enum.GetNames(typeof(CurveInterpolationMethods))
+                .Select(x => x.ToString().ToUpper())
+                .Where(x => x.Contains("DISCOUNTFACTORS"))
+                .ToList();
+        
+        object[,] output = new object[interpolationMethods.Count + 1, 1];
+        output[0, 0] = "Interpolation Methods for Discount Factors";
+        int i = 1;
+        foreach (string interpolationMethod in interpolationMethods)
+        {
+            output[i++, 0] = interpolationMethod;
+        }
+        
+        return output;
     }
 }

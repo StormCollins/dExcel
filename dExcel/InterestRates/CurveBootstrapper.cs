@@ -19,10 +19,10 @@ public static class CurveBootstrapper
     /// </summary>
     /// <returns>A column of all available interpolation methods for interest rate curve bootstrapping.</returns>
     [ExcelFunction(
-        Name = "d.Curve_GetAvailableBootstrappingInterpolationMethods",
+        Name = "d.Curve_GetBootstrappingInterpolationMethods",
         Description = "Returns all available interpolation methods for interest rate curve bootstrapping.",
         Category = "∂Excel: Interest Rates")]
-    public static object GetAvailableBootstrappingInterpolationMethods()
+    public static object GetBootstrappingInterpolationMethods()
     {
         Array methods = Enum.GetValues(typeof(CurveInterpolationMethods));
         object[,] output = new object[methods.Length + 1, 1];
@@ -36,6 +36,27 @@ public static class CurveBootstrapper
         return output;
     }
 
+    /// <summary>
+    /// Gets a list of all available rate indices for interest rate curve bootstrapping.
+    /// </summary>
+    /// <returns>A 2D column of rate index names.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_GetRateIndices",
+        Description = "Returns all available rate indices for interest rate curve bootstrapping.",
+        Category = "∂Excel: Interest Rates")]
+    public static object GetRateIndices()
+    {
+        List<string> indices = Enum.GetNames(typeof(RateIndices)).Select(x => x.ToString().ToUpper()).ToList();
+        object[,] output = new object[indices.Count + 1, 1];
+        output[0, 0] = "Rate Indices";
+        int i = 1;
+        foreach (string index in indices)
+        {
+            output[i++, 0] = index;
+        }
+        return output;
+    }
+    
     /// <summary>
     /// Gets the IBOR index for the given name and tenor and can also apply the forecast curve if supplied.
     /// </summary>

@@ -45,7 +45,7 @@ public class CurveUtilsTests
         { 0.96 },
     };
 
-    private static readonly string Handle = CurveUtils.Create("ZarSwapCurve", CurveParameters, DatesRange, DiscountFactorRange);
+    private static readonly string Handle = CurveUtils.CreateFromDiscountFactors("ZarSwapCurve", CurveParameters, DatesRange, DiscountFactorRange);
         
     [TestCase]
     public void ZarGetZeroRatesTest()
@@ -73,7 +73,7 @@ public class CurveUtilsTests
     [Test]
     public void ZarGetDiscountFactorsTest()
     {
-        string handle1 = CurveUtils.Create("ZarSwapCurve", CurveParameters, DatesRange, DiscountFactorRange); 
+        string handle1 = CurveUtils.CreateFromDiscountFactors("ZarSwapCurve", CurveParameters, DatesRange, DiscountFactorRange); 
         object[] interpolationDates = { new DateTime(2022, 01, 15).ToOADate() };
         object[,] dfs = (object[,])CurveUtils.GetDiscountFactors(handle1, interpolationDates);
 
@@ -90,7 +90,7 @@ public class CurveUtilsTests
     public void TestIncompatiblySizedDateAndDiscountFactorsRange()
     {
         string actual = 
-            CurveUtils.Create("ErrorCurve", CurveParameters, DatesRange, IncompatiblySizedDiscountFactorRange);
+            CurveUtils.CreateFromDiscountFactors("ErrorCurve", CurveParameters, DatesRange, IncompatiblySizedDiscountFactorRange);
         
         string expected = 
             CommonUtils.DExcelErrorMessage(
