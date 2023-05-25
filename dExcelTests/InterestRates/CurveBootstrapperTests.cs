@@ -5,7 +5,6 @@ using dExcel.ExcelUtils;
 using dExcel.InterestRates;
 using NUnit.Framework;
 using QL = QuantLib;
-using DateTime = System.DateTime;
 
 namespace dExcelTests.InterestRates;
 
