@@ -65,8 +65,8 @@
 
   <ItemGroup>
     <PackageReference Include="ExcelDna.Integration" Version="1.7.0-rc4" />
-    <PackageReference Include="MaterialDesignColors" Version="2.1.1" />
-    <PackageReference Include="MaterialDesignThemes" Version="4.7.1" />
+    <PackageReference Include="MaterialDesignColors" Version="2.1.5-ci268" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.10.0-ci268" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0-preview.4.23259.5" />
   </ItemGroup>
