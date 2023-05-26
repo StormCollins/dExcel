@@ -146,6 +146,15 @@ public static class CurveBootstrapper
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(rateIndexTenor).ToUpper());
         }
 
+        string? rateIndexForecastCurve =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "RateIndexForecastCurve", columnHeaderIndex);
+
+        string? otherIndexName =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "OtherIndex", columnHeaderIndex);
+
+        string? otherRateIndexTenor =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "OtherRateIndexTenor", columnHeaderIndex);
+
         string? interpolation =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Interpolation", columnHeaderIndex);
         
@@ -196,8 +205,8 @@ public static class CurveBootstrapper
             string? instrumentType = ExcelTableUtils.GetTableLabel(instruments);
             List<string>? tenors = ExcelTableUtils.GetColumn<string>(instruments, "Tenors");
             List<string>? fraTenors = ExcelTableUtils.GetColumn<string>(instruments, "FraTenors");
-            List<DateTime>? endDates = ExcelTableUtils.GetColumn<DateTime>(instruments, "EndDates");
             List<double>? rates = ExcelTableUtils.GetColumn<double>(instruments, "Rates");
+            List<double>? basisSpreads = ExcelTableUtils.GetColumn<double>(instruments, "BasisSpreads");
             List<bool>? includeInstruments = ExcelTableUtils.GetColumn<bool>(instruments, "Include");
 
             if (includeInstruments is null)
@@ -207,7 +216,7 @@ public static class CurveBootstrapper
 
             int instrumentCount = includeInstruments.Count;
 
-            if (string.Equals(instrumentType, "Deposits", StringComparison.OrdinalIgnoreCase))
+            if (instrumentType.IgnoreCaseEquals("Deposits"))
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
@@ -350,6 +359,214 @@ public static class CurveBootstrapper
     }
     
     /// <summary>
+    /// Bootstraps an interest rate curve. It supports multi-curve bootstrapping.
+    /// Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR.
+    /// </summary>
+    /// <param name="handle">The 'handle' or name used to refer to the object in memory.
+    /// Each object in a workbook must have a unique handle.</param>
+    /// <param name="curveParameters">The parameters required to construct the curve.</param>
+    /// <param name="customRateIndex">(Optional)A custom rate index.</param>
+    /// <param name="instrumentGroups">The list of instrument groups used in the bootstrapping.</param>
+    /// <returns>A handle to a bootstrapped curve.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_BootstrapTenorBasisCurve",
+        Description = "Bootstraps a single currency interest rate curve. Supports multi-curve bootstrapping.",
+        Category = "∂Excel: Interest Rates",
+        IsVolatile = true,
+        IsMacroType = true)]
+    public static string BootstrapTenorBasisCurve(
+        [ExcelArgument(Name = "Handle", Description = DescriptionUtils.Handle)]
+        string handle,
+        [ExcelArgument(
+            Name = "Curve Parameters",
+            Description = "The curves parameters.")]
+        object[,] curveParameters,
+        [ExcelArgument(
+            Name = "(Optional)Custom Rate Index",
+            Description =
+                "Only populate this if you have NOT supplied a 'RateIndexName' in the curve parameters.")]
+        object[,]? customRateIndex = null,
+        [ExcelArgument(
+            Name = "Instrument Groups",
+            Description = "The instrument groups used to bootstrap the curve e.g., 'Deposits', 'FRAs', 'Swaps'.")]
+        params object[] instrumentGroups)
+    {
+        int columnHeaderIndex = ExcelTableUtils.GetRowIndex(curveParameters, "Parameter");
+        
+        DateTime baseDate =
+            ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", columnHeaderIndex);
+        
+        if (baseDate == default)
+        {
+            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseDate).ToUpper());
+        }
+
+        QL.Settings.instance().setEvaluationDate(baseDate.ToQuantLibDate());
+
+        string? baseIndexName =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexName", columnHeaderIndex);
+        
+        if (baseIndexName is null && customRateIndex is null)
+        {
+            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseIndexName).ToUpper());
+        }
+
+        string? baseIndexTenor =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexTenor", columnHeaderIndex);
+        
+        if (baseIndexTenor is null && customRateIndex is null && baseIndexName != "FEDFUND")
+        {
+            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseIndexTenor).ToUpper());
+        }
+
+        string? baseIndexForecastCurveHandle =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexForecastCurve", columnHeaderIndex);
+
+        string? baseIndexDiscountCurveHandle =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexDiscountCurve", columnHeaderIndex);
+
+        string? otherIndexName =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "OtherIndex", columnHeaderIndex);
+
+        string? otherRateIndexTenor =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "OtherRateIndexTenor", columnHeaderIndex);
+
+        string? interpolation =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Interpolation", columnHeaderIndex);
+        
+        if (interpolation == null)
+        {
+            return CommonUtils.CurveParameterMissingErrorMessage(nameof(interpolation).ToUpper());
+        }
+        
+        bool? allowExtrapolation =
+            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex);
+        
+        if (allowExtrapolation == null)
+        {
+            allowExtrapolation = false;
+        }
+        
+        QL.RelinkableYieldTermStructureHandle baseIndexForecastCurve = new();
+        if (baseIndexForecastCurveHandle != null)
+        {
+            QL.YieldTermStructure? yieldTermStructure = CurveUtils.GetCurveObject(baseIndexForecastCurveHandle);
+            baseIndexForecastCurve.linkTo(yieldTermStructure);
+        }
+
+        QL.RelinkableYieldTermStructureHandle baseIndexDiscountCurve = new();
+        if (baseIndexDiscountCurveHandle != null)
+        {
+            QL.YieldTermStructure? yieldTermStructure = CurveUtils.GetCurveObject(baseIndexDiscountCurveHandle);
+            baseIndexForecastCurve.linkTo(yieldTermStructure);
+        }
+
+        QL.IborIndex? baseIndex = GetIborIndex(baseIndexName, baseIndexTenor, baseIndexForecastCurve);
+        QL.IborIndex? otherIndex = GetIborIndex(otherIndexName, otherRateIndexTenor,null);
+
+        // else
+        // {
+        //     string? tenor = ExcelTable.GetTableValue<string>(customRateIndex, "Value", "Tenor");
+        //     int? settlementDays = ExcelTable.GetTableValue<int>(customRateIndex, "Value", "SettlementDay");
+        //     string? currency = ExcelTable.GetTableValue<string>(customRateIndex, "Value", "Currency");
+        //     (Currency x, Calendar y) z =
+        //         currency switch
+        //         {
+        //             // TODO: Use reflection here.
+        //             "USD" => (new USDCurrency(), new UnitedStates()),
+        //             "ZAR" => (new ZARCurrency(), new SouthAfrica()),
+        //             _ => throw new NotImplementedException(),
+        //         };
+        //
+        //     rateIndex = new IborIndex("Test", new Period(tenor), settlementDays, z.x, z.y, )
+        // }
+
+        if (baseIndex is null)
+        {
+            return CommonUtils.DExcelErrorMessage($"Unsupported rate index: {baseIndexName}");
+        }
+
+        QL.RateHelperVector rateHelpers = new();
+
+        foreach (object instrumentGroup in instrumentGroups)
+        {
+            object[,] instruments = (object[,]) instrumentGroup;
+            string? instrumentType = ExcelTableUtils.GetTableLabel(instruments);
+            List<string>? tenors = ExcelTableUtils.GetColumn<string>(instruments, "Tenors");
+            List<double>? basisSpreads = ExcelTableUtils.GetColumn<double>(instruments, "BasisSpreads");
+            List<bool>? includeInstruments = ExcelTableUtils.GetColumn<bool>(instruments, "Include");
+
+            if (includeInstruments is null)
+            {
+                continue;
+            }
+
+            int instrumentCount = includeInstruments.Count;
+
+            if (instrumentType.Equals("Tenor Basis Swaps", StringComparison.OrdinalIgnoreCase))
+            {
+                if (basisSpreads is null)
+                {
+                    return CommonUtils.DExcelErrorMessage("Basis spreads missing.");
+                }
+
+                if (otherIndexName is null)
+                {
+
+                }
+                
+                for (int i = 0; i < instrumentCount; i++)
+                {
+                    if (includeInstruments[i])
+                    {
+                        rateHelpers.Add(
+                            new QL.IborIborBasisSwapRateHelper(
+                                settlementDays: 2, 
+                                tenor: new QL.Period(tenors?[i]),
+                                basis: new QL.QuoteHandle(new QL.SimpleQuote(basisSpreads[i])),
+                                baseIndex: baseIndex,
+                                calendar: baseIndex.fixingCalendar(),
+                                convention: baseIndex.businessDayConvention(),
+                                endOfMonth: false,
+                                otherIndex: otherIndex,
+                                discountHandle: baseIndexDiscountCurve,
+                                bootstrapBaseCurve: false));
+                    }
+                }
+            }
+
+        }
+
+        QL.YieldTermStructure? termStructure =
+            BootstrapCurveFromRateHelpers(
+                rateHelpers: rateHelpers, 
+                referenceDate: baseDate, 
+                dayCountConvention: baseIndex.dayCounter(), 
+                interpolation: interpolation);
+        
+        if (termStructure is null)
+        {
+            return CommonUtils.DExcelErrorMessage($"Unknown interpolation method: '{interpolation}'");
+        }
+        
+        if ((bool)allowExtrapolation)
+        {
+            termStructure.enableExtrapolation();
+        }
+        
+        CurveDetails curveDetails = 
+            new(termStructure: termStructure, 
+                dayCountConvention: baseIndex.dayCounter(), 
+                interpolation: interpolation, 
+                discountFactorDates: null,  
+                discountFactors: null, 
+                instrumentGroups: instrumentGroups);
+        
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return dataObjectController.Add(handle, curveDetails);
+    }
+    
+    /// <summary>
     /// Bootstraps a curve (single or multi-curve) given a list of rate helpers.
     /// </summary>
     /// <param name="rateHelpers">Rate helpers.</param>
@@ -407,6 +624,7 @@ public static class CurveBootstrapper
         return null;
     }
     
+
     /// <summary>
     /// Extracts and bootstraps a curve from the Omicron database.
     /// </summary>
