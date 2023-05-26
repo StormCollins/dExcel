@@ -56,6 +56,25 @@
 				onAction='CalculateRange'
 				screentip='Select a range and click this button to recalculate it.'
 				tag='calculate-range-small-blue.ico'/>
+			  <menu
+			    id='menuInsertEnums'
+				label='Insert Enums'
+				getImage='GetImage'
+				supertip='Inserts drop down menus for common lists (i.e., "Enums").'
+				tag='list-small-blue.ico'>
+				<button
+				  id='btnRateIndices'
+				  label='Insert Rate Indices Drop Menu'
+				  onAction='InsertRateIndicesDropDownMenu'/>
+				<button
+				  id='btnInterpolationMethodsForBootstrapping'
+				  label='Insert Interpolation Methods for Bootstrapping Drop Menu'
+				  onAction='InsertInterpolationMethodsForBootstrappingDropDownMenu'/>
+				<button
+				  id='btnInterpolationMethodsForDiscountFactors'
+				  label='Insert Interpolation Methods for Discount Factors Drop Menu'
+				  onAction='InsertInterpolationMethodsForDiscountFactorsDropDownMenu'/>
+			  </menu>
 			  <button
 				id='btnManagePasswords'
 				label='Manage Passwords'
@@ -63,6 +82,7 @@
 				enabled='false'
 				size='large'
 				tag='manage-passwords-large-blue.ico'/>
+			 
 			  <splitButton id='btnWorkbookHyperlinks' size='large'>
 				  <button
 					id='btnCreateLinkToSheet'

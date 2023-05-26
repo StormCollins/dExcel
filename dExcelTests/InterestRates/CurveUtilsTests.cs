@@ -102,7 +102,7 @@ public class CurveUtilsTests
     
     
     [Test]
-    public void GetAvailableRateIndicesTest()
+    public void GetRateIndicesTest()
     {
         Array rateIndices = Enum.GetValues(typeof(RateIndices));
         object[,] expectedOutput = new object[rateIndices.Length + 1, 1];
@@ -112,7 +112,7 @@ public class CurveUtilsTests
         {
             expectedOutput[i++, 0] = index.ToString();
         }
-        object[,] actualOutput = (object[,])CurveUtils.GetAvailableRateIndices();
+        object[,] actualOutput = (object[,])CurveUtils.GetRateIndices();
         
         Assert.AreEqual(expectedOutput, actualOutput);
     }

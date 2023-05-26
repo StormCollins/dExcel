@@ -62,6 +62,7 @@
     <None Remove="Resources\Icons\fx_green.ico" />
     <None Remove="Resources\Icons\interest-rates-large-blue.ico" />
     <None Remove="Resources\Icons\interest-rates-large-green.ico" />
+    <None Remove="Resources\Icons\list-small-blue.ico" />
     <None Remove="Resources\Icons\m.png" />
     <None Remove="Resources\Icons\manage-passwords-large-blue.ico" />
     <None Remove="Resources\Icons\mathematics-large-green.ico" />
@@ -130,6 +131,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Icons\fx-green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Icons\list-small-blue.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Icons\other-green.ico">

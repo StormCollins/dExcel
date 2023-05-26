@@ -13,20 +13,23 @@ namespace dExcel.InterestRates;
 public static class CurveUtils
 {
     /// <summary>
-    /// Lists all available rate indices.
+    /// Gets a list of all available rate indices for interest rate curve bootstrapping.
     /// </summary>
-    /// <returns>A list of all available rate indices.</returns>
-    public static object GetAvailableRateIndices()
+    /// <returns>A 2D column of rate index names.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_GetRateIndices",
+        Description = "Returns all available rate indices for interest rate curve bootstrapping.",
+        Category = "∂Excel: Interest Rates")]
+    public static object GetRateIndices()
     {
-        Array rateIndices = Enum.GetValues(typeof(RateIndices));
-        object[,] output = new object[rateIndices.Length + 1, 1];
-        output[0, 0] = "Interest Rate Indices";
-        int i = 0;
-        foreach (RateIndices index in rateIndices)
+        List<string> indices = Enum.GetNames(typeof(RateIndices)).Select(x => x.ToString().ToUpper()).ToList();
+        object[,] output = new object[indices.Count + 1, 1];
+        output[0, 0] = "Rate Indices";
+        int i = 1;
+        foreach (string index in indices)
         {
-            output[i++, 0] = index.ToString();
+            output[i++, 0] = index;
         }
-        
         return output;
     }
    
@@ -434,8 +437,8 @@ public static class CurveUtils
     {
         List<string> interpolationMethods = 
             Enum.GetNames(typeof(CurveInterpolationMethods))
-                .Select(x => x.ToString().ToUpper())
-                .Where(x => x.Contains("DISCOUNTFACTORS"))
+                .Select(x => x.ToString())
+                .Where(x => x.ToUpper().Contains("DISCOUNTFACTORS"))
                 .ToList();
         
         object[,] output = new object[interpolationMethods.Count + 1, 1];

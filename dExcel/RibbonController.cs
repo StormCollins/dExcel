@@ -11,6 +11,7 @@ using ExcelDna.Integration.CustomUI;
 using ExcelDna.Integration;
 using ExcelUtils;
 using FuzzySharp;
+using InterestRates;
 using SkiaSharp;
 using Utilities;
 using WPF;
@@ -391,6 +392,53 @@ public class RibbonController : ExcelRibbon
         ((Excel.Range)xlApp.Selection).Calculate();
     }
 
+    /// <summary>
+    /// Inserts a drop down (or data validation list) for the selected cell containing the available rate indices.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void InsertRateIndicesDropDownMenu(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        string[] rateIndices = 
+            ExcelArrayUtils.ConvertExcelRangeToList<string>((object[,]) CurveUtils.GetRateIndices()).ToArray()[1..];
+        Excel.Range selection = (Excel.Range)xlApp.Selection;
+        selection.Validation.Delete();
+        selection.Validation.Add(Excel.XlDVType.xlValidateList, Formula1: string.Join(", ", rateIndices));
+    }
+    
+    /// <summary>
+    /// Inserts a drop down (or data validation list) for the selected cell containing the available interpolation
+    /// methods for bootstrapping.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void InsertInterpolationMethodsForBootstrappingDropDownMenu(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        string[] interpolationMethods = 
+            ExcelArrayUtils.ConvertExcelRangeToList<string>(
+                (object[,]) CurveBootstrapper.GetInterpolationMethodsForBootstrapping()).ToArray()[1..];
+        
+        Excel.Range selection = (Excel.Range)xlApp.Selection;
+        selection.Validation.Delete();
+        selection.Validation.Add(Excel.XlDVType.xlValidateList, Formula1: string.Join(", ", interpolationMethods));
+    }
+    
+    /// <summary>
+    /// Inserts a drop down (or data validation list) for the selected cell containing the available interpolation
+    /// methods for discount factors.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void InsertInterpolationMethodsForDiscountFactorsDropDownMenu(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        string[] interpolationMethods = 
+            ExcelArrayUtils.ConvertExcelRangeToList<string>(
+                (object[,]) CurveUtils.GetInterpolationMethodsForDiscountFactors()).ToArray()[1..];
+        Excel.Range selection = (Excel.Range)xlApp.Selection;
+        selection.Validation.Delete();
+        selection.Validation.Add(Excel.XlDVType.xlValidateList, Formula1: string.Join(", ", interpolationMethods));
+    }
+    
     public void ApplyTestUtilsFormatting(IRibbonControl control)
     {
         RangeFormatUtils.SetConditionalTestUtilsFormatting();

@@ -19,41 +19,20 @@ public static class CurveBootstrapper
     /// </summary>
     /// <returns>A column of all available interpolation methods for interest rate curve bootstrapping.</returns>
     [ExcelFunction(
-        Name = "d.Curve_GetBootstrappingInterpolationMethods",
+        Name = "d.Curve_GetInterpolationMethodsForBootstrapping",
         Description = "Returns all available interpolation methods for interest rate curve bootstrapping.",
         Category = "∂Excel: Interest Rates")]
-    public static object GetBootstrappingInterpolationMethods()
+    public static object GetInterpolationMethodsForBootstrapping()
     {
         Array methods = Enum.GetValues(typeof(CurveInterpolationMethods));
         object[,] output = new object[methods.Length + 1, 1];
         output[0, 0] = "IR Bootstrapping Interpolation Methods";
-        int i = 0;
+        int i = 1;
         foreach (CurveInterpolationMethods method in methods)
         {
             output[i++, 0] = method.ToString();
         }
         
-        return output;
-    }
-
-    /// <summary>
-    /// Gets a list of all available rate indices for interest rate curve bootstrapping.
-    /// </summary>
-    /// <returns>A 2D column of rate index names.</returns>
-    [ExcelFunction(
-        Name = "d.Curve_GetRateIndices",
-        Description = "Returns all available rate indices for interest rate curve bootstrapping.",
-        Category = "∂Excel: Interest Rates")]
-    public static object GetRateIndices()
-    {
-        List<string> indices = Enum.GetNames(typeof(RateIndices)).Select(x => x.ToString().ToUpper()).ToList();
-        object[,] output = new object[indices.Count + 1, 1];
-        output[0, 0] = "Rate Indices";
-        int i = 1;
-        foreach (string index in indices)
-        {
-            output[i++, 0] = index;
-        }
         return output;
     }
     
@@ -116,7 +95,9 @@ public static class CurveBootstrapper
     [ExcelFunction(
         Name = "d.Curve_Bootstrap",
         Description = "Bootstraps a single currency interest rate curve. Supports multi-curve bootstrapping.",
-        Category = "∂Excel: Interest Rates")]
+        Category = "∂Excel: Interest Rates",
+        IsVolatile = true,
+        IsMacroType = true)]
     public static string Bootstrap(
         [ExcelArgument(Name = "Handle", Description = DescriptionUtils.Handle)]
         string handle,

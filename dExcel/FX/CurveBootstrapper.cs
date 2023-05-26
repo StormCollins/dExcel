@@ -13,7 +13,7 @@ namespace dExcel.FX;
 public static class CurveBootstrapper
 {
     /// <summary>
-    /// Bootstraps an FX basis adjusted curve. It supports multi-curve bootstrapping.
+    /// Bootstraps an FX basis adjusted curve. 
     /// Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR.
     /// </summary>
     /// <param name="handle">The 'handle' or name used to refer to the object in memory.
@@ -26,7 +26,9 @@ public static class CurveBootstrapper
     [ExcelFunction(
         Name = "d.Curve_BootstrapFxBasisCurve",
         Description = "Bootstraps an FX basis adjusted curve. Supports multi-curve bootstrapping.",
-        Category = "∂Excel: Interest Rates")]
+        Category = "∂Excel: Interest Rates",
+        IsVolatile = true,
+        IsMacroType = true)]
     public static string BootstrapFxBasisCurve(
         [ExcelArgument(Name = "Handle", Description = DescriptionUtils.Handle)]
         string handle,
