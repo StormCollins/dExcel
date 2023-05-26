@@ -137,4 +137,19 @@ public static class QuantLibDateExtensions
     {
         return date.ToDateTime().ToOADate();
     }
+
+    /// <summary>
+    /// Converts a string to a QuantLib month.
+    /// </summary>
+    /// <param name="month">The month string to convert e.g., "April".</param>
+    /// <returns>A QuantLib month enum, if it can parse the string, otherwise null.</returns>
+    public static QL.Month? ToQuantLibMonth(this string month)
+    {
+        if (Enum.TryParse<QL.Month>(month, true, out QL.Month output))
+        {
+            return output;
+        }
+
+        return null;
+    }
 }
