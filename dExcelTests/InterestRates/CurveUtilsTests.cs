@@ -106,8 +106,8 @@ public class CurveUtilsTests
     {
         Array rateIndices = Enum.GetValues(typeof(RateIndices));
         object[,] expectedOutput = new object[rateIndices.Length + 1, 1];
-        expectedOutput[0, 0] = "Interest Rate Indices";
-        int i = 0;
+        expectedOutput[0, 0] = "Rate Indices";
+        int i = 1;
         foreach (RateIndices index in rateIndices)
         {
             expectedOutput[i++, 0] = index.ToString();

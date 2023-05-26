@@ -459,7 +459,7 @@ public class CurveBootstrapperTest
         Array methods = Enum.GetValues(typeof(CurveInterpolationMethods));
         object[,] expectedOutput = new object[methods.Length + 1, 1];
         expectedOutput[0, 0] = "IR Bootstrapping Interpolation Methods";
-        int i = 0;
+        int i = 1;
         foreach (CurveInterpolationMethods method in methods)
         {
             expectedOutput[i++, 0] = method.ToString();

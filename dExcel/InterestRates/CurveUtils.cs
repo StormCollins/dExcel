@@ -451,4 +451,44 @@ public static class CurveUtils
         
         return output;
     }
+
+    /// <summary>
+    /// Returns a QuantLib term structure from an (Excel) table containing various parameters including the (string)
+    /// handle to a term structure.
+    /// </summary>
+    /// <param name="yieldTermStructureName">The name of the term structure parameter e.g., "DiscountCurve" or
+    /// "BaseCurrencyCurve" etc.</param>
+    /// <param name="table">The table of parameters containing the term structure handle.</param>
+    /// <param name="columnHeaderIndex">The index (in terms of row numbers, yes, row numbers) that contains the column
+    /// headers.</param>
+    /// <returns>A tuple containing the yield term structure, possibly null, and an error message, also possibly null.
+    /// </returns>
+    public static (QL.RelinkableYieldTermStructureHandle?, string? errorMessage) GetYieldTermStructure(
+        string yieldTermStructureName,
+        object[,] table,
+        int columnHeaderIndex,
+        bool allowExtrapolation)
+    {
+         string? termStructureHandle =
+             ExcelTableUtils.GetTableValue<string?>(
+                table: table, 
+                columnHeader: "Value", 
+                rowHeader: yieldTermStructureName, 
+                rowIndexOfColumnHeaders: columnHeaderIndex);
+        
+        if (termStructureHandle is null)
+        {
+            return (null, CommonUtils.CurveParameterMissingErrorMessage(yieldTermStructureName)); 
+        }
+        
+        QL.RelinkableYieldTermStructureHandle termStructure = new();
+        QL.YieldTermStructure? tempYieldTermStructure = GetCurveObject(termStructureHandle);
+        termStructure.linkTo(tempYieldTermStructure);
+        if (allowExtrapolation)
+        {
+            termStructure.enableExtrapolation();
+        }
+        
+        return (termStructure, null);
+    }
 }

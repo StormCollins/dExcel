@@ -154,8 +154,7 @@ public static class CurveBootstrapper
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(interpolation).ToUpper());
         }
         
-        string? discountCurveHandle =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "DiscountCurveHandle", columnHeaderIndex);
+
         
         bool? allowExtrapolation =
             ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex);
@@ -278,17 +277,32 @@ public static class CurveBootstrapper
 
                     if (includeInstruments[i])
                     {
-                        QL.RelinkableYieldTermStructureHandle discountCurve = new();
-                        if (discountCurveHandle != null)
+                        (QL.RelinkableYieldTermStructureHandle? discountCurve, string? discountCurveErrorMessage) =
+                            CurveUtils.GetYieldTermStructure(
+                                yieldTermStructureName: "DiscountCurve", 
+                                table: curveParameters, 
+                                columnHeaderIndex: columnHeaderIndex,
+                                allowExtrapolation: (bool)allowExtrapolation);
+
+                        if (discountCurve is null)
                         {
-                            QL.YieldTermStructure? yieldTermStructure = CurveUtils.GetCurveObject(discountCurveHandle);
-                            discountCurve.linkTo(yieldTermStructure);
-                        }
-                       
-                        QL.QuoteHandle quoteHandle = new(new QL.SimpleQuote(rates[i]));
-                        rateHelpers.Add(
+                            rateHelpers.Add(
                             new QL.SwapRateHelper(
-                                rate: quoteHandle,
+                                rate: new QL.QuoteHandle((new QL.SimpleQuote(rates[i]))),
+                                tenor: new QL.Period(tenors[i]),
+                                calendar: rateIndex.fixingCalendar(),
+                                fixedFrequency: rateIndex.tenor().frequency(),
+                                fixedConvention: rateIndex.businessDayConvention(),
+                                fixedDayCount: rateIndex.dayCounter(),
+                                index: rateIndex,
+                                spread: new QL.QuoteHandle(new QL.SimpleQuote(0)),
+                                fwdStart: new QL.Period(0, QL.TimeUnit.Months)));
+                        }
+                        else
+                        {
+                            rateHelpers.Add(
+                            new QL.SwapRateHelper(
+                                rate: new QL.QuoteHandle((new QL.SimpleQuote(rates[i]))),
                                 tenor: new QL.Period(tenors[i]),
                                 calendar: rateIndex.fixingCalendar(),
                                 fixedFrequency: rateIndex.tenor().frequency(),
@@ -298,6 +312,7 @@ public static class CurveBootstrapper
                                 spread: new QL.QuoteHandle(new QL.SimpleQuote(0)),
                                 fwdStart: new QL.Period(0, QL.TimeUnit.Months),
                                 discountingCurve: discountCurve));
+                        }
                     }
                 }
             }
@@ -422,6 +437,14 @@ public static class CurveBootstrapper
 
         QL.Settings.instance().setEvaluationDate(baseDate.ToQuantLibDate());
 
+        bool? allowExtrapolation =
+            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex);
+        
+        if (allowExtrapolation == null)
+        {
+            allowExtrapolation = false;
+        }
+        
         string? baseIndexName =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexName", columnHeaderIndex);
         
@@ -438,8 +461,6 @@ public static class CurveBootstrapper
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseIndexTenor).ToUpper());
         }
 
-        string? baseIndexForecastCurveHandle =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexForecastCurve", columnHeaderIndex);
 
         string? baseIndexDiscountCurveHandle =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexDiscountCurve", columnHeaderIndex);
@@ -457,48 +478,33 @@ public static class CurveBootstrapper
         {
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(interpolation).ToUpper());
         }
-        
-        bool? allowExtrapolation =
-            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex);
-        
-        if (allowExtrapolation == null)
-        {
-            allowExtrapolation = false;
-        }
-        
-        QL.RelinkableYieldTermStructureHandle baseIndexForecastCurve = new();
-        if (baseIndexForecastCurveHandle != null)
-        {
-            QL.YieldTermStructure? yieldTermStructure = CurveUtils.GetCurveObject(baseIndexForecastCurveHandle);
-            baseIndexForecastCurve.linkTo(yieldTermStructure);
-        }
 
-        QL.RelinkableYieldTermStructureHandle baseIndexDiscountCurve = new();
-        if (baseIndexDiscountCurveHandle != null)
+        (QL.RelinkableYieldTermStructureHandle? baseIndexForecastCurve, string? baseIndexForecastCurveErrorMessage) =
+            CurveUtils.GetYieldTermStructure(
+                yieldTermStructureName: "BaseIndexForecastCurve", 
+                table: curveParameters, 
+                columnHeaderIndex: columnHeaderIndex,
+                allowExtrapolation: (bool)allowExtrapolation);
+        
+        if (baseIndexForecastCurveErrorMessage is not null)
         {
-            QL.YieldTermStructure? yieldTermStructure = CurveUtils.GetCurveObject(baseIndexDiscountCurveHandle);
-            baseIndexForecastCurve.linkTo(yieldTermStructure);
+            return baseIndexForecastCurveErrorMessage;
         }
-
+        
+        (QL.RelinkableYieldTermStructureHandle? baseIndexDiscountCurve, string? baseIndexDiscountCurveErrorMessage) =
+            CurveUtils.GetYieldTermStructure(
+                yieldTermStructureName: "BaseIndexDiscountCurve", 
+                table: curveParameters, 
+                columnHeaderIndex: columnHeaderIndex,
+                allowExtrapolation: (bool)allowExtrapolation);
+            
+        if (baseIndexDiscountCurveErrorMessage is not null)
+        {
+            return baseIndexDiscountCurveErrorMessage;
+        }
+        
         QL.IborIndex? baseIndex = GetIborIndex(baseIndexName, baseIndexTenor, baseIndexForecastCurve);
         QL.IborIndex? otherIndex = GetIborIndex(otherIndexName, otherRateIndexTenor,null);
-
-        // else
-        // {
-        //     string? tenor = ExcelTable.GetTableValue<string>(customBaseIndex, "Value", "Tenor");
-        //     int? settlementDays = ExcelTable.GetTableValue<int>(customBaseIndex, "Value", "SettlementDay");
-        //     string? currency = ExcelTable.GetTableValue<string>(customBaseIndex, "Value", "Currency");
-        //     (Currency x, Calendar y) z =
-        //         currency switch
-        //         {
-        //             // TODO: Use reflection here.
-        //             "USD" => (new USDCurrency(), new UnitedStates()),
-        //             "ZAR" => (new ZARCurrency(), new SouthAfrica()),
-        //             _ => throw new NotImplementedException(),
-        //         };
-        //
-        //     rateIndex = new IborIndex("Test", new Period(tenor), settlementDays, z.x, z.y, )
-        // }
 
         if (baseIndex is null)
         {

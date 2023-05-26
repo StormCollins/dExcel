@@ -101,7 +101,7 @@ public static class CurveBootstrapper
         string? interpolation =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Interpolation", columnHeaderIndex);
         
-        if (interpolation == null)
+        if (interpolation is null)
         {
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(interpolation).ToUpper());
         }
@@ -109,52 +109,11 @@ public static class CurveBootstrapper
         double? spotFx =
             ExcelTableUtils.GetTableValue<double?>(curveParameters, "Value", "SpotFX", columnHeaderIndex);
         
-        if (spotFx == null)
+        if (spotFx is null)
         {
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(spotFx).ToUpper());
         }
         
-        string? baseCurrencyDiscountCurveHandle =
-            ExcelTableUtils.GetTableValue<string?>(
-                table: curveParameters, 
-                columnHeader: "Value", 
-                rowHeader: "BaseCurrencyDiscountCurveHandle", 
-                rowIndexOfColumnHeaders: columnHeaderIndex);
-        
-        QL.RelinkableYieldTermStructureHandle baseCurrencyDiscountCurve = new();
-        if (baseCurrencyDiscountCurveHandle != null)
-        {
-            QL.YieldTermStructure? yieldTermStructure = CurveUtils.GetCurveObject(baseCurrencyDiscountCurveHandle);
-            baseCurrencyDiscountCurve.linkTo(yieldTermStructure);
-        }
-        
-        string? baseCurrencyForecastCurveHandle =
-            ExcelTableUtils.GetTableValue<string?>(
-                table: curveParameters, 
-                columnHeader: "Value", 
-                rowHeader: "BaseCurrencyForecastCurveHandle", 
-                rowIndexOfColumnHeaders: columnHeaderIndex);
-        
-        QL.RelinkableYieldTermStructureHandle baseCurrencyForecastCurve = new();
-        if (baseCurrencyForecastCurveHandle != null)
-        {
-            QL.YieldTermStructure? yieldTermStructure = CurveUtils.GetCurveObject(baseCurrencyForecastCurveHandle);
-            baseCurrencyForecastCurve.linkTo(yieldTermStructure);
-        }
-        
-        string? quoteCurrencyForecastCurveHandle =
-            ExcelTableUtils.GetTableValue<string?>(
-                table: curveParameters, 
-                columnHeader: "Value", 
-                rowHeader: "QuoteCurrencyForecastCurveHandle", 
-                rowIndexOfColumnHeaders: columnHeaderIndex);
-        
-        QL.RelinkableYieldTermStructureHandle quoteCurrencyForecastCurve = new();
-        if (baseCurrencyForecastCurveHandle != null)
-        {
-            QL.YieldTermStructure? yieldTermStructure = CurveUtils.GetCurveObject(quoteCurrencyForecastCurveHandle);
-            quoteCurrencyForecastCurve.linkTo(yieldTermStructure);
-        }
         
         bool? allowExtrapolation =
             ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex);
@@ -163,7 +122,51 @@ public static class CurveBootstrapper
         {
             allowExtrapolation = false;
         }
+                
+        string? baseCurrencyDiscountCurve =
+            ExcelTableUtils.GetTableValue<string?>(
+                table: curveParameters, 
+                columnHeader: "Value", 
+                rowHeader: "BaseCurrencyDiscountCurve", 
+                rowIndexOfColumnHeaders: columnHeaderIndex);
+
+        if (baseCurrencyDiscountCurve is null)
+        {
+            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseCurrencyDiscountCurve).ToUpper()); 
+        }
         
+        QL.RelinkableYieldTermStructureHandle baseCurrencyDiscountCurveTermStructure = new();
+        QL.YieldTermStructure? baseCurrencyYieldTermStructure = 
+            CurveUtils.GetCurveObject(baseCurrencyDiscountCurve);
+        
+        baseCurrencyDiscountCurveTermStructure.linkTo(baseCurrencyYieldTermStructure);
+        
+        (QL.RelinkableYieldTermStructureHandle? baseCurrencyForecastCurve,
+                string? baseCurrencyForecastCurveErrorMessage) =
+           CurveUtils.GetYieldTermStructure(
+               yieldTermStructureName: "BaseCurrencyForecastCurve", 
+               table: curveParameters, 
+               columnHeaderIndex: columnHeaderIndex, 
+               allowExtrapolation: (bool)allowExtrapolation);
+
+        if (baseCurrencyForecastCurve is null)
+        {
+            return baseCurrencyForecastCurveErrorMessage;
+        }
+        
+        (QL.RelinkableYieldTermStructureHandle? quoteCurrencyForecastCurve,
+                string? quoteCurrencyForecastCurveErrorMessage) =
+           CurveUtils.GetYieldTermStructure(
+               yieldTermStructureName: "QuoteCurrencyForecastCurve", 
+               table: curveParameters, 
+               columnHeaderIndex: columnHeaderIndex, 
+               allowExtrapolation: (bool)allowExtrapolation);
+
+        if (quoteCurrencyForecastCurve is null)
+        {
+            return quoteCurrencyForecastCurveErrorMessage;
+        }
+      
         QL.IborIndex? quoteCurrencyIndex = 
             dExcel.InterestRates.CurveBootstrapper.GetIborIndex(
                 indexName: quoteCurrencyIndexName, 
@@ -245,7 +248,7 @@ public static class CurveBootstrapper
                                 endOfMonth: baseCurrencyIndex.endOfMonth(),
                                 spotFx: new QL.QuoteHandle(new QL.SimpleQuote((double) spotFx)),
                                 isFxBaseCurrencyCollateralCurrency: true,
-                                collateralCurve: baseCurrencyDiscountCurve));
+                                collateralCurve: baseCurrencyDiscountCurveTermStructure));
                     }
                 }
             }
@@ -284,7 +287,7 @@ public static class CurveBootstrapper
                                 endOfMonth: false,
                                 baseCurrencyIndex: baseCurrencyIndex,
                                 quoteCurrencyIndex: quoteCurrencyIndex,
-                                collateralCurve: baseCurrencyDiscountCurve,
+                                collateralCurve: baseCurrencyDiscountCurveTermStructure,
                                 isFxBaseCurrencyCollateralCurrency: true,
                                 isBasisOnFxBaseCurrencyLeg: false));
                     }

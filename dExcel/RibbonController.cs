@@ -1,6 +1,4 @@
-﻿namespace dExcel;
-
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -9,12 +7,14 @@ using System.Windows.Threading;
 using Excel = Microsoft.Office.Interop.Excel;
 using ExcelDna.Integration.CustomUI;
 using ExcelDna.Integration;
-using ExcelUtils;
 using FuzzySharp;
-using InterestRates;
 using SkiaSharp;
-using Utilities;
-using WPF;
+using dExcel.ExcelUtils;
+using dExcel.InterestRates;
+using dExcel.Utilities;
+using dExcel.WPF;
+
+namespace dExcel;
 
 /// <summary>
 /// Used to control the actions and behaviour of the ribbon of the add-in.
