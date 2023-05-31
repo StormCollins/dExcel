@@ -108,6 +108,11 @@ public static class CurveUtils
                 $"({datesRange.GetLength(0)} ≠ {discountFactorsRange.GetLength(0)}).");
         }
 
+        if (Math.Abs((double)discountFactorsRange[0, 0] - 1.0) > 1e-10)
+        {
+            return CommonUtils.DExcelErrorMessage("Initial discount factor must be 1.")
+        }
+
         List<QL.Date> dates = new();
         List<double> discountFactors = new();
         for (int i = 0; i < datesRange.GetLength(0); i++)
