@@ -154,16 +154,10 @@ public static class CurveBootstrapper
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(interpolation).ToUpper());
         }
         
+        bool allowExtrapolation =
+            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex) ??
+            false;
 
-        
-        bool? allowExtrapolation =
-            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex);
-        
-        if (allowExtrapolation == null)
-        {
-            allowExtrapolation = false;
-        }
-        
         QL.IborIndex? rateIndex = GetIborIndex(rateIndexName, rateIndexTenor, null);
         // else
         // {
@@ -196,7 +190,6 @@ public static class CurveBootstrapper
             List<string>? tenors = ExcelTableUtils.GetColumn<string>(instruments, "Tenors");
             List<string>? fraTenors = ExcelTableUtils.GetColumn<string>(instruments, "FraTenors");
             List<double>? rates = ExcelTableUtils.GetColumn<double>(instruments, "Rates");
-            List<double>? basisSpreads = ExcelTableUtils.GetColumn<double>(instruments, "BasisSpreads");
             List<bool>? includeInstruments = ExcelTableUtils.GetColumn<bool>(instruments, "Include");
             List<string>? referenceMonths = ExcelTableUtils.GetColumn<string>(instruments, "ReferenceMonths");
             List<int>? referenceYears = ExcelTableUtils.GetColumn<int>(instruments, "ReferenceYears");
@@ -282,8 +275,13 @@ public static class CurveBootstrapper
                                 yieldTermStructureName: "DiscountCurve", 
                                 table: curveParameters, 
                                 columnHeaderIndex: columnHeaderIndex,
-                                allowExtrapolation: (bool)allowExtrapolation);
-
+                                allowExtrapolation: allowExtrapolation);
+                        
+                        if (discountCurveErrorMessage is not null)
+                        {
+                            return  discountCurveErrorMessage;
+                        }
+                        
                         if (discountCurve is null)
                         {
                             rateHelpers.Add(
@@ -370,7 +368,7 @@ public static class CurveBootstrapper
             return CommonUtils.DExcelErrorMessage($"Unknown interpolation method: '{interpolation}'");
         }
         
-        if ((bool)allowExtrapolation)
+        if (allowExtrapolation)
         {
             termStructure.enableExtrapolation();
         }
@@ -437,14 +435,10 @@ public static class CurveBootstrapper
 
         QL.Settings.instance().setEvaluationDate(baseDate.ToQuantLibDate());
 
-        bool? allowExtrapolation =
-            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex);
-        
-        if (allowExtrapolation == null)
-        {
-            allowExtrapolation = false;
-        }
-        
+        bool allowExtrapolation =
+            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex) ??
+            false;
+
         string? baseIndexName =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexName", columnHeaderIndex);
         
@@ -573,7 +567,7 @@ public static class CurveBootstrapper
             return CommonUtils.DExcelErrorMessage($"Unknown interpolation method: '{interpolation}'");
         }
         
-        if ((bool)allowExtrapolation)
+        if (allowExtrapolation)
         {
             termStructure.enableExtrapolation();
         }

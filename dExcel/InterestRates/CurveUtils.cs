@@ -7,6 +7,8 @@ using QL = QuantLib;
 
 namespace dExcel.InterestRates;
 
+using MathNet.Numerics.RootFinding;
+
 /// <summary>
 /// A collection of utility functions for dealing with interest rate curves.
 /// </summary>
@@ -110,7 +112,7 @@ public static class CurveUtils
 
         if (Math.Abs((double)discountFactorsRange[0, 0] - 1.0) > 1e-10)
         {
-            return CommonUtils.DExcelErrorMessage("Initial discount factor must be 1.")
+            return CommonUtils.DExcelErrorMessage("Initial discount factor must be 1.");
         }
 
         List<QL.Date> dates = new();
@@ -188,6 +190,14 @@ public static class CurveUtils
         {
             return CommonUtils.DExcelErrorMessage($"Unsupported interpolation method: {interpolationParameter}");
         }
+
+        bool allowExtrapolation =
+            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation") ?? false;
+
+        if (allowExtrapolation)
+        {
+            discountCurve.enableExtrapolation();     
+        }
         
         CurveDetails curveDetails = 
             new(
@@ -199,8 +209,155 @@ public static class CurveUtils
         
         DataObjectController dataObjectController = DataObjectController.Instance;
         return dataObjectController.Add(handle, curveDetails);
-        
     }
+
+    /// <summary>
+    /// Creates a QLNet YieldTermStructure curve object which is stored in the DataObjectController.
+    /// </summary>
+    /// <param name="handle">Handle or name to extract curve from DataObjectController.</param>
+    /// <param name="curveParameters">The parameters for curve construction e.g. interpolation, day count convention etc.</param>
+    /// <param name="datesRange">The dates for the corresponding discount factors.</param>
+    /// <param name="zeroRatesRange">The discount factors for the corresponding dates.</param>
+    /// <returns>A string containing the handle and time stamp.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_CreateZeroRates",
+        Description =
+            "Creates an interest rate curve given dates and corresponding zero rates.\n" +
+            "Use 'd.Curve_GetInterpolationMethodsForZeroRates' to view available interpolation methods.",
+        Category = "∂Excel: Interest Rates",
+        IsVolatile = true)]
+    public static string CreateFromZeroRates(
+        [ExcelArgument(
+            Name = "Handle",
+            Description = "The 'handle' or name used to store & retrieve the curve.")]
+        string handle,
+        [ExcelArgument(
+            Name = "Parameters",
+            Description = "The parameters for curve construction e.g. interpolation, day count convention etc.")]
+        object[,] curveParameters,
+        [ExcelArgument(
+            Name = "Dates",
+            Description = "The dates for the corresponding zero rates.")]
+        object[,] datesRange,
+        [ExcelArgument(
+            Name = "Zero Rates",
+            Description = "The zero rates for the corresponding dates.")]
+        object[,] zeroRatesRange)
+    {
+        if (datesRange.GetLength(0) != zeroRatesRange.GetLength(0))
+        {
+            return CommonUtils.DExcelErrorMessage("Dates and zero rates have incompatible sizes: " +
+                                                  $"({datesRange.GetLength(0)} ≠ {zeroRatesRange.GetLength(0)}).");
+        }
+
+        List<QL.Date> dates = new();
+        List<double> zeroRates = new();
+        for (int i = 0; i < datesRange.GetLength(0); i++)
+        {
+            dates.Add(DateTime.FromOADate((double)datesRange[i, 0]).ToQuantLibDate());
+            zeroRates.Add((double)zeroRatesRange[i, 0]);
+        }
+
+        string? dayCountConventionParameter =
+            ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "DayCountConvention", 0);
+        if (dayCountConventionParameter == null)
+        {
+            return CommonUtils.DExcelErrorMessage("Parameter not set: 'DayCountConvention'");
+        }
+
+        if (!ParserUtils.TryParseQuantLibDayCountConvention(
+                dayCountConventionToParse: dayCountConventionParameter,
+                dayCountConvention: out QL.DayCounter? dayCountConvention,
+                errorMessage: out string? dayCountConventionErrorMessage))
+        {
+            return dayCountConventionErrorMessage;
+        }
+
+        string? interpolationParameter =
+            ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Interpolation", 0);
+        if (interpolationParameter == null)
+        {
+            return CommonUtils.DExcelErrorMessage("'Interpolation' not set in parameters.");
+        }
+
+        string? calendarsParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Calendars", 0);
+        IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
+        (QL.Calendar? calendar, string errorMessage) = DateUtils.ParseCalendars(calendarsParameter);
+        
+        string compoundingConventionParameter =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "CompoundingConvention", 0) ?? "";
+
+        if (!ParserUtils.TryParseQuantLibCompoundingConvention(
+                compoundingConventionParameter,
+                out (QL.Compounding compounding, QL.Frequency frequency)? compoundingConvention,
+                out string? compoundingConventionErrorMessage))
+        {
+            return compoundingConventionErrorMessage;
+        }
+
+        QL.YieldTermStructure discountCurve;
+
+        if (interpolationParameter.IgnoreCaseEquals(CurveInterpolationMethods.Cubic_On_ZeroRates))
+        {
+            discountCurve =
+                new QL.CubicZeroCurve(
+                    dates: new QL.DateVector(dates),
+                    yields: new QL.DoubleVector(zeroRates),
+                    dayCounter: dayCountConvention,
+                    calendar: calendar,
+                    i: new QL.Cubic(),
+                    compounding: compoundingConvention.Value.compounding,
+                    frequency: compoundingConvention.Value.frequency);
+        }
+        else if (interpolationParameter.IgnoreCaseEquals(CurveInterpolationMethods.Linear_On_ZeroRates))
+        {
+            discountCurve =
+                new QL.ZeroCurve(
+                    dates: new QL.DateVector(dates),
+                    yields: new QL.DoubleVector(zeroRates),
+                    dayCounter: dayCountConvention,
+                    calendar: calendar,
+                    i: new QL.Linear(),
+                    compounding: compoundingConvention.Value.compounding,
+                    frequency: compoundingConvention.Value.frequency);
+        }
+        else if (interpolationParameter.IgnoreCaseEquals(CurveInterpolationMethods.NaturalCubic_On_ZeroRates))
+        {
+            discountCurve =
+                new QL.NaturalCubicZeroCurve(
+                    dates: new QL.DateVector(dates),
+                    yields: new QL.DoubleVector(zeroRates),
+                    dayCounter: dayCountConvention,
+                    calendar: calendar,
+                    i: new QL.SplineCubic(),
+                    compounding: compoundingConvention.Value.compounding,
+                    frequency: compoundingConvention.Value.frequency);
+        }
+        else
+        {
+            return CommonUtils.DExcelErrorMessage($"Unsupported interpolation method: {interpolationParameter}");
+        }
+        
+        bool allowExtrapolation =
+            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation") ?? false;
+
+        if (allowExtrapolation)
+        {
+            discountCurve.enableExtrapolation();     
+        }
+
+        CurveDetails curveDetails =
+            new(
+                termStructure: discountCurve,
+                dayCountConvention: dayCountConvention,
+                interpolation: interpolationParameter,
+                discountFactorDates: dates.Select(x => x.ToDateTime()),
+                discountFactors: zeroRates);
+
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return dataObjectController.Add(handle, curveDetails);
+    }
+
 
     /// <summary>
     /// Gets the discount factor(s) from a QLNet YieldTermStructure curve object for a given set of date(s).

@@ -114,15 +114,10 @@ public static class CurveBootstrapper
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(spotFx).ToUpper());
         }
         
-        
-        bool? allowExtrapolation =
-            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex);
-        
-        if (allowExtrapolation == null)
-        {
-            allowExtrapolation = false;
-        }
-                
+        bool allowExtrapolation =
+            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex) ??
+            false;
+
         string? baseCurrencyDiscountCurve =
             ExcelTableUtils.GetTableValue<string?>(
                 table: curveParameters, 
@@ -147,7 +142,7 @@ public static class CurveBootstrapper
                yieldTermStructureName: "BaseCurrencyForecastCurve", 
                table: curveParameters, 
                columnHeaderIndex: columnHeaderIndex, 
-               allowExtrapolation: (bool)allowExtrapolation);
+               allowExtrapolation: allowExtrapolation);
 
         if (baseCurrencyForecastCurve is null)
         {
@@ -160,7 +155,7 @@ public static class CurveBootstrapper
                yieldTermStructureName: "QuoteCurrencyForecastCurve", 
                table: curveParameters, 
                columnHeaderIndex: columnHeaderIndex, 
-               allowExtrapolation: (bool)allowExtrapolation);
+               allowExtrapolation: allowExtrapolation);
 
         if (quoteCurrencyForecastCurve is null)
         {
@@ -307,7 +302,7 @@ public static class CurveBootstrapper
             return CommonUtils.DExcelErrorMessage($"Unknown interpolation method: '{interpolation}'");
         }
         
-        if ((bool)allowExtrapolation)
+        if (allowExtrapolation)
         {
             termStructure.enableExtrapolation();
         }
