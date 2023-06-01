@@ -270,17 +270,14 @@ public static class CurveBootstrapper
 
                     if (includeInstruments[i])
                     {
+                        // Having a discount curve is only required for multi-curve bootstrapping.
+                        // Hence we don't check if the curve is null here.
                         (QL.RelinkableYieldTermStructureHandle? discountCurve, string? discountCurveErrorMessage) =
                             CurveUtils.GetYieldTermStructure(
                                 yieldTermStructureName: "DiscountCurve", 
                                 table: curveParameters, 
                                 columnHeaderIndex: columnHeaderIndex,
                                 allowExtrapolation: allowExtrapolation);
-                        
-                        if (discountCurveErrorMessage is not null)
-                        {
-                            return  discountCurveErrorMessage;
-                        }
                         
                         if (discountCurve is null)
                         {

@@ -593,7 +593,7 @@ public static class CurveUtils
         Name = "d.Curve_GetInterpolationMethodsForDiscountFactors",
         Description = 
             "Gets all the available interpolation methods for discount factors.\n" +
-            "This is in particularly useful for the function d.Curve_CreateFromDiscountFactors.",
+            "This is in particularly useful for the function 'd.Curve_CreateFromDiscountFactors'.",
         Category = "∂Excel: Interest Rates")]
     public static object GetInterpolationMethodsForDiscountFactors()
     {
@@ -614,6 +614,37 @@ public static class CurveUtils
         return output;
     }
 
+    /// <summary>
+    /// Gets all the available interpolation methods for zero rates. This is in particularly useful for the
+    /// function <see cref="CreateFromZeroRates"/>.
+    /// </summary>
+    /// <returns>A 2D column array of interpolation methods for zero rates.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_GetInterpolationMethodsForZeroRates",
+        Description = 
+            "Gets all the available interpolation methods for zero rates.\n" +
+            "This is in particularly useful for the function 'd.Curve_CreateFromZeroRates'.",
+        Category = "∂Excel: Interest Rates")]
+    public static object GetInterpolationMethodsForZeroRates()
+    {
+        List<string> interpolationMethods = 
+            Enum.GetNames(typeof(CurveInterpolationMethods))
+                .Select(x => x.ToString())
+                .Where(x => x.ToUpper().Contains("ZERORATES"))
+                .ToList();
+        
+        object[,] output = new object[interpolationMethods.Count + 1, 1];
+        output[0, 0] = "Interpolation Methods for Zero Rates";
+        int i = 1;
+        foreach (string interpolationMethod in interpolationMethods)
+        {
+            output[i++, 0] = interpolationMethod;
+        }
+        
+        return output;
+    }
+    
+    /// <summary>
     /// <summary>
     /// Returns a QuantLib term structure from an (Excel) table containing various parameters including the (string)
     /// handle to a term structure.

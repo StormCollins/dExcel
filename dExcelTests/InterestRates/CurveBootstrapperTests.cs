@@ -8,6 +8,8 @@ using QL = QuantLib;
 
 namespace dExcelTests.InterestRates;
 
+using dExcel.Utilities;
+
 [TestFixture]
 public class CurveBootstrapperTest
 {
@@ -260,6 +262,7 @@ public class CurveBootstrapperTest
                 customRateIndex: null, 
                 instrumentGroups: instruments);
         
+        Debug.Assert(!handle.Contains(CommonUtils.DExcelErrorPrefix));
         QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.0001;
         List<string> tenors = new() {"0m", "1m", "3m", "6m", "9m", "12m", "15m", "18m", "21m", "24m"};
@@ -387,7 +390,10 @@ public class CurveBootstrapperTest
                 curveParameters: curveParameters, 
                 customRateIndex: null, 
                 instrumentGroups: instruments);
-        
+       
+        // Debug.Assert(!handle.Contains(CommonUtils.DExcelErrorPrefix));
+        // Debug.WriteIf(!handle.Contains(CommonUtils.DExcelErrorPrefix), handle);
+        Debug.Print(handle);
         QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.000000001;
         QL.Date date3M = ((DateTime)DateUtils.AddTenorToDate(baseDate.ToDateTime(), "3M", "ZAR", "ModFol")).ToQuantLibDate();
@@ -444,7 +450,7 @@ public class CurveBootstrapperTest
     [Test]
     public void Bootstrap_Get_ZarSwapCurveTest()
     {
-        // TODO: Needs to warn user if not connected to VPN.
+        // If this fails you might not be connected to the VPN.
         DateTime baseDate = new(2023, 03, 31);
         string handle = CurveBootstrapper.Get("ZarSwapCurve", "ZAR-Swap", baseDate);
         object[] dates = {baseDate.ToOADate(), baseDate.AddYears(1).ToOADate()};
@@ -454,7 +460,7 @@ public class CurveBootstrapperTest
     }
 
     [Test]
-    public void GetAvailableBootstrappingInterpolationMethods()
+    public void GetInterpolationMethodsForBootstrappingTest()
     {
         Array methods = Enum.GetValues(typeof(CurveInterpolationMethods));
         object[,] expectedOutput = new object[methods.Length + 1, 1];
@@ -466,7 +472,6 @@ public class CurveBootstrapperTest
         }
         
         object[,] actualOutput = (object[,])CurveBootstrapper.GetInterpolationMethodsForBootstrapping();
-        
         Assert.AreEqual(expectedOutput, actualOutput);
     }
 }

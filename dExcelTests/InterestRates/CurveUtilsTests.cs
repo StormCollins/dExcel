@@ -116,4 +116,44 @@ public class CurveUtilsTests
         
         Assert.AreEqual(expectedOutput, actualOutput);
     }
+    
+    [Test]
+    public void GetInterpolationMethodsForDiscountFactorsTest()
+    {
+        List<string> interpolationMethodsForDiscountFactors = 
+            Enum.GetNames(typeof(CurveInterpolationMethods))
+                .Where(x => x.ToUpper().Contains("DISCOUNTFACTORS"))
+                .ToList();
+        
+        object[,] expectedOutput = new object[interpolationMethodsForDiscountFactors.Count + 1, 1];
+        expectedOutput[0, 0] = "Interpolation Methods for Discount Factors";
+        int i = 1;
+        foreach (string curveInterpolationMethod in interpolationMethodsForDiscountFactors)
+        {
+            expectedOutput[i++, 0] = curveInterpolationMethod;
+        }
+        
+        object[,] actualOutput = (object[,])CurveUtils.GetInterpolationMethodsForDiscountFactors();
+        Assert.AreEqual(expectedOutput, actualOutput);
+    }
+    
+    [Test]
+    public void GetInterpolationMethodsForZeroRatesTest()
+    {
+        List<string> interpolationMethods = 
+            Enum.GetNames(typeof(CurveInterpolationMethods))
+                .Where(x => x.ToUpper().Contains("ZERORATES"))
+                .ToList();
+        
+        object[,] expectedOutput = new object[interpolationMethods.Count + 1, 1];
+        expectedOutput[0, 0] = "Interpolation Methods for Zero Rates";
+        int i = 1;
+        foreach (string interpolationMethod in interpolationMethods)
+        {
+            expectedOutput[i++, 0] = interpolationMethod;
+        }
+        
+        object[,] actualOutput = (object[,])CurveUtils.GetInterpolationMethodsForZeroRates();
+        Assert.AreEqual(expectedOutput, actualOutput);
+    }
 }
