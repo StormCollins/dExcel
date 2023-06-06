@@ -5,6 +5,9 @@ using NUnit.Framework;
 
 namespace dExcelTests.InterestRates;
 
+using dExcel.Dates;
+using QuantLib;
+
 [TestFixture]
 public class CurveUtilsTests
 {
@@ -35,7 +38,7 @@ public class CurveUtilsTests
         { 0.96 },
         { 0.62 },
     };
-    
+
     private static readonly object[,] IncompatiblySizedDiscountFactorRange =
     {
         { 1.00 },
@@ -46,7 +49,8 @@ public class CurveUtilsTests
     };
 
     private static readonly string Handle = CurveUtils.CreateFromDiscountFactors("ZarSwapCurve", CurveParameters, DatesRange, DiscountFactorRange);
-        
+    
+     
     [TestCase]
     public void ZarGetZeroRatesTest()
     {
@@ -155,5 +159,43 @@ public class CurveUtilsTests
         
         object[,] actualOutput = (object[,])CurveUtils.GetInterpolationMethodsForZeroRates();
         Assert.AreEqual(expectedOutput, actualOutput);
+    }
+
+    [Test]
+    public void CreateFromZeroRatesTest()
+    {
+        DateTime baseDate = DateTime.FromOADate((double) DatesRange[0, 0]);
+        object[,] yearFractions = new object[DatesRange.GetLength(0), 1];
+        for (int i = 0; i < yearFractions.GetLength(0); i++)
+        {
+            yearFractions[i, 0] = DateUtils.Act365(baseDate, DateTime.FromOADate((double) DatesRange[i, 0]));
+        }  
+        
+        object[,] zeroRates = new object[DiscountFactorRange.GetLength(0), 1];
+        for (int i = 0; i < zeroRates.GetLength(0); i++)
+        {
+            zeroRates[i, 0] = -1 * Math.Log((double) DiscountFactorRange[i, 0]) / (double) yearFractions[i, 0];
+        }
+
+        object[,] curveParameters =
+        {
+            {"Parameter", "Value"},
+            {"BaseDate", (double) DatesRange[0, 0]},
+            {"Calendars", "ZAR"},
+            {"DayCountConvention", "Actual365"},
+            {"CompoundingConvention", "NACC"},
+            {"Interpolation", CurveInterpolationMethods.Linear_On_ZeroRates.ToString()},
+        };
+        
+        string handle = 
+            CurveUtils.CreateFromZeroRates(nameof(CreateFromZeroRatesTest), curveParameters, DatesRange, zeroRates);
+
+        for (int i = 0; i < DiscountFactorRange.GetLength(0); i++)
+        {
+            Assert.AreEqual(
+                expected: (double)DiscountFactorRange[i, 0], 
+                actual: (double)((object[,])CurveUtils.GetDiscountFactors(handle, new[] {DatesRange[i, 0]}))[0, 0],
+                delta: 1e-10); 
+        }  
     }
 }

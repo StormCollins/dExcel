@@ -63,17 +63,21 @@
 				supertip='Inserts drop down menus for common lists (i.e., "Enums").'
 				tag='list-small-blue.ico'>
 				<button
-				  id='btnRateIndices'
-				  label='Insert Rate Indices Drop Menu'
-				  onAction='InsertRateIndicesDropDownMenu'/>
+				  id='btnInsertDropDownMenuForRateIndices'
+				  label='Insert Drop Menu for Rate Indices'
+				  onAction='InsertDropDownMenuForRateIndices'/>
 				<button
-				  id='btnInterpolationMethodsForBootstrapping'
-				  label='Insert Interpolation Methods for Bootstrapping Drop Menu'
-				  onAction='InsertInterpolationMethodsForBootstrappingDropDownMenu'/>
+				  id='btnInsertDropDownMenuForBootstrappingInterpolation'
+				  label='Insert Drop Down Menu for Bootstrapping Interpolation'
+				  onAction='InsertDropDownMenuForBootstrappingInterpolation'/>
 				<button
-				  id='btnInterpolationMethodsForDiscountFactors'
-				  label='Insert Interpolation Methods for Discount Factors Drop Menu'
-				  onAction='InsertInterpolationMethodsForDiscountFactorsDropDownMenu'/>
+				  id='btnInsertDropDownMenuForDiscountFactorInterpolation'
+				  label='Insert Drop Down Menu for Discount Factors Interpolation'
+				  onAction='InsertDropDownMenuForDiscountFactorInterpolation'/>
+				<button
+				  id='btnInsertDropDownMenuForZeroRatesInterpolation'
+				  label='Insert Drop Down Menu for Zero Rates Interpolation'
+				  onAction='InsertDropDownMenuForZeroRatesInterpolation'/>
 			  </menu>
 			  <button
 				id='btnManagePasswords'
@@ -82,7 +86,6 @@
 				enabled='false'
 				size='large'
 				tag='manage-passwords-large-blue.ico'/>
-			 
 			  <splitButton id='btnWorkbookHyperlinks' size='large'>
 				  <button
 					id='btnCreateLinkToSheet'

@@ -241,7 +241,7 @@ public class ExcelTableTests
     [TestCaseSource(nameof(LookUpDayCountConventionTestCaseData))]
     public string? LookUpDayCountConventionTest(string label)
     {
-        return ExcelTableUtils.GetTableValue<QL.DayCounter>(_parameterTable, "Value", label).name();
+        return ExcelTableUtils.GetTableValue<QL.DayCounter>(_parameterTable, "Value", label)?.name();
     }
 
     [Test]

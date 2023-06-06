@@ -13,7 +13,6 @@ namespace dExcel.InterestRates;
 /// </summary>
 public static class CurveBootstrapper
 {
-
     /// <summary>
     /// Lists all available interpolation methods for interest rate curve bootstrapping.
     /// </summary>

@@ -396,7 +396,7 @@ public class RibbonController : ExcelRibbon
     /// Inserts a drop down (or data validation list) for the selected cell containing the available rate indices.
     /// </summary>
     /// <param name="control">The ribbon control.</param>
-    public void InsertRateIndicesDropDownMenu(IRibbonControl control)
+    public void InsertDropDownMenuForRateIndices(IRibbonControl control)
     {
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         string[] rateIndices = 
@@ -411,7 +411,7 @@ public class RibbonController : ExcelRibbon
     /// methods for bootstrapping.
     /// </summary>
     /// <param name="control">The ribbon control.</param>
-    public void InsertInterpolationMethodsForBootstrappingDropDownMenu(IRibbonControl control)
+    public void InsertDropDownMenuForBootstrappingInterpolation(IRibbonControl control)
     {
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         string[] interpolationMethods = 
@@ -428,12 +428,28 @@ public class RibbonController : ExcelRibbon
     /// methods for discount factors.
     /// </summary>
     /// <param name="control">The ribbon control.</param>
-    public void InsertInterpolationMethodsForDiscountFactorsDropDownMenu(IRibbonControl control)
+    public void InsertDropDownMenuForDiscountFactorInterpolation(IRibbonControl control)
     {
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         string[] interpolationMethods = 
             ExcelArrayUtils.ConvertExcelRangeToList<string>(
                 (object[,]) CurveUtils.GetInterpolationMethodsForDiscountFactors()).ToArray()[1..];
+        Excel.Range selection = (Excel.Range)xlApp.Selection;
+        selection.Validation.Delete();
+        selection.Validation.Add(Excel.XlDVType.xlValidateList, Formula1: string.Join(", ", interpolationMethods));
+    }
+    
+    /// <summary>
+    /// Inserts a drop down (or data validation list) for the selected cell containing the available interpolation
+    /// methods for zero rates.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void InsertDropDownMenuForZeroRatesInterpolation(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
+        string[] interpolationMethods = 
+            ExcelArrayUtils.ConvertExcelRangeToList<string>(
+                (object[,]) CurveUtils.GetInterpolationMethodsForZeroRates()).ToArray()[1..];
         Excel.Range selection = (Excel.Range)xlApp.Selection;
         selection.Validation.Delete();
         selection.Validation.Add(Excel.XlDVType.xlValidateList, Formula1: string.Join(", ", interpolationMethods));
@@ -454,16 +470,6 @@ public class RibbonController : ExcelRibbon
     {
         var xlApp = (Excel.Application)ExcelDnaUtil.Application;
         RangeFormatUtils.SetSecondaryTitleRangeFormatting(xlApp.Selection);
-    }
-
-    // TODO: Move these to a separate class.
-    private StringBuilder allTemplates = new("Hello,Hi,XiXi,Hoho,XiXe,Hiddy");
-    private StringBuilder templates = new("Hello,Hi,XiXi,Hoho,XiXe,Hiddy");
-    private static int templateCount = 6;
-
-    public int GetTemplateSearchCount(IRibbonControl control)
-    {
-        return templateCount;
     }
 
     /// <summary>
@@ -556,7 +562,7 @@ public class RibbonController : ExcelRibbon
         // TODO: See if this can be simplified.
         xlApp.Application.ScreenUpdating = false;
     
-        string breakIt = "%{F11}%TE+{TAB}{RIGHT}%V{+}{TAB}";
+        const string breakIt = "%{F11}%TE+{TAB}{RIGHT}%V{+}{TAB}";
         foreach (VBIDE.Window window in wb.VBProject.VBE.Windows)
         {
             if (window.Caption.Contains('('))
@@ -564,8 +570,8 @@ public class RibbonController : ExcelRibbon
                 window.Close();
             }
         }
+        
         wb.Activate();
-         
         xlApp.Application.OnKey("%{F11}");
         SendKeys.SendWait(breakIt + "asterix" + "{TAB}" + "asterix" + "~%{F11}");
         xlApp.Application.ScreenUpdating = true;

@@ -7,8 +7,6 @@ using QL = QuantLib;
 
 namespace dExcel.InterestRates;
 
-using MathNet.Numerics.RootFinding;
-
 /// <summary>
 /// A collection of utility functions for dealing with interest rate curves.
 /// </summary>
@@ -220,7 +218,7 @@ public static class CurveUtils
     /// <param name="zeroRatesRange">The discount factors for the corresponding dates.</param>
     /// <returns>A string containing the handle and time stamp.</returns>
     [ExcelFunction(
-        Name = "d.Curve_CreateZeroRates",
+        Name = "d.Curve_CreateFromZeroRates",
         Description =
             "Creates an interest rate curve given dates and corresponding zero rates.\n" +
             "Use 'd.Curve_GetInterpolationMethodsForZeroRates' to view available interpolation methods.",
