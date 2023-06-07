@@ -162,12 +162,12 @@ public class ExcelTableTests
         Assert.AreEqual(
             expected: new List<string>
             {
-                "CURVEUTILS NAME", 
+                "CURVEUTILSNAME", 
                 "INTERPOLATION", 
                 "INSTRUMENTS", 
                 "", 
                 "", 
-                "BASE DATE", 
+                "BASEDATE", 
                 "VALIDBUSINESSDAYCONVENTION", 
                 "INVALIDBUSINESSDAYCONVENTION",
                 "BUS252DAYCOUNTCONVENTION", 

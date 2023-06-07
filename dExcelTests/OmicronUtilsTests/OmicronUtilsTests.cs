@@ -261,7 +261,7 @@ public class OmicronUtilsTests
         string rawJson = 
             File.ReadAllText(@"C:\GitLab\dExcelTools\dExcel\dExcelTests\OmicronUtilsTests\OmicronRequisition1Example.json"); 
         List<QuoteValue>? quoteValues = OmicronUtils.DeserializeOmicronObjects(rawJson);
-        List<QuoteValue> zarSwapCurveQuotes = OmicronUtils.GetSwapCurveQuotes("JIBAR", quoteValues);
+        List<QuoteValue> zarSwapCurveQuotes = OmicronUtils.GetSwapCurveQuotes("JIBAR", null, quoteValues);
         Assert.AreEqual(zarSwapCurveQuotes.Count, 23);
     }
 }

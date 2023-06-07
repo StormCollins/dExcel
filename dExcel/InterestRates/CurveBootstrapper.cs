@@ -310,7 +310,7 @@ public static class CurveBootstrapper
                     }
                 }
             }
-            else if (instrumentType.Equals("OISs", StringComparison.OrdinalIgnoreCase))
+            else if (instrumentType.IgnoreCaseEquals("OIS", "OISs", "Overnight Index Swap", "Overnight Index Swaps"))
             {
                 if (rates is null)
                 {
@@ -337,6 +337,21 @@ public static class CurveBootstrapper
                     return CommonUtils.DExcelErrorMessage("SOFR rates missing.");
                 }
                 
+                if (frequencies is null)
+                {
+                    return CommonUtils.DExcelErrorMessage("SOFR frequencies missing.");
+                }
+
+                if (referenceMonths is null)
+                {
+                    return CommonUtils.DExcelErrorMessage("SOFR reference months missing.");     
+                }
+
+                if (referenceYears is null)
+                {
+                    return CommonUtils.DExcelErrorMessage("SOFR reference years missing.");
+                }
+                
                 for (int i = 0; i < instrumentCount; i++)
                 {
                     if (includeInstruments[i])
@@ -349,6 +364,10 @@ public static class CurveBootstrapper
                                 referenceFreq: new QL.Period(frequencies[i]).frequency()));
                     }
                 }
+            }
+            else
+            {
+                return CommonUtils.DExcelErrorMessage($"Unknown instrument type: {instrumentType}");
             }
         }
 
@@ -380,7 +399,7 @@ public static class CurveBootstrapper
         DataObjectController dataObjectController = DataObjectController.Instance;
         return dataObjectController.Add(handle, curveDetails);
     }
-    
+
     /// <summary>
     /// Bootstraps a tenor basis, single currency interest rate curve. 
     /// Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR.
@@ -388,7 +407,8 @@ public static class CurveBootstrapper
     /// <param name="handle">The 'handle' or name used to refer to the object in memory.
     /// Each object in a workbook must have a unique handle.</param>
     /// <param name="curveParameters">The parameters required to construct the curve.</param>
-    /// <param name="customBaseIndex">(Optional)A custom rate index.</param>
+    /// <param name="customBaseIndex">(Optional)A custom base rate index.</param>
+    /// <param name="customSpreadIndex">(Optional)A custom spread rate index.</param>
     /// <param name="instrumentGroups">The list of instrument groups used in the bootstrapping.</param>
     /// <returns>A handle to a bootstrapped curve.</returns>
     [ExcelFunction(
@@ -410,10 +430,10 @@ public static class CurveBootstrapper
                 "Only populate this if you have NOT supplied a 'RateIndexName' in the curve parameters.")]
         object[,]? customBaseIndex = null,
         [ExcelArgument(
-            Name = "(Optional)Custom Other Index",
+            Name = "(Optional)Custom Spread Index",
             Description =
                 "Only populate this if you have NOT supplied a 'RateIndexName' in the curve parameters.")]
-        object[,]? customOtherIndex = null,
+        object[,]? customSpreadIndex = null,
         [ExcelArgument(
             Name = "Instrument Groups",
             Description = "The instrument groups used to bootstrap the curve e.g., 'Deposits', 'FRAs', 'Swaps'.")]
@@ -451,15 +471,14 @@ public static class CurveBootstrapper
             return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseIndexTenor).ToUpper());
         }
 
-
         string? baseIndexDiscountCurveHandle =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexDiscountCurve", columnHeaderIndex);
 
-        string? otherIndexName =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "OtherIndex", columnHeaderIndex);
+        string? spreadIndexName =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "SpreadIndex", columnHeaderIndex);
 
-        string? otherRateIndexTenor =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "OtherRateIndexTenor", columnHeaderIndex);
+        string? spreadIndexTenor =
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "SpreadIndexTenor", columnHeaderIndex);
 
         string? interpolation =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Interpolation", columnHeaderIndex);
@@ -474,7 +493,7 @@ public static class CurveBootstrapper
                 yieldTermStructureName: "BaseIndexForecastCurve", 
                 table: curveParameters, 
                 columnHeaderIndex: columnHeaderIndex,
-                allowExtrapolation: (bool)allowExtrapolation);
+                allowExtrapolation: allowExtrapolation);
         
         if (baseIndexForecastCurveErrorMessage is not null)
         {
@@ -486,7 +505,7 @@ public static class CurveBootstrapper
                 yieldTermStructureName: "BaseIndexDiscountCurve", 
                 table: curveParameters, 
                 columnHeaderIndex: columnHeaderIndex,
-                allowExtrapolation: (bool)allowExtrapolation);
+                allowExtrapolation: allowExtrapolation);
             
         if (baseIndexDiscountCurveErrorMessage is not null)
         {
@@ -494,7 +513,7 @@ public static class CurveBootstrapper
         }
         
         QL.IborIndex? baseIndex = GetIborIndex(baseIndexName, baseIndexTenor, baseIndexForecastCurve);
-        QL.IborIndex? otherIndex = GetIborIndex(otherIndexName, otherRateIndexTenor,null);
+        QL.IborIndex? otherIndex = GetIborIndex(spreadIndexName, spreadIndexTenor,null);
 
         if (baseIndex is null)
         {
@@ -525,7 +544,7 @@ public static class CurveBootstrapper
                     return CommonUtils.DExcelErrorMessage("Basis spreads missing.");
                 }
 
-                if (otherIndexName is null)
+                if (spreadIndexName is null)
                 {
 
                 }
@@ -638,7 +657,6 @@ public static class CurveBootstrapper
         return null;
     }
     
-
     /// <summary>
     /// Extracts and bootstraps a curve from the Omicron database.
     /// </summary>
@@ -682,14 +700,15 @@ public static class CurveBootstrapper
         // against this.
         string rateIndexName = "";
         string rateIndexTenor = "";
+        string? spreadIndexName = null; 
         switch (curveName.ToUpper())
         {
             case "ZAR-SWAP":
-                rateIndexName = "JIBAR"; 
+                rateIndexName = RateIndices.JIBAR.ToString(); 
                 rateIndexTenor = "3m";
                 break;
             case "USD-OIS":
-                rateIndexName = "FEDFUND";
+                rateIndexName = RateIndices.FEDFUND.ToString();
                 rateIndexTenor = "1d";
                 break;
         }
@@ -698,7 +717,7 @@ public static class CurveBootstrapper
         try
         {
             quoteValues =
-                OmicronUtils.OmicronUtils.GetSwapCurveQuotes(rateIndexName, null, 1, baseDate.ToString("yyyy-MM-dd"));
+                OmicronUtils.OmicronUtils.GetSwapCurveQuotes(rateIndexName, spreadIndexName, null, 1, baseDate.ToString("yyyy-MM-dd"));
         }
         catch (Exception ex)
         {
@@ -803,4 +822,6 @@ public static class CurveBootstrapper
 
         return Bootstrap(handle, curveParameters, null, instruments.ToArray());
     }
+    
+
 }

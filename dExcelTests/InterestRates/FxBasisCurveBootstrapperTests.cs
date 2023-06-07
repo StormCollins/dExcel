@@ -215,7 +215,7 @@ public class FxBasisCurveBootstrapperTests
         };
         
         string usdZarFxBasisCurveHandle = 
-            FxCurveBootstrapper.BootstrapFxBasisCurve(
+            FxCurveBootstrapper.BootstrapFxBasisAdjustedCurve(
                 handle: "UsdZarFxBasisCurve",
                 curveParameters: usdZarFxBasisCurveParameters,
                 customBaseCurrencyIndex: null,
@@ -732,7 +732,7 @@ public class FxBasisCurveBootstrapperTests
         };
 
         string usdZarFxBasisCurveHandle = 
-            dExcel.FX.CurveBootstrapper.BootstrapFxBasisCurve(
+            dExcel.FX.CurveBootstrapper.BootstrapFxBasisAdjustedCurve(
                 handle: "OldValsMethod",
                 curveParameters: usdZarFxBasisCurveParameters,
                 customBaseCurrencyIndex: null,

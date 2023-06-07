@@ -41,7 +41,7 @@ public static class ExcelTableUtils
         List<string> columnHeaders
             = Enumerable
                 .Range(0, table.GetLength(1))
-                .Select(j => table[rowIndexOfColumnHeaders, j].ToString()?.ToUpper())
+                .Select(j => table[rowIndexOfColumnHeaders, j].ToString()?.ToUpper().Replace(" ", ""))
                 .Cast<string>()
                 .ToList();
         
@@ -60,7 +60,7 @@ public static class ExcelTableUtils
     /// <returns>The table column.</returns>
     public static List<T>? GetColumn<T>(object[,] table, string columnHeader, int rowIndexOfColumnHeaders = 1)
     {
-        int index = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader.ToUpper());
+        int index = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader.ToUpper().Replace(" ", ""));
         if (index == -1)
         {
             return null;
@@ -152,7 +152,7 @@ public static class ExcelTableUtils
     {
         return Enumerable
                 .Range(rowIndexOfFirstRowHeader, table.GetLength(0) - rowIndexOfFirstRowHeader)
-                .Select(i => table[i, 0].ToString()?.ToUpper())
+                .Select(i => table[i, 0].ToString()?.ToUpper().Replace(" ",  ""))
                 .ToList(); 
     }
 
@@ -173,13 +173,13 @@ public static class ExcelTableUtils
         string rowHeader,
         int rowIndexOfColumnHeaders = 1)
     {
-        int columnIndex = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader.ToUpper());
+        int columnIndex = GetColumnHeaders(table, rowIndexOfColumnHeaders).IndexOf(columnHeader.ToUpper().Replace(" ", ""));
         if (columnIndex == -1)
         {
             return default;
         }
         
-        int unadjustedRowIndex = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader.ToUpper());
+        int unadjustedRowIndex = GetRowHeaders(table, rowIndexOfColumnHeaders + 1).IndexOf(rowHeader.ToUpper().Replace(" ", ""));
         if (unadjustedRowIndex == -1)
         {
             return default;

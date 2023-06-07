@@ -3,12 +3,11 @@ using dExcel.CommonEnums;
 using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.InterestRates;
+using dExcel.Utilities;
 using NUnit.Framework;
 using QL = QuantLib;
 
 namespace dExcelTests.InterestRates;
-
-using dExcel.Utilities;
 
 [TestFixture]
 public class CurveBootstrapperTest
@@ -458,7 +457,7 @@ public class CurveBootstrapperTest
         Assert.AreEqual(((object[,])discountFactors)[0, 0], 1.000000000000d); 
         Assert.AreEqual((double)((object[,])discountFactors)[1, 0], 0.922680208459d, 1e-10d);
     }
-
+    
     [Test]
     public void GetInterpolationMethodsForBootstrappingTest()
     {

@@ -44,13 +44,17 @@ public static class OmicronUtils
     /// 'QuoteValues'. Thus one must either populate the <param name="quotes"/> or populate both the
     /// <param name="requisitionId"/> and .
     /// </summary>
-    /// <param name="indexName">The index name e.g., 'JIBAR'</param>
+    /// <param name="index">In the case of an IRS, the index name e.g., 'JIBAR'. In the case of a cross currency
+    /// swap this is the same as the quote index i.e., 'JIBAR' in the case of 'USDZAR'.</param>
+    /// <param name="spreadIndex">This is null in the case of an IRS. For a cross currency swap it's the same as the
+    /// base index i.e., for 'USDZAR' it would be 'USD-LIBOR'.</param>
     /// <param name="quotes">(Optional)The list of Omicron quote values to loop through. If the</param>
     /// <param name="requisitionId">The relevant requisition ID in Omicron.</param>
     /// <param name="marketDataDate">The market data date for which to extract the data from Omicron.</param>
     /// <returns>A list of the relevant swap curve quotes.</returns>
     public static List<QuoteValue> GetSwapCurveQuotes(
-        string indexName, 
+        string index,
+        string? spreadIndex = null,
         List<QuoteValue>? quotes = null, 
         int? requisitionId = null,
         string? marketDataDate = null)
@@ -60,11 +64,14 @@ public static class OmicronUtils
         return 
             quotes
                 .Where(x => 
-                    (x.Type.GetType() == typeof(RateIndex) && ((RateIndex) x.Type).Name == indexName) ||
-                    (x.Type.GetType() == typeof(Fra) && ((Fra)x.Type).ReferenceIndex.Name == indexName) ||
+                    (x.Type.GetType() == typeof(RateIndex) && ((RateIndex) x.Type).Name == index) ||
+                    (x.Type.GetType() == typeof(Fra) && ((Fra)x.Type).ReferenceIndex.Name == index) ||
                     (x.Type.GetType() == typeof(InterestRateSwap) && 
-                     ((InterestRateSwap)x.Type).ReferenceIndex.Name == indexName) ||
-                    (x.Type.GetType() == typeof(Ois) && ((Ois)x.Type).ReferenceIndex.Name == indexName))
+                     ((InterestRateSwap)x.Type).ReferenceIndex.Name == index) ||
+                    (x.Type.GetType() == typeof(Ois) && ((Ois)x.Type).ReferenceIndex.Name == index) ||
+                    (x.Type.GetType() == typeof(FxBasisSwap) && 
+                     (((FxBasisSwap)x.Type).BaseIndex.Name == index) &&
+                     (((FxBasisSwap)x.Type).BaseIndex.Name == spreadIndex)))
                 .ToList();
     }
 

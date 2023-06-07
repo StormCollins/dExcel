@@ -9,10 +9,19 @@ public static class Extensions
     /// Succinctly wraps the string comparison method, ignoring case.
     /// </summary>
     /// <param name="s">The current string.</param>
-    /// <param name="value">The value to be compared to.</param>
+    /// <param name="values">The set of values to be compared to.</param>
     /// <returns>True if the two strings are the same, ignoring case, otherwise False.</returns>
-    public static bool IgnoreCaseEquals<T>(this string? s, T value)
+    public static bool IgnoreCaseEquals<T>(this string? s, params T[] values)
     {
-        return string.Equals(s, value?.ToString(), StringComparison.InvariantCultureIgnoreCase);
+        foreach (T value in values)
+        {
+            if (string.Equals(s, value?.ToString(), StringComparison.InvariantCultureIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
+
