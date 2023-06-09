@@ -189,7 +189,8 @@ public static class CurveBootstrapper
         }
         
         QL.RateHelperVector rateHelpers = new();
-
+        bool instrumentsWithNaNsFound = false;
+        
         foreach (object instrumentGroup in instrumentGroups)
         {
             object[,] instruments = (object[,]) instrumentGroup;
@@ -231,6 +232,8 @@ public static class CurveBootstrapper
                         return CommonUtils.DExcelErrorMessage("FEC fixing days missing.");
                     }
 
+                    instrumentsWithNaNsFound = instrumentsWithNaNsFound || double.IsNaN(forwardPoints[i]);
+                    
                     if (includeInstruments[i])
                     {
                         QL.JointCalendar jointCalendar =
@@ -269,6 +272,8 @@ public static class CurveBootstrapper
                     {
                         return CommonUtils.DExcelErrorMessage("Cross currency swap fixing days missing.");
                     }
+                    
+                    instrumentsWithNaNsFound = instrumentsWithNaNsFound || double.IsNaN(basisSpreads[i]);
                     
                     if (includeInstruments[i])
                     {
@@ -315,9 +320,12 @@ public static class CurveBootstrapper
             termStructure.enableExtrapolation();
         }
         
-        CurveDetails curveDetails = new(termStructure, quoteCurrencyIndex.dayCounter(), interpolation, null,  null, instrumentGroups);
+        CurveDetails curveDetails = 
+            new(termStructure, quoteCurrencyIndex.dayCounter(), interpolation, null,  null, instrumentGroups);
+        
         DataObjectController dataObjectController = DataObjectController.Instance;
-        return dataObjectController.Add(handle, curveDetails);
+        string warningMessage = instrumentsWithNaNsFound ? "Instruments with NaNs found" : "";
+        return dataObjectController.Add(handle, curveDetails, warningMessage);
     }
     
     /// <summary>
