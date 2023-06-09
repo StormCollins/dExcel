@@ -34,6 +34,53 @@ public static class CurveUtils
     }
    
     /// <summary>
+    /// Gets a list of all available swap curves that can be pulled from Omicron.
+    /// </summary>
+    /// <returns>A 2D column of swap curve names.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_GetOmicronSwapCurves",
+        Description = "Returns all available swap curves for interest rate curve bootstrapping in Omicron.",
+        Category = "∂Excel: Interest Rates")]
+    public static object GetOmicronSwapCurves()
+    {
+        List<string> swapCurves = 
+            Enum.GetNames(typeof(OmicronSwapCurves)).Select(x => x.ToString().ToUpper()).ToList();
+        
+        object[,] output = new object[swapCurves.Count + 1, 1];
+        output[0, 0] = "Omicron Swap Curves";
+        int i = 1;
+        foreach (string swapCurve in swapCurves)
+        {
+            output[i++, 0] = swapCurve;
+        }
+        return output;
+    }
+    
+   
+    /// <summary>
+    /// Gets a list of all available FX basis adjusted swap curves that can be pulled from Omicron.
+    /// </summary>
+    /// <returns>A 2D column of FX basis adjusted swap curve names.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_GetOmicronFxBasisAdjustedSwapCurves",
+        Description = "Returns all available FX basis adjusted swap curves for bootstrapping in Omicron.",
+        Category = "∂Excel: FX")]
+    public static object GetOmicronFxBasisAdjustedSwapCurves()
+    {
+        List<string> fxBasisAdjustedSwapCurves = 
+            Enum.GetNames(typeof(OmicronFxBasisCurves)).Select(x => x.ToString().ToUpper()).ToList();
+        
+        object[,] output = new object[fxBasisAdjustedSwapCurves.Count + 1, 1];
+        output[0, 0] = "Omicron FX Basis Adjusted Swap Curves";
+        int i = 1;
+        foreach (string swapCurve in fxBasisAdjustedSwapCurves)
+        {
+            output[i++, 0] = swapCurve;
+        }
+        return output;
+    }
+    
+    /// <summary>
     /// Gets all "details" stored with a curve in the DataObject controller e.g., day count convention, interpolation
     /// method, etc.
     /// </summary>
@@ -669,7 +716,7 @@ public static class CurveUtils
         
         if (termStructureHandle is null)
         {
-            return (null, CommonUtils.CurveParameterMissingErrorMessage(yieldTermStructureName)); 
+            return (null, yieldTermStructureName.CurveParameterMissingErrorMessage()); 
         }
         
         QL.RelinkableYieldTermStructureHandle termStructure = new();

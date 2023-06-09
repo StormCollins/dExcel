@@ -401,9 +401,44 @@ public class RibbonController : ExcelRibbon
         Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application;
         string[] rateIndices = 
             ExcelArrayUtils.ConvertExcelRangeToList<string>((object[,]) CurveUtils.GetRateIndices()).ToArray()[1..];
+        
         Excel.Range selection = (Excel.Range)xlApp.Selection;
         selection.Validation.Delete();
         selection.Validation.Add(Excel.XlDVType.xlValidateList, Formula1: string.Join(", ", rateIndices));
+    }
+
+    /// <summary>
+    /// Inserts a drop down (or data validation list) for the selected cell containing the available swap curves in
+    /// Omicron.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void InsertDropDownMenuForOmicronSwapCurves(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application; 
+        string[] swapCurves = 
+            ExcelArrayUtils.ConvertExcelRangeToList<string>(
+                (object[,]) CurveUtils.GetOmicronSwapCurves()).ToArray()[1..];
+        
+        Excel.Range selection = (Excel.Range)xlApp.Selection;
+        selection.Validation.Delete();
+        selection.Validation.Add(Excel.XlDVType.xlValidateList, Formula1: string.Join(", ", swapCurves));
+    }
+    
+    /// <summary>
+    /// Inserts a drop down (or data validation list) for the selected cell containing the available FX basis adjusted
+    /// swap curves in Omicron.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void InsertDropDownMenuForOmicronFxBasisAdjustedSwapCurves(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application; 
+        string[] fxBasisAdjustedSwapCurves = 
+            ExcelArrayUtils.ConvertExcelRangeToList<string>(
+                (object[,]) CurveUtils.GetOmicronFxBasisAdjustedSwapCurves()).ToArray()[1..];
+        
+        Excel.Range selection = (Excel.Range)xlApp.Selection;
+        selection.Validation.Delete();
+        selection.Validation.Add(Excel.XlDVType.xlValidateList, Formula1: string.Join(", ", fxBasisAdjustedSwapCurves));
     }
     
     /// <summary>

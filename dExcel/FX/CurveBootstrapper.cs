@@ -59,45 +59,47 @@ public static class CurveBootstrapper
         int columnHeaderIndex = ExcelTableUtils.GetRowIndex(curveParameters, "Parameter");
         
         DateTime baseDate =
-            ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "Base Date", columnHeaderIndex);
         
         if (baseDate == default)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseDate).ToUpper());
+            return nameof(baseDate).CurveParameterMissingErrorMessage();
         }
 
         QL.Settings.instance().setEvaluationDate(baseDate.ToQuantLibDate());
 
         string? baseCurrencyIndexName =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseCurrencyIndexName", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Base Currency Index Name", columnHeaderIndex);
         
         if (baseCurrencyIndexName is null && customBaseCurrencyIndex is null)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseCurrencyIndexName).ToUpper());
+            return nameof(baseCurrencyIndexName).CurveParameterMissingErrorMessage();
         }
         
         string? quoteCurrencyIndexName =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "QuoteCurrencyIndexName", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Quote Currency Index Name", columnHeaderIndex);
         
         if (quoteCurrencyIndexName is null && customBaseCurrencyIndex is null)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(quoteCurrencyIndexName).ToUpper());
+            return nameof(quoteCurrencyIndexName).CurveParameterMissingErrorMessage();
         }
 
         string? baseCurrencyIndexTenor =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseCurrencyIndexTenor", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Base Currency Index Tenor", columnHeaderIndex);
         
         if (baseCurrencyIndexTenor is null && customBaseCurrencyIndex is null && quoteCurrencyIndexName != "FEDFUND")
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseCurrencyIndexTenor).ToUpper());
+            return nameof(baseCurrencyIndexTenor).CurveParameterMissingErrorMessage();
         }
 
         string? quoteCurrencyIndexTenor =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "QuoteCurrencyIndexTenor", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Quote Currency Index Tenor", columnHeaderIndex);
         
-        if (quoteCurrencyIndexTenor is null && customBaseCurrencyIndex is null && quoteCurrencyIndexName != "FEDFUND")
+        if (quoteCurrencyIndexTenor is null && 
+            customBaseCurrencyIndex is null && 
+            quoteCurrencyIndexName != RateIndices.FEDFUND.ToString())
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(quoteCurrencyIndexTenor).ToUpper());
+            return nameof(quoteCurrencyIndexTenor).CurveParameterMissingErrorMessage();
         }
         
         string? interpolation =
@@ -105,31 +107,31 @@ public static class CurveBootstrapper
         
         if (interpolation is null)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(interpolation).ToUpper());
+            return nameof(interpolation).CurveParameterMissingErrorMessage();
         }
         
         double? spotFx =
-            ExcelTableUtils.GetTableValue<double?>(curveParameters, "Value", "SpotFX", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<double?>(curveParameters, "Value", "Spot FX", columnHeaderIndex);
         
         if (spotFx is null)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(spotFx).ToUpper());
+            return nameof(spotFx).CurveParameterMissingErrorMessage();
         }
         
         bool allowExtrapolation =
-            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex) ??
+            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "Allow Extrapolation", columnHeaderIndex) ??
             false;
 
         string? baseCurrencyDiscountCurve =
             ExcelTableUtils.GetTableValue<string?>(
                 table: curveParameters, 
                 columnHeader: "Value", 
-                rowHeader: "BaseCurrencyDiscountCurve", 
+                rowHeader: "Base Currency Discount Curve", 
                 rowIndexOfColumnHeaders: columnHeaderIndex);
 
         if (baseCurrencyDiscountCurve is null)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseCurrencyDiscountCurve).ToUpper()); 
+            return nameof(baseCurrencyDiscountCurve).CurveParameterMissingErrorMessage(); 
         }
         
         QL.RelinkableYieldTermStructureHandle baseCurrencyDiscountCurveTermStructure = new();
@@ -146,7 +148,7 @@ public static class CurveBootstrapper
                columnHeaderIndex: columnHeaderIndex, 
                allowExtrapolation: allowExtrapolation);
 
-        if (baseCurrencyForecastCurve is null)
+        if (baseCurrencyForecastCurveErrorMessage is not null)
         {
             return baseCurrencyForecastCurveErrorMessage;
         }
@@ -159,7 +161,7 @@ public static class CurveBootstrapper
                columnHeaderIndex: columnHeaderIndex, 
                allowExtrapolation: allowExtrapolation);
 
-        if (quoteCurrencyForecastCurve is null)
+        if (quoteCurrencyForecastCurveErrorMessage is not null)
         {
             return quoteCurrencyForecastCurveErrorMessage;
         }
@@ -198,9 +200,9 @@ public static class CurveBootstrapper
             }
             
             List<string>? tenors = ExcelTableUtils.GetColumn<string>(instruments, "Tenors");
-            List<double>? basisSpreads = ExcelTableUtils.GetColumn<double>(instruments, "BasisSpreads");
-            List<double>? forwardPoints = ExcelTableUtils.GetColumn<double>(instruments, "ForwardPoints");
-            List<int>? fixingDays = ExcelTableUtils.GetColumn<int>(instruments, "FixingDays");
+            List<double>? basisSpreads = ExcelTableUtils.GetColumn<double>(instruments, "Basis Spreads");
+            List<double>? forwardPoints = ExcelTableUtils.GetColumn<double>(instruments, "Forward Points");
+            List<int>? fixingDays = ExcelTableUtils.GetColumn<int>(instruments, "Fixing Days");
             List<bool>? includeInstruments = ExcelTableUtils.GetColumn<bool>(instruments, "Include");
 
             if (includeInstruments is null)
@@ -249,7 +251,7 @@ public static class CurveBootstrapper
                     }
                 }
             }
-            else if (instrumentType.Equals("Cross Currency Swaps", StringComparison.OrdinalIgnoreCase))
+            else if (instrumentType.IgnoreCaseEquals("Cross Currency Swap", "Cross Currency Swaps"))
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
@@ -289,6 +291,10 @@ public static class CurveBootstrapper
                                 isBasisOnFxBaseCurrencyLeg: false));
                     }
                 }
+            }
+            else
+            {
+                return CommonUtils.DExcelErrorMessage($"Invalid instrument type: '{instrumentType}'");
             }
         }
 
@@ -356,12 +362,10 @@ public static class CurveBootstrapper
         string rateIndexName = "";
         string rateIndexTenor = "";
         string? spreadIndexName = null; 
-        switch (curveName.ToUpper())
+        if (curveName.IgnoreCaseEquals(OmicronFxBasisCurves.USDZAR.ToString()))
         {
-            case "USDZAR_FxBasisCurve":
                rateIndexName = RateIndices.JIBAR.ToString();
                spreadIndexName = RateIndices.USD_LIBOR.ToString();
-               break;
         }
 
         List<QuoteValue> quoteValues;

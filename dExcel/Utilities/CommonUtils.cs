@@ -28,12 +28,17 @@ public static class CommonUtils
     public static string DExcelErrorMessage(string message) => $"{DExcelErrorPrefix} {message}";
 
     /// <summary>
-    /// Returns a ∂Excel specific error message if a curve parameter is missing.
+    /// Returns a ∂Excel specific error message that a curve parameter is missing.
     /// </summary>
-    /// <param name="missingCurveParameter">The name of the missing curve parameter.</param>
-    /// <returns>∂Excel error message with ∂Excel prefix as well as the curve parameter is missing.</returns>
-    public static string CurveParameterMissingErrorMessage(string missingCurveParameter) => 
-        DExcelErrorMessage($"Missing curve parameter: '{missingCurveParameter}'.");
+    /// <param name="missingCurveParameter">The actual name of the missing curve parameter.</param>
+    /// <returns>A ∂Excel error message that a curve parameter is missing.</returns>
+    /// <remarks>If, for example, a variable/parameter named "baseDate" is missing one would invoke this function with
+    /// nameof(baseDate).CurveParameterMissingErrorMessage(). This would return something to the effect of
+    /// "Curve parameter 'Base Date' missing." i.e., it formats it nicely and uses reflection to find the name of the
+    /// parameter.</remarks>
+    public static string CurveParameterMissingErrorMessage(
+        this string missingCurveParameter) => 
+        DExcelErrorMessage($"Missing curve parameter: '{missingCurveParameter.SplitCamelCase()}'.");
     
     /// <summary>
     /// Returns an error message that the calendar is unsupported. 

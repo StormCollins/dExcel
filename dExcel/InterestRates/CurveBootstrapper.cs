@@ -8,6 +8,8 @@ using QL = QuantLib;
 
 namespace dExcel.InterestRates;
 
+using System.Diagnostics.CodeAnalysis;
+
 /// <summary>
 /// A class containing a collection of interest rate curve bootstrapping utilities.
 /// </summary>
@@ -47,7 +49,7 @@ public static class CurveBootstrapper
         string? indexTenor,
         QL.RelinkableYieldTermStructureHandle? forecastCurve = null)
     {
-        if (!Enum.TryParse(indexName, out RateIndices iborName))
+        if (!Enum.TryParse(indexName.Replace("-", "_"), out RateIndices iborName))
         {
             return null;
         }
@@ -124,7 +126,7 @@ public static class CurveBootstrapper
         
         if (baseDate == default)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseDate).ToUpper());
+            return nameof(baseDate).CurveParameterMissingErrorMessage();
         }
 
         QL.Settings.instance().setEvaluationDate(baseDate.ToQuantLibDate());
@@ -134,7 +136,7 @@ public static class CurveBootstrapper
         
         if (rateIndexName is null && customRateIndex is null)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(rateIndexName).ToUpper());
+            return nameof(rateIndexName).CurveParameterMissingErrorMessage();
         }
 
         string? rateIndexTenor =
@@ -142,7 +144,7 @@ public static class CurveBootstrapper
         
         if (rateIndexTenor is null && customRateIndex is null && rateIndexName != "FEDFUND")
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(rateIndexTenor).ToUpper());
+            return nameof(rateIndexTenor).CurveParameterMissingErrorMessage();
         }
 
         string? interpolation =
@@ -150,7 +152,7 @@ public static class CurveBootstrapper
         
         if (interpolation == null)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(interpolation).ToUpper());
+            return nameof(interpolation).CurveParameterMissingErrorMessage();
         }
         
         bool allowExtrapolation =
@@ -177,7 +179,7 @@ public static class CurveBootstrapper
 
         if (rateIndex is null)
         {
-            return CommonUtils.DExcelErrorMessage($"Unsupported rate index: {rateIndexName}");
+            return CommonUtils.DExcelErrorMessage($"Unsupported rate index: '{rateIndexName}'");
         }
 
         QL.RateHelperVector rateHelpers = new();
@@ -201,7 +203,7 @@ public static class CurveBootstrapper
 
             int instrumentCount = includeInstruments.Count;
 
-            if (instrumentType.IgnoreCaseEquals("Deposits"))
+            if (instrumentType.IgnoreCaseEquals("Deposit", "Deposits"))
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
@@ -229,7 +231,7 @@ public static class CurveBootstrapper
                     }
                 }
             }
-            else if (instrumentType.IgnoreCaseEquals("FRAs"))
+            else if (instrumentType.IgnoreCaseEquals("FRA", "FRAs", "Forward Rate Agreement", "Forward Rate Agreements"))
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
@@ -253,7 +255,7 @@ public static class CurveBootstrapper
                     }
                 }
             }
-            else if (instrumentType.IgnoreCaseEquals("Interest Rate Swaps"))
+            else if (instrumentType.IgnoreCaseEquals("IRS", "IRSs", "Interest Rate Swap", "Interest Rate Swaps"))
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
@@ -367,7 +369,7 @@ public static class CurveBootstrapper
             }
             else
             {
-                return CommonUtils.DExcelErrorMessage($"Unknown instrument type: {instrumentType}");
+                return CommonUtils.DExcelErrorMessage($"Unknown instrument type: '{instrumentType}'");
             }
         }
 
@@ -446,7 +448,7 @@ public static class CurveBootstrapper
         
         if (baseDate == default)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseDate).ToUpper());
+            return nameof(baseDate).CurveParameterMissingErrorMessage();
         }
 
         QL.Settings.instance().setEvaluationDate(baseDate.ToQuantLibDate());
@@ -460,7 +462,7 @@ public static class CurveBootstrapper
         
         if (baseIndexName is null && customBaseIndex is null)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseIndexName).ToUpper());
+            return nameof(baseIndexName).CurveParameterMissingErrorMessage();
         }
 
         string? baseIndexTenor =
@@ -468,7 +470,7 @@ public static class CurveBootstrapper
         
         if (baseIndexTenor is null && customBaseIndex is null && baseIndexName != "FEDFUND")
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(baseIndexTenor).ToUpper());
+            return nameof(baseIndexTenor).CurveParameterMissingErrorMessage();
         }
 
         string? baseIndexDiscountCurveHandle =
@@ -485,7 +487,7 @@ public static class CurveBootstrapper
         
         if (interpolation == null)
         {
-            return CommonUtils.CurveParameterMissingErrorMessage(nameof(interpolation).ToUpper());
+            return nameof(interpolation).CurveParameterMissingErrorMessage();
         }
 
         (QL.RelinkableYieldTermStructureHandle? baseIndexForecastCurve, string? baseIndexForecastCurveErrorMessage) =
@@ -517,7 +519,7 @@ public static class CurveBootstrapper
 
         if (baseIndex is null)
         {
-            return CommonUtils.DExcelErrorMessage($"Unsupported rate index: {baseIndexName}");
+            return CommonUtils.DExcelErrorMessage($"Unsupported rate index: '{baseIndexName}'");
         }
 
         QL.RateHelperVector rateHelpers = new();
@@ -537,7 +539,7 @@ public static class CurveBootstrapper
 
             int instrumentCount = includeInstruments.Count;
 
-            if (instrumentType.Equals("Tenor Basis Swaps", StringComparison.OrdinalIgnoreCase))
+            if (instrumentType.IgnoreCaseEquals("Basis Swap", "Basis Swaps", "Tenor Basis Swap", "Tenor Basis Swaps"))
             {
                 if (basisSpreads is null)
                 {
@@ -695,29 +697,49 @@ public static class CurveBootstrapper
         interpolation = 
             interpolation != "" ? interpolation : CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString();
         
-        // TODO: List the available types of interpolation.
         // One could create more complicated abstract code for mapping from quotes to 2d tables but I would advise
         // against this.
-        string rateIndexName = "";
-        string rateIndexTenor = "";
-        string? spreadIndexName = null; 
-        switch (curveName.ToUpper())
-        {
-            case "ZAR-SWAP":
-                rateIndexName = RateIndices.JIBAR.ToString(); 
-                rateIndexTenor = "3m";
-                break;
-            case "USD-OIS":
-                rateIndexName = RateIndices.FEDFUND.ToString();
-                rateIndexTenor = "1d";
-                break;
-        }
+        // string rateIndexName = "";
+        // string rateIndexTenor = "";
+        // string? spreadIndexName = null; 
+        //
+        // if (curveName.IgnoreCaseEquals(OmicronSwapCurves.ZAR_Swap.ToString()))
+        // {
+        //     rateIndexName = RateIndices.JIBAR.ToString(); 
+        //     rateIndexTenor = "3M";
+        // }
+        // else if (curveName.IgnoreCaseEquals(OmicronSwapCurves.USD_OIS.ToString()))
+        // {
+        //     rateIndexName = RateIndices.FEDFUND.ToString();
+        //     rateIndexTenor = "1D";
+        // }
+        // else if (curveName.IgnoreCaseEquals(OmicronSwapCurves.USD_Swap.ToString()))
+        // {
+        //     rateIndexName = RateIndices.USD_LIBOR.ToString().Replace("_", "-");
+        //     rateIndexTenor = "3M";
+        // }
+        // else
+        // {
+        //     return CommonUtils.DExcelErrorMessage($"Unsupported curve name: '{curveName}'");
+        // }
 
+        if (!TryParseCurveNameToRateIndex(
+                curveName, 
+                out (string name, string tenor)? index,
+                out string curveNameErrorMessage))
+        {
+            return curveNameErrorMessage; 
+        }
+            
         List<QuoteValue> quoteValues;
+        bool instrumentValuesContainNaNs = false;
         try
         {
             quoteValues =
-                OmicronUtils.OmicronUtils.GetSwapCurveQuotes(rateIndexName, spreadIndexName, null, 1, baseDate.ToString("yyyy-MM-dd"));
+                OmicronUtils.OmicronUtils.GetSwapCurveQuotes(index.Value.name.Replace("_", "-"), null, null, 1, baseDate.ToString("yyyy-MM-dd"));
+            
+            string quoteValuesString = string.Join("|", quoteValues.Select(x => x.ToString()));
+            instrumentValuesContainNaNs = quoteValuesString.Contains("NaN", StringComparison.OrdinalIgnoreCase);
         }
         catch (Exception ex)
         {
@@ -734,8 +756,8 @@ public static class CurveBootstrapper
             {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
-            {"RateIndexName", rateIndexName},
-            {"RateIndexTenor", rateIndexTenor},
+            {"RateIndexName", index.Value.name},
+            {"RateIndexTenor", index.Value.tenor},
             {"Interpolation", interpolation},
         };
 
@@ -754,7 +776,7 @@ public static class CurveBootstrapper
             depositInstruments[row, 0] = ((RateIndex) deposit.Type).Tenor.ToString();
             depositInstruments[row, 1] = ((RateIndex) deposit.Type).Name;
             depositInstruments[row, 2] = deposit.Value;
-            depositInstruments[row, 3] = "TRUE";
+            depositInstruments[row, 3] = double.IsNaN(deposit.Value) ? "FALSE" : "TRUE";
             row++;
         }
 
@@ -774,7 +796,7 @@ public static class CurveBootstrapper
             fraInstruments[row, 0] = $"{((Fra) fra.Type).Tenor.Amount}x{((Fra) fra.Type).Tenor.Amount + 3}";
             fraInstruments[row, 1] = ((Fra) fra.Type).ReferenceIndex.Name;
             fraInstruments[row, 2] = fra.Value;
-            fraInstruments[row, 3] = "TRUE";
+            fraInstruments[row, 3] = fra.Value.ToString().IgnoreCaseEquals("NaN") ? "FALSE" : "TRUE";
             row++;
         }
 
@@ -793,7 +815,7 @@ public static class CurveBootstrapper
             swapInstruments[row, 0] = ((InterestRateSwap) swap.Type).Tenor.ToString();
             swapInstruments[row, 1] = ((InterestRateSwap) swap.Type).ReferenceIndex.Name;
             swapInstruments[row, 2] = swap.Value;
-            swapInstruments[row, 3] = "TRUE";
+            swapInstruments[row, 3] = double.IsNaN(swap.Value) ? "FALSE" : "TRUE";
             row++;
         }
         
@@ -810,7 +832,7 @@ public static class CurveBootstrapper
         {
             oisInstruments[row, 0] = ((Ois)ois.Type).Tenor.ToString();
             oisInstruments[row, 1] = ois.Value;
-            oisInstruments[row, 2] = "TRUE";
+            oisInstruments[row, 2] = double.IsNaN(ois.Value) ? "FALSE" : "TRUE";
             row++;
         }
 
@@ -822,6 +844,69 @@ public static class CurveBootstrapper
 
         return Bootstrap(handle, curveParameters, null, instruments.ToArray());
     }
-    
 
+    /// <summary>
+    /// Tries to parse a curve name to a rate index pair of "(name, tenor)" e.g., "ZAR_Swap" => ("JIBAR", "3M").
+    /// </summary>
+    /// <param name="curveName">The curve name e.g., "ZAR_Swap", "USD_Libor"</param>
+    /// <param name="rateIndex">A tuple consisting of the rate index name and tenor.</param>
+    /// <param name="errorMessage">An error message if it can't parse the curve name.</param>
+    /// <returns>True if it can parse the curve name, otherwise false.</returns>
+    public static bool TryParseCurveNameToRateIndex(
+        string curveName, 
+        [NotNullWhen(true)] 
+        out (string name, string tenor)? rateIndex, 
+        out string errorMessage)
+    {
+        errorMessage = "";
+        curveName = curveName.Replace("-", "_");
+        if (curveName.IgnoreCaseEquals(OmicronSwapCurves.ZAR_Swap.ToString()))
+        {
+            rateIndex = (RateIndices.JIBAR.ToString(), "3M");
+            return true;
+        }
+        
+        if (curveName.IgnoreCaseEquals(OmicronSwapCurves.USD_Swap.ToString()))
+        {
+            rateIndex = (RateIndices.USD_LIBOR.ToString(), "3M");
+            return true;
+        }
+        
+        if (curveName.IgnoreCaseEquals(OmicronSwapCurves.USD_OIS.ToString()))
+        {
+            rateIndex = (RateIndices.FEDFUND.ToString(), "1D");
+            return true;
+        }
+
+        rateIndex = null;
+        errorMessage = CommonUtils.DExcelErrorMessage($"Unsupported curve name: {curveName}");
+        return false;
+    }
+   
+    /// <summary>
+    /// Extracts the underlying swap curve quotes for a given curve.
+    /// </summary>
+    /// <param name="curveName">The curve name e.g., "USD-Swap", "ZAR-Swap", etc.</param>
+    /// <param name="baseDate">The base date of the curve.</param>
+    /// <returns>A 2D array of quotes for the curve.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_GetSwapCurveQuotes",
+        Description = "Extracts the underlying swap quotes for a given curve.",
+        Category = "")]
+    public static object GetSwapCurveQuotes(string curveName, DateTime baseDate)
+    {
+        if (!TryParseCurveNameToRateIndex(curveName, out (string name, string tenor)? index, out string errorMessage))
+        {
+            return errorMessage;        
+        }
+         
+        List<QuoteValue> quoteValues = OmicronUtils.OmicronUtils.GetSwapCurveQuotes(index.Value.name.Replace("_", "-"), null, null, 1, baseDate.ToString("yyyy-MM-dd"));
+        object[,] output = new object[quoteValues.Count, 1];
+        for (int i = 0; i < quoteValues.Count; i++)
+        {
+            output[i, 0] = quoteValues[i].ToString();
+        }   
+        
+        return output;
+    }
 }

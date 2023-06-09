@@ -60,7 +60,8 @@ public static class OmicronUtils
         string? marketDataDate = null)
     {
         quotes ??= GetOmicronRequisitionData(requisitionId, marketDataDate);
-
+        // Enums don't allow for hyphens but Omicron uses them.
+        index = index.Replace("_", "-");
         return 
             quotes
                 .Where(x => 
@@ -80,10 +81,8 @@ public static class OmicronUtils
     /// 'QuoteValues'. Thus one must either populate the <param name="quotes"/> or populate both the
     /// <param name="requisitionId"/> and the <param name="date"/>.
     /// </summary>
-    /// <param name="indexName">The index name e.g., 'JIBAR'</param>
     /// <param name="quotes">(Optional)The list of Omicron quote values to loop through. If the</param>
     /// <param name="requisitionId">The relevant requisition ID in Omicron.</param>
-    /// <param name="marketDataDate">The market data date for which to extract the data from Omicron.</param>
     /// <returns>A list of the relevant swap curve quotes.</returns>
     public static List<QuoteValue> GetFxVolQuotes(
         List<QuoteValue>? quotes = null, 

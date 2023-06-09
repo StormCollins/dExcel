@@ -1,4 +1,8 @@
-﻿namespace dExcel.Utilities;
+﻿using System.Text.RegularExpressions;
+
+namespace dExcel.Utilities;
+
+using System.Text;
 
 /// <summary>
 /// A collection of useful extension methods for various types.
@@ -23,5 +27,19 @@ public static class Extensions
 
         return false;
     }
-}
 
+    /// <summary>
+    /// Adds spaces before the capitals of a camel case string (assuming it has no spaces already).
+    /// E.g., "CamelCase" -> "Camel Case".
+    /// It also capitalizes the very first letter e.g., "camelCase" -> "Camel Case".
+    /// </summary>
+    /// <param name="s">The word to added spaces to.</param>
+    /// <returns>A string with spaces before the capitals.</returns>
+    public static string SplitCamelCase(this string s)
+    {
+        StringBuilder output = new(Regex.Replace(s, "([A-Z])", " $1", RegexOptions.Compiled).Trim());
+        output[0] = char.ToUpper(output[0]);
+        return output.ToString();
+    }
+
+}

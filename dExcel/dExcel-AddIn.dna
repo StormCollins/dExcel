@@ -70,14 +70,24 @@
 				  id='btnInsertDropDownMenuForBootstrappingInterpolation'
 				  label='Insert Drop Down Menu for Bootstrapping Interpolation'
 				  onAction='InsertDropDownMenuForBootstrappingInterpolation'/>
+				<menuSeparator id='InterpolationSeparator'/>
 				<button
 				  id='btnInsertDropDownMenuForDiscountFactorInterpolation'
 				  label='Insert Drop Down Menu for Discount Factors Interpolation'
 				  onAction='InsertDropDownMenuForDiscountFactorInterpolation'/>
+				<menuSeparator id='OmicronSeparator'/>
 				<button
 				  id='btnInsertDropDownMenuForZeroRatesInterpolation'
 				  label='Insert Drop Down Menu for Zero Rates Interpolation'
 				  onAction='InsertDropDownMenuForZeroRatesInterpolation'/>
+				<button 
+				  id='btnInsertDropDownMenuForOmicronSwapCurves'
+				  label='Insert Drop Down Menu for Omicron Swap Curves'
+				  onAction='InsertDropDownMenuForOmicronSwapCurves'/>
+				<button
+				  id='btnInsertDropDownMenuForOmicronFxBasisAdjustedSwapCurves'
+				  label='Insert Drop Down Menu for Omicron FX Basis Adjusted Swap Curves'
+				  onAction='InsertDropDownMenuForOmicronFxBasisAdjustedSwapCurves'/>
 			  </menu>
 			  <button
 				id='btnManagePasswords'
