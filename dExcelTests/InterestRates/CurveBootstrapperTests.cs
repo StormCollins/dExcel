@@ -482,103 +482,103 @@ public class CurveBootstrapperTest
         object[,] expected = 
         {
             {
-                "QuoteValue { Type = Fra { Tenor = 12M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.04106, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 12M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04106, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 15M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.0368, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 15M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.0368, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 18M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.034089999999999995, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 18M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.034089999999999995, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1M }, Date = 31/03/2023 00:00:00, Value = 0.0485771, IsRefreshable = False }"
+                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1M }, Date = 2023-03-31 00:00:00, Value = 0.0485771, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 1M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.05191, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 1M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.05191, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 21M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = NaN, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 21M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = NaN, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 2M }, Date = 31/03/2023 00:00:00, Value = NaN, IsRefreshable = False }"
+                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 2M }, Date = 2023-03-31 00:00:00, Value = NaN, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 2M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.052199999999999996, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 2M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.052199999999999996, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 3M }, Date = 31/03/2023 00:00:00, Value = 0.0519271, IsRefreshable = False }"
+                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 3M }, Date = 2023-03-31 00:00:00, Value = 0.0519271, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 3M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.05215, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 3M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.05215, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 4M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.050519999999999995, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 4M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.050519999999999995, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 5M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.04933, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 5M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04933, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 6M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.04823, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 6M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04823, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 7M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.047119999999999995, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 7M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.047119999999999995, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 8M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.04601, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 8M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04601, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = Fra { Tenor = 9M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 31/03/2023 00:00:00, Value = 0.04471, IsRefreshable = False }"
+                "QuoteValue { Type = Fra { Tenor = 9M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04471, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1D }, Date = 31/03/2023 00:00:00, Value = 0.0480086, IsRefreshable = False }"
+                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1D }, Date = 2023-03-31 00:00:00, Value = 0.0480086, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 10Y }, Date = 31/03/2023 00:00:00, Value = 0.03454, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 10Y }, Date = 2023-03-31 00:00:00, Value = 0.03454, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 12Y }, Date = 31/03/2023 00:00:00, Value = 0.034621, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 12Y }, Date = 2023-03-31 00:00:00, Value = 0.034621, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 15Y }, Date = 31/03/2023 00:00:00, Value = 0.03466, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 15Y }, Date = 2023-03-31 00:00:00, Value = 0.03466, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 20Y }, Date = 31/03/2023 00:00:00, Value = 0.03411, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 20Y }, Date = 2023-03-31 00:00:00, Value = 0.03411, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 25Y }, Date = 31/03/2023 00:00:00, Value = 0.033010000000000005, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 25Y }, Date = 2023-03-31 00:00:00, Value = 0.033010000000000005, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 2Y }, Date = 31/03/2023 00:00:00, Value = 0.044320000000000005, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 2Y }, Date = 2023-03-31 00:00:00, Value = 0.044320000000000005, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 30Y }, Date = 31/03/2023 00:00:00, Value = 0.0321945, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 30Y }, Date = 2023-03-31 00:00:00, Value = 0.0321945, IsRefreshable = False }"
             },
             { 
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 3Y }, Date = 31/03/2023 00:00:00, Value = 0.040143000000000005, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 3Y }, Date = 2023-03-31 00:00:00, Value = 0.040143000000000005, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 40Y }, Date = 31/03/2023 00:00:00, Value = 0.02984, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 40Y }, Date = 2023-03-31 00:00:00, Value = 0.02984, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 4Y }, Date = 31/03/2023 00:00:00, Value = 0.037822, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 4Y }, Date = 2023-03-31 00:00:00, Value = 0.037822, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 5Y }, Date = 31/03/2023 00:00:00, Value = 0.03618, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 5Y }, Date = 2023-03-31 00:00:00, Value = 0.03618, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 6Y }, Date = 31/03/2023 00:00:00, Value = 0.03545, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 6Y }, Date = 2023-03-31 00:00:00, Value = 0.03545, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 7Y }, Date = 31/03/2023 00:00:00, Value = 0.03501, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 7Y }, Date = 2023-03-31 00:00:00, Value = 0.03501, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 8Y }, Date = 31/03/2023 00:00:00, Value = 0.03481, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 8Y }, Date = 2023-03-31 00:00:00, Value = 0.03481, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 9Y }, Date = 31/03/2023 00:00:00, Value = 0.03469, IsRefreshable = False }"
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 9Y }, Date = 2023-03-31 00:00:00, Value = 0.03469, IsRefreshable = False }"
             },
             {
-                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1W }, Date = 31/03/2023 00:00:00, Value = NaN, IsRefreshable = False }"
+                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1W }, Date = 2023-03-31 00:00:00, Value = NaN, IsRefreshable = False }"
             }
         };
         

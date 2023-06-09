@@ -1,4 +1,5 @@
-﻿using dExcel.CommonEnums;
+﻿using System.Diagnostics.CodeAnalysis;
+using dExcel.CommonEnums;
 using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.Utilities;
@@ -8,7 +9,7 @@ using QL = QuantLib;
 
 namespace dExcel.InterestRates;
 
-using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 /// <summary>
 /// A class containing a collection of interest rate curve bootstrapping utilities.
@@ -122,7 +123,7 @@ public static class CurveBootstrapper
         int columnHeaderIndex = ExcelTableUtils.GetRowIndex(curveParameters, "Parameter");
         
         DateTime baseDate =
-            ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "BaseDate", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<DateTime>(curveParameters, "Value", "Base Date", columnHeaderIndex);
         
         if (baseDate == default)
         {
@@ -132,7 +133,7 @@ public static class CurveBootstrapper
         QL.Settings.instance().setEvaluationDate(baseDate.ToQuantLibDate());
 
         string? rateIndexName =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "RateIndexName", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Rate Index Name", columnHeaderIndex);
         
         if (rateIndexName is null && customRateIndex is null)
         {
@@ -140,7 +141,7 @@ public static class CurveBootstrapper
         }
 
         string? rateIndexTenor =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "RateIndexTenor", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Rate Index Tenor", columnHeaderIndex);
         
         if (rateIndexTenor is null && customRateIndex is null && rateIndexName != "FEDFUND")
         {
@@ -156,7 +157,7 @@ public static class CurveBootstrapper
         }
         
         bool allowExtrapolation =
-            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex) ??
+            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "Allow Extrapolation", columnHeaderIndex) ??
             false;
 
         QL.IborIndex? rateIndex = GetIborIndex(rateIndexName, rateIndexTenor, null);
@@ -184,16 +185,18 @@ public static class CurveBootstrapper
 
         QL.RateHelperVector rateHelpers = new();
 
+        bool instrumentsWithNaNsFound = false;
+        
         foreach (object instrumentGroup in instrumentGroups)
         {
             object[,] instruments = (object[,]) instrumentGroup;
             string? instrumentType = ExcelTableUtils.GetTableLabel(instruments);
             List<string>? tenors = ExcelTableUtils.GetColumn<string>(instruments, "Tenors");
-            List<string>? fraTenors = ExcelTableUtils.GetColumn<string>(instruments, "FraTenors");
+            List<string>? fraTenors = ExcelTableUtils.GetColumn<string>(instruments, "Fra Tenors");
             List<double>? rates = ExcelTableUtils.GetColumn<double>(instruments, "Rates");
             List<bool>? includeInstruments = ExcelTableUtils.GetColumn<bool>(instruments, "Include");
-            List<string>? referenceMonths = ExcelTableUtils.GetColumn<string>(instruments, "ReferenceMonths");
-            List<int>? referenceYears = ExcelTableUtils.GetColumn<int>(instruments, "ReferenceYears");
+            List<string>? referenceMonths = ExcelTableUtils.GetColumn<string>(instruments, "Reference Months");
+            List<int>? referenceYears = ExcelTableUtils.GetColumn<int>(instruments, "Reference Years");
             List<string>? frequencies = ExcelTableUtils.GetColumn<string>(instruments, "Frequencies");
 
             if (includeInstruments is null)
@@ -217,6 +220,7 @@ public static class CurveBootstrapper
                         return CommonUtils.DExcelErrorMessage("Deposit tenors missing");
                     }
 
+                    instrumentsWithNaNsFound = instrumentsWithNaNsFound || double.IsNaN(rates[i]);
                     if (includeInstruments[i])
                     {
                         rateHelpers.Add(
@@ -235,22 +239,24 @@ public static class CurveBootstrapper
             {
                 for (int i = 0; i < instrumentCount; i++)
                 {
+                    if (fraTenors is null)
+                    {
+                        return CommonUtils.DExcelErrorMessage("FRA tenors missing.");
+                    }
+
+                    if (rates is null)
+                    {
+                        return CommonUtils.DExcelErrorMessage("FRA rates missing.");
+                    }
+                    
+                    instrumentsWithNaNsFound = instrumentsWithNaNsFound || double.IsNaN(rates[i]);
                     if (includeInstruments[i])
                     {
-                        if (fraTenors is null)
-                        {
-                            return CommonUtils.DExcelErrorMessage("FRA tenors missing.");
-                        }
-
-                        if (rates is null)
-                        {
-                            return CommonUtils.DExcelErrorMessage("FRA rates missing.");
-                        }
-
+                        string fraTenorInMonths = Regex.Match(fraTenors[i], @"^\d+").Value + "M";
                         rateHelpers.Add(
                             new QL.FraRateHelper(
                                 rate: new QL.QuoteHandle(new QL.SimpleQuote(rates[i])),
-                                periodToStart: new QL.Period(fraTenors[i]),
+                                periodToStart: new QL.Period(fraTenorInMonths),
                                 iborIndex: rateIndex));
                     }
                 }
@@ -269,6 +275,7 @@ public static class CurveBootstrapper
                         return CommonUtils.DExcelErrorMessage("Swap tenors missing");
                     }
 
+                    instrumentsWithNaNsFound = instrumentsWithNaNsFound || double.IsNaN(rates[i]);
                     if (includeInstruments[i])
                     {
                         // Having a discount curve is only required for multi-curve bootstrapping.
@@ -319,6 +326,7 @@ public static class CurveBootstrapper
                     return CommonUtils.DExcelErrorMessage("OIS rates missing.");
                 }
                 
+                instrumentsWithNaNsFound = instrumentsWithNaNsFound || double.IsNaN(rates[0]);
                 for (int i = 0; i < instrumentCount; i++)
                 {
                     if (includeInstruments[i])
@@ -356,6 +364,7 @@ public static class CurveBootstrapper
                 
                 for (int i = 0; i < instrumentCount; i++)
                 {
+                    instrumentsWithNaNsFound = instrumentsWithNaNsFound || double.IsNaN(rates[i]);
                     if (includeInstruments[i])
                     {
                         rateHelpers.Add(
@@ -399,7 +408,9 @@ public static class CurveBootstrapper
                 instrumentGroups: instrumentGroups);
         
         DataObjectController dataObjectController = DataObjectController.Instance;
-        return dataObjectController.Add(handle, curveDetails);
+        
+        string warningMessage = instrumentsWithNaNsFound ? "Instruments with NaNs found" : "";
+        return dataObjectController.Add(handle, curveDetails, warningMessage);
     }
 
     /// <summary>
@@ -454,11 +465,11 @@ public static class CurveBootstrapper
         QL.Settings.instance().setEvaluationDate(baseDate.ToQuantLibDate());
 
         bool allowExtrapolation =
-            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "AllowExtrapolation", columnHeaderIndex) ??
+            ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "Allow Extrapolation", columnHeaderIndex) ??
             false;
 
         string? baseIndexName =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexName", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Base Index Name", columnHeaderIndex);
         
         if (baseIndexName is null && customBaseIndex is null)
         {
@@ -466,21 +477,21 @@ public static class CurveBootstrapper
         }
 
         string? baseIndexTenor =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexTenor", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Base Index Tenor", columnHeaderIndex);
         
-        if (baseIndexTenor is null && customBaseIndex is null && baseIndexName != "FEDFUND")
+        if (baseIndexTenor is null && customBaseIndex is null && baseIndexName != RateIndices.FEDFUND.ToString())
         {
             return nameof(baseIndexTenor).CurveParameterMissingErrorMessage();
         }
 
         string? baseIndexDiscountCurveHandle =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "BaseIndexDiscountCurve", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Base Index Discount Curve", columnHeaderIndex);
 
         string? spreadIndexName =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "SpreadIndex", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Spread Index", columnHeaderIndex);
 
         string? spreadIndexTenor =
-            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "SpreadIndexTenor", columnHeaderIndex);
+            ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Spread Index Tenor", columnHeaderIndex);
 
         string? interpolation =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Interpolation", columnHeaderIndex);
@@ -523,13 +534,14 @@ public static class CurveBootstrapper
         }
 
         QL.RateHelperVector rateHelpers = new();
+        bool instrumentsWithNaNsFound = false;
 
         foreach (object instrumentGroup in instrumentGroups)
         {
             object[,] instruments = (object[,]) instrumentGroup;
             string? instrumentType = ExcelTableUtils.GetTableLabel(instruments);
             List<string>? tenors = ExcelTableUtils.GetColumn<string>(instruments, "Tenors");
-            List<double>? basisSpreads = ExcelTableUtils.GetColumn<double>(instruments, "BasisSpreads");
+            List<double>? basisSpreads = ExcelTableUtils.GetColumn<double>(instruments, "Basis Spreads");
             List<bool>? includeInstruments = ExcelTableUtils.GetColumn<bool>(instruments, "Include");
 
             if (includeInstruments is null)
@@ -553,6 +565,8 @@ public static class CurveBootstrapper
                 
                 for (int i = 0; i < instrumentCount; i++)
                 {
+                    instrumentsWithNaNsFound = instrumentsWithNaNsFound || double.IsNaN(basisSpreads[i]);
+                    
                     if (includeInstruments[i])
                     {
                         rateHelpers.Add(
@@ -598,7 +612,8 @@ public static class CurveBootstrapper
                 instrumentGroups: instrumentGroups);
         
         DataObjectController dataObjectController = DataObjectController.Instance;
-        return dataObjectController.Add(handle, curveDetails);
+        string warningMessage = instrumentsWithNaNsFound ? "Instruments with NaNs found" : "";
+        return dataObjectController.Add(handle, curveDetails, warningMessage);
     }
     
     /// <summary>
@@ -732,14 +747,15 @@ public static class CurveBootstrapper
         }
             
         List<QuoteValue> quoteValues;
-        bool instrumentValuesContainNaNs = false;
         try
         {
             quoteValues =
-                OmicronUtils.OmicronUtils.GetSwapCurveQuotes(index.Value.name.Replace("_", "-"), null, null, 1, baseDate.ToString("yyyy-MM-dd"));
-            
-            string quoteValuesString = string.Join("|", quoteValues.Select(x => x.ToString()));
-            instrumentValuesContainNaNs = quoteValuesString.Contains("NaN", StringComparison.OrdinalIgnoreCase);
+                OmicronUtils.OmicronUtils.GetSwapCurveQuotes(
+                    index: index.Value.name.Replace("_", "-"), 
+                    spreadIndex: null,
+                    quotes: null,
+                    requisitionId: 1, 
+                    marketDataDate: baseDate.ToString("yyyy-MM-dd"));
         }
         catch (Exception ex)
         {
@@ -748,16 +764,16 @@ public static class CurveBootstrapper
                 return CommonUtils.DExcelErrorMessage("Not connected to Deloitte network/VPN.");
             }
 
-            return CommonUtils.DExcelErrorMessage($"Unknown error. {ex.Message}");
+            return CommonUtils.DExcelErrorMessage($"Unknown error: {ex.Message}");
         }
 
         object[,] curveParameters =
         {
-            {"CurveUtils Parameters", ""},
+            {"Curve Utils Parameters", ""},
             {"Parameter", "Value"},
-            {"BaseDate", baseDate.ToOADate()},
-            {"RateIndexName", index.Value.name},
-            {"RateIndexTenor", index.Value.tenor},
+            {"Base Date", baseDate.ToOADate()},
+            {"Rate Index Name", index.Value.name},
+            {"Rate Index Tenor", index.Value.tenor},
             {"Interpolation", interpolation},
         };
 
@@ -766,7 +782,7 @@ public static class CurveBootstrapper
         object[,] depositInstruments = new object[deposits.Count + 2, 4];
         depositInstruments[0, 0] = "Deposits";
         depositInstruments[1, 0] = "Tenors";
-        depositInstruments[1, 1] = "RateIndex";
+        depositInstruments[1, 1] = "Rate Index";
         depositInstruments[1, 2] = "Rates";
         depositInstruments[1, 3] = "Include";
 
@@ -775,7 +791,7 @@ public static class CurveBootstrapper
         {
             depositInstruments[row, 0] = ((RateIndex) deposit.Type).Tenor.ToString();
             depositInstruments[row, 1] = ((RateIndex) deposit.Type).Name;
-            depositInstruments[row, 2] = deposit.Value;
+            depositInstruments[row, 2] = double.IsNaN(deposit.Value) ? "NaN" : deposit.Value;
             depositInstruments[row, 3] = double.IsNaN(deposit.Value) ? "FALSE" : "TRUE";
             row++;
         }
@@ -785,8 +801,8 @@ public static class CurveBootstrapper
         object[,] fraInstruments = new object[fras.Count + 2, 4];
         row = 2;
         fraInstruments[0, 0] = "FRAs";
-        fraInstruments[1, 0] = "FraTenors";
-        fraInstruments[1, 1] = "RateIndex";
+        fraInstruments[1, 0] = "Fra Tenors";
+        fraInstruments[1, 1] = "Rate Index";
         fraInstruments[1, 2] = "Rates";
         fraInstruments[1, 3] = "Include";
 
@@ -795,8 +811,8 @@ public static class CurveBootstrapper
             // TODO: Ensure the amount is always in months.
             fraInstruments[row, 0] = $"{((Fra) fra.Type).Tenor.Amount}x{((Fra) fra.Type).Tenor.Amount + 3}";
             fraInstruments[row, 1] = ((Fra) fra.Type).ReferenceIndex.Name;
-            fraInstruments[row, 2] = fra.Value;
-            fraInstruments[row, 3] = fra.Value.ToString().IgnoreCaseEquals("NaN") ? "FALSE" : "TRUE";
+            fraInstruments[row, 2] = double.IsNaN(fra.Value) ? "NaN" : fra.Value;
+            fraInstruments[row, 3] = double.IsNaN(fra.Value) ? "FALSE" : "TRUE";
             row++;
         }
 
@@ -805,7 +821,7 @@ public static class CurveBootstrapper
         object[,] swapInstruments = new object[swaps.Count + 2, 4];
         swapInstruments[0, 0] = "Interest Rate Swaps";
         swapInstruments[1, 0] = "Tenors";
-        swapInstruments[1, 1] = "RateIndex";
+        swapInstruments[1, 1] = "Rate Index";
         swapInstruments[1, 2] = "Rates";
         swapInstruments[1, 3] = "Include";
 
@@ -814,7 +830,7 @@ public static class CurveBootstrapper
         {
             swapInstruments[row, 0] = ((InterestRateSwap) swap.Type).Tenor.ToString();
             swapInstruments[row, 1] = ((InterestRateSwap) swap.Type).ReferenceIndex.Name;
-            swapInstruments[row, 2] = swap.Value;
+            swapInstruments[row, 2] = double.IsNaN(swap.Value) ? "NaN" : swap.Value;
             swapInstruments[row, 3] = double.IsNaN(swap.Value) ? "FALSE" : "TRUE";
             row++;
         }
@@ -831,7 +847,7 @@ public static class CurveBootstrapper
         foreach (QuoteValue ois in overnightIndexSwaps)
         {
             oisInstruments[row, 0] = ((Ois)ois.Type).Tenor.ToString();
-            oisInstruments[row, 1] = ois.Value;
+            oisInstruments[row, 1] = double.IsNaN(ois.Value) ? "NaN" : ois.Value;
             oisInstruments[row, 2] = double.IsNaN(ois.Value) ? "FALSE" : "TRUE";
             row++;
         }
@@ -892,7 +908,7 @@ public static class CurveBootstrapper
     [ExcelFunction(
         Name = "d.Curve_GetSwapCurveQuotes",
         Description = "Extracts the underlying swap quotes for a given curve.",
-        Category = "")]
+        Category = "∂Excel: Interest Rates")]
     public static object GetSwapCurveQuotes(string curveName, DateTime baseDate)
     {
         if (!TryParseCurveNameToRateIndex(curveName, out (string name, string tenor)? index, out string errorMessage))
@@ -900,11 +916,18 @@ public static class CurveBootstrapper
             return errorMessage;        
         }
          
-        List<QuoteValue> quoteValues = OmicronUtils.OmicronUtils.GetSwapCurveQuotes(index.Value.name.Replace("_", "-"), null, null, 1, baseDate.ToString("yyyy-MM-dd"));
+        List<QuoteValue> quoteValues = 
+            OmicronUtils.OmicronUtils.GetSwapCurveQuotes(
+                index: index.Value.name.Replace("_", "-"),
+                spreadIndex: null,
+                quotes: null, 
+                requisitionId: 1, 
+                marketDataDate: baseDate.ToString("yyyy-MM-dd"));
+        
         object[,] output = new object[quoteValues.Count, 1];
         for (int i = 0; i < quoteValues.Count; i++)
         {
-            output[i, 0] = quoteValues[i].ToString();
+            output[i, 0] = Regex.Replace(quoteValues[i].ToString(), @"(\d{2})/(\d{2})/(\d{4})", "$3-$2-$1");
         }   
         
         return output;
