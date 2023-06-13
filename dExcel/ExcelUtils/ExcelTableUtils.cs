@@ -187,6 +187,13 @@ public static class ExcelTableUtils
         
         int rowIndex = unadjustedRowIndex + rowIndexOfColumnHeaders + 1;
 
+        if (typeof(T) == typeof(int))
+        {
+            return (T)Convert.ChangeType(
+                value: int.Parse(table[rowIndex, columnIndex].ToString() ?? string.Empty), 
+                conversionType: typeof(T));
+        }
+
         if (typeof(T) == typeof(DateTime))
         {
             return (T)Convert.ChangeType(

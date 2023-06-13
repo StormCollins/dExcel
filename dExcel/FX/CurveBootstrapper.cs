@@ -369,7 +369,8 @@ public static class CurveBootstrapper
         // against this.
         string rateIndexName = "";
         string rateIndexTenor = "";
-        string? spreadIndexName = null; 
+        string spreadIndexName = ""; 
+        
         if (curveName.IgnoreCaseEquals(OmicronFxBasisCurves.USDZAR.ToString()))
         {
                rateIndexName = RateIndices.JIBAR.ToString();

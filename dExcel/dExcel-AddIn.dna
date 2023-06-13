@@ -57,29 +57,33 @@
 				screentip='Select a range and click this button to recalculate it.'
 				tag='calculate-range-small-blue.ico'/>
 			  <menu
-			    id='menuInsertEnums'
-				label='Insert Enums'
+			    id='menuInsertMenus'
+				label='Insert Menus'
 				getImage='GetImage'
-				supertip='Inserts drop down menus for common lists (i.e., "Enums").'
+				supertip='Inserts drop down menus for common lists.'
 				tag='list-small-blue.ico'>
+				<button
+				  id='btnInsertDropDownMenuForCompoundingConventions'
+				  label='Insert Drop Menu for Compounding Conventions'
+				  onAction='InsertDropDownMenuForCompoundingConventions'/>
 				<button
 				  id='btnInsertDropDownMenuForRateIndices'
 				  label='Insert Drop Menu for Rate Indices'
 				  onAction='InsertDropDownMenuForRateIndices'/>
+				<menuSeparator id='InterpolationSeparator'/>
 				<button
 				  id='btnInsertDropDownMenuForBootstrappingInterpolation'
 				  label='Insert Drop Down Menu for Bootstrapping Interpolation'
 				  onAction='InsertDropDownMenuForBootstrappingInterpolation'/>
-				<menuSeparator id='InterpolationSeparator'/>
 				<button
 				  id='btnInsertDropDownMenuForDiscountFactorInterpolation'
 				  label='Insert Drop Down Menu for Discount Factors Interpolation'
 				  onAction='InsertDropDownMenuForDiscountFactorInterpolation'/>
-				<menuSeparator id='OmicronSeparator'/>
 				<button
 				  id='btnInsertDropDownMenuForZeroRatesInterpolation'
 				  label='Insert Drop Down Menu for Zero Rates Interpolation'
 				  onAction='InsertDropDownMenuForZeroRatesInterpolation'/>
+				<menuSeparator id='OmicronSeparator'/>
 				<button 
 				  id='btnInsertDropDownMenuForOmicronSwapCurves'
 				  label='Insert Drop Down Menu for Omicron Swap Curves'

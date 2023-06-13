@@ -34,6 +34,30 @@ public static class CurveUtils
     }
    
     /// <summary>
+    /// Gets a list of all available compounding conventions.
+    /// </summary>
+    /// <returns>A 2D column of compounding conventions.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_GetCompoundingConventions",
+        Description = "Gets all available compounding conventions.",
+        Category = "∂Excel: Interest Rates")]
+    public static object GetCompoundingConventions()
+    {
+        List<string> compoundingConventions = 
+            Enum.GetNames(typeof(CompoundingConventions)).Select(x => x.ToString().ToUpper()).ToList();
+        
+        object[,] output = new object[compoundingConventions.Count + 1, 1];
+        output[0, 0] = "Compounding Conventions";
+        int i = 1;
+        foreach (string compoundingConvention in compoundingConventions)
+        {
+            output[i++, 0] = compoundingConvention;
+        }
+        
+        return output;
+    }
+    
+    /// <summary>
     /// Gets a list of all available swap curves that can be pulled from Omicron.
     /// </summary>
     /// <returns>A 2D column of swap curve names.</returns>
@@ -427,12 +451,23 @@ public static class CurveUtils
     {
         object[,] discountFactors = new object[dates.Length, 1];
         QL.YieldTermStructure? curve = GetCurveObject(handle);
+        if (curve is null)
+        {
+            return CommonUtils.DExcelErrorMessage("Curve null. Have you tried refreshing the cell?");
+        }
+        
         // Most "current" dates are in the range 40,000 - 50,000.
         // Hence it's safe to assume that if it's less than 1,000 it must be a year fraction.
         if ((double) dates[0] < 1_000)
         {
+            double maxTenor = curve.dayCounter().yearFraction(curve.referenceDate(), curve.maxDate());
             for (int i = 0; i < dates.Length; i++)
             {
+                if ((double) dates[i] > maxTenor && !curve.allowsExtrapolation())
+                {
+                    return CommonUtils.DExcelErrorMessage($"Extrapolation not enabled. Point {dates[i]} outside bounds.");
+                }
+                
                 discountFactors[i, 0] = curve.discount((double) dates[i]);
             }
         }
@@ -440,6 +475,14 @@ public static class CurveUtils
         {
             for (int i = 0; i < dates.Length; i++)
             {
+                if (((double) dates[i]).ToQuantLibDate() > curve.maxDate() && !curve.allowsExtrapolation())
+                {
+                    return 
+                        CommonUtils.DExcelErrorMessage(
+                            $"Extrapolation not enabled. " +
+                            $"Point {DateTime.FromOADate((double)dates[i]):yyyy-MM-dd} outside bounds.");
+                }
+                
                 discountFactors[i, 0] = curve.discount(((double)dates[i]).ToQuantLibDate());
             }    
         }
@@ -470,7 +513,6 @@ public static class CurveUtils
         {
             return compoundingConventionErrorMessage;
         }
-        
 
         List<DateTime> startDates = ExcelArrayUtils.ConvertExcelRangeToList<DateTime>(startDatesRange);
         List<DateTime> endDates = ExcelArrayUtils.ConvertExcelRangeToList<DateTime>(endDatesRange);

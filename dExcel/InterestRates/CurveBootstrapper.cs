@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using dExcel.CommonEnums;
 using dExcel.Dates;
 using dExcel.ExcelUtils;
@@ -8,8 +9,6 @@ using Omicron;
 using QL = QuantLib;
 
 namespace dExcel.InterestRates;
-
-using System.Text.RegularExpressions;
 
 /// <summary>
 /// A class containing a collection of interest rate curve bootstrapping utilities.
@@ -46,7 +45,7 @@ public static class CurveBootstrapper
     /// <param name="forecastCurve">The forecast curve for the index.</param>
     /// <returns>The IBOR index, if successful, otherwise null.</returns>
     public static QL.IborIndex? GetIborIndex(
-        string? indexName,
+        string indexName,
         string? indexTenor,
         QL.RelinkableYieldTermStructureHandle? forecastCurve = null)
     {
@@ -65,6 +64,7 @@ public static class CurveBootstrapper
                     RateIndices.FEDFUND => new QL.FedFunds(),
                     RateIndices.JIBAR => new QL.Jibar(new QL.Period(indexTenor)),
                     RateIndices.USD_LIBOR => new QL.USDLibor(new QL.Period(indexTenor)),
+                    RateIndices.SOFR => new QL.Sofr(),
                     _ => null,
                 };
         }
@@ -77,6 +77,7 @@ public static class CurveBootstrapper
                     RateIndices.FEDFUND => new QL.FedFunds(forecastCurve),
                     RateIndices.JIBAR => new QL.Jibar(new QL.Period(indexTenor), forecastCurve),
                     RateIndices.USD_LIBOR => new QL.USDLibor(new QL.Period(indexTenor), forecastCurve),
+                    RateIndices.SOFR => new QL.Sofr(forecastCurve),
                     _ => null,
                 };
         }
@@ -143,7 +144,7 @@ public static class CurveBootstrapper
         string? rateIndexTenor =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Rate Index Tenor", columnHeaderIndex);
         
-        if (rateIndexTenor is null && customRateIndex is null && rateIndexName != "FEDFUND")
+        if (rateIndexTenor is null && customRateIndex is null && rateIndexName != "FEDFUND" && rateIndexName != RateIndices.SOFR.ToString())
         {
             return nameof(rateIndexTenor).CurveParameterMissingErrorMessage();
         }
@@ -156,6 +157,12 @@ public static class CurveBootstrapper
             return nameof(interpolation).CurveParameterMissingErrorMessage();
         }
         
+        int? settlementDays =
+            ExcelTableUtils.GetTableValue<int>(curveParameters, "Value", "Settlement Days", columnHeaderIndex);
+
+        int? paymentLagDays =
+            ExcelTableUtils.GetTableValue<int>(curveParameters, "Value", "Payment Lag Days", columnHeaderIndex);
+
         bool allowExtrapolation =
             ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "Allow Extrapolation", columnHeaderIndex) ??
             false;
@@ -319,7 +326,7 @@ public static class CurveBootstrapper
                     }
                 }
             }
-            else if (instrumentType.IgnoreCaseEquals("OIS", "OISs", "Overnight Index Swap", "Overnight Index Swaps"))
+            else if (instrumentType.IgnoreCaseEquals("OIS", "OISs", "OIS Swap", "OIS Swaps", "Overnight Index Swap", "Overnight Index Swaps"))
             {
                 if (rates is null)
                 {
@@ -333,46 +340,10 @@ public static class CurveBootstrapper
                     {
                         rateHelpers.Add(
                             new QL.OISRateHelper(
-                                settlementDays: 2, 
+                                settlementDays: (uint)settlementDays, 
                                 tenor: new QL.Period(tenors?[i]),
                                 rate: new QL.QuoteHandle(new QL.SimpleQuote(rates[i])), 
                                 index: rateIndex as QL.OvernightIndex));
-                    }
-                }
-            }
-            else if (instrumentType.IgnoreCaseEquals("SOFR Swaps"))
-            {
-                if (rates is null)
-                {
-                    return CommonUtils.DExcelErrorMessage("SOFR rates missing.");
-                }
-                
-                if (frequencies is null)
-                {
-                    return CommonUtils.DExcelErrorMessage("SOFR frequencies missing.");
-                }
-
-                if (referenceMonths is null)
-                {
-                    return CommonUtils.DExcelErrorMessage("SOFR reference months missing.");     
-                }
-
-                if (referenceYears is null)
-                {
-                    return CommonUtils.DExcelErrorMessage("SOFR reference years missing.");
-                }
-                
-                for (int i = 0; i < instrumentCount; i++)
-                {
-                    instrumentsWithNaNsFound = instrumentsWithNaNsFound || double.IsNaN(rates[i]);
-                    if (includeInstruments[i])
-                    {
-                        rateHelpers.Add(
-                            new QL.SofrFutureRateHelper(
-                                price: new QL.QuoteHandle(new QL.SimpleQuote(rates[i])),
-                                referenceMonth: (QL.Month)referenceMonths[i].ToQuantLibMonth(),
-                                referenceYear: referenceYears[i],
-                                referenceFreq: new QL.Period(frequencies[i]).frequency()));
                     }
                 }
             }
@@ -415,7 +386,7 @@ public static class CurveBootstrapper
 
     /// <summary>
     /// Bootstraps a tenor basis, single currency interest rate curve. 
-    /// Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR.
+    /// Available Indices: EURIBOR, FEDFUND (OIS), JIBAR, USD-LIBOR, SOFR.
     /// </summary>
     /// <param name="handle">The 'handle' or name used to refer to the object in memory.
     /// Each object in a workbook must have a unique handle.</param>

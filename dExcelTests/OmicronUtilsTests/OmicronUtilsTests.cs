@@ -2,6 +2,7 @@
 
 using dExcel.CommonEnums;
 using NUnit.Framework;
+using System.Collections.Immutable;
 using dExcel.OmicronUtils;
 using Omicron;
 using Option = Omicron.Option;
@@ -263,5 +264,23 @@ public class OmicronUtilsTests
         List<QuoteValue>? quoteValues = OmicronUtils.DeserializeOmicronObjects(rawJson);
         List<QuoteValue> zarSwapCurveQuotes = OmicronUtils.GetSwapCurveQuotes("JIBAR", null, quoteValues);
         Assert.AreEqual(zarSwapCurveQuotes.Count, 23);
+    }
+
+    [Test]
+    public void TestThisOmicronPieceOfShit()
+    {
+        var date = new DateTime(2021, 01, 21);
+        Requisition? requisition = new(
+            Name: "Shit",
+            Source: Source.RefinitivDataScope,
+            Requests: new ImmutableArray<RequisitionRequest>()
+            {
+                new("DKKAED="),
+                new("DKKAUD="),
+                new("JIBAR3M="),
+                new("USD3MFSR="),
+            },
+            StartDate: date);
+
     }
 }

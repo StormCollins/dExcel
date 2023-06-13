@@ -8,7 +8,8 @@ All notable changes to ∂Excel will be documented in this file.
 - Interpolation for bootstrapping is now clearly state as being on discount factors, zero rates, or forward rates.
 - Renamed ``d.Curve_Create`` to ``d.Curve_CreateFromDiscountFactors``.
 - Added function ``d.Curve_CreateFromZeroRates``.
-- Bootstrapping supports multiple instrument names e.g., ``Interest Rate Swaps`` or ``IRSs``.
+- Bootstrapping supports multiple instrument names e.g., ``Interest Rate Swaps`` or ``IRSs``, ``Depos`` or ``Deposits`` etc.
+- Bootstrapping FX basis adjusted curves added.
 
 ## [0.2.0] - 2023-05-03
 ### Features

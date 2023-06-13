@@ -138,8 +138,11 @@ public static class OmicronUtils
             return typeof(T) == objectType;
         }
   
-        public override object ReadJson(JsonReader reader, Type objectType,
-            object existingValue, JsonSerializer serializer)
+        public override object ReadJson(
+            JsonReader reader, 
+            Type objectType, 
+            object? existingValue, 
+            JsonSerializer serializer)
         {
             try
             {
@@ -154,7 +157,7 @@ public static class OmicronUtils
             }
         }
   
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }

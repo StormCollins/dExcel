@@ -490,6 +490,23 @@ public class RibbonController : ExcelRibbon
         selection.Validation.Add(Excel.XlDVType.xlValidateList, Formula1: string.Join(", ", interpolationMethods));
     }
     
+    /// <summary>
+    /// Inserts a drop down (or data validation list) for the selected cell containing the available compounding
+    /// conventions.
+    /// </summary>
+    /// <param name="control">The ribbon control.</param>
+    public void InsertDropDownMenuForCompoundingConventions(IRibbonControl control)
+    {
+        Excel.Application xlApp = (Excel.Application)ExcelDnaUtil.Application; 
+        string[] compoundingConventions = 
+            ExcelArrayUtils.ConvertExcelRangeToList<string>(
+                (object[,]) CurveUtils.GetCompoundingConventions()).ToArray()[1..];
+        
+        Excel.Range selection = (Excel.Range)xlApp.Selection;
+        selection.Validation.Delete();
+        selection.Validation.Add(Excel.XlDVType.xlValidateList, Formula1: string.Join(", ", compoundingConventions));
+    }
+    
     public void ApplyTestUtilsFormatting(IRibbonControl control)
     {
         RangeFormatUtils.SetConditionalTestUtilsFormatting();

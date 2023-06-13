@@ -1,8 +1,7 @@
-﻿using ExcelDna.Integration;
+﻿using dExcel.Utilities;
+using ExcelDna.Integration;
 
 namespace dExcel.ExcelUtils;
-
-using Utilities;
 
 /// <summary>
 /// A collection of utilities for performing basic fuzzy logic on tests/checks in Excel.
