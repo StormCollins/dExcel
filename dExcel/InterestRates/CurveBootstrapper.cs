@@ -10,6 +10,8 @@ using QL = QuantLib;
 
 namespace dExcel.InterestRates;
 
+using OmicronUtils;
+
 /// <summary>
 /// A class containing a collection of interest rate curve bootstrapping utilities.
 /// </summary>
@@ -190,6 +192,7 @@ public static class CurveBootstrapper
             return CommonUtils.DExcelErrorMessage($"Unsupported rate index: '{rateIndexName}'");
         }
 
+        // This is where the actual bootstrapping occurs.
         QL.RateHelperVector rateHelpers = new();
 
         bool instrumentsWithNaNsFound = false;
@@ -202,9 +205,6 @@ public static class CurveBootstrapper
             List<string>? fraTenors = ExcelTableUtils.GetColumn<string>(instruments, "Fra Tenors");
             List<double>? rates = ExcelTableUtils.GetColumn<double>(instruments, "Rates");
             List<bool>? includeInstruments = ExcelTableUtils.GetColumn<bool>(instruments, "Include");
-            List<string>? referenceMonths = ExcelTableUtils.GetColumn<string>(instruments, "Reference Months");
-            List<int>? referenceYears = ExcelTableUtils.GetColumn<int>(instruments, "Reference Years");
-            List<string>? frequencies = ExcelTableUtils.GetColumn<string>(instruments, "Frequencies");
 
             if (includeInstruments is null)
             {
@@ -621,7 +621,7 @@ public static class CurveBootstrapper
         {
             return new QL.PiecewiseLogCubicDiscount(curveDate, rateHelpers, dayCountConvention);
         }
-
+    
         if (interpolation.IgnoreCaseEquals(CurveInterpolationMethods.NaturalLogCubic_On_DiscountFactors))
         {
             return new QL.PiecewiseNaturalLogCubicDiscount(curveDate, rateHelpers, dayCountConvention);
@@ -662,12 +662,7 @@ public static class CurveBootstrapper
     public static string Get(
         [ExcelArgument(Name = "Handle", Description = DescriptionUtils.Handle)]
         string handle,
-        [ExcelArgument(
-            Name = "Curve Name",
-            Description = 
-                "The name of the curve in Omicron. Current available options are:\n" +
-                "• USD-OIS\n" +
-                "• ZAR-Swap")]
+        [ExcelArgument(Name = "Curve Name", Description = "The name of the curve in Omicron.")]
         string curveName,
         [ExcelArgument(
             Name = "Base Date",
@@ -720,13 +715,24 @@ public static class CurveBootstrapper
         List<QuoteValue> quoteValues;
         try
         {
+            // quoteValues =
+            //     (List<QuoteValue>)ExcelAsyncUtil.Run(
+            //         nameof(Get), 
+            //         new object[] { index, baseDate },
+            //         () => OmicronUtils.OmicronUtils.GetSwapCurveQuotes(
+            //             index: index.Value.name.Replace("_", "-"), 
+            //             spreadIndex: null,
+            //             quotes: null,
+            //             requisitionId: 1, 
+            //             marketDataDate: baseDate.ToString("yyyy-MM-dd")));
+
             quoteValues =
-                OmicronUtils.OmicronUtils.GetSwapCurveQuotes(
-                    index: index.Value.name.Replace("_", "-"), 
-                    spreadIndex: null,
-                    quotes: null,
-                    requisitionId: 1, 
-                    marketDataDate: baseDate.ToString("yyyy-MM-dd"));
+                Task.Run(
+                    function: () => OmicronUtils.GetAllSwapCurveQuotes(
+                        index: index.Value.name, 
+                        tenor: new QL.Period(index.Value.tenor).ToOmicronTenor(), 
+                        marketDataDate: baseDate))
+                    .Result;
         }
         catch (Exception ex)
         {
@@ -876,24 +882,53 @@ public static class CurveBootstrapper
     /// <param name="curveName">The curve name e.g., "USD-Swap", "ZAR-Swap", etc.</param>
     /// <param name="baseDate">The base date of the curve.</param>
     /// <returns>A 2D array of quotes for the curve.</returns>
-    [ExcelFunction(
-        Name = "d.Curve_GetSwapCurveQuotes",
-        Description = "Extracts the underlying swap quotes for a given curve.",
-        Category = "∂Excel: Interest Rates")]
     public static object GetSwapCurveQuotes(string curveName, DateTime baseDate)
     {
         if (!TryParseCurveNameToRateIndex(curveName, out (string name, string tenor)? index, out string errorMessage))
         {
             return errorMessage;        
         }
-         
+        
         List<QuoteValue> quoteValues = 
-            OmicronUtils.OmicronUtils.GetSwapCurveQuotes(
-                index: index.Value.name.Replace("_", "-"),
-                spreadIndex: null,
-                quotes: null, 
-                requisitionId: 1, 
-                marketDataDate: baseDate.ToString("yyyy-MM-dd"));
+            (List<QuoteValue>)ExcelAsyncUtil.Run(
+                nameof(GetSwapCurveQuotes),
+                new object[] {index, baseDate},
+                () => OmicronUtils.GetSwapCurveQuotes(
+                    index: index.Value.name.Replace("_", "-"),
+                    spreadIndex: null,
+                    quotes: null, 
+                    requisitionId: 1, 
+                    marketDataDate: baseDate.ToString("yyyy-MM-dd")));
+        
+        object[,] output = new object[quoteValues.Count, 1];
+        for (int i = 0; i < quoteValues.Count; i++)
+        {
+            output[i, 0] = Regex.Replace(quoteValues[i].ToString(), @"(\d{2})/(\d{2})/(\d{4})", "$3-$2-$1");
+        }   
+        
+        return output;
+    }
+    
+    
+    /// <summary>
+    /// Extracts the underlying swap curve quotes for a given curve.
+    /// </summary>
+    /// <param name="curveName">The curve name e.g., "USD-Swap", "ZAR-Swap", etc.</param>
+    /// <param name="baseDate">The base date of the curve.</param>
+    /// <returns>A 2D array of quotes for the curve.</returns>
+    [ExcelFunction(
+        Name = "d.Curve_GetSwapCurveQuotes",
+        Description = "Extracts the underlying swap quotes for a given curve.",
+        Category = "∂Excel: Interest Rates")]
+    public static object GetAllSwapCurveQuotes(string curveName, DateTime baseDate)
+    {
+        if (!TryParseCurveNameToRateIndex(curveName, out (string name, string tenor)? index, out string errorMessage))
+        {
+            return errorMessage;        
+        }
+        QL.Period tenor = new(index.Value.tenor); 
+        List<QuoteValue> quoteValues = 
+           Task.Run(() => OmicronUtils.GetAllSwapCurveQuotes(index.Value.name, tenor.ToOmicronTenor(), baseDate)).Result;
         
         object[,] output = new object[quoteValues.Count, 1];
         for (int i = 0; i < quoteValues.Count; i++)

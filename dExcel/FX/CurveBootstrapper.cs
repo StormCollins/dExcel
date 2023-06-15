@@ -381,7 +381,10 @@ public static class CurveBootstrapper
         try
         {
             quoteValues =
-                OmicronUtils.OmicronUtils.GetSwapCurveQuotes(rateIndexName, spreadIndexName, null, 1, baseDate.ToString("yyyy-MM-dd"));
+                (List<QuoteValue>) ExcelAsyncUtil.Run(
+                    nameof(GetFxBasisAdjustedCurve),
+                    new object[] {rateIndexName, rateIndexTenor, spreadIndexName, baseDate},
+                    () => OmicronUtils.OmicronUtils.GetSwapCurveQuotes(rateIndexName, spreadIndexName, null, 1, baseDate.ToString("yyyy-MM-dd")));
         }
         catch (Exception ex)
         {

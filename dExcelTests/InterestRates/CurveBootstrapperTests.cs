@@ -479,8 +479,11 @@ public class CurveBootstrapperTest
     [Test]
     public void GetSwapCurveQuotesTest()
     {
-        object[,] expected = 
+        object[,] expectedRaw = 
         {
+            {
+                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1D }, Date = 2023-03-31 00:00:00, Value = 0.0480086, IsRefreshable = False }"
+            },
             {
                 "QuoteValue { Type = Fra { Tenor = 12M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04106, IsRefreshable = False }"
             },
@@ -528,9 +531,6 @@ public class CurveBootstrapperTest
             },
             {
                 "QuoteValue { Type = Fra { Tenor = 9M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04471, IsRefreshable = False }"
-            },
-            {
-                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1D }, Date = 2023-03-31 00:00:00, Value = 0.0480086, IsRefreshable = False }"
             },
             {
                 "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 10Y }, Date = 2023-03-31 00:00:00, Value = 0.03454, IsRefreshable = False }"
@@ -581,8 +581,16 @@ public class CurveBootstrapperTest
                 "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1W }, Date = 2023-03-31 00:00:00, Value = NaN, IsRefreshable = False }"
             }
         };
+
+        object[,] actualRaw =
+            (object[,]) CurveBootstrapper.GetAllSwapCurveQuotes(
+                curveName: RateIndices.USD_LIBOR.ToString(),
+                baseDate: new DateTime(2023, 03, 31));
         
-        object[,] actual = (object[,]) CurveBootstrapper.GetSwapCurveQuotes("USD_Swap", new DateTime(2023, 03, 31));
+        List<string> actual = ExcelArrayUtils.ConvertExcelRangeToList<string>(actualRaw);
+        List<string> expected = ExcelArrayUtils.ConvertExcelRangeToList<string>(expectedRaw);
+        expected.Sort();
+        actual.Sort();
         Assert.AreEqual(expected, actual);
     }
 

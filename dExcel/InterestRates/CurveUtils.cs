@@ -188,6 +188,16 @@ public static class CurveUtils
         List<double> discountFactors = new();
         for (int i = 0; i < datesRange.GetLength(0); i++)
         {
+            if (datesRange[i, 0].ToString() == ExcelEmpty.Value.ToString())
+            {
+                return CommonUtils.DExcelErrorMessage("Empty date found.");
+            }
+
+            if (discountFactorsRange[i, 0].ToString() == ExcelEmpty.Value.ToString())
+            {
+                return CommonUtils.DExcelErrorMessage("Empty discount factor found.");
+            }
+
             dates.Add(DateTime.FromOADate((double)datesRange[i, 0]).ToQuantLibDate());
             discountFactors.Add((double)discountFactorsRange[i, 0]);
         }

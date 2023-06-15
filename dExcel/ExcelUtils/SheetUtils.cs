@@ -15,11 +15,16 @@ public static class SheetUtils
         Name = "d.Excel_GetSheetName",
         Description = "Gets the current sheet name.",
         Category = "∂Excel: Excel Utils")]
-    public static string GetSheetName()
+    public static string GetSheetName(bool removeSpaces = true)
     {
         ExcelReference reference = (ExcelReference)XlCall.Excel(XlCall.xlfCaller);
         string sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
-        sheetName = sheetName[(sheetName.LastIndexOf(']') + 1)..]; 
+        sheetName = sheetName[(sheetName.LastIndexOf(']') + 1)..];
+        if (removeSpaces)
+        {
+            sheetName = sheetName.Replace(" ", "");
+        }
+
         return sheetName;
     }
 }
