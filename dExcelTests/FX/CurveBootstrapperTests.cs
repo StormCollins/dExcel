@@ -349,7 +349,28 @@ public class CurveBootstrapperTests
          Assert.AreEqual(
             expected: (double)expectedUsdZarFxBasisCurveDiscountFactors[i, 0], 
             actual: (double)actualUsdZarFxBasisCurveDiscountFactors[i, 0],
-            5e-3); 
+            delta: 5e-3); 
       } 
+   }
+
+   [Test]
+   public void GetUsdZarFxBasisAdjustedCurveTest()
+   {
+      string curveHandle = 
+         dExcel.FX.CurveBootstrapper.GetFxBasisAdjustedCurve(
+            handle: "FxBasisAdjustedCurveGet",
+            curveName: "USDZAR",
+            baseDate: new DateTime(2023, 03, 31));
+   }
+   
+   [Test]
+   public void GetUsdZarSofrFxBasisAdjustedCurveTest()
+   {
+      string curveHandle = 
+         dExcel.FX.CurveBootstrapper.GetFxBasisAdjustedCurve(
+            handle: "UsdZarSofrFxBasisAdjustedCurveGet",
+            curveName: OmicronFxBasisCurves.USDZAR_SOFR.ToString(),
+            baseDate: new DateTime(2023, 03, 31));
+        
    }
 }

@@ -7,5 +7,5 @@ public enum OmicronFxBasisCurves
 {
     // ReSharper disable InconsistentNaming
     USDZAR,
-    Test
+    USDZAR_SOFR,
 }

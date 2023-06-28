@@ -7,6 +7,7 @@ using ExcelUtils;
 
 internal static class UsageStatsUtils
 {
+
     public static void LogUsage()
     {
         if (NetworkUtils.GetVpnConnectionStatus())

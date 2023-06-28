@@ -88,7 +88,9 @@ public static class CurveBootstrapper
         string? baseCurrencyIndexTenor =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Base Currency Index Tenor", columnHeaderIndex);
         
-        if (baseCurrencyIndexTenor is null && customBaseCurrencyIndex is null && quoteCurrencyIndexName != "FEDFUND")
+        if (baseCurrencyIndexTenor is null && 
+            customBaseCurrencyIndex is null && 
+            quoteCurrencyIndexName != RateIndices.FEDFUND.ToString())
         {
             return nameof(baseCurrencyIndexTenor).CurveParameterMissingErrorMessage();
         }
@@ -368,12 +370,15 @@ public static class CurveBootstrapper
         // TODO: List the available types of interpolation.
         // One could create more complicated abstract code for mapping from quotes to 2d tables but I would advise
         // against this.
-        string baseIndexName = "";
+        string baseIndexName;
         Tenor baseIndexTenor;
         Currency baseCurrency;
-        string spreadIndexName = "";
+        string spreadIndexName;
         Tenor spreadIndexTenor;
         Currency spreadCurrency;
+        string quoteCurrencyForecastCurveHandle;
+        string baseCurrencyForecastCurveHandle;
+        string baseCurrencyDiscountCurveHandle;
         
         if (curveName.IgnoreCaseEquals(OmicronFxBasisCurves.USDZAR.ToString()))
         {
@@ -383,6 +388,27 @@ public static class CurveBootstrapper
                spreadIndexName = RateIndices.USD_LIBOR.ToString();
                spreadIndexTenor = new Tenor(3, TenorUnit.Month);
                spreadCurrency = Currency.USD;
+               quoteCurrencyForecastCurveHandle = 
+                   InterestRates.CurveBootstrapper.Get(handle + "_ZAR", "ZAR-Swap", baseDate);
+               baseCurrencyDiscountCurveHandle = 
+                   InterestRates.CurveBootstrapper.Get(handle + "_USDOIS", OmicronSwapCurves.USD_OIS.ToString(), baseDate);
+               baseCurrencyForecastCurveHandle = 
+                   InterestRates.CurveBootstrapper.Get(handle + "_USDSwap", OmicronSwapCurves.USD_Swap.ToString(), baseDate);
+               
+        }
+        else if (curveName.IgnoreCaseEquals(OmicronFxBasisCurves.USDZAR_SOFR.ToString()))
+        {
+               baseIndexName = RateIndices.JIBAR.ToString();
+               baseIndexTenor = new Tenor(3, TenorUnit.Month);
+               baseCurrency = Currency.ZAR;
+               spreadIndexName = RateIndices.SOFR.ToString();
+               spreadIndexTenor = new Tenor(3, TenorUnit.Month);
+               spreadCurrency = Currency.USD;
+               quoteCurrencyForecastCurveHandle = 
+                   InterestRates.CurveBootstrapper.Get(handle + "_ZAR", "ZAR-Swap", baseDate);
+               baseCurrencyDiscountCurveHandle = 
+                   InterestRates.CurveBootstrapper.Get(handle + "_SOFR", OmicronSwapCurves.SOFR.ToString(), baseDate);
+               baseCurrencyForecastCurveHandle = baseCurrencyDiscountCurveHandle;
         }
         else
         {
@@ -394,17 +420,15 @@ public static class CurveBootstrapper
         {
             quoteValues =
                 Task.Run(
-                    function: () => OmicronUtils.OmicronUtils.GetAllFxBasisCurveQuotes(
-                        marketDataDate: baseDate,
-                        spreadIndexName: spreadIndexName,
-                        spreadIndexTenor: spreadIndexTenor,
-                        baseIndexName: baseIndexName,
-                        baseIndexTenor: baseIndexTenor,
-                        numeratorCurrency: baseCurrency,
-                        
-                        ));
-
-
+                    function: () => 
+                        OmicronUtils.OmicronUtils.GetAllFxBasisCurveQuotes(
+                            spreadIndexName: spreadIndexName,
+                            spreadIndexTenor: spreadIndexTenor,
+                            baseIndexName: baseIndexName,
+                            baseIndexTenor: baseIndexTenor,
+                            numeratorCurrency: baseCurrency,
+                            denominatorCurrency: spreadCurrency,
+                            marketDataDate: baseDate)).Result;
         }
         catch (Exception ex)
         {
@@ -416,22 +440,43 @@ public static class CurveBootstrapper
             return CommonUtils.DExcelErrorMessage($"Unknown error. {ex.Message}");
         }
 
+        double fxSpot = (quoteValues.Where(x => x.Type == new FxSpot(baseCurrency, spreadCurrency)).ElementAt(0)).Value;
         object[,] curveParameters =
         {
             {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
             {"BaseCurrencyIndexName", spreadIndexName},
-            {"BaseCurrencyIndexTenor", "TODO"}, // TODO:
-            {"BaseCurrencyDiscountCurve", "TODO"},  // TODO:
-            {"BaseCurrencyForecastCurve", "TODO"},  // TODO:
+            {"BaseCurrencyIndexTenor", spreadIndexTenor.ToString()}, 
+            {"BaseCurrencyDiscountCurve", baseCurrencyDiscountCurveHandle},
+            {"BaseCurrencyForecastCurve", baseCurrencyForecastCurveHandle},  
             {"QuoteCurrencyIndexName", baseIndexName},
-            {"QuoteCurrencyIndexTenor", rateIndexTenor},
-            {"QuoteCurrencyForecastCurve", "TODO"},  // TODO:
-            {"SpotFx", rateIndexTenor},
+            {"QuoteCurrencyIndexTenor", baseIndexTenor.ToString()},
+            {"QuoteCurrencyForecastCurve", quoteCurrencyForecastCurveHandle},  
+            {"SpotFx", fxSpot},
             {"Interpolation", interpolation},
         };
 
+        
+        List<QuoteValue> fxForwards = quoteValues.Where(x => x.Type.GetType() == typeof(FxForward)).ToList();
+        fxForwards = fxForwards.OrderBy(x => ((FxForward)x.Type).Tenor, new TenorComparer()).ToList();
+        object[,] fxForwardInstruments = new object[fxForwards.Count + 2, 4];
+        fxForwardInstruments[0, 0] = "FX Forwards";
+        fxForwardInstruments[1, 0] = "Tenors";
+        fxForwardInstruments[1, 1] = "BasisSpreads";
+        fxForwardInstruments[1, 2] = "FixingDays";
+        fxForwardInstruments[1, 3] = "Include";
+
+        int fxForwardRow = 2;
+        foreach (QuoteValue fxForward in fxForwards)
+        {
+            fxForwardInstruments[fxForwardRow, 0] = ((FxForward) fxForward.Type).Tenor.ToString();
+            fxForwardInstruments[fxForwardRow, 1] = fxForward.Value;
+            fxForwardInstruments[fxForwardRow, 2] = 2; // TODO: Map this somewhere.
+            fxForwardInstruments[fxForwardRow, 3] = "TRUE";
+            fxForwardRow++;
+        }
+        
         List<QuoteValue> crossCurrencySwaps = quoteValues.Where(x => x.Type.GetType() == typeof(FxBasisSwap)).ToList();
         crossCurrencySwaps = crossCurrencySwaps.OrderBy(x => ((FxBasisSwap)x.Type).Tenor, new TenorComparer()).ToList();
         object[,] crossCurrencySwapInstruments = new object[crossCurrencySwaps.Count + 2, 4];
@@ -441,18 +486,18 @@ public static class CurveBootstrapper
         crossCurrencySwapInstruments[1, 2] = "FixingDays";
         crossCurrencySwapInstruments[1, 3] = "Include";
 
-        int row = 2;
+        int swapRow = 2;
         foreach (QuoteValue crossCurrencySwap in crossCurrencySwaps)
         {
-            crossCurrencySwapInstruments[row, 0] = ((FxBasisSwap) crossCurrencySwap.Type).Tenor.ToString();
-            crossCurrencySwapInstruments[row, 1] = crossCurrencySwap.Value;
-            crossCurrencySwapInstruments[row, 2] = 2; // TODO: Map this somewhere.
-            crossCurrencySwapInstruments[row, 3] = "TRUE";
-            row++;
+            crossCurrencySwapInstruments[swapRow, 0] = ((FxBasisSwap) crossCurrencySwap.Type).Tenor.ToString();
+            crossCurrencySwapInstruments[swapRow, 1] = crossCurrencySwap.Value;
+            crossCurrencySwapInstruments[swapRow, 2] = 2; // TODO: Map this somewhere.
+            crossCurrencySwapInstruments[swapRow, 3] = "TRUE";
+            swapRow++;
         }
         
         List<object> instruments = new();
-        if (crossCurrencySwaps.Any()) instruments.Add(crossCurrencySwaps);
+        if (crossCurrencySwaps.Any()) instruments.Add(crossCurrencySwapInstruments);
 
         return BootstrapFxBasisAdjustedCurve(handle, curveParameters, null, null, instruments.ToArray());
     }

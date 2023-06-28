@@ -1,8 +1,6 @@
-﻿using System.Drawing;
-using dExcel.CommonEnums;
+﻿using dExcel.CommonEnums;
 using NUnit.Framework;
 using dExcel.OmicronUtils;
-using dExcel.Utilities;
 using Omicron;
 using Option = Omicron.Option;
 

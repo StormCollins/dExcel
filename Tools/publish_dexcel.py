@@ -117,7 +117,7 @@ try:
     # The path on the local machine where the release build is created.
     release_build_path: str = r'C:\GitLab\dExcelTools\dExcel\dExcel\bin\Release\net6.0-windows'
     # The path on the shared drive containing the dExcel releases.
-    shared_drive_releases_path: str = r'\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\Releases'
+    shared_drive_releases_path: str = r'C:\Users\keklynsmith\Documents\PublishTest' #'\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\Releases'
     dexcel_project_file_path: str = r'C:\GitLab\dExcelTools\dExcel\dExcel\dExcel.csproj'
     tree = ET.parse(dexcel_project_file_path)
 

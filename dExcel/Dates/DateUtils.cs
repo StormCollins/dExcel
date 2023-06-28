@@ -536,7 +536,7 @@ public static class DateUtils
         {
             return calendarErrorMessage;
         }
-
+        
         (QL.BusinessDayConvention? businessDayConvention, string errorMessage) = 
             ParseBusinessDayConvention(userBusinessDayConvention);
 
