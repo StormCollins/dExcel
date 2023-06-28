@@ -2,7 +2,9 @@
 using dExcel.ExcelUtils;
 using dExcel.Utilities;
 using ExcelDna.Integration;
+using MathNet.Numerics.Interpolation;
 using Omicron;
+using QuantLib;
 using QL = QuantLib;
 
 namespace dExcel.InterestRates;
@@ -498,4 +500,49 @@ public static class CurveBootstrapper
 
         return Bootstrap(handle, curveParameters, null, instruments.ToArray());
     }
-}
+
+
+
+
+    /// <summary>
+    /// Creates flat curve for testing purposes. Assumes simple interest rate compounding convention.
+    /// </summary>
+    /// <param name="handle">The 'handle' or name used to refer to the object in memory.
+    /// Each object in a workbook must have a unique handle.</param>
+    /// <param name="baseDate">Date used as starting point of the curve.</param>
+    /// <param name="rate">Flat interest rate assuming simple compounding.</param>
+    /// <param name="dayCountConventionToParse">Day count convention to be applied.</param>
+    /// <returns>A handle to a bootstrapped curve.</returns>
+    [ExcelFunction(
+            Name = "d.Curve_CreateFlatCurve",
+            Description = "Creates flat curve for testing purposes. Assumes simple interest rate compounding convention.",
+            Category = "∂Excel: Interest Rates")]
+        public static string CreateFlatCurve(
+            [ExcelArgument(Name = "Handle", Description = DescriptionUtils.Handle)]
+            string handle,
+            [ExcelArgument(Name = "baseDate", Description = "The start date of the curve")]
+            DateTime baseDate,
+            [ExcelArgument(Name = "rate", Description = "The flat interest rate. Simple compounding convention.")]
+            double rate,
+            [ExcelArgument(Name = "Day count convention", Description = "The flat interest rate. Simple compounding convention.")]
+            string dayCountConventionToParse)
+        {
+
+            QL.DayCounter? dayCountConvention = DateUtils.ParseDayCountConvention(dayCountConventionToParse);
+
+            QL.FlatForward interestRateCurve =
+                new(baseDate.ToQuantLibDate(),
+                new QL.QuoteHandle(new QL.SimpleQuote(rate)),
+        dayCountConvention);
+
+
+        CurveDetails curveDetails = new(interestRateCurve, null, null, null, null, null);
+        DataObjectController dataObjectController = DataObjectController.Instance;
+        return dataObjectController.Add(handle, curveDetails);
+
+
+        }
+
+
+
+    }
