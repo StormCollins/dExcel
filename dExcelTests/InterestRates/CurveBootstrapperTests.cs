@@ -584,7 +584,7 @@ public class CurveBootstrapperTest
 
         object[,] actualRaw =
             (object[,]) CurveBootstrapper.GetAllSwapCurveQuotes(
-                curveName: RateIndices.USD_LIBOR.ToString(),
+                curveName: OmicronSwapCurves.USD_Swap.ToString(),
                 baseDate: new DateTime(2023, 03, 31));
         
         List<string> actual = ExcelArrayUtils.ConvertExcelRangeToList<string>(actualRaw);
@@ -592,12 +592,5 @@ public class CurveBootstrapperTest
         expected.Sort();
         actual.Sort();
         Assert.AreEqual(expected, actual);
-    }
-
-    [Test]
-    public void GetUsdSwapCurveTest()
-    {
-        string handle = CurveBootstrapper.Get("MyLittleUsdSwapCurve", "USD-Swap", new DateTime(2023, 03, 31)); 
-        
     }
 }

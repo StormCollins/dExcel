@@ -223,8 +223,10 @@ public static class CurveUtils
         }
 
         string? calendarsParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Calendars", 0);
-        IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
-        (QL.Calendar? calendar, string errorMessage) = DateUtils.ParseCalendars(calendarsParameter);
+        if (!DateUtils.TryParseCalendars(calendarsParameter, out QL.Calendar? calendar, out string errorMessage))
+        {
+            return errorMessage;
+        }
 
         QL.YieldTermStructure discountCurve;
         
@@ -360,8 +362,10 @@ public static class CurveUtils
         }
 
         string? calendarsParameter = ExcelTableUtils.GetTableValue<string>(curveParameters, "Value", "Calendars", 0);
-        IEnumerable<string>? calendars = calendarsParameter?.Split(',').Select(x => x.ToString().Trim().ToUpper());
-        (QL.Calendar? calendar, string errorMessage) = DateUtils.ParseCalendars(calendarsParameter);
+        if (!DateUtils.TryParseCalendars(calendarsParameter, out QL.Calendar? calendar, out string errorMessage))
+        {
+            return errorMessage;
+        }
         
         string compoundingConventionParameter =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "CompoundingConvention", 0) ?? "";
@@ -740,8 +744,7 @@ public static class CurveUtils
         
         return output;
     }
-    
-    /// <summary>
+
     /// <summary>
     /// Returns a QuantLib term structure from an (Excel) table containing various parameters including the (string)
     /// handle to a term structure.
@@ -751,6 +754,7 @@ public static class CurveUtils
     /// <param name="table">The table of parameters containing the term structure handle.</param>
     /// <param name="columnHeaderIndex">The index (in terms of row numbers, yes, row numbers) that contains the column
     /// headers.</param>
+    /// <param name="allowExtrapolation">Set to 'true' to allow extrapolation.</param>
     /// <returns>A tuple containing the yield term structure, possibly null, and an error message, also possibly null.
     /// </returns>
     public static (QL.RelinkableYieldTermStructureHandle?, string? errorMessage) GetYieldTermStructure(
@@ -781,4 +785,28 @@ public static class CurveUtils
         
         return (termStructure, null);
     }
+
+    // [ExcelFunction(
+    //     Name = "d.Curve_CreateCustomRateIndex",
+    //     Description = "Creates a custom rate index.",
+    //     Category = "∂Excel: Interest Rates")]
+    // public static string CreateCustomIndex(
+    //     string handle,
+    //     string name,
+    //     string tenor,
+    //     int settlementDays,
+    //     string currency,
+    //     string calendar,)
+    // {
+    //     if (!ParserUtils.TryParseQuantLibCurrency(
+    //             currency,
+    //             out QL.Currency? quantLibCurrency,
+    //             out string? currencyErrorMessage))
+    //     {
+    //         return currencyErrorMessage;
+    //     }
+    //     
+    //     DateUtils.TryParseCalendars(calendar)
+    //     QL.IborIndex index = new(name, new QL.Period(tenor), settlementDays, quantLibCurrency,  )
+    // }
 }

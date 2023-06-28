@@ -9,4 +9,5 @@ public enum OmicronSwapCurves
     ZAR_Swap,
     USD_OIS, 
     USD_Swap,
+    SOFR,
 }

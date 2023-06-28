@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using dExcel.CommonEnums;
 using dExcel.Dates;
+using dExcel.OmicronUtils;
 using dExcel.ExcelUtils;
 using dExcel.Utilities;
 using ExcelDna.Integration;
@@ -9,8 +10,6 @@ using Omicron;
 using QL = QuantLib;
 
 namespace dExcel.InterestRates;
-
-using OmicronUtils;
 
 /// <summary>
 /// A class containing a collection of interest rate curve bootstrapping utilities.
@@ -677,32 +676,6 @@ public static class CurveBootstrapper
     {
         interpolation = 
             interpolation != "" ? interpolation : CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString();
-        
-        // One could create more complicated abstract code for mapping from quotes to 2d tables but I would advise
-        // against this.
-        // string rateIndexName = "";
-        // string rateIndexTenor = "";
-        // string? spreadIndexName = null; 
-        //
-        // if (curveName.IgnoreCaseEquals(OmicronSwapCurves.ZAR_Swap.ToString()))
-        // {
-        //     rateIndexName = RateIndices.JIBAR.ToString(); 
-        //     rateIndexTenor = "3M";
-        // }
-        // else if (curveName.IgnoreCaseEquals(OmicronSwapCurves.USD_OIS.ToString()))
-        // {
-        //     rateIndexName = RateIndices.FEDFUND.ToString();
-        //     rateIndexTenor = "1D";
-        // }
-        // else if (curveName.IgnoreCaseEquals(OmicronSwapCurves.USD_Swap.ToString()))
-        // {
-        //     rateIndexName = RateIndices.USD_LIBOR.ToString().Replace("_", "-");
-        //     rateIndexTenor = "3M";
-        // }
-        // else
-        // {
-        //     return CommonUtils.DExcelErrorMessage($"Unsupported curve name: '{curveName}'");
-        // }
 
         if (!TryParseCurveNameToRateIndex(
                 curveName, 
@@ -728,7 +701,7 @@ public static class CurveBootstrapper
 
             quoteValues =
                 Task.Run(
-                    function: () => OmicronUtils.GetAllSwapCurveQuotes(
+                    function: () => OmicronUtils.OmicronUtils.GetAllSwapCurveQuotes(
                         index: index.Value.name, 
                         tenor: new QL.Period(index.Value.tenor).ToOmicronTenor(), 
                         marketDataDate: baseDate))
@@ -871,6 +844,12 @@ public static class CurveBootstrapper
             return true;
         }
 
+        if (curveName.IgnoreCaseEquals(OmicronSwapCurves.SOFR.ToString()))
+        {
+            rateIndex = (RateIndices.SOFR.ToString(), "1D");
+            return true;
+        }
+
         rateIndex = null;
         errorMessage = CommonUtils.DExcelErrorMessage($"Unsupported curve name: {curveName}");
         return false;
@@ -893,7 +872,7 @@ public static class CurveBootstrapper
             (List<QuoteValue>)ExcelAsyncUtil.Run(
                 nameof(GetSwapCurveQuotes),
                 new object[] {index, baseDate},
-                () => OmicronUtils.GetSwapCurveQuotes(
+                () => dExcel.OmicronUtils.OmicronUtils.GetSwapCurveQuotes(
                     index: index.Value.name.Replace("_", "-"),
                     spreadIndex: null,
                     quotes: null, 
@@ -926,9 +905,10 @@ public static class CurveBootstrapper
         {
             return errorMessage;        
         }
+        
         QL.Period tenor = new(index.Value.tenor); 
         List<QuoteValue> quoteValues = 
-           Task.Run(() => OmicronUtils.GetAllSwapCurveQuotes(index.Value.name, tenor.ToOmicronTenor(), baseDate)).Result;
+           Task.Run(() => OmicronUtils.OmicronUtils.GetAllSwapCurveQuotes(index.Value.name, tenor.ToOmicronTenor(), baseDate)).Result;
         
         object[,] output = new object[quoteValues.Count, 1];
         for (int i = 0; i < quoteValues.Count; i++)

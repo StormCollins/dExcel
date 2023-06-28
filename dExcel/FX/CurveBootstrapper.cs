@@ -2,6 +2,7 @@
 using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.InterestRates;
+using dExcel.OmicronUtils;
 using dExcel.Utilities;
 using ExcelDna.Integration;
 using Omicron;
@@ -367,24 +368,43 @@ public static class CurveBootstrapper
         // TODO: List the available types of interpolation.
         // One could create more complicated abstract code for mapping from quotes to 2d tables but I would advise
         // against this.
-        string rateIndexName = "";
-        string rateIndexTenor = "";
-        string spreadIndexName = ""; 
+        string baseIndexName = "";
+        Tenor baseIndexTenor;
+        Currency baseCurrency;
+        string spreadIndexName = "";
+        Tenor spreadIndexTenor;
+        Currency spreadCurrency;
         
         if (curveName.IgnoreCaseEquals(OmicronFxBasisCurves.USDZAR.ToString()))
         {
-               rateIndexName = RateIndices.JIBAR.ToString();
+               baseIndexName = RateIndices.JIBAR.ToString();
+               baseIndexTenor = new Tenor(3, TenorUnit.Month);
+               baseCurrency = Currency.ZAR;
                spreadIndexName = RateIndices.USD_LIBOR.ToString();
+               spreadIndexTenor = new Tenor(3, TenorUnit.Month);
+               spreadCurrency = Currency.USD;
+        }
+        else
+        {
+            return CommonUtils.DExcelErrorMessage($"Unsupported curve name: {curveName}");
         }
 
         List<QuoteValue> quoteValues;
         try
         {
             quoteValues =
-                (List<QuoteValue>) ExcelAsyncUtil.Run(
-                    nameof(GetFxBasisAdjustedCurve),
-                    new object[] {rateIndexName, rateIndexTenor, spreadIndexName, baseDate},
-                    () => OmicronUtils.OmicronUtils.GetSwapCurveQuotes(rateIndexName, spreadIndexName, null, 1, baseDate.ToString("yyyy-MM-dd")));
+                Task.Run(
+                    function: () => OmicronUtils.OmicronUtils.GetAllFxBasisCurveQuotes(
+                        marketDataDate: baseDate,
+                        spreadIndexName: spreadIndexName,
+                        spreadIndexTenor: spreadIndexTenor,
+                        baseIndexName: baseIndexName,
+                        baseIndexTenor: baseIndexTenor,
+                        numeratorCurrency: baseCurrency,
+                        
+                        ));
+
+
         }
         catch (Exception ex)
         {
@@ -405,7 +425,7 @@ public static class CurveBootstrapper
             {"BaseCurrencyIndexTenor", "TODO"}, // TODO:
             {"BaseCurrencyDiscountCurve", "TODO"},  // TODO:
             {"BaseCurrencyForecastCurve", "TODO"},  // TODO:
-            {"QuoteCurrencyIndexName", rateIndexName},
+            {"QuoteCurrencyIndexName", baseIndexName},
             {"QuoteCurrencyIndexTenor", rateIndexTenor},
             {"QuoteCurrencyForecastCurve", "TODO"},  // TODO:
             {"SpotFx", rateIndexTenor},

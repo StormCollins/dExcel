@@ -290,4 +290,20 @@ public class OmicronUtilsTests
         
         Assert.AreEqual(33, quotes.Count);
     }
+
+    [Test]
+    public async Task GetAllFxBasisCurveQuotesTest()
+    {
+        List<QuoteValue> quotes = 
+            await OmicronUtils.GetAllFxBasisCurveQuotes(
+                spreadIndexName: RateIndices.USD_LIBOR.ToString(),
+                spreadIndexTenor: new Tenor(3, TenorUnit.Month),
+                baseIndexName: RateIndices.JIBAR.ToString(),
+                baseIndexTenor: new Tenor(3, TenorUnit.Month),
+                numeratorCurrency: Currency.ZAR,
+                denominatorCurrency: Currency.USD,
+                marketDataDate: new DateTime(2023, 03, 31));
+        
+        Assert.AreEqual(28, quotes.Count);
+    }
 }

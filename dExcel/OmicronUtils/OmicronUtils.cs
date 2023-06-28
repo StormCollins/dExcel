@@ -6,10 +6,9 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Omicron;
 using Option = Omicron.Option;
+using dExcel.Utilities;
 
 namespace dExcel.OmicronUtils;
-
-using Utilities;
 
 /// <summary>
 /// A collection of utility functions for interfacing with Omicron, the market data database.
@@ -79,66 +78,164 @@ public static class OmicronUtils
     }
 
     public static async Task<List<QuoteValue>> GetAllSwapCurveQuotes(
-        string index,
-        Tenor tenor,
-        DateTime marketDataDate)
+             string index,
+             Tenor tenor,
+             DateTime marketDataDate)
+     {
+         RateIndex underlyingRateIndex = new(index.Replace("_", "-"), tenor);
+         OmicronClient client = new(@"https://omicron.fsa-aks.deloitte.co.za/");
+ 
+         List<QuoteValue> curveQuotes = new();
+         Dictionary<string, object> rateIndicesQuery = new() { ["$type"] = nameof(RateIndex) };
+         
+         QuoteType[] rateIndexTypes = await client.SearchAsync(rateIndicesQuery).ToArrayAsync();
+         rateIndexTypes = 
+             rateIndexTypes
+                 .Where(x => 
+                     ((RateIndex) x).Name.IgnoreCaseEquals(index.Replace("_", "-")) && 
+                     ((RateIndex)x).Tenor.ToQuantLibPeriod() <= underlyingRateIndex.Tenor.ToQuantLibPeriod())
+                 .ToArray();
+ 
+         if (rateIndexTypes.Length != 0)
+         {
+             (QuoteType QuoteType, QuoteDto[] Quotes)[] rateIndexQuotes = 
+                 await client.GetQuotesAsync(rateIndexTypes, marketDataDate, marketDataDate).ToArrayAsync(); 
+             
+             foreach ((QuoteType QuoteType, QuoteDto[] Quotes) rateIndexQuote in rateIndexQuotes)
+             {
+                 curveQuotes.Add(new(rateIndexQuote.QuoteType, rateIndexQuote.Quotes[0].Date, rateIndexQuote.Quotes[0].Quote));
+             }
+         }
+         
+         Dictionary<string, object> fraQuery = new() { ["$type"] = nameof(Fra) };
+         QuoteType[] fraTypes = await client.SearchAsync(fraQuery).ToArrayAsync();
+         fraTypes = fraTypes.Where(x => ((Fra) x).ReferenceIndex == underlyingRateIndex).ToArray();
+ 
+         if (fraTypes.Length != 0)
+         {
+             (QuoteType QuoteType, QuoteDto[] Quotes)[] fraQuotes = 
+                 await client.GetQuotesAsync(fraTypes, marketDataDate, marketDataDate).ToArrayAsync(); 
+             
+             foreach ((QuoteType QuoteType, QuoteDto[] Quotes) fraQuote in fraQuotes)
+             {
+                 curveQuotes.Add(new(fraQuote.QuoteType, fraQuote.Quotes[0].Date, fraQuote.Quotes[0].Quote));
+             }
+         }
+ 
+         Dictionary<string, object> interestRateSwapQuery = new() { ["$type"] = nameof(InterestRateSwap) };
+         QuoteType[] interestRateSwapTypes = await client.SearchAsync(interestRateSwapQuery).ToArrayAsync();
+         interestRateSwapTypes = 
+             interestRateSwapTypes.Where(x => ((InterestRateSwap)x).ReferenceIndex == underlyingRateIndex).ToArray();
+         
+         if (interestRateSwapTypes.Length != 0)
+         {
+             (QuoteType QuoteType, QuoteDto[] Quotes)[] interestRateSwapQuotes = 
+                 await client.GetQuotesAsync(interestRateSwapTypes, marketDataDate, marketDataDate).ToArrayAsync();
+             
+             foreach ((QuoteType QuoteType, QuoteDto[] Quotes) interestRateSwapQuote in interestRateSwapQuotes)
+             {
+                 curveQuotes.Add(
+                     new(
+                         Type: interestRateSwapQuote.QuoteType, 
+                         Date: interestRateSwapQuote.Quotes[0].Date, 
+                         Value: interestRateSwapQuote.Quotes[0].Quote));
+             }
+         }
+         
+         Dictionary<string, object> oisQuery = new() { ["$type"] = nameof(Ois) };
+         QuoteType[] oisTypes = await client.SearchAsync(oisQuery).ToArrayAsync();
+         oisTypes = 
+             oisTypes.Where(x => ((Ois)x).ReferenceIndex == underlyingRateIndex).ToArray();
+         
+         if (oisTypes.Length != 0)
+         {
+             (QuoteType QuoteType, QuoteDto[] Quotes)[] oisQuotes = 
+                 await client.GetQuotesAsync(oisTypes, marketDataDate, marketDataDate).ToArrayAsync();
+             
+             foreach ((QuoteType QuoteType, QuoteDto[] Quotes) oisQuote in oisQuotes)
+             {
+                 curveQuotes.Add(
+                     new QuoteValue(
+                         Type: oisQuote.QuoteType, 
+                         Date: oisQuote.Quotes[0].Date, 
+                         Value: oisQuote.Quotes[0].Quote));
+             }
+         }
+         
+         return curveQuotes;
+     }
+    
+    public static async Task<List<QuoteValue>> GetAllFxBasisCurveQuotes(
+             string spreadIndexName,
+             Tenor spreadIndexTenor,
+             string baseIndexName,
+             Tenor baseIndexTenor,
+             Currency numeratorCurrency,
+             Currency denominatorCurrency,
+             DateTime marketDataDate)
     {
-        RateIndex underlyingRateIndex = new(index.Replace("_", "-"), tenor);
-        OmicronClient client = new(@"https://omicron.fsa-aks.deloitte.co.za/");
+         RateIndex spreadIndex = new(spreadIndexName.Replace("_", "-"), spreadIndexTenor);
+         RateIndex baseIndex = new(baseIndexName.Replace("_", "-"), baseIndexTenor);
+         OmicronClient client = new(@"https://omicron.fsa-aks.deloitte.co.za/");
 
-        Dictionary<string, object> rateIndicesQuery = new() { ["$type"] = nameof(RateIndex) };
-        
-        QuoteType[] rateIndexTypes = await client.SearchAsync(rateIndicesQuery).ToArrayAsync();
-        rateIndexTypes = 
-            rateIndexTypes
-                .Where(x => 
-                    ((RateIndex) x).Name.IgnoreCaseEquals(index.Replace("_", "-")) && 
-                    ((RateIndex)x).Tenor.ToQuantLibPeriod() <= underlyingRateIndex.Tenor.ToQuantLibPeriod())
-                .ToArray();
-        
-        (QuoteType QuoteType, QuoteDto[] Quotes)[] rateIndexQuotes = 
-            await client.GetQuotesAsync(rateIndexTypes, marketDataDate, marketDataDate).ToArrayAsync(); 
-        
-        Dictionary<string, object> fraQuery = new() { ["$type"] = nameof(Fra) };
-        
-        QuoteType[] fraTypes = await client.SearchAsync(fraQuery).ToArrayAsync();
-        fraTypes = fraTypes.Where(x => ((Fra) x).ReferenceIndex == underlyingRateIndex).ToArray();
-
-        (QuoteType QuoteType, QuoteDto[] Quotes)[] fraQuotes = 
-            await client.GetQuotesAsync(fraTypes, marketDataDate, marketDataDate).ToArrayAsync(); 
-        
-        Dictionary<string, object> interestRateSwapQuery = new() { ["$type"] = nameof(InterestRateSwap) };
-          
-        QuoteType[] interestRateSwapTypes = await client.SearchAsync(interestRateSwapQuery).ToArrayAsync();
-        
-        interestRateSwapTypes = 
-            interestRateSwapTypes.Where(x => ((InterestRateSwap)x).ReferenceIndex == underlyingRateIndex).ToArray();
-        
-        (QuoteType QuoteType, QuoteDto[] Quotes)[] interestRateSwapQuotes = 
-            await client.GetQuotesAsync(interestRateSwapTypes, marketDataDate, marketDataDate).ToArrayAsync(); 
-        
-        List<QuoteValue> curveQuotes = new();
-
-        foreach ((QuoteType QuoteType, QuoteDto[] Quotes) rateIndexQuote in rateIndexQuotes)
-        {
-            curveQuotes.Add(new(rateIndexQuote.QuoteType, rateIndexQuote.Quotes[0].Date, rateIndexQuote.Quotes[0].Quote));
-        }
-        
-        foreach ((QuoteType QuoteType, QuoteDto[] Quotes) fraQuote in fraQuotes)
-        {
-            curveQuotes.Add(new(fraQuote.QuoteType, fraQuote.Quotes[0].Date, fraQuote.Quotes[0].Quote));
-        }
-        
-        foreach ((QuoteType QuoteType, QuoteDto[] Quotes) interestRateSwapQuote in interestRateSwapQuotes)
-        {
-            curveQuotes.Add(
-                new(
-                    Type: interestRateSwapQuote.QuoteType, 
-                    Date: interestRateSwapQuote.Quotes[0].Date, 
-                    Value: interestRateSwapQuote.Quotes[0].Quote));
-        }
-        
-        return curveQuotes;
+         FxSpot fxSpot = new(numeratorCurrency, denominatorCurrency);
+         
+         List<QuoteValue> curveQuotes = new();
+         Dictionary<string, object> fxSpotQuery = new() { ["$type"] = nameof(FxSpot) };
+         
+         QuoteType[] fxSpotTypes = await client.SearchAsync(fxSpotQuery).ToArrayAsync();
+         fxSpotTypes =
+             fxSpotTypes
+                 .Where(x => ((FxSpot) x) == fxSpot).ToArray();
+ 
+         if (fxSpotTypes.Length != 0)
+         {
+             (QuoteType QuoteType, QuoteDto[] Quotes)[] fxSpotQuotes = 
+                 await client.GetQuotesAsync(fxSpotTypes, marketDataDate, marketDataDate).ToArrayAsync(); 
+             
+             foreach ((QuoteType QuoteType, QuoteDto[] Quotes) fxSpotQuote in fxSpotQuotes)
+             {
+                 curveQuotes.Add(new(fxSpotQuote.QuoteType, fxSpotQuote.Quotes[0].Date, fxSpotQuote.Quotes[0].Quote));
+             }
+         }
+         
+         Dictionary<string, object> fxForwardQuery = new() { ["$type"] = nameof(FxForward) };
+         QuoteType[] fxForwardTypes = await client.SearchAsync(fxForwardQuery).ToArrayAsync();
+         fxForwardTypes = fxForwardTypes.Where(x => ((FxForward) x).FxSpot == fxSpot).ToArray();
+         
+         if (fxForwardTypes.Length != 0)
+         {
+             (QuoteType QuoteType, QuoteDto[] Quotes)[] fxForwardQuotes = 
+                 await client.GetQuotesAsync(fxForwardTypes, marketDataDate, marketDataDate).ToArrayAsync(); 
+             
+             foreach ((QuoteType QuoteType, QuoteDto[] Quotes) fxForwardQuote in fxForwardQuotes)
+             {
+                 curveQuotes.Add(new(fxForwardQuote.QuoteType, fxForwardQuote.Quotes[0].Date, fxForwardQuote.Quotes[0].Quote));
+             }
+         }
+ 
+         Dictionary<string, object> fxBasisSwapQuery = new() { ["$type"] = nameof(FxBasisSwap) };
+         QuoteType[] fxBasisSwapTypes = await client.SearchAsync(fxBasisSwapQuery).ToArrayAsync();
+         fxBasisSwapTypes = 
+             fxBasisSwapTypes.Where(x => 
+                 ((FxBasisSwap)x).BaseIndex == baseIndex && ((FxBasisSwap)x).SpreadIndex == spreadIndex).ToArray();
+         
+         if (fxBasisSwapTypes.Length != 0)
+         {
+             (QuoteType QuoteType, QuoteDto[] Quotes)[] fxBasisSwapQuotes = 
+                 await client.GetQuotesAsync(fxBasisSwapTypes, marketDataDate, marketDataDate).ToArrayAsync();
+             
+             foreach ((QuoteType QuoteType, QuoteDto[] Quotes) fxBasisSwapQuote in fxBasisSwapQuotes)
+             {
+                 curveQuotes.Add(
+                     new(
+                         Type: fxBasisSwapQuote.QuoteType, 
+                         Date: fxBasisSwapQuote.Quotes[0].Date, 
+                         Value: fxBasisSwapQuote.Quotes[0].Quote));
+             }
+         }
+         
+         return curveQuotes;
     }
 
     /// <summary>
