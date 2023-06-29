@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <DnaLibrary Name='dExcel Add-In' RuntimeVersion='v4.0' xmlns='http://schemas.excel-dna.net/addin/2020/07/dnalibrary'>
-  <ExternalLibrary Path='dExcel.dll' ExplicitExports='false' ExplicitRegistration='true' LoadFromBytes='true' Pack='true' IncludePdb='false'/>
+  <ExternalLibrary Path='dExcel.dll' ExplicitExports='false' ExplicitRegistration='true' LoadFromBytes='true' Pack='false' IncludePdb='false'/>
   <Reference Path="ExcelDna.Registration.dll" Pack="true" />
   <Reference Path='FuzzySharp.dll' Pack='true'/>
   <Reference Path='MaterialDesignColors.dll' Pack='true'/>
@@ -56,6 +56,43 @@
 				onAction='CalculateRange'
 				screentip='Select a range and click this button to recalculate it.'
 				tag='calculate-range-small-blue.ico'/>
+			  <menu
+			    id='menuInsertMenus'
+				label='Insert Menus'
+				getImage='GetImage'
+				supertip='Inserts drop down menus for common lists.'
+				tag='list-small-blue.ico'>
+				<button
+				  id='btnInsertDropDownMenuForCompoundingConventions'
+				  label='Insert Drop Menu for Compounding Conventions'
+				  onAction='InsertDropDownMenuForCompoundingConventions'/>
+				<button
+				  id='btnInsertDropDownMenuForRateIndices'
+				  label='Insert Drop Menu for Rate Indices'
+				  onAction='InsertDropDownMenuForRateIndices'/>
+				<menuSeparator id='InterpolationSeparator'/>
+				<button
+				  id='btnInsertDropDownMenuForBootstrappingInterpolation'
+				  label='Insert Drop Down Menu for Bootstrapping Interpolation'
+				  onAction='InsertDropDownMenuForBootstrappingInterpolation'/>
+				<button
+				  id='btnInsertDropDownMenuForDiscountFactorInterpolation'
+				  label='Insert Drop Down Menu for Discount Factors Interpolation'
+				  onAction='InsertDropDownMenuForDiscountFactorInterpolation'/>
+				<button
+				  id='btnInsertDropDownMenuForZeroRatesInterpolation'
+				  label='Insert Drop Down Menu for Zero Rates Interpolation'
+				  onAction='InsertDropDownMenuForZeroRatesInterpolation'/>
+				<menuSeparator id='OmicronSeparator'/>
+				<button 
+				  id='btnInsertDropDownMenuForOmicronSwapCurves'
+				  label='Insert Drop Down Menu for Omicron Swap Curves'
+				  onAction='InsertDropDownMenuForOmicronSwapCurves'/>
+				<button
+				  id='btnInsertDropDownMenuForOmicronFxBasisAdjustedSwapCurves'
+				  label='Insert Drop Down Menu for Omicron FX Basis Adjusted Swap Curves'
+				  onAction='InsertDropDownMenuForOmicronFxBasisAdjustedSwapCurves'/>
+			  </menu>
 			  <button
 				id='btnManagePasswords'
 				label='Manage Passwords'

@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to ∂Excel will be documented in this file.
 
+## [0.2.1] - 2023-06-09
+### Features
+- Excel table column and row headers support spaces in names (improves readability).
+- Added ``Insert Enums`` to ribbon for inserting drop down menus of common types e.g., rate indices.
+- Interpolation for bootstrapping is now clearly state as being on discount factors, zero rates, or forward rates.
+- Renamed ``d.Curve_Create`` to ``d.Curve_CreateFromDiscountFactors``.
+- Added function ``d.Curve_CreateFromZeroRates``.
+- Bootstrapping supports multiple instrument names e.g., ``Interest Rate Swaps`` or ``IRSs``, ``Depos`` or ``Deposits`` etc.
+- Bootstrapping FX basis adjusted curves added.
+
 ## [0.2.0] - 2023-05-03
 ### Features
 - Added multi-curve bootstrapping support in ``d.Curve_Boostrap``.

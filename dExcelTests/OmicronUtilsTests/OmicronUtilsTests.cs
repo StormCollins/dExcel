@@ -1,9 +1,10 @@
-﻿namespace dExcelTests.OmicronUtilsTests;
-
+﻿using dExcel.CommonEnums;
 using NUnit.Framework;
 using dExcel.OmicronUtils;
 using Omicron;
 using Option = Omicron.Option;
+
+namespace dExcelTests.OmicronUtilsTests;
 
 [TestFixture]
 public class OmicronUtilsTests
@@ -194,7 +195,7 @@ public class OmicronUtilsTests
         List<QuoteValue>? quoteValues = OmicronUtils.DeserializeOmicronObjects(FxBasisSwapJson); 
         FxBasisSwap fxBasisSwap = 
             new(
-                BaseIndex: new RateIndex("JIBAR", new Tenor(3, TenorUnit.Month)), 
+                BaseIndex: new RateIndex(RateIndices.JIBAR.ToString(), new Tenor(3, TenorUnit.Month)), 
                 SpreadIndex: new RateIndex("USD-LIBOR", new Tenor(3, TenorUnit.Month)), 
                 Tenor: new Tenor(12, TenorUnit.Year));
         Assert.AreEqual(quoteValues?[0].Type, fxBasisSwap);
@@ -255,12 +256,52 @@ public class OmicronUtilsTests
     }
 
     [Test]
-    public void GetSwapCurveQuotesTest()
+    public async Task GetSwapCurveQuotesTest()
     {
         string rawJson = 
-            File.ReadAllText(@"C:\GitLab\dExcelTools\dExcel\dExcelTests\OmicronUtilsTests\OmicronRequisition1Example.json"); 
+            await File.ReadAllTextAsync(@"C:\GitLab\dExcelTools\dExcel\dExcelTests\OmicronUtilsTests\OmicronRequisition1Example.json"); 
         List<QuoteValue>? quoteValues = OmicronUtils.DeserializeOmicronObjects(rawJson);
-        List<QuoteValue> zarSwapCurveQuotes = OmicronUtils.GetSwapCurveQuotes("JIBAR", quoteValues);
+        List<QuoteValue> zarSwapCurveQuotes =
+            await OmicronUtils.GetSwapCurveQuotes(RateIndices.JIBAR.ToString(), null, quoteValues);
         Assert.AreEqual(zarSwapCurveQuotes.Count, 23);
+    }
+
+    [Test]
+    public async Task GetAllSwapCurveQuotesZarSwapTest()
+    {
+        List<QuoteValue> quotes =
+            await OmicronUtils.GetAllSwapCurveQuotes(
+                index: RateIndices.JIBAR.ToString(), 
+                tenor: new Tenor(Amount: 3, Unit: TenorUnit.Month),
+                marketDataDate: new DateTime(year: 2023, month: 03, day: 31));
+        Assert.AreEqual(expected: 23, actual: quotes.Count);
+    }
+    
+    [Test]
+    public async Task GetAllSwapCurveQuotesUsdSwapTest()
+    {
+        List<QuoteValue> quotes =
+            await OmicronUtils.GetAllSwapCurveQuotes(
+                index: RateIndices.USD_LIBOR.ToString(), 
+                tenor: new Tenor(3, TenorUnit.Month),
+                marketDataDate: new DateTime(2023, 03, 31));
+        
+        Assert.AreEqual(33, quotes.Count);
+    }
+
+    [Test]
+    public async Task GetAllFxBasisCurveQuotesTest()
+    {
+        List<QuoteValue> quotes = 
+            await OmicronUtils.GetAllFxBasisCurveQuotes(
+                spreadIndexName: RateIndices.USD_LIBOR.ToString(),
+                spreadIndexTenor: new Tenor(3, TenorUnit.Month),
+                baseIndexName: RateIndices.JIBAR.ToString(),
+                baseIndexTenor: new Tenor(3, TenorUnit.Month),
+                numeratorCurrency: Currency.ZAR,
+                denominatorCurrency: Currency.USD,
+                marketDataDate: new DateTime(2023, 03, 31));
+        
+        Assert.AreEqual(28, quotes.Count);
     }
 }

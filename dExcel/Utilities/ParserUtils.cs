@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using QL = QuantLib;
 
 namespace dExcel.Utilities;
+
 
 /// <summary>
 /// A collection of utility functions for parsing strings to commonly occuring types.
@@ -203,4 +205,35 @@ public static class ParserUtils
                 return false;
         }
     }
+
+
+    /// <summary>
+    /// Tries to parse a string as a QuantLib currency.
+    /// </summary>
+    /// <param name="currencyToParse">Currency to parse.</param>
+    /// <param name="currency">The output QuantLib currency.</param>
+    /// <param name="errorMessage">The output error message.</param>
+    /// <returns>QuantLib currency.</returns>
+    public static bool TryParseQuantLibCurrency(
+       string currencyToParse, 
+       [NotNullWhen(true)]out QL.Currency? currency, 
+       [NotNullWhen(false)]out string? errorMessage)
+   {
+       Assembly? quantLib = 
+           AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == "NQuantLib");
+       
+       Type? type = quantLib?.GetType($"QuantLib.{currencyToParse.ToUpper()}Currency");
+       if (type is not null)
+       {
+           currency = (QL.Currency)Activator.CreateInstance(type)!;
+           errorMessage = null;
+           return true;
+       }
+       else
+       {
+           currency = null;
+           errorMessage = CommonUtils.DExcelErrorMessage($"Invalid currency: '{currency}'");
+           return false;
+       }
+   } 
 }

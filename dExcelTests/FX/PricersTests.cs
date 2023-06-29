@@ -1,9 +1,9 @@
-﻿namespace dExcelTests.FX;
-
-using dExcel.FX;
+﻿using dExcel.FX;
 using dExcel.Utilities;
 using NUnit.Framework;
 using mnd = MathNet.Numerics.Distributions;
+
+namespace dExcelTests.FX;
 
 [TestFixture]
 public class PricersTests
@@ -40,9 +40,8 @@ public class PricersTests
                 strike * domesticDiscountFactor * mnd.Normal.CDF(0, 1, d2);
         
         Assert.AreEqual(expectedCallOptionPrice, actualCallOptionPrice);
-    }  
-    
-    
+    }
+
     [Test]
     public void GarmanKohlhagenSpotOptionPricerForCallOptionVerboseOutputTest()
     {

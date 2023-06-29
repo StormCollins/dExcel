@@ -181,8 +181,7 @@ public static class EquityUtils
                 forward: new QL.QuoteHandle(new QL.SimpleQuote(dividendYield)),
                 dayCounter: dayCounter);
 
-        (QL.Calendar? qlCalendar, string? qlCalendarErrorMessage) = DateUtils.ParseCalendars(calendar);
-        if (qlCalendar == null)
+        if (!DateUtils.TryParseCalendars(calendar, out QL.Calendar? qlCalendar, out string qlCalendarErrorMessage))
         {
             return qlCalendarErrorMessage;
         }

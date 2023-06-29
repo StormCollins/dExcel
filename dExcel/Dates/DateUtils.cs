@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 
 namespace dExcel.Dates;
 
+using System.Diagnostics.CodeAnalysis;
+
 /// <summary>
 /// A collection of date utility functions.
 /// </summary>
@@ -38,18 +40,21 @@ public static class DateUtils
             ? (null, CommonUtils.DExcelErrorMessage($"Unsupported business day convention: '{businessDayConventionToParse}'"))
             : (businessDayConvention, "");
     }
-    
+
     /// <summary>
     /// Used to parse a range of Excel dates to a custom QLNet calendar.
     /// </summary>
     /// <param name="holidaysOrCalendars">Holiday range.</param>
-    /// <param name="calendar">Calendar.</param>
-    /// <returns>A custom QLNet calendar.</returns>
+    /// <param name="calendar">The output calendar.</param>
+    /// <param name="errorMessage">The output error message.</param>
+    /// <returns>True if it can parse the holidays, otherwise false.</returns>
     /// <exception cref="ArgumentException">Thrown for invalid dates in <param name="holidaysOrCalendars"></param>.
     /// </exception>
-    public static (QL.Calendar? calendar, string errorMessage) ParseHolidays(
+    public static bool TryParseHolidays(
         object[,] holidaysOrCalendars, 
-        QL.Calendar calendar)
+        QL.Calendar baseCalendar,
+        out QL.Calendar? calendar, 
+        out string errorMessage)
     {
         // There is a single column of holidays.
         if (holidaysOrCalendars.GetLength(1) == 1)
@@ -58,13 +63,15 @@ public static class DateUtils
             {
                 if (double.TryParse(holiday.ToString(), out double holidayValue))
                 {
-                    calendar.addHoliday(DateTime.FromOADate(holidayValue).ToQuantLibDate());
+                    baseCalendar.addHoliday(DateTime.FromOADate(holidayValue).ToQuantLibDate());
                 }
                 else
                 {
                     if (!Regex.IsMatch(holiday.ToString() ?? string.Empty, ValidHolidayTitlePattern))
                     {
-                        throw new ArgumentException(CommonUtils.DExcelErrorMessage($"Invalid date: '{holiday}'"));
+                        calendar = null;
+                        errorMessage = CommonUtils.DExcelErrorMessage($"Invalid date: '{holiday}'");
+                        return false;
                     }
                 }
             }
@@ -78,23 +85,30 @@ public static class DateUtils
                 {
                     if (double.TryParse(holidaysOrCalendars[i, j].ToString(), out double holidayValue))
                     {
-                        calendar.addHoliday(DateTime.FromOADate(holidayValue).ToQuantLibDate());
+                        baseCalendar.addHoliday(DateTime.FromOADate(holidayValue).ToQuantLibDate());
                     }
                 }
             }
         }
 
-        return (calendar, "");
+        errorMessage = "";
+        calendar = baseCalendar;
+        return true;
     }
 
     /// <summary>
     /// Parses a string as a QLNet calendar.
     /// </summary>
     /// <param name="calendarToParse">Calendar to parse.</param>
+    /// <param name="calendar"></param>
+    /// <param name="errorMessage"></param>
     /// <returns>QLNet calendar.</returns>
-    private static (QL.Calendar? calendar, string errorMessage) ParseSingleCalendar(string? calendarToParse)
+    private static bool TryParseSingleCalendar(
+        string? calendarToParse, 
+        [NotNullWhen(true)]out QL.Calendar? calendar, 
+        out string errorMessage)
     {
-        QL.Calendar? calendar = calendarToParse?.ToUpper() switch
+        calendar = calendarToParse?.ToUpper() switch
         {
             "ARS" or "ARGENTINA" => new QL.Argentina(),
             "AUD" or "AUSTRALIA" => new QL.Australia(),
@@ -142,68 +156,97 @@ public static class DateUtils
             _ => null,
         };
 
-        return calendar is not null
-            ? (calendar, "")
-            : (null, CommonUtils.UnsupportedCalendarMessage(calendarToParse ?? ""));
+        if (calendar is null)
+        {
+            errorMessage = CommonUtils.UnsupportedCalendarMessage(calendarToParse ?? "");
+            return false;
+        }
+        else
+        {
+            errorMessage = "";
+            return true;
+        }
     }
 
     /// <summary>
     /// Parses a comma-delimited list of calendars e.g., 'EUR,USD,ZAR', and creates a joint calendar.
     /// </summary>
     /// <param name="calendarsToParse">String of comma separated calendars e.g., 'EUR,USD,ZAR'.</param>
+    /// <param name="calendar"></param>
+    /// <param name="errorMessage"></param>
     /// <returns>A tuple consisting of the joint calendar and a possible error message.</returns>
-    private static (QL.Calendar? calendar, string errorMessage) ParseJointCalendar(string? calendarsToParse)
+    private static bool TryParseJointCalendar(
+        string? calendarsToParse, 
+        [NotNullWhen(true)]out QL.Calendar? calendar, 
+        out string errorMessage)
     {
         IEnumerable<string>? calendars = calendarsToParse?.Split(',').Select(x => x.Trim());
 
         if (calendars != null)
         {
             IEnumerable<string> enumerable = calendars as string[] ?? calendars.ToArray();
-            (QL.Calendar? calendar0, string errorMessage0) = ParseSingleCalendar(enumerable.ElementAt(0));
-            (QL.Calendar? calendar1, string errorMessage1) = ParseSingleCalendar(enumerable.ElementAt(1));
+            // (QL.Calendar? calendar0, string errorMessage0) = ParseSingleCalendar(enumerable.ElementAt(0));
+            // (QL.Calendar? calendar1, string errorMessage1) = ParseSingleCalendar(enumerable.ElementAt(1));
 
-            if (calendar0 is null)
+            if (!TryParseSingleCalendar(enumerable.ElementAt(0), out QL.Calendar? calendar0, out string errorMessage0))
             {
-                return (calendar0, errorMessage0);
+                calendar = calendar0;
+                errorMessage = errorMessage0;
+                return false;
             }
 
-            if (calendar1 is null)
+            if (!TryParseSingleCalendar(enumerable.ElementAt(1), out QL.Calendar? calendar1, out string errorMessage1))
             {
-                return (calendar1, errorMessage1);
+                calendar = calendar1;
+                errorMessage = errorMessage1;
+                return false;
             }
 
             QL.JointCalendar jointCalendar = new(calendar0, calendar1);
 
             for (int i = 2; i < enumerable.Count(); i++)
             {
-                (QL.Calendar? currentCalendar, string currentErrorMessage) = ParseSingleCalendar(enumerable.ElementAt(i));
-                if (currentCalendar is null)
+                if (!TryParseSingleCalendar(
+                        calendarToParse: enumerable.ElementAt(i), 
+                        calendar: out QL.Calendar? currentCalendar, 
+                        errorMessage: out string currentErrorMessage))
                 {
-                    return (currentCalendar, currentErrorMessage);
+                    calendar = currentCalendar;
+                    errorMessage = currentErrorMessage;
+                    return false;
                 }
 
                 jointCalendar = new QL.JointCalendar(jointCalendar, currentCalendar);
             }
 
-            return (jointCalendar, "");
+            calendar = jointCalendar;
+            errorMessage = "";
+            return true;
         }
 
-        return (null, CommonUtils.DExcelErrorMessage("No valid calendars found."));
+        calendar = null;
+        errorMessage = CommonUtils.DExcelErrorMessage("No valid calendars found.");
+        return false;
     }
 
     /// <summary>
     /// Parses a string containing either a single or multiple calendars e.g., 'ZAR' or 'EUR,USD,ZAR'.
     /// </summary>
     /// <param name="calendarsToParse">The calendar string to parse e.g., 'ZAR' or 'EUR,USD,ZAR'.</param>
+    /// <param name="calendar">The output QuantLib calendar.</param>
+    /// <param name="errorMessage">The output error message.</param>
     /// <returns>A tuple containing the relevant calendar object and a possible error message.</returns>
-    public static (QL.Calendar? calendar, string errorMessage) ParseCalendars(string? calendarsToParse)
+    public static bool TryParseCalendars(
+        string? calendarsToParse, 
+        [NotNullWhen(true)]out QL.Calendar? calendar, 
+        out string errorMessage)
     {
         if (calendarsToParse != null && calendarsToParse.Contains(','))
         {
-            return ParseJointCalendar(calendarsToParse);
+            return TryParseJointCalendar(calendarsToParse, out calendar, out errorMessage);
         }
 
-        return ParseSingleCalendar(calendarsToParse);
+        return TryParseSingleCalendar(calendarsToParse, out calendar, out errorMessage);
     }
         
     /// <summary>
@@ -263,8 +306,7 @@ public static class DateUtils
             Description = "A comma separated list of calendars to use for the business dates.")]
         string calendarsToParse)
     {
-        (QL.Calendar? calendar, string errorMessage) = ParseCalendars(calendarsToParse);
-        if (calendar is null)
+        if (!TryParseCalendars(calendarsToParse, out QL.Calendar? calendar, out string errorMessage))
         {
             return errorMessage;
         }
@@ -332,25 +374,28 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        (QL.Calendar? calendar, string errorMessage) result;
+        // QL.Calendar? calendar, string errorMessage) result;
+        QL.Calendar? calendar;
+        string errorMessage;
         if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
         {
-            result = ParseCalendars(holidaysOrCalendar[0, 0].ToString());
+            if (!TryParseCalendars(holidaysOrCalendar[0, 0].ToString(), out calendar, out errorMessage))
+            {
+                return errorMessage;
+            }
         }
         else
         {
             QL.BespokeCalendar bespokeCalendar = new("BespokeCalendar");
             bespokeCalendar.addWeekend(DayOfWeek.Saturday.ToQuantLibWeekday());
             bespokeCalendar.addWeekend(DayOfWeek.Sunday.ToQuantLibWeekday());
-            result = ParseHolidays(holidaysOrCalendar, bespokeCalendar);
+            if (!TryParseHolidays(holidaysOrCalendar, bespokeCalendar, out calendar, out errorMessage))
+            {
+                return errorMessage;
+            }
         }
 
-        if (result.calendar is null)
-        {
-            return result.errorMessage;
-        }
-
-        QL.Date? adjustedDate = result.calendar?.adjust(date.ToQuantLibDate());
+        QL.Date? adjustedDate = calendar?.adjust(date.ToQuantLibDate());
         if (adjustedDate is not null)
         {
             return adjustedDate.ToDateTime().ToOADate();
@@ -383,25 +428,28 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        (QL.Calendar? calendar, string errorMessage) result;
+        // (QL.Calendar? calendar, string errorMessage) result;
+        QL.Calendar? calendar;
+        string errorMessage;
         if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
         {
-            result = ParseCalendars(holidaysOrCalendar[0, 0].ToString());
+            if (!TryParseCalendars(holidaysOrCalendar[0, 0].ToString(), out calendar, out errorMessage))
+            {
+                return errorMessage;
+            }
         }
         else
         {
             QL.BespokeCalendar bespokeCalendar = new("BespokeCalendar");
             bespokeCalendar.addWeekend(DayOfWeek.Saturday.ToQuantLibWeekday());
             bespokeCalendar.addWeekend(DayOfWeek.Sunday.ToQuantLibWeekday());
-            result = ParseHolidays(holidaysOrCalendar, bespokeCalendar);
+            if (!TryParseHolidays(holidaysOrCalendar, bespokeCalendar, out calendar, out errorMessage))
+            {
+                return errorMessage;
+            }
         }
 
-        if (result.calendar is null)
-        {
-            return result.errorMessage;
-        }
-
-        return result.calendar.adjust(date.ToQuantLibDate(), QL.BusinessDayConvention.ModifiedFollowing).ToOaDate();
+        return calendar.adjust(date.ToQuantLibDate(), QL.BusinessDayConvention.ModifiedFollowing).ToOaDate();
     }
 
     /// <summary>
@@ -428,25 +476,29 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        (QL.Calendar? calendar, string errorMessage) result;
+        // (QL.Calendar? calendar, string errorMessage) result;
+        QL.Calendar? calendar;
+        string errorMessage;
         if (holidaysOrCalendar.GetLength(0) == 1 && holidaysOrCalendar.GetLength(1) == 1)
         {
-            result = ParseCalendars(holidaysOrCalendar[0, 0].ToString());
+            if (!TryParseCalendars(holidaysOrCalendar[0, 0].ToString(), out calendar, out errorMessage))
+            {
+                return errorMessage;
+            }
         }
         else
         {
             QL.BespokeCalendar bespokeCalendar = new("BespokeCalendar");
             bespokeCalendar.addWeekend(DayOfWeek.Saturday.ToQuantLibWeekday());
             bespokeCalendar.addWeekend(DayOfWeek.Sunday.ToQuantLibWeekday());
-            result = ParseHolidays(holidaysOrCalendar, bespokeCalendar);
+            if (!TryParseHolidays(holidaysOrCalendar, bespokeCalendar, out calendar, out errorMessage))
+            {
+                return errorMessage;
+            }
         }
 
-        if (result.calendar is null)
-        {
-            return result.errorMessage;
-        }
 
-        return result.calendar.adjust(date.ToQuantLibDate(), QL.BusinessDayConvention.Preceding).ToOaDate();
+        return calendar.adjust(date.ToQuantLibDate(), QL.BusinessDayConvention.Preceding).ToOaDate();
     }
 
     /// <summary>
@@ -479,8 +531,8 @@ public static class DateUtils
 #if DEBUG
         CommonUtils.InFunctionWizard();
 #endif
-        (QL.Calendar? calendar, string calendarErrorMessage) = ParseCalendars(userCalendar);
-        if (calendar is null)
+        // (QL.Calendar? calendar, string calendarErrorMessage) = TryParseCalendars(userCalendar);
+        if (!TryParseCalendars(userCalendar, out QL.Calendar? calendar, out string calendarErrorMessage))
         {
             return calendarErrorMessage;
         }
@@ -643,8 +695,8 @@ public static class DateUtils
             Description = "The single calendar (e.g., 'USD', 'ZAR') or joint calendar (e.g., 'USD,ZAR') to parse.")]
         string calendarsToParse)
     {
-        (QL.Calendar? calendar, string errorMessage) = ParseCalendars(calendarsToParse);
-        if (calendar is null)
+        // (QL.Calendar? calendar, string errorMessage) = TryParseCalendars(calendarsToParse);
+        if (!TryParseCalendars(calendarsToParse, out QL.Calendar? calendar, out string errorMessage))
         {
             return new object[,] {{errorMessage}};
         }
@@ -710,8 +762,8 @@ public static class DateUtils
                           "\n'IMM' = IMM dates.")]
         string ruleToParse)
     {
-        (QL.Calendar? calendar, string calendarErrorMessage) = ParseCalendars(calendarsToParse);
-        if (calendar is null)
+        // (QL.Calendar? calendar, string calendarErrorMessage) = TryParseCalendars(calendarsToParse);
+        if (!TryParseCalendars(calendarsToParse, out QL.Calendar? calendar, out string calendarErrorMessage))
         {
             return new object[,] {{calendarErrorMessage}};
         }
@@ -783,8 +835,8 @@ public static class DateUtils
         Category = "∂Excel: Dates")]
     public static object IsBusinessDay(DateTime date, string calendarsToParse)
     {
-        (QL.Calendar? calendar, string errorMessage) = ParseCalendars(calendarsToParse); 
-        if (calendar is null)
+        // (QL.Calendar? calendar, string errorMessage) = TryParseCalendars(calendarsToParse); 
+        if (!TryParseCalendars(calendarsToParse, out QL.Calendar? calendar, out string errorMessage))
         {
             return errorMessage;
         }

@@ -108,7 +108,9 @@ public class FxUtilsTests
             { 0.10459, 0.09983, 0.09663, 0.09434, 0.09266, 0.09144, 0.09062, 0.09015, 0.09050, 0.09108, 0.09039, 0.09006, 0.09009, 0.09053, 0.09150, 0.09324, 0.09630 },
             { 0.10792, 0.10273, 0.09934, 0.09698, 0.09533, 0.09422, 0.09359, 0.09341, 0.09380, 0.09513, 0.09410, 0.09353, 0.09342, 0.09381, 0.09483, 0.09676, 0.10026 },
         };
-        
+
+        QL.DeltaVolQuote deltaVolQuote = new(0.9, new QL.QuoteHandle(new QL.SimpleQuote(0.10792)), 10, QL.DeltaVolQuote.DeltaType.Spot);
         // object convertedVolSurface = FxUtils.ConvertDeltaToMoneynessVolSurface(deltaVols, deltas, optionMaturities, 0.1, 0.2);
+        // QL.BlackVolTermStructureHandle blackVolTermStructure = new(new QL.BlackVarianceSurface())
     }
 }

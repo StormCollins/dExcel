@@ -143,7 +143,7 @@ public class StatsUtilsTests
    public void NonSquareMatrixForCorrelatedNormalRandomNumbersTest()
    {
       double[,] correlationMatrix = {{ 1.0, 0.5, 0.1 }, { 0.1, 1.0, 1.0 }};
-      string actual = StatsUtils.CorrelatedNormalRandomNumbers(999, 100_000, correlationMatrix).ToString();
+      string? actual = StatsUtils.CorrelatedNormalRandomNumbers(999, 100_000, correlationMatrix).ToString();
       string expected = CommonUtils.DExcelErrorMessage("Matrix is not square.");
       Assert.AreEqual(expected, actual);
    }
@@ -152,7 +152,7 @@ public class StatsUtilsTests
    public void DiagonalCorrelationNotOneForCorrelatedNormalRandomNumbersTest()
    {
       double[,] correlationMatrix = {{ 1.0, 0.5 }, { 0.5, 2.0 }};
-      string actual = StatsUtils.CorrelatedNormalRandomNumbers(999, 100_000, correlationMatrix).ToString();
+      string? actual = StatsUtils.CorrelatedNormalRandomNumbers(999, 100_000, correlationMatrix).ToString();
       string expected = CommonUtils.DExcelErrorMessage("Diagonal elements of the correlation matrix must be 1.");
       Assert.AreEqual(expected, actual);
    }

@@ -27,12 +27,13 @@ public sealed class DataObjectController
         }
     }
 
-    public string Add(string handle, object dataObject)
+    public string Add(string handle, object dataObject, string warningMessage = "")
     {
         char[] bannedCharacters = { '@', ':', ',', ';', '\\', '/' };
         if (bannedCharacters.Any(handle.Contains))
         {
-            return CommonUtils.DExcelErrorMessage($"Handle may not contain following: {string.Join(", ", bannedCharacters)}");
+            return CommonUtils.DExcelErrorMessage(
+                $"Handle may not contain following: {string.Join(", ", bannedCharacters)}");
         }
         
         if (!_dataObjects.ContainsKey(handle))
@@ -43,7 +44,8 @@ public sealed class DataObjectController
         {
             _dataObjects[handle] = dataObject;  
         }
-        return $"@@{handle}::{DateTime.Now:HH:mm:ss}";
+        
+        return $"@@{handle}::{DateTime.Now:HH:mm:ss}" + (warningMessage == "" ? "" : $":: {warningMessage}");
     }
 
     private static string CleanHandle(string dirtyTag)

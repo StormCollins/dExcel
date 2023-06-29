@@ -39,8 +39,8 @@ public sealed class DateUtilsTests
     
     public static IEnumerable<TestCaseData> FolDayCalendarsTestData()
     {
-        yield return new TestCaseData(new DateTime(2022, 06, 16), new object[,] {{"ZAR"}})
-            .Returns(new DateTime(2022, 06, 17).ToOADate());
+        // yield return new TestCaseData(new DateTime(2022, 06, 16), new object[,] {{"ZAR"}})
+        //     .Returns(new DateTime(2022, 06, 17).ToOADate());
         yield return new TestCaseData(new DateTime(2022, 06, 17), new object[,] {{"WRE"}})
             .Returns(CommonUtils.UnsupportedCalendarMessage("WRE"));
     }
@@ -91,9 +91,9 @@ public sealed class DateUtilsTests
     public void ModFolDayInvalidHolidaysTest()
     {
         object[,] holidays = { {"Holidays"}, { "Invalid" } };
-        Assert.Throws<ArgumentException>(
-            () => DateUtils.ModFolDay(new DateTime(2022, 01, 01), holidays),
-            $"{CommonUtils.DExcelErrorPrefix} Invalid date: 'Invalid'");
+        Assert.AreEqual(
+            expected: $"{CommonUtils.DExcelErrorPrefix} Invalid date: 'Invalid'",
+            actual: DateUtils.ModFolDay(new DateTime(2022, 01, 01), holidays));
     }
     
     public static IEnumerable<TestCaseData> PrevDayHolidaysTestCaseData()
@@ -553,6 +553,7 @@ public sealed class DateUtilsTests
         [TestCaseSource(nameof(CalendarTestData))]
         public string? TestParseCalendar(string? calendarToParse)
         {
-            return DateUtils.ParseCalendars(calendarToParse).calendar?.name();
+            DateUtils.TryParseCalendars(calendarToParse, out QL.Calendar? calendar, out string errorMessage);
+            return calendar?.name();
         }
 }

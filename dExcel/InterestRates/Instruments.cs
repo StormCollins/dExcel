@@ -1,23 +1,8 @@
-﻿using QL = QuantLib;
-using dExcel.Dates;
+﻿using dExcel.Dates;
 using dExcel.Utilities;
-using QuantLib;
-using ExcelDna.Integration;
-//using QuantLib;
-using System.Windows.Documents;
-using System;
-using System.Reflection;
-using MathNet.Numerics.Differentiation;
-using System.Reflection.Metadata;
-using Microsoft.OData.Client;
-using Microsoft.Office.Interop.Excel;
 using dExcel.ExcelUtils;
-using FuzzySharp.Utils;
-using System.Collections.Immutable;
-using Omicron.Data.Model.QuoteTypes;
-using Microsoft.VisualBasic.Logging;
-using Omicron;
-using Omicron.Data.Model;
+using ExcelDna.Integration;
+using QL = QuantLib;
 
 namespace dExcel.InterestRates;
 
@@ -26,8 +11,6 @@ namespace dExcel.InterestRates;
 /// </summary>
 public static class Instruments
 {
-
-
     /// <summary>
     /// Creates a rate index object. Allows for historical fixings to be assigned, which removes the need to assign these on an instrument level.
     /// </summary>
@@ -41,7 +24,7 @@ public static class Instruments
     /// <returns>A handle to a bootstrapped curve.</returns>
     [ExcelFunction(
             Name = "d.IR_CreateReferenceRateIndex",
-            Description = "Creates a rate index object. Allows for historicak fixings to be assigned.",
+            Description = "Creates a rate index object. Allows for historic fixings to be assigned.",
             Category = "∂Excel: Interest Rates")]
     public static string CreateReferenceRateIndex(
             [ExcelArgument(Name = "Handle", Description = DescriptionUtils.Handle)]
@@ -55,7 +38,7 @@ public static class Instruments
             [ExcelArgument(Name = "(Optional) Fixing Dates", Description = "The dates for any applicable historical fixings.")]
             object fixingDatesRange = null,
             [ExcelArgument(Name = "(Optional) Fixings", Description = "The fixings for the corresponding fixing dates.")]
-            object fixingsRange=null)
+            object fixingsRange = null)
     {
 
         QL.YieldTermStructure? interestRateCurve = CurveUtils.GetCurveObject(curveHandle);
@@ -76,7 +59,7 @@ public static class Instruments
             };
         }
         
-        rateIndex.clearFixings();
+        rateIndex?.clearFixings();
         if (fixingDatesRange is not null && fixingDatesRange.GetType() != typeof(double))
         {
             List<QL.Date> fixingDates = new();
@@ -86,10 +69,10 @@ public static class Instruments
                 fixingDates.Add(DateTime.FromOADate((double)((object[,])fixingDatesRange)[i, 0]).ToQuantLibDate());
                 fixings.Add((double)((object[,])fixingsRange)[i, 0]);
             }
-            rateIndex.addFixings(new QL.DateVector(fixingDates), new QL.DoubleVector(fixings));
+            rateIndex?.addFixings(new QL.DateVector(fixingDates), new QL.DoubleVector(fixings));
         }
 
-        if (fixingDatesRange is not null && fixingDatesRange.GetType() == typeof(double))
+        if (fixingDatesRange is not null && fixingDatesRange is double)
         {
             List<QL.Date> fixingDates = new();
             List<double> fixings = new();
@@ -97,12 +80,11 @@ public static class Instruments
             fixingDates.Add(DateTime.FromOADate((double)fixingDatesRange).ToQuantLibDate());
             fixings.Add((double)fixingsRange);
 
-            rateIndex.addFixings(new QL.DateVector(fixingDates), new QL.DoubleVector(fixings));
+            rateIndex?.addFixings(new QL.DateVector(fixingDates), new QL.DoubleVector(fixings));
         }
 
-        var dataObjectController = DataObjectController.Instance;
+        DataObjectController dataObjectController = DataObjectController.Instance;
         return dataObjectController.Add(handle, rateIndex);
-
     }
 
     /// <summary>
@@ -169,7 +151,7 @@ public static class Instruments
 
     {
 
-        Settings.instance().setEvaluationDate(valuationDate.ToQuantLibDate());
+        QL.Settings.instance().setEvaluationDate(valuationDate.ToQuantLibDate());
 
         QL.YieldTermStructure? interestRateCurve = CurveUtils.GetCurveObject(curveHandle);
 
@@ -177,7 +159,7 @@ public static class Instruments
         object dataObjectIndex = dataObjectControllerReferenceRateIndex.GetDataObject(referenceRateIndexHandle);
         QL.IborIndex rateIndex = (QL.IborIndex)dataObjectIndex;
 
-        (QL.Calendar? calendar, string calendarErrorMessage) = DateUtils.ParseCalendars(calendarsToParse);
+        DateUtils.TryParseCalendars(calendarsToParse, out QL.Calendar? calendar, out string calendarErrorMessage);
         (QL.BusinessDayConvention? businessDayConvention, string errorMessage) = DateUtils.ParseBusinessDayConvention(businessDayConventionToParse);
         QL.DayCounter? dayCountConvention = DateUtils.ParseDayCountConvention(dayCountConventionToParse);
     
@@ -333,16 +315,12 @@ public static class Instruments
 
     {
 
-        Settings.instance().setEvaluationDate(valuationDate.ToQuantLibDate());
-
+        QL.Settings.instance().setEvaluationDate(valuationDate.ToQuantLibDate());
         QL.YieldTermStructure? interestRateCurve = CurveUtils.GetCurveObject(curveHandle);
-
-        var dataObjectControllerReferenceRateIndex = DataObjectController.Instance;
+        DataObjectController? dataObjectControllerReferenceRateIndex = DataObjectController.Instance;
         object dataObjectIndex = dataObjectControllerReferenceRateIndex.GetDataObject(referenceRateIndexHandle);
         QL.IborIndex rateIndex = (QL.IborIndex)dataObjectIndex;
-
         QL.DayCounter? dayCountConvention = DateUtils.ParseDayCountConvention(dayCountConventionToParse);
-
         QL.Swap.Type type = swapTypeToParse.ToUpper() switch
         {
             "PAYER" => QL.Swap.Type.Payer,
@@ -350,11 +328,9 @@ public static class Instruments
         };
 
         QL.YieldTermStructureHandle yieldTermStructureHandle = new(interestRateCurve);
-
         QL.DiscountingSwapEngine discountingSwapEngine = new(new QL.YieldTermStructureHandle(interestRateCurve));
 
         //convert excel bespoke cash flow inputs into lists
-
         List<QL.Date> cashFlowDates = new();
         List<double> nominalFloatLeg = new();
         List<double> nominalFixedLeg = new();
@@ -395,9 +371,8 @@ public static class Instruments
 
         QL.NonstandardSwap nonstandardSwap = new(type, new QL.DoubleVector(nominalFixedLeg), new QL.DoubleVector(nominalFloatLeg), new QL.Schedule(new QL.DateVector(cashFlowDates)), new QL.DoubleVector(fixedRateVector), dayCountConvention, new QL.Schedule(new QL.DateVector(cashFlowDates)), rateIndex, new QL.DoubleVector(gearingVector), new QL.DoubleVector(spreadVector), dayCountConvention);
         nonstandardSwap.setPricingEngine(discountingSwapEngine);
-        var dataObjectController = DataObjectController.Instance;
+        DataObjectController dataObjectController = DataObjectController.Instance;
         return dataObjectController.Add(handle, nonstandardSwap);
-
     }
 
 
@@ -475,6 +450,7 @@ public static class Instruments
 
 
     /// <summary>
+    /// </summary>
     /// <param name="handle"></param>
     /// <param name="valuationDate">The valuation date.</param>
     /// <param name="effectiveDate">Start date.</param>
@@ -495,9 +471,7 @@ public static class Instruments
         Name = "d.IR_CreateFloatForFloatInterestRateSwap",
         Description = "Creates a float-for-float interest rate swap object in Excel",
         Category = "∂Excel: Interest Rates")]
-
     public static string CreateFloatForFloatInterestRateSwap(
-
         [ExcelArgument(Name = "Handle", Description = DescriptionUtils.Handle)]
         string handle,
         [ExcelArgument(Name = "Valuation Date", Description = "The valuation date.")]
@@ -534,19 +508,17 @@ public static class Instruments
         [ExcelArgument(Name = "CurveHandleDiscount", Description = "Handle of curve that will be used for discounting.")]
         string curveHandleDiscount)
     {
-
-        Settings.instance().setEvaluationDate(valuationDate.ToQuantLibDate());
-
-        var dataObjectControllerReferenceRateIndex1 = DataObjectController.Instance;
+        QL.Settings.instance().setEvaluationDate(valuationDate.ToQuantLibDate());
+        DataObjectController dataObjectControllerReferenceRateIndex1 = DataObjectController.Instance;
         object dataObjectIndex1 = dataObjectControllerReferenceRateIndex1.GetDataObject(referenceRateIndexHandle1);
         QL.IborIndex rateIndex1 = (QL.IborIndex)dataObjectIndex1;
-        var dataObjectControllerReferenceRateIndex2 = DataObjectController.Instance;
+        DataObjectController dataObjectControllerReferenceRateIndex2 = DataObjectController.Instance;
         object dataObjectIndex2 = dataObjectControllerReferenceRateIndex2.GetDataObject(referenceRateIndexHandle2);
         QL.IborIndex rateIndex2 = (QL.IborIndex)dataObjectIndex2;
 
         QL.YieldTermStructure? interestRateCurveDiscount = CurveUtils.GetCurveObject(curveHandleDiscount);
 
-        (QL.Calendar? calendar, string calendarErrorMessage) = DateUtils.ParseCalendars(calendarsToParse);
+        DateUtils.TryParseCalendars(calendarsToParse, out QL.Calendar? calendar, out string calendarErrorMessage);
         (QL.BusinessDayConvention? businessDayConvention, string errorMessage) = DateUtils.ParseBusinessDayConvention(businessDayConventionToParse);
         QL.DayCounter? dayCountConvention = DateUtils.ParseDayCountConvention(dayCountConventionToParse);
 
@@ -705,7 +677,7 @@ public static class Instruments
 
         //first start off through creating a cash flow schedule
 
-        (QL.Calendar? calendar, string calendarErrorMessage) = DateUtils.ParseCalendars(calendarsToParse);
+        DateUtils.TryParseCalendars(calendarsToParse, out QL.Calendar? calendar, out string calendarErrorMessage );
         (QL.BusinessDayConvention? businessDayConvention, string errorMessage) = DateUtils.ParseBusinessDayConvention(businessDayConventionToParse);
         QL.DayCounter? dayCountConvention = DateUtils.ParseDayCountConvention(dayCountConventionToParse);
 
@@ -814,28 +786,18 @@ public static class Instruments
         bool includeNotionalExchange
         )
     {
-
-        
-        Settings.instance().setEvaluationDate(valuationDate.ToQuantLibDate());
-
+        QL.Settings.instance().setEvaluationDate(valuationDate.ToQuantLibDate());
         QL.YieldTermStructure? interestRateCurveDiscount = CurveUtils.GetCurveObject(curveHandleDiscount);
         QL.YieldTermStructureHandle yieldTermStructureHandle = new(interestRateCurveDiscount);
-
         QL.Leg leg = CreateConstantNotionalIborLeg(handle, valuationDate, effectiveDate, terminationDate, tenor,
         calendarsToParse, businessDayConventionToParse, ruleToParse, nominal, dayCountConventionToParse,
         referenceRateIndexHandle, spread, includeNotionalExchange);
-
         double pv = QL.CashFlows.npv(leg, yieldTermStructureHandle,false);
-
-
         object[,] container = new object[2, 1];
         container[0, 0] = leg;
         container[1, 0] = pv;
-
-        var dataObjectController = DataObjectController.Instance;
+        DataObjectController dataObjectController = DataObjectController.Instance;
         return dataObjectController.Add(handle, container);
-            
-
     }
 
 
@@ -846,7 +808,7 @@ public static class Instruments
     Category = "∂Excel: Interest Rates")]
     public static object ConstantNotionalFloatingLeg_GetPrice(string handle, bool cashFlows = false)
     {
-        var dataObjectController = DataObjectController.Instance;
+        DataObjectController dataObjectController = DataObjectController.Instance;
         object dataObjectContainer = dataObjectController.GetDataObject(handle);
         object output;
         object[,] container = (object[,])dataObjectContainer;
@@ -860,13 +822,12 @@ public static class Instruments
             
             if (cashFlows)
             {
-                
-                    object[,] outputTemp = new object[leg.Count, 17];
-                    QL.Date tempFixingDateIndex1;
-                    QL.Date tempFixingStartDateIndex1;
+                object[,] outputTemp = new object[leg.Count, 17];
+                QL.Date tempFixingDateIndex1;
+                QL.Date tempFixingStartDateIndex1;
 
-                    for (int i = 0; i < leg.Count; i++)
-                    {
+                for (int i = 0; i < leg.Count; i++)
+                {
                     if (QL.NQuantLibc.as_floating_rate_coupon(leg[i]) is not null)
                     {
                         //first set of days relate to accrual period. this should be same for fixed and float legs, used fix leg (no specific reason)  to access the data
@@ -905,24 +866,14 @@ public static class Instruments
                         outputTemp[i, 16] = leg[i].amount();
                     }
 
-                    }
-                    output = outputTemp;
-
-          
+                }
+                output = outputTemp;
             }
-            
-
             else
             {
-
-
                 output = pv;
             }
-
-            
-
         }
-
         else
         {
             return CommonUtils.DExcelErrorMessage("Unknown interest rate swap type.");
@@ -932,8 +883,8 @@ public static class Instruments
     }
 
 
-
     /// <summary>
+    /// </summary>
     /// <param name="generalInstrumentInputs">List of inputs applicable to both legs.</param>
     /// <param name="legInputs">List of inputs on individual leg basis.</param>
     /// <returns></returns>
@@ -941,17 +892,14 @@ public static class Instruments
         Name = "d.IR_CreateConstantNotionalCrossCurrencySwap",
         Description = "Creates a constant notional cross currency swap object in Excel",
         Category = "∂Excel: Interest Rates")]
-
     public static string CreateConstantNotionalCrossCurrencySwap(
 
         [ExcelArgument(Name = "General Instrument Inputs", Description = DescriptionUtils.Handle)]
         object[,] generalInstrumentInputs,
         [ExcelArgument(Name = "Base Currency Leg Inputs", Description = DescriptionUtils.Handle)]
-        object[,] legInputs
-        )
+        object[,] legInputs)
     {
         int columnHeaderIndexInstrument = ExcelTableUtils.GetRowIndex(generalInstrumentInputs, "Input Name");
-
         string? instrumentHandle = ExcelTableUtils.GetTableValue<string>(generalInstrumentInputs, "Value", "Xccy Swap Handle", columnHeaderIndexInstrument);
         DateTime valuationDate = ExcelTableUtils.GetTableValue<DateTime>(generalInstrumentInputs, "Value", "Valuation Date", columnHeaderIndexInstrument);
         DateTime effectiveDate = ExcelTableUtils.GetTableValue<DateTime>(generalInstrumentInputs, "Value", "Effective Date", columnHeaderIndexInstrument);
@@ -961,16 +909,13 @@ public static class Instruments
         string? businessDayConventionToParse = ExcelTableUtils.GetTableValue<string>(generalInstrumentInputs, "Value", "Business Day Convention", columnHeaderIndexInstrument);
         string? ruleToParse = ExcelTableUtils.GetTableValue<string>(generalInstrumentInputs, "Value", "Date Generation Rule", columnHeaderIndexInstrument);
         double fxSpot = ExcelTableUtils.GetTableValue<double>(generalInstrumentInputs, "Value", "FXSpot", columnHeaderIndexInstrument);
-
         int columnHeaderIndexLegs = ExcelTableUtils.GetRowIndex(legInputs, "Input Name");
-
         string? currencyBaseCcy = ExcelTableUtils.GetTableValue<string>(legInputs, "Base Ccy Inputs", "Currency", columnHeaderIndexLegs);
         double nominalBaseCcy = ExcelTableUtils.GetTableValue<double>(legInputs, "Base Ccy Inputs", "Nominal", columnHeaderIndexLegs);
         string? dayCountConventionToParseBaseCcy = ExcelTableUtils.GetTableValue<string>(legInputs, "Base Ccy Inputs", "Day Count Convention", columnHeaderIndexLegs);
         string? referenceRateBaseCcy = ExcelTableUtils.GetTableValue<string>(legInputs, "Base Ccy Inputs", "Reference Rate Object", columnHeaderIndexLegs);
         double spreadBaseCcy = ExcelTableUtils.GetTableValue<double>(legInputs, "Base Ccy Inputs", "Spread", columnHeaderIndexLegs);
         string? discountCurveHandleBaseCcy = ExcelTableUtils.GetTableValue<string>(legInputs, "Base Ccy Inputs", "Discount Curve Object", columnHeaderIndexLegs);
-
         string? currencyQuoteCcy = ExcelTableUtils.GetTableValue<string>(legInputs, "Quote Ccy Inputs", "Currency", columnHeaderIndexLegs);
         double nominalQuoteCcy = ExcelTableUtils.GetTableValue<double>(legInputs, "Quote Ccy Inputs", "Nominal", columnHeaderIndexLegs);
         string? dayCountConventionToParseQuoteCcy = ExcelTableUtils.GetTableValue<string>(legInputs, "Quote Ccy Inputs", "Day Count Convention", columnHeaderIndexLegs);
@@ -978,76 +923,59 @@ public static class Instruments
         double spreadQuoteCcy = ExcelTableUtils.GetTableValue<double>(legInputs, "Quote Ccy Inputs", "Spread", columnHeaderIndexLegs);
         string? discountCurveHandleQuoteCcy = ExcelTableUtils.GetTableValue<string>(legInputs, "Quote Ccy Inputs", "Discount Curve Object", columnHeaderIndexLegs);
 
-
-        Settings.instance().setEvaluationDate(valuationDate.ToQuantLibDate());
-
+        QL.Settings.instance().setEvaluationDate(valuationDate.ToQuantLibDate());
 
         //set discount curves
-
         QL.YieldTermStructure? DiscountCurveBaseCcy = CurveUtils.GetCurveObject(discountCurveHandleBaseCcy);
         QL.YieldTermStructureHandle yieldTermStructureHandleBaseCcy = new(DiscountCurveBaseCcy);
-
         QL.YieldTermStructure? DiscountCurveQuoteCcy = CurveUtils.GetCurveObject(discountCurveHandleQuoteCcy);
         QL.YieldTermStructureHandle yieldTermStructureHandleQuoteCcy = new(DiscountCurveQuoteCcy);
-
-        QL.Leg legBaseCcy = CreateConstantNotionalIborLeg(currencyBaseCcy + "Leg", valuationDate, effectiveDate, terminationDate, tenor,
+        QL.Leg legBaseCcy = 
+            CreateConstantNotionalIborLeg(currencyBaseCcy + "Leg", valuationDate, effectiveDate, terminationDate, tenor,
                             calendarsToParse, businessDayConventionToParse, ruleToParse, nominalBaseCcy, dayCountConventionToParseBaseCcy,
                             referenceRateBaseCcy, spreadBaseCcy, true);
-        QL.Leg legQuoteCcy = CreateConstantNotionalIborLeg(currencyQuoteCcy + "Leg", valuationDate, effectiveDate, terminationDate, tenor,
+        QL.Leg legQuoteCcy 
+            = CreateConstantNotionalIborLeg(currencyQuoteCcy + "Leg", valuationDate, effectiveDate, terminationDate, tenor,
                         calendarsToParse, businessDayConventionToParse, ruleToParse, nominalQuoteCcy, dayCountConventionToParseQuoteCcy,
                         referenceRateQuoteCcy, spreadQuoteCcy, true);
 
         double pvBaseCcy = QL.CashFlows.npv(legBaseCcy, yieldTermStructureHandleBaseCcy, false) * fxSpot;
         double pvQuoteCcy = QL.CashFlows.npv(legQuoteCcy, yieldTermStructureHandleQuoteCcy, false);
-
-
         object[,] container = new object[2, 3];
         container[0, 0] = currencyBaseCcy + "Leg"; container[0, 1] = legBaseCcy; container[0, 2] = pvBaseCcy;
         container[1, 0] = currencyQuoteCcy + "Leg"; container[1, 1] = legQuoteCcy; container[1, 2] = pvQuoteCcy;
 
-        var dataObjectController = DataObjectController.Instance;
+        DataObjectController dataObjectController = DataObjectController.Instance;
         return dataObjectController.Add(instrumentHandle, container);
-
     }
 
 
     [ExcelFunction(
-    Name = "d.IR_ConstantNotionalXccySwap_GetPrice",
-    Description = "Get pricing elements of a Constant Notional XCcy Swap.",
-    Category = "∂Excel: Interest Rates")]
+        Name = "d.IR_ConstantNotionalXccySwap_GetPrice",
+        Description = "Get pricing elements of a Constant Notional XCcy Swap.",
+        Category = "∂Excel: Interest Rates")]
     public static object ConstantNotionalXccySwap_GetPrice(string handle, bool cashFlows = false)
     {
-
-        var dataObjectController = DataObjectController.Instance;
+        DataObjectController dataObjectController = DataObjectController.Instance;
         object dataObjectContainer = dataObjectController.GetDataObject(handle);
         object[,] container = (object[,])dataObjectContainer; //input container containing handles, legs and pv
-
         object output;
-
         object[,] legs = new object[2, 2];
         legs[0, 0] = container[0,0]; legs[0, 1] = container[0,1]; 
         legs[1, 0] = container[1, 0]; legs[1, 1] = container[1, 1];
 
         if (legs[0, 1].GetType() == typeof(QL.Leg))
         {
-
             if (cashFlows)
             {
-
                 QL.Leg legTemp = (QL.Leg)legs[0, 1];
                 object[,] outputTemp = new object[legTemp.Count*2, 18];
                 int iIndexStart = 0;
-
-
                 for (int legCounter = 0; legCounter < 2; legCounter++)
-
                 {
                     QL.Leg leg = (QL.Leg)legs[legCounter, 1];
-
-
                     QL.Date tempFixingDateIndex1;
                     QL.Date tempFixingStartDateIndex1;
-
                     int iIndexEnd = leg.Count * (legCounter + 1);
                     int iTempCounter = 0;
 
@@ -1092,43 +1020,21 @@ public static class Instruments
                             outputTemp[i, 10] = leg[i-iIndexStart].amount();
                             outputTemp[i, 17] = leg[i-iIndexStart].amount();
                         }
-
                         iTempCounter = i;
                     }
                     iIndexStart = iTempCounter+1;
-
                 }
-
                 output = outputTemp;
-
             }
-
-
             else
             {
-
                 output = (double)container[0, 2] + (double)container[1, 2];
-
-
             }
-
         }
-
         else
         {
             return CommonUtils.DExcelErrorMessage("Unknown interest rate swap type.");
         }
         return output;
     }
-
 }
-
-
-
-
-
-
-
-
-
-

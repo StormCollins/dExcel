@@ -1,22 +1,19 @@
-﻿using dExcel.Dates;
+﻿using System.Diagnostics;
+using dExcel.CommonEnums;
+using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.InterestRates;
+using dExcel.Utilities;
 using NUnit.Framework;
 using QL = QuantLib;
-using DateTime = System.DateTime;
 
 namespace dExcelTests.InterestRates;
 
-using System.Diagnostics;
+using Omicron;
 
 [TestFixture]
 public class CurveBootstrapperTest
 {
-    public void TestCurveBootstrapper()
-    {
-        
-    }
-    
     [Test]
     public void Bootstrap_MissingBaseDate_Test()
     {
@@ -24,18 +21,18 @@ public class CurveBootstrapperTest
         {
             {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
-            {"RateIndexName", "JIBAR"},
+            {"RateIndexName", RateIndices.JIBAR.ToString()},
             {"RateIndexTenor", "3m"},
-            {"Interpolation", "Linear"},
+            {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
 
         object[,] instrumentGroups = 
         {
             {"Deposits", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"1m", "JIBAR", 0.1, "TRUE"},
-            {"3m", "JIBAR", 0.1, "TRUE"},
-            {"6m", "JIBAR", 0.1, "TRUE"},
+            {"1m", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
+            {"3m", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
+            {"6m", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
         };
         
         string handle = 
@@ -45,7 +42,7 @@ public class CurveBootstrapperTest
                 customRateIndex: null,
                 instrumentGroups: instrumentGroups);
         
-            const string expected = "#∂Excel Error: Curve parameter missing: 'BASEDATE'.";
+            const string expected = "#∂Excel Error: Missing curve parameter: 'Base Date'.";
             Assert.AreEqual(expected, handle);
     }
         
@@ -61,7 +58,7 @@ public class CurveBootstrapperTest
             {"BaseDate", baseDate.ToOADate()},
             {"RateIndexName", "JIBAR"},
             {"RateIndexTenor", "3m"},
-            {"Interpolation", "Linear"},
+            {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
 
         Dictionary<string, double> depositRates = 
@@ -76,9 +73,9 @@ public class CurveBootstrapperTest
         {
             {"Deposits", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"1m", "JIBAR", depositRates["1m"], "TRUE"},
-            {"3m", "JIBAR", depositRates["3m"], "TRUE"},
-            {"6m", "JIBAR", depositRates["6m"], "TRUE"},
+            {"1m", RateIndices.JIBAR.ToString(), depositRates["1m"], "TRUE"},
+            {"3m", RateIndices.JIBAR.ToString(), depositRates["3m"], "TRUE"},
+            {"6m", RateIndices.JIBAR.ToString(), depositRates["6m"], "TRUE"},
         };
         
         QL.DayCounter dayCounter = new QL.Actual365Fixed();
@@ -117,9 +114,9 @@ public class CurveBootstrapperTest
             {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
-            {"RateIndexName", "JIBAR"},
+            {"RateIndexName", RateIndices.JIBAR.ToString()},
             {"RateIndexTenor", "3m"},
-            {"Interpolation", "Linear"},
+            {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
 
         Dictionary<string, double> depositRates = 
@@ -134,9 +131,9 @@ public class CurveBootstrapperTest
         {
             {"Deposits", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"1m", "JIBAR", depositRates["1m"], "TRUE"},
-            {"3m", "JIBAR", depositRates["3m"], "TRUE"},
-            {"6m", "JIBAR", depositRates["6m"], "TRUE"},
+            {"1m", RateIndices.JIBAR.ToString(), depositRates["1m"], "TRUE"},
+            {"3m", RateIndices.JIBAR.ToString(), depositRates["3m"], "TRUE"},
+            {"6m", RateIndices.JIBAR.ToString(), depositRates["6m"], "TRUE"},
         };
        
         Dictionary<string, double> fraRates = 
@@ -150,8 +147,8 @@ public class CurveBootstrapperTest
         {
             {"FRAs", "", "", ""},
             {"FraTenors", "RateIndex", "Rates", "Include"},
-            {"6x9", "JIBAR", fraRates["6x9"], "TRUE"},
-            {"9x12", "JIBAR", fraRates["9x12"], "TRUE"},
+            {"6x9", RateIndices.JIBAR.ToString(), fraRates["6x9"], "TRUE"},
+            {"9x12", RateIndices.JIBAR.ToString(), fraRates["9x12"], "TRUE"},
         };
 
         object[] instruments = {depositInstruments, fraInstruments};
@@ -205,9 +202,9 @@ public class CurveBootstrapperTest
             {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToOADate()},
-            {"RateIndexName", "JIBAR"},
+            {"RateIndexName", RateIndices.JIBAR.ToString()},
             {"RateIndexTenor", "3m"},
-            {"Interpolation", "Exponential"},
+            {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
 
         Dictionary<string, double> depositRates = 
@@ -222,9 +219,9 @@ public class CurveBootstrapperTest
         {
             {"Deposits", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"1m", "JIBAR", depositRates["1m"], "TRUE"},
-            {"3m", "JIBAR", depositRates["3m"], "TRUE"},
-            {"6m", "JIBAR", depositRates["6m"], "TRUE"},
+            {"1m", RateIndices.JIBAR.ToString(), depositRates["1m"], "TRUE"},
+            {"3m", RateIndices.JIBAR.ToString(), depositRates["3m"], "TRUE"},
+            {"6m", RateIndices.JIBAR.ToString(), depositRates["6m"], "TRUE"},
         };
        
         Dictionary<string, double> fraRates = 
@@ -238,8 +235,8 @@ public class CurveBootstrapperTest
         {
             {"FRAs", "", "", ""},
             {"FraTenors", "RateIndex", "Rates", "Include"},
-            {"6x9", "JIBAR", fraRates["6x9"], "TRUE"},
-            {"9x12", "JIBAR", fraRates["9x12"], "TRUE"},
+            {"6x9", RateIndices.JIBAR.ToString(), fraRates["6x9"], "TRUE"},
+            {"9x12", RateIndices.JIBAR.ToString(), fraRates["9x12"], "TRUE"},
         };
 
         Dictionary<string, double> swapRates = 
@@ -253,8 +250,8 @@ public class CurveBootstrapperTest
         {
             {"Interest Rate Swaps", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"2y", "JIBAR", swapRates["2y"], "TRUE"},
-            {"3y", "JIBAR", swapRates["3y"], "TRUE"},
+            {"2y", RateIndices.JIBAR.ToString(), swapRates["2y"], "TRUE"},
+            {"3y", RateIndices.JIBAR.ToString(), swapRates["3y"], "TRUE"},
         };
 
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
@@ -266,6 +263,7 @@ public class CurveBootstrapperTest
                 customRateIndex: null, 
                 instrumentGroups: instruments);
         
+        Debug.Assert(!handle.Contains(CommonUtils.DExcelErrorPrefix));
         QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.0001;
         List<string> tenors = new() {"0m", "1m", "3m", "6m", "9m", "12m", "15m", "18m", "21m", "24m"};
@@ -355,33 +353,33 @@ public class CurveBootstrapperTest
             {"CurveUtils Parameters", ""},
             {"Parameter", "Value"},
             {"BaseDate", baseDate.ToDateTime().ToOADate()},
-            {"RateIndexName", "JIBAR"},
+            {"RateIndexName", RateIndices.JIBAR.ToString()},
             {"RateIndexTenor", "3m"},
-            {"Interpolation", "Linear"},
+            {"Interpolation", CurveInterpolationMethods.Exponential_On_DiscountFactors.ToString()},
         };
             
         object[,] depositInstruments = 
         {
             {"Deposits", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"3m", "JIBAR", 0.1, "TRUE"},
-            {"6m", "JIBAR", 0.1, "TRUE"},
+            {"3m", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
+            {"6m", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
         };
                    
         object[,] fraInstruments = 
         {
             {"FRAs", "", "", ""},
             {"FraTenors", "RateIndex", "Rates", "Include"},
-            {"6x9", "JIBAR", 0.1, "TRUE"},
-            {"9x12", "JIBAR", 0.1, "TRUE"},
+            {"6x9", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
+            {"9x12", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
         };
             
         object[,] swapInstruments =
         {
             {"Interest Rate Swaps", "", "", ""},
             {"Tenors", "RateIndex", "Rates", "Include"},
-            {"2y", "JIBAR", 0.1, "TRUE"},
-            {"3y", "JIBAR", 0.1, "TRUE"},
+            {"2y", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
+            {"3y", RateIndices.JIBAR.ToString(), 0.1, "TRUE"},
         };
             
         object[] instruments = {depositInstruments, fraInstruments, swapInstruments};
@@ -393,7 +391,10 @@ public class CurveBootstrapperTest
                 curveParameters: curveParameters, 
                 customRateIndex: null, 
                 instrumentGroups: instruments);
-        
+       
+        // Debug.Assert(!handle.Contains(CommonUtils.DExcelErrorPrefix));
+        // Debug.WriteIf(!handle.Contains(CommonUtils.DExcelErrorPrefix), handle);
+        Debug.Print(handle);
         QL.YieldTermStructure? curve = CurveUtils.GetCurveObject(handle);
         const double tolerance = 0.000000001;
         QL.Date date3M = ((DateTime)DateUtils.AddTenorToDate(baseDate.ToDateTime(), "3M", "ZAR", "ModFol")).ToQuantLibDate();
@@ -450,12 +451,146 @@ public class CurveBootstrapperTest
     [Test]
     public void Bootstrap_Get_ZarSwapCurveTest()
     {
-        // TODO: Needs to warn user if not connected to VPN.
+        // If this fails you might not be connected to the VPN.
         DateTime baseDate = new(2023, 03, 31);
-        string handle = CurveBootstrapper.Get("ZarSwapCurve", "ZAR-Swap", baseDate);
+        string handle = CurveBootstrapper.Get("ZarSwapCurve", "ZAR_Swap", baseDate);
         object[] dates = {baseDate.ToOADate(), baseDate.AddYears(1).ToOADate()};
         object discountFactors = CurveUtils.GetDiscountFactors(handle, dates);
         Assert.AreEqual(((object[,])discountFactors)[0, 0], 1.000000000000d); 
         Assert.AreEqual((double)((object[,])discountFactors)[1, 0], 0.922680208459d, 1e-10d);
+    }
+    
+    [Test]
+    public void GetInterpolationMethodsForBootstrappingTest()
+    {
+        Array methods = Enum.GetValues(typeof(CurveInterpolationMethods));
+        object[,] expectedOutput = new object[methods.Length + 1, 1];
+        expectedOutput[0, 0] = "IR Bootstrapping Interpolation Methods";
+        int i = 1;
+        foreach (CurveInterpolationMethods method in methods)
+        {
+            expectedOutput[i++, 0] = method.ToString();
+        }
+        
+        object[,] actualOutput = (object[,])CurveBootstrapper.GetInterpolationMethodsForBootstrapping();
+        Assert.AreEqual(expectedOutput, actualOutput);
+    }
+
+    [Test]
+    public void GetSwapCurveQuotesTest()
+    {
+        object[,] expectedRaw = 
+        {
+            {
+                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1D }, Date = 2023-03-31 00:00:00, Value = 0.0480086, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 12M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04106, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 15M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.0368, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 18M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.034089999999999995, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1M }, Date = 2023-03-31 00:00:00, Value = 0.0485771, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 1M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.05191, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 21M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = NaN, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 2M }, Date = 2023-03-31 00:00:00, Value = NaN, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 2M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.052199999999999996, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 3M }, Date = 2023-03-31 00:00:00, Value = 0.0519271, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 3M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.05215, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 4M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.050519999999999995, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 5M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04933, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 6M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04823, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 7M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.047119999999999995, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 8M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04601, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = Fra { Tenor = 9M, ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M } }, Date = 2023-03-31 00:00:00, Value = 0.04471, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 10Y }, Date = 2023-03-31 00:00:00, Value = 0.03454, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 12Y }, Date = 2023-03-31 00:00:00, Value = 0.034621, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 15Y }, Date = 2023-03-31 00:00:00, Value = 0.03466, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 20Y }, Date = 2023-03-31 00:00:00, Value = 0.03411, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 25Y }, Date = 2023-03-31 00:00:00, Value = 0.033010000000000005, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 2Y }, Date = 2023-03-31 00:00:00, Value = 0.044320000000000005, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 30Y }, Date = 2023-03-31 00:00:00, Value = 0.0321945, IsRefreshable = False }"
+            },
+            { 
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 3Y }, Date = 2023-03-31 00:00:00, Value = 0.040143000000000005, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 40Y }, Date = 2023-03-31 00:00:00, Value = 0.02984, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 4Y }, Date = 2023-03-31 00:00:00, Value = 0.037822, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 5Y }, Date = 2023-03-31 00:00:00, Value = 0.03618, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 6Y }, Date = 2023-03-31 00:00:00, Value = 0.03545, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 7Y }, Date = 2023-03-31 00:00:00, Value = 0.03501, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 8Y }, Date = 2023-03-31 00:00:00, Value = 0.03481, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = InterestRateSwap { ReferenceIndex = RateIndex { Name = USD-LIBOR, Tenor = 3M }, PaymentFrequency = 6M, Tenor = 9Y }, Date = 2023-03-31 00:00:00, Value = 0.03469, IsRefreshable = False }"
+            },
+            {
+                "QuoteValue { Type = RateIndex { Name = USD-LIBOR, Tenor = 1W }, Date = 2023-03-31 00:00:00, Value = NaN, IsRefreshable = False }"
+            }
+        };
+
+        object[,] actualRaw =
+            (object[,]) CurveBootstrapper.GetAllSwapCurveQuotes(
+                curveName: OmicronSwapCurves.USD_Swap.ToString(),
+                baseDate: new DateTime(2023, 03, 31));
+        
+        List<string> actual = ExcelArrayUtils.ConvertExcelRangeToList<string>(actualRaw);
+        List<string> expected = ExcelArrayUtils.ConvertExcelRangeToList<string>(expectedRaw);
+        expected.Sort();
+        actual.Sort();
+        Assert.AreEqual(expected, actual);
     }
 }
