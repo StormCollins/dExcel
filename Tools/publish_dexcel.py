@@ -137,7 +137,7 @@ try:
 
     print(f'{Fore.LIGHTGREEN_EX}{Style.BRIGHT}')
     print(f'-----------------------------------------------------------')
-    print(f'             Publishing ∂Excel to Shared Drive             ')
+    print(f'             Publishing dExcel to Shared Drive             ')
     print(f'-----------------------------------------------------------')
     print(f'{Style.RESET_ALL}')
 
