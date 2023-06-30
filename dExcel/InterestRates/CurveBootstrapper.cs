@@ -144,7 +144,7 @@ public static class CurveBootstrapper
         string? rateIndexTenor =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Rate Index Tenor", columnHeaderIndex);
         
-        if (rateIndexTenor is null && customRateIndex is null && rateIndexName != "FEDFUND" && rateIndexName != RateIndices.SOFR.ToString())
+        if (rateIndexTenor is null && customRateIndex is null && rateIndexName != RateIndices.FEDFUND.ToString() && rateIndexName != RateIndices.SOFR.ToString())
         {
             return nameof(rateIndexTenor).CurveParameterMissingErrorMessage();
         }
@@ -167,23 +167,37 @@ public static class CurveBootstrapper
             ExcelTableUtils.GetTableValue<bool?>(curveParameters, "Value", "Allow Extrapolation", columnHeaderIndex) ??
             false;
 
-        QL.IborIndex? rateIndex = GetIborIndex(rateIndexName, rateIndexTenor, null);
-        // else
-        // {
-        //     string? tenor = ExcelTable.GetTableValue<string>(customBaseIndex, "Value", "Tenor");
-        //     int? settlementDays = ExcelTable.GetTableValue<int>(customBaseIndex, "Value", "SettlementDay");
-        //     string? currency = ExcelTable.GetTableValue<string>(customBaseIndex, "Value", "Currency");
-        //     (Currency x, Calendar y) z =
-        //         currency switch
-        //         {
-        //             // TODO: Use reflection here.
-        //             "USD" => (new USDCurrency(), new UnitedStates()),
-        //             "ZAR" => (new ZARCurrency(), new SouthAfrica()),
-        //             _ => throw new NotImplementedException(),
-        //         };
-        //
-        //     rateIndex = new IborIndex("Test", new Period(tenor), settlementDays, z.x, z.y, )
-        // }
+
+        QL.IborIndex? rateIndex = (customRateIndex is null)? GetIborIndex(rateIndexName, rateIndexTenor, null) : null;
+        if (rateIndex is null)
+        {
+            string? indexName = ExcelTableUtils.GetTableValue<string>(customRateIndex, "Value", "Name");
+            string? tenor = ExcelTableUtils.GetTableValue<string>(customRateIndex, "Value", "Tenor");
+            int? customSettlementDays = ExcelTableUtils.GetTableValue<int>(customRateIndex, "Value", "Settlement Days");
+            string? customCurrencyToParse = ExcelTableUtils.GetTableValue<string>(customRateIndex, "Value", "Currency");
+            ParserUtils.TryParseQuantLibCurrency(
+                customCurrencyToParse, 
+                out QL.Currency? customCurrency,
+                out string? customCurrencyErrorMessage);
+
+            string? calendarsToParse = ExcelTableUtils.GetTableValue<string>(customRateIndex, "Value", "Calendars");
+            DateUtils.TryParseCalendars(
+                calendarsToParse, 
+                out QL.Calendar? customCalendar,
+                out string customCalendarErrorMessage);
+
+            string? businessDayConventionToParse =
+                ExcelTableUtils.GetTableValue<string>(customRateIndex, "Value", "Business Day Convention");
+            (QL.BusinessDayConvention? customBusinessDayConvention, string? customBusinessDayConventionErrorMessage) =
+                DateUtils.ParseBusinessDayConvention(businessDayConventionToParse);
+
+            string? dayCountConventionToParse =
+                ExcelTableUtils.GetTableValue<string>(customRateIndex, "Value", "Day Count Convention");
+
+            QL.DayCounter? customDayCountConvention = DateUtils.ParseDayCountConvention(dayCountConventionToParse);
+            rateIndex = new QL.IborIndex(indexName, new QL.Period(tenor), (int)customSettlementDays, customCurrency,
+                customCalendar, (QL.BusinessDayConvention)customBusinessDayConvention, false, customDayCountConvention);
+        }
 
         if (rateIndex is null)
         {

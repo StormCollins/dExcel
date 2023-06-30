@@ -275,7 +275,7 @@ public static class StatsUtils
 
         if (orientation.IgnoreCaseEquals("ROWS"))
         {
-            object[,] output = new object[pathGenerator.size(), pathGenerator.timeGrid().size() + 1];
+            object[,] output = new object[pathGenerator.size(), pathGenerator.timeGrid().size()];
             for (int i = 0; i < numberOfPaths; i++)
             {
                 QL.Path? path = pathGenerator.next().value();

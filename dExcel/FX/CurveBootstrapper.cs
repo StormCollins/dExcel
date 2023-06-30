@@ -2,7 +2,6 @@
 using dExcel.Dates;
 using dExcel.ExcelUtils;
 using dExcel.InterestRates;
-using dExcel.OmicronUtils;
 using dExcel.Utilities;
 using ExcelDna.Integration;
 using Omicron;
@@ -79,7 +78,7 @@ public static class CurveBootstrapper
         
         string? quoteCurrencyIndexName =
             ExcelTableUtils.GetTableValue<string?>(curveParameters, "Value", "Quote Currency Index Name", columnHeaderIndex);
-        
+      
         if (quoteCurrencyIndexName is null && customBaseCurrencyIndex is null)
         {
             return nameof(quoteCurrencyIndexName).CurveParameterMissingErrorMessage();
@@ -169,17 +168,80 @@ public static class CurveBootstrapper
             return quoteCurrencyForecastCurveErrorMessage;
         }
       
-        QL.IborIndex? quoteCurrencyIndex = 
+        QL.IborIndex? quoteCurrencyIndex = (customQuoteCurrencyIndex is null) ? 
             dExcel.InterestRates.CurveBootstrapper.GetIborIndex(
                 indexName: quoteCurrencyIndexName, 
                 indexTenor: quoteCurrencyIndexTenor, 
-                forecastCurve: quoteCurrencyForecastCurve);
-        
-        QL.IborIndex? baseCurrencyIndex = 
+                forecastCurve: quoteCurrencyForecastCurve) : 
+            null;
+
+        if (quoteCurrencyIndex is null)
+        {
+            string? indexName = ExcelTableUtils.GetTableValue<string>(customQuoteCurrencyIndex, "Value", "Name");
+            string? tenor = ExcelTableUtils.GetTableValue<string>(customQuoteCurrencyIndex, "Value", "Tenor");
+            int? customSettlementDays = ExcelTableUtils.GetTableValue<int>(customQuoteCurrencyIndex, "Value", "Settlement Days");
+            string? customCurrencyToParse = ExcelTableUtils.GetTableValue<string>(customQuoteCurrencyIndex, "Value", "Currency");
+            ParserUtils.TryParseQuantLibCurrency(
+                customCurrencyToParse, 
+                out QL.Currency? customCurrency,
+                out string? customCurrencyErrorMessage);
+
+            string? calendarsToParse = ExcelTableUtils.GetTableValue<string>(customQuoteCurrencyIndex, "Value", "Calendars");
+            DateUtils.TryParseCalendars(
+                calendarsToParse, 
+                out QL.Calendar? customCalendar,
+                out string customCalendarErrorMessage);
+
+            string? businessDayConventionToParse =
+                ExcelTableUtils.GetTableValue<string>(customQuoteCurrencyIndex, "Value", "Business Day Convention");
+            (QL.BusinessDayConvention? customBusinessDayConvention, string? customBusinessDayConventionErrorMessage) =
+                DateUtils.ParseBusinessDayConvention(businessDayConventionToParse);
+
+            string? dayCountConventionToParse =
+                ExcelTableUtils.GetTableValue<string>(customQuoteCurrencyIndex, "Value", "Day Count Convention");
+
+            QL.DayCounter? customDayCountConvention = DateUtils.ParseDayCountConvention(dayCountConventionToParse);
+            quoteCurrencyIndex = new QL.IborIndex(indexName, new QL.Period(tenor), (int)customSettlementDays, customCurrency,
+                customCalendar, (QL.BusinessDayConvention)customBusinessDayConvention, false, customDayCountConvention);
+
+        }
+
+        QL.IborIndex? baseCurrencyIndex = (customBaseCurrencyIndex is null) ?
             dExcel.InterestRates.CurveBootstrapper.GetIborIndex(
                 indexName: baseCurrencyIndexName, 
                 indexTenor: baseCurrencyIndexTenor, 
-                forecastCurve: baseCurrencyForecastCurve);
+                forecastCurve: baseCurrencyForecastCurve) :
+            null;
+
+        if (baseCurrencyIndex is null)
+        {
+            string? indexName = ExcelTableUtils.GetTableValue<string>(customBaseCurrencyIndex, "Value", "Name");
+            string? tenor = ExcelTableUtils.GetTableValue<string>(customBaseCurrencyIndex, "Value", "Tenor");
+            int? customSettlementDays = ExcelTableUtils.GetTableValue<int>(customBaseCurrencyIndex, "Value", "Settlement Days");
+            string? customCurrencyToParse = ExcelTableUtils.GetTableValue<string>(customBaseCurrencyIndex, "Value", "Currency");
+            ParserUtils.TryParseQuantLibCurrency(
+                customCurrencyToParse, 
+                out QL.Currency? customCurrency,
+                out string? customCurrencyErrorMessage);
+
+            string? calendarsToParse = ExcelTableUtils.GetTableValue<string>(customBaseCurrencyIndex, "Value", "Calendars");
+            DateUtils.TryParseCalendars(
+                calendarsToParse, 
+                out QL.Calendar? customCalendar,
+                out string customCalendarErrorMessage);
+
+            string? businessDayConventionToParse =
+                ExcelTableUtils.GetTableValue<string>(customBaseCurrencyIndex, "Value", "Business Day Convention");
+            (QL.BusinessDayConvention? customBusinessDayConvention, string? customBusinessDayConventionErrorMessage) =
+                DateUtils.ParseBusinessDayConvention(businessDayConventionToParse);
+
+            string? dayCountConventionToParse =
+                ExcelTableUtils.GetTableValue<string>(customBaseCurrencyIndex, "Value", "Day Count Convention");
+
+            QL.DayCounter? customDayCountConvention = DateUtils.ParseDayCountConvention(dayCountConventionToParse);
+            baseCurrencyIndex = new QL.IborIndex(indexName, new QL.Period(tenor), (int)customSettlementDays, customCurrency,
+                customCalendar, (QL.BusinessDayConvention)customBusinessDayConvention, false, customDayCountConvention);
+        }
 
         if (baseCurrencyIndex is null)
         {
@@ -463,7 +525,7 @@ public static class CurveBootstrapper
         object[,] fxForwardInstruments = new object[fxForwards.Count + 2, 4];
         fxForwardInstruments[0, 0] = "FX Forwards";
         fxForwardInstruments[1, 0] = "Tenors";
-        fxForwardInstruments[1, 1] = "BasisSpreads";
+        fxForwardInstruments[1, 1] = "ForwardPoints";
         fxForwardInstruments[1, 2] = "FixingDays";
         fxForwardInstruments[1, 3] = "Include";
 
@@ -497,6 +559,7 @@ public static class CurveBootstrapper
         }
         
         List<object> instruments = new();
+        if (fxForwards.Any()) instruments.Add(fxForwardInstruments);
         if (crossCurrencySwaps.Any()) instruments.Add(crossCurrencySwapInstruments);
 
         return BootstrapFxBasisAdjustedCurve(handle, curveParameters, null, null, instruments.ToArray());
