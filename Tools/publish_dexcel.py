@@ -173,7 +173,7 @@ try:
                 if deleted_files_count == 1:
                     print('\n')
 
-                print(f'\t▫ Deleting {file} ', end='')
+                print(f'\t- Deleting {file} ', end='')
                 os.remove(os.path.join(release_build_path, file))
                 ok_message()
 
@@ -201,7 +201,7 @@ try:
             print_warning(f'File \'{target_path}\' already exists!')
             yes_no: str = f'[{Fore.GREEN}{Style.BRIGHT}y{Fore.LIGHTBLACK_EX}/{Fore.YELLOW}n{Fore.LIGHTBLACK_EX}]{Style.RESET_ALL}'
             print(f'{Fore.BLACK}{Style.BRIGHT}', end='')
-            option_to_overwrite_file: str = input(f'\t□ Would you like to overwrite the file? {yes_no} ')
+            option_to_overwrite_file: str = input(f'\t- Would you like to overwrite the file? {yes_no} ')
             print(f'{Style.RESET_ALL}', end='')
             
             if option_to_overwrite_file.upper() == 'Y':
