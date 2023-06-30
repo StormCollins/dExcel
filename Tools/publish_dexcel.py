@@ -142,16 +142,19 @@ try:
     print(f'{Style.RESET_ALL}')
 
     release_xll_path: str = r'C:\GitLab\dExcelTools\dExcel\dExcel\bin\Release\net6.0-windows\dExcel-AddIn64.xll'
+    if (not os.path.exists(release_xll_path)):
+        sys.exit('Not release build found.') 
+     
     debug_xll_path: str = r'C:\GitLab\dExcelTools\dExcel\dExcel\bin\Debug\net6.0-windows\dExcel-AddIn64.xll'
     wrong_build_choice: str = 'N'
 
-    if (os.path.getmtime(release_xll_path) < os.path.getmtime(debug_xll_path)):
+    if (os.path.exists(debug_xll_path) and os.path.getmtime(release_xll_path) < os.path.getmtime(debug_xll_path)):
         wrong_build_choice = input('Your debug build is more recent than your release build. Did you accidentally not do a release build? [y/n]')
     
     if (wrong_build_choice.upper() == 'Y'):
         sys.exit('Process aborted by user.')
     
-    print(f' • ∂Excel version number: {Fore.GREEN}{Style.BRIGHT}{version_number}{Style.RESET_ALL}\n')
+    print(f' • dExcel version number: {Fore.GREEN}{Style.BRIGHT}{version_number}{Style.RESET_ALL}\n')
 
     if ping(PING_HOST):
         print_process('Copying SQLite DLL for stats database')
