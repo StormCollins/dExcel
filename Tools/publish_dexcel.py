@@ -8,6 +8,7 @@ import os
 import re
 import shutil
 import socket
+import sys
 import xml.etree.ElementTree as ET
 import zipfile
 
@@ -112,17 +113,26 @@ def zip_directory(path, ziph) -> None:
             ziph.write(os.path.join(root, file),
                     os.path.relpath(os.path.join(root, file), path))
 
+# Main code
 try:
     colorama_init(convert=True)
     # The path on the local machine where the release build is created.
     release_build_path: str = r'C:\GitLab\dExcelTools\dExcel\dExcel\bin\Release\net6.0-windows'
     # The path on the shared drive containing the dExcel releases.
-    shared_drive_releases_path: str = r'C:\Users\keklynsmith\Documents\PublishTest' #'\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\Releases'
+    print('Please select your location:')
+    print('1. South Africa')
+    print('2. Australia')
+    location: int = int(input('Location: '))
+
+    shared_drive_releases_path: str = ''
+    if (location == 1):
+        shared_drive_releases_path = r'\\ZAJNB010\Capital Markets 2\AQS Quants\dExcelTools\Releases'
+    elif (location == 2):
+        shared_drive_releases_path = input('Enter path: ') 
+
     dexcel_project_file_path: str = r'C:\GitLab\dExcelTools\dExcel\dExcel\dExcel.csproj'
     tree = ET.parse(dexcel_project_file_path)
-
     version_number: str = tree.getroot().find('PropertyGroup').find('Version').text
-
     zip_file: str = f'{Fore.GREEN}{Style.BRIGHT}\'{version_number}.zip\'{Style.RESET_ALL}'
 
     print(f'{Fore.LIGHTGREEN_EX}{Style.BRIGHT}')
@@ -131,6 +141,16 @@ try:
     print(f'-----------------------------------------------------------')
     print(f'{Style.RESET_ALL}')
 
+    release_xll_path: str = r'C:\GitLab\dExcelTools\dExcel\dExcel\bin\Release\net6.0-windows\dExcel-AddIn64.xll'
+    debug_xll_path: str = r'C:\GitLab\dExcelTools\dExcel\dExcel\bin\Debug\net6.0-windows\dExcel-AddIn64.xll'
+    wrong_build_choice: str = 'N'
+
+    if (os.path.getmtime(release_xll_path) < os.path.getmtime(debug_xll_path)):
+        wrong_build_choice = input('Your debug build is more recent than your release build. Did you accidentally not do a release build? [y/n]')
+    
+    if (wrong_build_choice.upper() == 'Y'):
+        sys.exit('Process aborted by user.')
+    
     print(f' • ∂Excel version number: {Fore.GREEN}{Style.BRIGHT}{version_number}{Style.RESET_ALL}\n')
 
     if ping(PING_HOST):

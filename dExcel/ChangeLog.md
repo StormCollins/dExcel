@@ -6,6 +6,7 @@ All notable changes to ∂Excel will be documented in this file.
 - ``USDZAR`` FX basis adjusted curve and ``SOFR`` curve can now be pulled directly form Omicron.
 - Added function ``d.Stats_GBM_Create``.
 - Added function ``d.Stats_GBM_GetPaths``.
+- Interest rate swap pricing features added.
 
 ## [0.2.2] - 2023-6-15
 - Support added for manual ``SOFR`` and tenor basis bootstrapping.
