@@ -1,4 +1,5 @@
-﻿using ExcelDna.Integration;
+﻿using System.Windows.Automation;
+using ExcelDna.Integration;
 using dExcel.Utilities;
 using mnd = MathNet.Numerics.Distributions;
 using mnl = MathNet.Numerics.LinearAlgebra;
@@ -194,37 +195,114 @@ public static class StatsUtils
         return results.ToArray();
     }
 
+    /// <summary>
+    /// Creates a GBM object which can be queried for GBM paths.
+    /// </summary>
+    /// <param name="handle">The 'handle' or name used to refer to the object in memory.</param>
+    /// <param name="initialValue">The initial value to be simulated.</param>
+    /// <param name="drift">The drift of the GBM process.</param>
+    /// <param name="standardDeviation">The standard deviation of the GBM process.</param>
+    /// <param name="maturityInYears"></param>
+    /// <param name="numberOfTimeSteps"></param>
+    /// <param name="seed">The seed of the random number generator.</param>
+    /// <returns>A handle to a GBM object.</returns>
     [ExcelFunction(
-        Name = "d.Stats_GBM",
-        Description = "A GBM path generator",
+        Name = "d.Stats_GBM_Create",
+        Description = "Creates a GBM object which can be queried for GBM paths.",
         Category = "∂Excel: Stats")]
-    public static object gbmPathGenerator(
+    public static object GbmCreate(
+        [ExcelArgument(
+            Name = "Handle",
+            Description = "The 'handle' or name used to refer to the object in memory.")]
         string handle,
-        double initialValue, double drift, double standardDeviation, int seed,
-        double maturityInYears, int numberOfTimeSteps, int numberOfPaths)
+        [ExcelArgument(Name = "Initial Value", Description = "The initial value to be simulated.")]
+        double initialValue,
+        [ExcelArgument(Name = "Drift", Description = "The drift of the GBM process.")]
+        double drift,
+        [ExcelArgument(Name = "Standard Deviation", Description = "The standard deviation of the GBM process.")]
+        double standardDeviation,
+        [ExcelArgument(Name = "Maturity in Years", Description = "The maturity of the simulation in years.")]
+        double maturityInYears,
+        [ExcelArgument(
+            Name = "Number of Time Steps", 
+            Description = "Number of time steps in the Monte Carlo simulation.")]
+        int numberOfTimeSteps,
+        [ExcelArgument(Name = "Seed", Description = "The seed of the random number generator.")]
+        int seed)
     {
-        QL.UniformRandomGenerator uniformRandomGenerator = new();
+        if (ExcelDnaUtil.IsInFunctionWizard())
+        {
+            return CommonUtils.InFunctionWizard();
+        }
+
+        QL.UniformRandomGenerator uniformRandomGenerator = new(seed);
         QL.UniformRandomSequenceGenerator uniformSequenceGenerator = new((uint)numberOfTimeSteps, uniformRandomGenerator);
         QL.GaussianRandomSequenceGenerator gaussianSequenceRandomGenerator = new(uniformSequenceGenerator);
         QL.GeometricBrownianMotionProcess gbmProcess = new(initialValue, drift, standardDeviation);
         QL.GaussianPathGenerator gaussianPathGenerator =
             new(gbmProcess, maturityInYears, (uint)numberOfTimeSteps, gaussianSequenceRandomGenerator, false);
 
-        // object[,] output = new object[numberOfPaths, numberOfTimeSteps];
-        // for (int i = 0; i < numberOfPaths; i++)
-        // {
-        //     var path = gaussianPathGenerator.next().value();
-        //     for (int j = 0; j < numberOfTimeSteps; j++)
-        //     {
-        //         output[i, j] = path.value((uint)j);
-        //     }
-        // }
-
-        var instance = DataObjectController.Instance;
+        DataObjectController instance = DataObjectController.Instance;
         return instance.Add(handle, gaussianPathGenerator);
     }
 
+    /// <summary>
+    /// Gets the paths from a GBM object that has been created.
+    /// </summary>
+    /// <param name="handle">The 'handle' or name used to refer to the object in memory.</param>
+    /// <param name="orientation">The orientation as to how to output the paths either as 'ROWS' or 'COLUMNS'.
+    /// Default = 'COLUMNS'</param>
+    /// <returns>The numeric path values from the GBM Monte Carlo simulation.</returns>
+    [ExcelFunction(
+        Name = "d.Stats_GBM_GetPaths",
+        Description = "Gets the paths from a GBM object that has been created.",
+        Category = "∂Excel: Stats")]
+    public static object GbmGetPaths(
+        [ExcelArgument(
+            Name = "Handle",
+            Description = "The 'handle' or name used to refer to the object in memory.")]
+        string handle,
+        [ExcelArgument(Name = "Number of Paths", Description = "Number of paths in the Monte Carlo simulation.")]
+        int numberOfPaths,
+        [ExcelArgument(
+            Name = "(Optional)Orientation",
+            Description = "The orientation as to how to output the paths either as 'ROWS' or 'COLUMNS'.\n" +
+                          "Default = 'COLUMNS'")]
+        string orientation = "ROWS")
+    {
+        DataObjectController instance = DataObjectController.Instance;
+        QL.GaussianPathGenerator pathGenerator = (QL.GaussianPathGenerator)instance.GetDataObject(handle);
 
-    
+        if (orientation.IgnoreCaseEquals("ROWS"))
+        {
+            object[,] output = new object[pathGenerator.size(), pathGenerator.timeGrid().size() + 1];
+            for (int i = 0; i < numberOfPaths; i++)
+            {
+                QL.Path? path = pathGenerator.next().value();
+                for (int j = 0; j < pathGenerator.timeGrid().size(); j++)
+                {
+                    output[i, j] = path.value((uint)j);
+                }
+            }
+
+            return output;
+        }
+
+        if (orientation.IgnoreCaseEquals("ROWS"))
+        {
+            object[,] output = new object[pathGenerator.timeGrid().size() + 1, pathGenerator.size()];
+            for (int i = 0; i < numberOfPaths; i++)
+            {
+                QL.Path? path = pathGenerator.next().value();
+                for (int j = 0; j < pathGenerator.timeGrid().size(); j++)
+                {
+                    output[j, i] = path.value((uint)j);
+                }
+            }
+
+            return output;
+        }
+
+        return CommonUtils.DExcelErrorMessage($"Invalid orientation: '{orientation}'");
+    }
 }
-

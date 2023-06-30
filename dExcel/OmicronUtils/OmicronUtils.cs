@@ -1,12 +1,12 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Headers;
+using dExcel.Utilities;
 using JsonConverter = Newtonsoft.Json.JsonConverter;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Omicron;
 using Option = Omicron.Option;
-using dExcel.Utilities;
 
 namespace dExcel.OmicronUtils;
 

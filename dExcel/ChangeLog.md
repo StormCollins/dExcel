@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to ∂Excel will be documented in this file.
 
+## [0.2.3] - 2023-06-29
+### Features
+- ``USDZAR`` FX basis adjusted curve and ``SOFR`` curve can now be pulled directly form Omicron.
+- Added function ``d.Stats_GBM_Create``.
+- Added function ``d.Stats_GBM_GetPaths``.
+
+## [0.2.2] - 2023-6-15
+- Support added for manual ``SOFR`` and tenor basis bootstrapping.
+
 ## [0.2.1] - 2023-06-09
 ### Features
 - Excel table column and row headers support spaces in names (improves readability).
